@@ -794,14 +794,38 @@ def _fetch_player_game(compiled: Dict[str, Any]) -> pd.DataFrame:
         # Get games first
         games = fetchers.euroleague.fetch_euroleague_games(season, phase)
 
-        frames = []
-        for _, game in games.iterrows():
+        # Parallel fetching to avoid timeout on large seasons (330 games)
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        from tqdm import tqdm
+
+        def fetch_single_game(game_info):
+            """Fetch box score for a single game"""
+            game_code = int(game_info["GAME_CODE"])
             try:
-                game_code = int(game["GAME_CODE"])
-                box = fetchers.euroleague.fetch_euroleague_box_score(season, game_code)
-                frames.append(box)
+                return fetchers.euroleague.fetch_euroleague_box_score(season, game_code)
             except Exception as e:
                 logger.warning(f"Failed to fetch EuroLeague game {game_code}: {e}")
+                return None
+
+        frames = []
+        # Use 5 workers to parallelize while respecting rate limits
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            # Submit all tasks
+            futures = {
+                executor.submit(fetch_single_game, game): game["GAME_CODE"]
+                for _, game in games.iterrows()
+            }
+
+            # Collect results with progress bar
+            for future in tqdm(
+                as_completed(futures),
+                total=len(futures),
+                desc=f"Fetching EuroLeague {season}",
+                unit="game"
+            ):
+                result = future.result()
+                if result is not None and not result.empty:
+                    frames.append(result)
 
         df = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
 

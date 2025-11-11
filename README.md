@@ -616,9 +616,124 @@ pytest tests/ --cov=src/cbb_data --cov-report=html
 
 ---
 
+---
+
+## 🌐 REST API Server
+
+Access basketball data via HTTP endpoints with the built-in FastAPI server.
+
+### Quick Start
+
+```bash
+# Install API dependencies
+uv pip install -e ".[api]"
+
+# Start the server
+python -m cbb_data.servers.rest_server
+
+# Production mode
+python -m cbb_data.servers.rest_server --host 0.0.0.0 --port 8000 --workers 4
+```
+
+Visit **http://localhost:8000/docs** for interactive API documentation.
+
+### Example API Requests
+
+```bash
+# Get recent games
+curl http://localhost:8000/recent-games/NCAA-MBB?days=2
+
+# Query player stats
+curl -X POST http://localhost:8000/datasets/player_game \
+  -H "Content-Type: application/json" \
+  -d '{
+    "filters": {"league": "NCAA-MBB", "season": "2025", "team": ["Duke"]},
+    "limit": 10
+  }'
+
+# List all datasets
+curl http://localhost:8000/datasets
+```
+
+### API Features
+
+- **Auto-Generated Documentation**: OpenAPI/Swagger UI at `/docs`
+- **Rate Limiting**: 60 requests/minute per IP (configurable)
+- **CORS Support**: Cross-origin requests enabled
+- **Multiple Output Formats**: JSON, CSV, Records
+- **Performance Headers**: Execution time and cache status
+- **Error Handling**: Consistent error responses
+
+**Full Documentation:** See [API_GUIDE.md](API_GUIDE.md)
+
+---
+
+## 🤖 MCP Server (LLM Integration)
+
+Connect Claude Desktop and other LLMs directly to basketball data using the Model Context Protocol.
+
+### Quick Start
+
+```bash
+# Install MCP dependencies
+uv pip install -e ".[mcp]"
+
+# Start the MCP server
+python -m cbb_data.servers.mcp_server
+```
+
+### Claude Desktop Setup
+
+1. Edit your Claude Desktop config file:
+   - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+   - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+   - **Linux**: `~/.config/Claude/claude_desktop_config.json`
+
+2. Add the MCP server:
+
+```json
+{
+  "mcpServers": {
+    "cbb-data": {
+      "command": "python",
+      "args": ["-m", "cbb_data.servers.mcp_server"],
+      "cwd": "/absolute/path/to/nba_prospects_mcp"
+    }
+  }
+}
+```
+
+3. Restart Claude Desktop
+
+4. Ask Claude: *"Show me Cooper Flagg's stats for Duke this season"*
+
+### MCP Features
+
+- **10 Tools**: Functions for querying basketball data
+  - `get_schedule`, `get_player_game_stats`, `get_team_game_stats`
+  - `get_play_by_play`, `get_shot_chart`
+  - `get_player_season_stats`, `get_team_season_stats`
+  - `get_player_team_season`, `list_datasets`, `get_recent_games`
+
+- **11+ Resources**: Browsable data catalogs
+  - `cbb://datasets/` - List all datasets
+  - `cbb://leagues/NCAA-MBB` - League information
+  - `cbb://datasets/player_game` - Dataset metadata
+
+- **10 Prompts**: Pre-built query templates
+  - `top-scorers`, `team-schedule`, `recent-games`
+  - `player-game-log`, `team-standings`, `player-comparison`
+  - `head-to-head`, `breakout-players`, `todays-games`, `conference-leaders`
+
+**Full Documentation:** See [MCP_GUIDE.md](MCP_GUIDE.md)
+
+---
+
 ## 📚 Additional Resources
 
-- **[PROJECT_LOG.md](PROJECT_LOG.md)**: Detailed development log, architecture decisions, and session notes
+- **[API_GUIDE.md](API_GUIDE.md)**: Complete REST API documentation
+- **[MCP_GUIDE.md](MCP_GUIDE.md)**: MCP server setup and usage
+- **[PROJECT_LOG.md](PROJECT_LOG.md)**: Detailed development log and architecture decisions
 - **Architecture**: Inspired by [nba_mcp](https://github.com/ghadfield32/nba_mcp) pattern
 - **Data Sources**:
   - ESPN API (NCAA Men's & Women's)

@@ -39,7 +39,16 @@
       "Bash(.venvScriptspython test_comprehensive_validation.py)",
       "Bash(timeout 30 .venv/Scripts/python:*)",
       "Bash(timeout 45 .venv/Scripts/python:*)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(git push:*)",
+      "Bash(tree:*)",
+      "Bash(\".venv/Scripts/pip\" install fastapi uvicorn[standard] python-multipart tabulate)",
+      "Bash(curl:*)",
+      "Bash(timeout 300 .venv/Scripts/python:*)",
+      "Bash(timeout 180 .venv/Scripts/python:*)",
+      "Bash(timeout 5 .venv/Scripts/python:*)",
+      "Bash(dir /b \"c:\\docker_projects\\nba_prospects_mcp\\src\\cbb_data\\api\")",
+      "Bash(dir /b \"c:\\docker_projects\\nba_prospects_mcp\\src\\cbb_data\\api\\rest_api\")"
     ],
     "deny": [],
     "ask": []
