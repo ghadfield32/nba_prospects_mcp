@@ -12,28 +12,32 @@ Each dataset is tested across all 3 leagues:
 """
 
 import sys
-sys.path.insert(0, 'src')
 
-from cbb_data.api.datasets import get_dataset, DatasetRegistry
-import pandas as pd
+sys.path.insert(0, "src")
+
+from cbb_data.api.datasets import get_dataset
 
 
-def test_player_season():
+def test_player_season() -> bool:
     """Test player_season dataset across all leagues"""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("TEST 1: player_season Dataset")
-    print("="*70)
+    print("=" * 70)
 
     # Test 1.1: NCAA-MBB - Get top scorers for 2024-25 season
     print("\n1.1 NCAA-MBB: Top scorers 2024-25 (Totals)")
     print("-" * 70)
     try:
-        df = get_dataset("player_season", {
-            "league": "NCAA-MBB",
-            "season": "2025",
-            "per_mode": "Totals",
-            "min_minutes": 100  # Players with at least 100 total minutes
-        }, limit=10)
+        df = get_dataset(
+            "player_season",
+            {
+                "league": "NCAA-MBB",
+                "season": "2025",
+                "per_mode": "Totals",
+                "min_minutes": 100,  # Players with at least 100 total minutes
+            },
+            limit=10,
+        )
 
         if df.empty:
             print("[FAIL] FAIL: No data returned")
@@ -64,12 +68,11 @@ def test_player_season():
     print("\n1.2 NCAA-MBB: Top scorers 2024-25 (PerGame)")
     print("-" * 70)
     try:
-        df = get_dataset("player_season", {
-            "league": "NCAA-MBB",
-            "season": "2025",
-            "per_mode": "PerGame",
-            "min_minutes": 100
-        }, limit=10)
+        df = get_dataset(
+            "player_season",
+            {"league": "NCAA-MBB", "season": "2025", "per_mode": "PerGame", "min_minutes": 100},
+            limit=10,
+        )
 
         if df.empty:
             print("[FAIL] FAIL: No data returned")
@@ -92,12 +95,11 @@ def test_player_season():
     print("\n1.3 NCAA-WBB: Top scorers 2024-25")
     print("-" * 70)
     try:
-        df = get_dataset("player_season", {
-            "league": "NCAA-WBB",
-            "season": "2025",
-            "per_mode": "PerGame",
-            "min_minutes": 50
-        }, limit=5)
+        df = get_dataset(
+            "player_season",
+            {"league": "NCAA-WBB", "season": "2025", "per_mode": "PerGame", "min_minutes": 50},
+            limit=5,
+        )
 
         if df.empty:
             print("[FAIL] FAIL: No data returned")
@@ -119,11 +121,11 @@ def test_player_season():
     print("\n1.4 EuroLeague: Top scorers 2024")
     print("-" * 70)
     try:
-        df = get_dataset("player_season", {
-            "league": "EuroLeague",
-            "season": "2024",
-            "per_mode": "PerGame"
-        }, limit=10)
+        df = get_dataset(
+            "player_season",
+            {"league": "EuroLeague", "season": "2024", "per_mode": "PerGame"},
+            limit=10,
+        )
 
         if df.empty:
             print("[FAIL] FAIL: No data returned")
@@ -134,7 +136,11 @@ def test_player_season():
 
         if "PTS" in df.columns:
             print("\nTop 5 Scorers:")
-            print(df.nlargest(5, "PTS")[["PLAYER_NAME", "GP", "PTS", "REB", "AST"]].to_string(index=False))
+            print(
+                df.nlargest(5, "PTS")[["PLAYER_NAME", "GP", "PTS", "REB", "AST"]].to_string(
+                    index=False
+                )
+            )
 
         print("\n[OK] PASS: EuroLeague player_season")
     except Exception as e:
@@ -144,20 +150,17 @@ def test_player_season():
     return True
 
 
-def test_team_season():
+def test_team_season() -> bool:
     """Test team_season dataset across all leagues"""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("TEST 2: team_season Dataset")
-    print("="*70)
+    print("=" * 70)
 
     # Test 2.1: NCAA-MBB
     print("\n2.1 NCAA-MBB: Team season stats 2024-25")
     print("-" * 70)
     try:
-        df = get_dataset("team_season", {
-            "league": "NCAA-MBB",
-            "season": "2025"
-        }, limit=20)
+        df = get_dataset("team_season", {"league": "NCAA-MBB", "season": "2025"}, limit=20)
 
         if df.empty:
             print("[FAIL] FAIL: No data returned")
@@ -181,10 +184,7 @@ def test_team_season():
     print("\n2.2 NCAA-WBB: Team season stats 2024-25")
     print("-" * 70)
     try:
-        df = get_dataset("team_season", {
-            "league": "NCAA-WBB",
-            "season": "2025"
-        }, limit=10)
+        df = get_dataset("team_season", {"league": "NCAA-WBB", "season": "2025"}, limit=10)
 
         if df.empty:
             print("[FAIL] FAIL: No data returned")
@@ -202,10 +202,7 @@ def test_team_season():
     print("\n2.3 EuroLeague: Team season stats 2024")
     print("-" * 70)
     try:
-        df = get_dataset("team_season", {
-            "league": "EuroLeague",
-            "season": "2024"
-        }, limit=18)
+        df = get_dataset("team_season", {"league": "EuroLeague", "season": "2024"}, limit=18)
 
         if df.empty:
             print("[FAIL] FAIL: No data returned")
@@ -227,22 +224,21 @@ def test_team_season():
     return True
 
 
-def test_player_team_season():
+def test_player_team_season() -> bool:
     """Test player_team_season dataset (captures mid-season transfers)"""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("TEST 3: player_team_season Dataset (Transfer Portal Tracking)")
-    print("="*70)
+    print("=" * 70)
 
     # Test 3.1: NCAA-MBB
     print("\n3.1 NCAA-MBB: Player × Team × Season stats")
     print("-" * 70)
     try:
-        df = get_dataset("player_team_season", {
-            "league": "NCAA-MBB",
-            "season": "2025",
-            "per_mode": "Totals",
-            "min_minutes": 50
-        }, limit=20)
+        df = get_dataset(
+            "player_team_season",
+            {"league": "NCAA-MBB", "season": "2025", "per_mode": "Totals", "min_minutes": 50},
+            limit=20,
+        )
 
         if df.empty:
             print("[FAIL] FAIL: No data returned")
@@ -262,7 +258,11 @@ def test_player_team_season():
         # Show sample
         if "PLAYER_NAME" in df.columns and "PTS" in df.columns:
             print("\nSample Player-Team-Season Stats:")
-            sample_cols = [c for c in ["PLAYER_NAME", "TEAM_NAME", "GP", "PTS", "REB", "AST"] if c in df.columns]
+            sample_cols = [
+                c
+                for c in ["PLAYER_NAME", "TEAM_NAME", "GP", "PTS", "REB", "AST"]
+                if c in df.columns
+            ]
             print(df.head(5)[sample_cols].to_string(index=False))
 
         print("\n[OK] PASS: NCAA-MBB player_team_season")
@@ -274,11 +274,11 @@ def test_player_team_season():
     print("\n3.2 NCAA-WBB: Player × Team × Season stats")
     print("-" * 70)
     try:
-        df = get_dataset("player_team_season", {
-            "league": "NCAA-WBB",
-            "season": "2025",
-            "per_mode": "PerGame"
-        }, limit=10)
+        df = get_dataset(
+            "player_team_season",
+            {"league": "NCAA-WBB", "season": "2025", "per_mode": "PerGame"},
+            limit=10,
+        )
 
         if df.empty:
             print("[FAIL] FAIL: No data returned")
@@ -295,11 +295,11 @@ def test_player_team_season():
     print("\n3.3 EuroLeague: Player × Team × Season stats")
     print("-" * 70)
     try:
-        df = get_dataset("player_team_season", {
-            "league": "EuroLeague",
-            "season": "2024",
-            "per_mode": "PerGame"
-        }, limit=20)
+        df = get_dataset(
+            "player_team_season",
+            {"league": "EuroLeague", "season": "2024", "per_mode": "PerGame"},
+            limit=20,
+        )
 
         if df.empty:
             print("[FAIL] FAIL: No data returned")
@@ -315,11 +315,11 @@ def test_player_team_season():
     return True
 
 
-def test_dataset_registry():
+def test_dataset_registry() -> bool:
     """Verify the 3 new datasets are properly registered by attempting to call them"""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("TEST 4: Dataset Registry Verification")
-    print("="*70)
+    print("=" * 70)
 
     datasets_to_check = [
         ("player_season", {"league": "NCAA-MBB", "season": "2025"}),
@@ -332,7 +332,7 @@ def test_dataset_registry():
 
         # Try to call the dataset (this verifies registration)
         try:
-            df = get_dataset(dataset_id, filters, limit=1)
+            _ = get_dataset(dataset_id, filters, limit=1)
             print(f"[OK] '{dataset_id}' is registered and callable")
         except KeyError as e:
             print(f"[FAIL] '{dataset_id}' not found in registry: {e}")
@@ -345,11 +345,11 @@ def test_dataset_registry():
     return True
 
 
-def main():
+def main() -> int:
     """Run all tests"""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("PHASE 3.3: SEASON AGGREGATE DATASETS - TEST SUITE")
-    print("="*70)
+    print("=" * 70)
     print("\nTesting 3 new datasets:")
     print("  1. player_season - Player season totals/averages")
     print("  2. team_season - Team season totals/averages")
@@ -365,9 +365,9 @@ def main():
     results.append(("player_team_season", test_player_team_season()))
 
     # Summary
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("TEST SUMMARY")
-    print("="*70)
+    print("=" * 70)
 
     passed = sum(1 for _, result in results if result)
     total = len(results)

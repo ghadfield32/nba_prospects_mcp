@@ -11,9 +11,8 @@ fast entity resolution with clear alias mappings.
 """
 
 from __future__ import annotations
-import re
-from typing import Optional, Dict, List
 
+import re
 
 # NCAA team name mappings (common abbreviations -> full names)
 NCAA_TEAM_ALIASES = {
@@ -146,8 +145,8 @@ def resolve_euroleague_team(name: str) -> str:
 def resolve_entity(
     name: str,
     entity_type: str,
-    league: Optional[str] = None,
-) -> Optional[int]:
+    league: str | None = None,
+) -> int | None:
     """Resolve entity name to ID
 
     This is a placeholder implementation. In a production system, this would:
@@ -176,7 +175,7 @@ def resolve_entity(
     return None
 
 
-def get_team_aliases(league: str) -> Dict[str, List[str]]:
+def get_team_aliases(league: str) -> dict[str, list[str]]:
     """Get team alias mappings for a league
 
     Args:
@@ -187,7 +186,7 @@ def get_team_aliases(league: str) -> Dict[str, List[str]]:
     """
     if league in ["NCAA-MBB", "NCAA-WBB"]:
         # Combine NCAA aliases
-        aliases = {}
+        aliases: dict[str, list[str]] = {}
         for abbr, full in NCAA_TEAM_ALIASES.items():
             if full not in aliases:
                 aliases[full] = []
@@ -200,7 +199,7 @@ def get_team_aliases(league: str) -> Dict[str, List[str]]:
     return {}
 
 
-def search_teams(query: str, league: Optional[str] = None, limit: int = 5) -> List[str]:
+def search_teams(query: str, league: str | None = None, limit: int = 5) -> list[str]:
     """Search for teams by name using substring matching
 
     Args:
@@ -217,7 +216,7 @@ def search_teams(query: str, league: Optional[str] = None, limit: int = 5) -> Li
         >>> search_teams("State", league="NCAA-MBB", limit=3)
         ['Iowa State', 'Kansas State', 'Louisiana State']
     """
-    candidates = []
+    candidates: list[str] = []
 
     # Gather candidate teams based on league
     if league in ["NCAA-MBB", "NCAA-WBB", None]:

@@ -15,28 +15,31 @@ import argparse
 import json
 import logging
 import sys
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 try:
     from mcp.server import Server
     from mcp.server.stdio import stdio_server
-    from mcp.types import Tool, Resource, Prompt, TextContent
+    from mcp.types import Prompt, Resource, TextContent, Tool
 except ImportError:
     print("ERROR: mcp library is not installed. Install it with:")
     print("  pip install mcp")
     print("  or: uv pip install mcp")
     print("\nFor now, creating a simplified JSON-RPC server...")
-    Server = None
-    stdio_server = None
+    Server = None  # type: ignore[assignment,misc]
+    stdio_server = None  # type: ignore[assignment]
 
-from .mcp.tools import TOOLS
-from .mcp.resources import RESOURCES, STATIC_RESOURCES, resource_get_dataset_info, resource_get_league_info
 from .mcp.prompts import PROMPTS
+from .mcp.resources import (
+    STATIC_RESOURCES,
+    resource_get_dataset_info,
+    resource_get_league_info,
+)
+from .mcp.tools import TOOLS
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -44,6 +47,7 @@ logger = logging.getLogger(__name__)
 # ============================================================================
 # MCP Server Implementation
 # ============================================================================
+
 
 class BasketballDataMCPServer:
     """
@@ -61,7 +65,7 @@ class BasketballDataMCPServer:
             name: Server name for MCP registration
         """
         self.name = name
-        self.server = None
+        self.server: Any = None
         self.tools_registry = {tool["name"]: tool for tool in TOOLS}
 
         logger.info(f"Initialized {name} MCP server")
@@ -69,7 +73,7 @@ class BasketballDataMCPServer:
         logger.info(f"Registered {len(STATIC_RESOURCES)} resources")
         logger.info(f"Registered {len(PROMPTS)} prompts")
 
-    def setup_server(self) -> Optional[Server]:
+    def setup_server(self) -> Server | None:
         """
         Set up the MCP server with tools, resources, and prompts.
 
@@ -83,64 +87,63 @@ class BasketballDataMCPServer:
         # Create server
         self.server = Server(self.name)
 
+        # Type guard: self.server is now not None
+        assert self.server is not None
+
         # Register list_tools handler
         @self.server.list_tools()
-        async def list_tools() -> List[Tool]:
+        async def list_tools() -> list[Tool]:
             """List all available tools."""
             return [
                 Tool(
-                    name=tool["name"],
-                    description=tool["description"],
-                    inputSchema=tool["inputSchema"]
+                    name=tool["name"],  # type: ignore[arg-type,index]
+                    description=tool["description"],  # type: ignore[arg-type,index]
+                    inputSchema=tool["inputSchema"],  # type: ignore[arg-type,index]
                 )
                 for tool in TOOLS
             ]
 
         # Register call_tool handler
         @self.server.call_tool()
-        async def call_tool(name: str, arguments: Dict[str, Any]) -> List[TextContent]:
+        async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]:
             """Call a tool with arguments."""
             logger.info(f"Tool called: {name} with args: {arguments}")
 
             # Find tool
             tool = self.tools_registry.get(name)
             if not tool:
-                return [TextContent(
-                    type="text",
-                    text=json.dumps({
-                        "success": False,
-                        "error": f"Tool '{name}' not found"
-                    })
-                )]
+                return [
+                    TextContent(
+                        type="text",
+                        text=json.dumps({"success": False, "error": f"Tool '{name}' not found"}),
+                    )
+                ]
 
             # Execute tool handler
             try:
-                result = tool["handler"](**arguments)
-                return [TextContent(
-                    type="text",
-                    text=json.dumps(result, indent=2)
-                )]
+                result = tool["handler"](**arguments)  # type: ignore[index,operator]
+                return [TextContent(type="text", text=json.dumps(result, indent=2))]
             except Exception as e:
                 logger.error(f"Error executing tool {name}: {e}", exc_info=True)
-                return [TextContent(
-                    type="text",
-                    text=json.dumps({
-                        "success": False,
-                        "error": str(e),
-                        "error_type": type(e).__name__
-                    })
-                )]
+                return [
+                    TextContent(
+                        type="text",
+                        text=json.dumps(
+                            {"success": False, "error": str(e), "error_type": type(e).__name__}
+                        ),
+                    )
+                ]
 
         # Register list_resources handler
         @self.server.list_resources()
-        async def list_resources() -> List[Resource]:
+        async def list_resources() -> list[Resource]:
             """List all available resources."""
             return [
                 Resource(
-                    uri=res["uri"],
-                    name=res["name"],
-                    description=res["description"],
-                    mimeType=res["mimeType"]
+                    uri=res["uri"],  # type: ignore[arg-type,index]
+                    name=res["name"],  # type: ignore[index]
+                    description=res["description"],  # type: ignore[index]
+                    mimeType=res["mimeType"],  # type: ignore[index]
                 )
                 for res in STATIC_RESOURCES
             ]
@@ -155,42 +158,42 @@ class BasketballDataMCPServer:
             if uri.startswith("cbb://datasets/") and uri != "cbb://datasets/":
                 dataset_id = uri.replace("cbb://datasets/", "")
                 result = resource_get_dataset_info(dataset_id)
-                return result["text"]
+                return str(result["text"])
 
             # Handle league info resources
             if uri.startswith("cbb://leagues/"):
                 league = uri.replace("cbb://leagues/", "")
                 result = resource_get_league_info(league)
-                return result["text"]
+                return str(result["text"])
 
             return f"Resource not found: {uri}"
 
         # Register list_prompts handler
         @self.server.list_prompts()
-        async def list_prompts() -> List[Prompt]:
+        async def list_prompts() -> list[Prompt]:
             """List all available prompts."""
             return [
                 Prompt(
-                    name=prompt["name"],
-                    description=prompt["description"],
-                    arguments=prompt.get("arguments", [])
+                    name=prompt["name"],  # type: ignore[arg-type,index]
+                    description=prompt["description"],  # type: ignore[arg-type,index]
+                    arguments=prompt.get("arguments", []),  # type: ignore[arg-type,attr-defined]
                 )
                 for prompt in PROMPTS
             ]
 
         # Register get_prompt handler
         @self.server.get_prompt()
-        async def get_prompt(name: str, arguments: Dict[str, Any]) -> str:
+        async def get_prompt(name: str, arguments: dict[str, Any]) -> str:
             """Get a prompt template with arguments filled in."""
             logger.info(f"Prompt requested: {name} with args: {arguments}")
 
             # Find prompt
-            prompt = next((p for p in PROMPTS if p["name"] == name), None)
+            prompt = next((p for p in PROMPTS if p["name"] == name), None)  # type: ignore[index,attr-defined]
             if not prompt:
                 return f"Prompt '{name}' not found"
 
             # Fill in template with arguments
-            template = prompt["template"]
+            template: str = prompt["template"]  # type: ignore[index,assignment]
 
             # Handle special formatting for optional parameters
             if "season" in arguments:
@@ -225,12 +228,12 @@ class BasketballDataMCPServer:
             if "days" not in arguments:
                 arguments["days"] = 2
 
-            return template.format(**arguments)
+            return str(template.format(**arguments))
 
         logger.info("MCP server setup complete")
-        return self.server
+        return self.server  # type: ignore[no-any-return]
 
-    async def run_stdio(self):
+    async def run_stdio(self) -> None:
         """Run server in stdio mode (for Claude Desktop)."""
         if self.server is None:
             self.server = self.setup_server()
@@ -244,12 +247,10 @@ class BasketballDataMCPServer:
 
         async with stdio_server() as (read_stream, write_stream):
             await self.server.run(
-                read_stream,
-                write_stream,
-                self.server.create_initialization_options()
+                read_stream, write_stream, self.server.create_initialization_options()
             )
 
-    async def run_sse(self, host: str = "localhost", port: int = 3000):
+    async def run_sse(self, host: str = "localhost", port: int = 3000) -> None:
         """
         Run server in SSE mode (for web clients).
 
@@ -274,46 +275,37 @@ class BasketballDataMCPServer:
 # CLI Entry Point
 # ============================================================================
 
-def parse_args():
+
+def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Start the College Basketball Data MCP server"
-    )
+    parser = argparse.ArgumentParser(description="Start the College Basketball Data MCP server")
 
     parser.add_argument(
         "--transport",
         type=str,
         default="stdio",
         choices=["stdio", "sse"],
-        help="Transport mode: stdio (for Claude Desktop) or sse (for web clients)"
+        help="Transport mode: stdio (for Claude Desktop) or sse (for web clients)",
     )
 
     parser.add_argument(
-        "--host",
-        type=str,
-        default="localhost",
-        help="Host to bind to (SSE mode only)"
+        "--host", type=str, default="localhost", help="Host to bind to (SSE mode only)"
     )
 
-    parser.add_argument(
-        "--port",
-        type=int,
-        default=3000,
-        help="Port to bind to (SSE mode only)"
-    )
+    parser.add_argument("--port", type=int, default=3000, help="Port to bind to (SSE mode only)")
 
     parser.add_argument(
         "--log-level",
         type=str,
         default="info",
         choices=["critical", "error", "warning", "info", "debug"],
-        help="Log level"
+        help="Log level",
     )
 
     return parser.parse_args()
 
 
-async def main():
+async def main() -> None:
     """Main entry point for MCP server."""
     args = parse_args()
 
@@ -349,4 +341,5 @@ async def main():
 
 if __name__ == "__main__":
     import asyncio
+
     asyncio.run(main())

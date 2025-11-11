@@ -13,24 +13,24 @@ Usage:
 """
 
 import argparse
-import sys
 import json
-from typing import Optional, List, Dict, Any
+import sys
+from typing import Any
 
 # Import basketball data functions
-from cbb_data.api.datasets import get_dataset, list_datasets, get_recent_games
-
+from cbb_data.api.datasets import get_dataset, get_recent_games, list_datasets
 
 # ============================================================================
 # Helper Functions
 # ============================================================================
 
-def print_json(data: Any, indent: int = 2):
+
+def print_json(data: Any, indent: int = 2) -> None:
     """Print data as formatted JSON."""
     print(json.dumps(data, indent=indent, default=str))
 
 
-def print_table(data: Dict[str, Any]):
+def print_table(data: dict[str, Any]) -> None:
     """Print data as a simple table."""
     # Handle compact mode format
     if isinstance(data, dict) and "columns" in data and "rows" in data:
@@ -56,7 +56,8 @@ def print_table(data: Dict[str, Any]):
 # Command: List Datasets
 # ============================================================================
 
-def cmd_list_datasets(args):
+
+def cmd_list_datasets(args: argparse.Namespace) -> None:
     """List all available datasets."""
     print("Available Datasets:\n")
 
@@ -74,7 +75,8 @@ def cmd_list_datasets(args):
 # Command: Get Dataset
 # ============================================================================
 
-def cmd_get_dataset(args):
+
+def cmd_get_dataset(args: argparse.Namespace) -> None:
     """Query a dataset with filters."""
     # Build filters dict
     filters = {"league": args.league}
@@ -94,27 +96,20 @@ def cmd_get_dataset(args):
 
     # Query dataset
     try:
-        df = get_dataset(
-            grouping=args.dataset,
-            filters=filters,
-            limit=args.limit
-        )
+        df = get_dataset(grouping=args.dataset, filters=filters, limit=args.limit)
 
         # Format output
         if args.output == "json":
             result = {
                 "columns": df.columns.tolist(),
                 "rows": df.values.tolist(),
-                "row_count": len(df)
+                "row_count": len(df),
             }
             print_json(result)
         elif args.output == "csv":
             print(df.to_csv(index=False))
         elif args.output == "table":
-            result = {
-                "columns": df.columns.tolist(),
-                "rows": df.values.tolist()
-            }
+            result = {"columns": df.columns.tolist(), "rows": df.values.tolist()}
             print_table(result)
         else:
             print(df)
@@ -128,7 +123,8 @@ def cmd_get_dataset(args):
 # Command: Get Recent Games
 # ============================================================================
 
-def cmd_recent_games(args):
+
+def cmd_recent_games(args: argparse.Namespace) -> None:
     """Get recent games for a league."""
     try:
         # Import natural language parser
@@ -140,27 +136,20 @@ def cmd_recent_games(args):
             days = 2  # Default
 
         # Get recent games
-        df = get_recent_games(
-            league=args.league,
-            days=days,
-            teams=args.teams
-        )
+        df = get_recent_games(league=args.league, days=days, teams=args.teams)
 
         # Format output
         if args.output == "json":
             result = {
                 "columns": df.columns.tolist(),
                 "rows": df.values.tolist(),
-                "row_count": len(df)
+                "row_count": len(df),
             }
             print_json(result)
         elif args.output == "csv":
             print(df.to_csv(index=False))
         elif args.output == "table":
-            result = {
-                "columns": df.columns.tolist(),
-                "rows": df.values.tolist()
-            }
+            result = {"columns": df.columns.tolist(), "rows": df.values.tolist()}
             print_table(result)
         else:
             print(df)
@@ -174,7 +163,8 @@ def cmd_recent_games(args):
 # Command: Show Schema
 # ============================================================================
 
-def cmd_show_schema(args):
+
+def cmd_show_schema(args: argparse.Namespace) -> None:
     """Show API schemas."""
     print("Basketball Data API Schemas\n")
     print("=" * 60)
@@ -203,7 +193,7 @@ def cmd_show_schema(args):
             "date_to": "End date OR 'today'",
             "per_mode": "Aggregation mode: Totals, PerGame, Per40",
             "limit": "Maximum rows to return (1-10000)",
-            "compact": "Use compact mode for token efficiency"
+            "compact": "Use compact mode for token efficiency",
         }
         for name, desc in filters.items():
             print(f"\n  {name}")
@@ -222,10 +212,114 @@ def cmd_show_schema(args):
 
 
 # ============================================================================
+# Command: Cache Warmer
+# ============================================================================
+
+
+def cmd_warm_cache(args: argparse.Namespace) -> None:
+    """
+    Warm the cache with popular queries.
+
+    Pre-fetches commonly requested data to improve response times for
+    subsequent queries. Useful for running before peak usage times or
+    after cache clears.
+    """
+    print("Cache Warmer - Pre-fetching popular queries...\n")
+    print("=" * 60)
+
+    # Define popular queries to warm
+    warming_plans: list[dict[str, Any]] = [
+        {
+            "name": "NCAA-MBB Today's Schedule",
+            "dataset": "schedule",
+            "filters": {"league": "NCAA-MBB", "season": "2025"},
+            "limit": 200,
+        },
+        {
+            "name": "NCAA-MBB Recent Games (Last 2 Days)",
+            "dataset": "schedule",
+            "filters": {"league": "NCAA-MBB", "date_from": "2 days ago"},
+            "limit": 200,
+        },
+        {
+            "name": "NCAA-MBB Top Teams (Season Stats)",
+            "dataset": "team_season",
+            "filters": {"league": "NCAA-MBB", "season": "2025", "per_mode": "PerGame"},
+            "limit": 100,
+        },
+        {
+            "name": "NCAA-WBB Today's Schedule",
+            "dataset": "schedule",
+            "filters": {"league": "NCAA-WBB", "season": "2025"},
+            "limit": 200,
+        },
+        {
+            "name": "EuroLeague Current Season Schedule",
+            "dataset": "schedule",
+            "filters": {"league": "EuroLeague", "season": "2024"},
+            "limit": 200,
+        },
+        {
+            "name": "EuroLeague Player Leaders",
+            "dataset": "player_season",
+            "filters": {"league": "EuroLeague", "season": "2024", "per_mode": "PerGame"},
+            "limit": 100,
+        },
+    ]
+
+    # Add custom teams if specified
+    if args.teams:
+        for team in args.teams:
+            warming_plans.append(
+                {
+                    "name": f"{team} Recent Games",
+                    "dataset": "schedule",
+                    "filters": {"league": "NCAA-MBB", "season": "2025", "team": [team]},
+                    "limit": 50,
+                }
+            )
+
+    # Execute warming plans
+    successes = 0
+    failures = 0
+    total_rows = 0
+
+    for plan in warming_plans:
+        try:
+            print(f"\n[{successes + failures + 1}/{len(warming_plans)}] {plan['name']}...")
+
+            df = get_dataset(
+                grouping=plan["dataset"], filters=plan["filters"], limit=plan.get("limit", 100)
+            )
+
+            rows = len(df)
+            total_rows += rows
+            successes += 1
+
+            print(f"  [OK] Cached {rows} rows")
+
+        except Exception as e:
+            failures += 1
+            print(f"  [FAIL] Failed: {str(e)}")
+
+    # Summary
+    print("\n" + "=" * 60)
+    print("\nCache Warming Complete!")
+    print(f"  Successful: {successes}/{len(warming_plans)}")
+    print(f"  Failed: {failures}/{len(warming_plans)}")
+    print(f"  Total Rows Cached: {total_rows:,}")
+
+    if failures > 0:
+        print(f"\n[WARN] {failures} queries failed - check logs for details")
+        sys.exit(1)
+
+
+# ============================================================================
 # Main CLI
 # ============================================================================
 
-def main():
+
+def main() -> None:
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
         prog="cbb",
@@ -251,7 +345,7 @@ Examples:
   # Show API schemas
   cbb schema
   cbb schema --type filters
-        """
+        """,
     )
 
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
@@ -259,114 +353,84 @@ Examples:
     # ========================================
     # Command: datasets
     # ========================================
-    parser_datasets = subparsers.add_parser(
-        "datasets",
-        help="List all available datasets"
-    )
+    parser_datasets = subparsers.add_parser("datasets", help="List all available datasets")
     parser_datasets.set_defaults(func=cmd_list_datasets)
 
     # ========================================
     # Command: get
     # ========================================
-    parser_get = subparsers.add_parser(
-        "get",
-        help="Query a dataset with filters"
-    )
+    parser_get = subparsers.add_parser("get", help="Query a dataset with filters")
     parser_get.add_argument(
-        "dataset",
-        help="Dataset ID (e.g., schedule, player_game, player_season)"
+        "dataset", help="Dataset ID (e.g., schedule, player_game, player_season)"
     )
     parser_get.add_argument(
         "--league",
         required=True,
         choices=["NCAA-MBB", "NCAA-WBB", "EuroLeague"],
-        help="League identifier"
+        help="League identifier",
     )
-    parser_get.add_argument(
-        "--season",
-        help="Season year OR 'this season', 'last season'"
-    )
-    parser_get.add_argument(
-        "--team",
-        nargs="+",
-        help="Team names to filter"
-    )
-    parser_get.add_argument(
-        "--player",
-        nargs="+",
-        help="Player names to filter"
-    )
-    parser_get.add_argument(
-        "--date-from",
-        help="Start date OR 'yesterday', 'last week'"
-    )
-    parser_get.add_argument(
-        "--date-to",
-        help="End date OR 'today'"
-    )
+    parser_get.add_argument("--season", help="Season year OR 'this season', 'last season'")
+    parser_get.add_argument("--team", nargs="+", help="Team names to filter")
+    parser_get.add_argument("--player", nargs="+", help="Player names to filter")
+    parser_get.add_argument("--date-from", help="Start date OR 'yesterday', 'last week'")
+    parser_get.add_argument("--date-to", help="End date OR 'today'")
     parser_get.add_argument(
         "--per-mode",
         choices=["Totals", "PerGame", "Per40"],
-        help="Aggregation mode for season stats"
+        help="Aggregation mode for season stats",
     )
     parser_get.add_argument(
-        "--limit",
-        type=int,
-        default=100,
-        help="Maximum rows to return (default: 100)"
+        "--limit", type=int, default=100, help="Maximum rows to return (default: 100)"
     )
     parser_get.add_argument(
         "--output",
         choices=["table", "json", "csv", "dataframe"],
         default="table",
-        help="Output format (default: table)"
+        help="Output format (default: table)",
     )
     parser_get.set_defaults(func=cmd_get_dataset)
 
     # ========================================
     # Command: recent
     # ========================================
-    parser_recent = subparsers.add_parser(
-        "recent",
-        help="Get recent games for a league"
-    )
+    parser_recent = subparsers.add_parser("recent", help="Get recent games for a league")
     parser_recent.add_argument(
-        "league",
-        choices=["NCAA-MBB", "NCAA-WBB", "EuroLeague"],
-        help="League identifier"
+        "league", choices=["NCAA-MBB", "NCAA-WBB", "EuroLeague"], help="League identifier"
     )
     parser_recent.add_argument(
         "--days",
         default="2",
-        help="Number of days OR 'today', 'last week', 'last 5 days' (default: 2)"
+        help="Number of days OR 'today', 'last week', 'last 5 days' (default: 2)",
     )
-    parser_recent.add_argument(
-        "--teams",
-        nargs="+",
-        help="Team names to filter"
-    )
+    parser_recent.add_argument("--teams", nargs="+", help="Team names to filter")
     parser_recent.add_argument(
         "--output",
         choices=["table", "json", "csv", "dataframe"],
         default="table",
-        help="Output format (default: table)"
+        help="Output format (default: table)",
     )
     parser_recent.set_defaults(func=cmd_recent_games)
 
     # ========================================
     # Command: schema
     # ========================================
-    parser_schema = subparsers.add_parser(
-        "schema",
-        help="Show API schemas and documentation"
-    )
+    parser_schema = subparsers.add_parser("schema", help="Show API schemas and documentation")
     parser_schema.add_argument(
         "--type",
         choices=["all", "datasets", "filters", "natural-language"],
         default="all",
-        help="Schema type to display (default: all)"
+        help="Schema type to display (default: all)",
     )
     parser_schema.set_defaults(func=cmd_show_schema)
+
+    # ========================================
+    # Command: warm-cache
+    # ========================================
+    parser_warm = subparsers.add_parser("warm-cache", help="Warm the cache with popular queries")
+    parser_warm.add_argument(
+        "--teams", nargs="+", help="Additional teams to warm (e.g., Duke UNC Kansas)"
+    )
+    parser_warm.set_defaults(func=cmd_warm_cache)
 
     # Parse args and execute command
     args = parser.parse_args()

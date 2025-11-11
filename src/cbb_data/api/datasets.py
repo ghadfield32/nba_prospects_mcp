@@ -10,33 +10,33 @@ All datasets support the unified FilterSpec for consistent querying.
 """
 
 from __future__ import annotations
-import pandas as pd
-from typing import Optional, List, Dict, Any
-from datetime import datetime, date
-import logging
-import copy
 
-from ..filters.spec import FilterSpec
-from ..filters.compiler import compile_params, apply_post_mask
-from ..filters.validator import validate_filters, FilterValidationError
-from ..catalog.registry import DatasetRegistry
+import copy
+import logging
+from collections.abc import Callable
+from datetime import datetime
+from typing import Any
+
+import pandas as pd
+
 from .. import fetchers
-from ..fetchers import cbbpy_mbb  # CBBpy integration for NCAA Men's box scores
-from ..fetchers import cbbpy_wbb  # CBBpy integration for NCAA Women's box scores
+from ..catalog.registry import DatasetRegistry
 from ..compose.enrichers import (
-    coerce_common_columns,
-    add_home_away,
-    extract_opponent,
-    compose_player_team_game,
-    add_season_context,
     add_league_context,
+    coerce_common_columns,
 )
-from ..utils.entity_resolver import (
-    resolve_ncaa_team,
-    resolve_euroleague_team,
-    resolve_entity,
+from ..fetchers import (
+    cbbpy_mbb,  # CBBpy integration for NCAA Men's box scores
+    cbbpy_wbb,  # CBBpy integration for NCAA Women's box scores
 )
+from ..filters.compiler import apply_post_mask, compile_params
+from ..filters.spec import FilterSpec
+from ..filters.validator import validate_filters
 from ..storage.duckdb_storage import get_storage
+from ..utils.entity_resolver import (
+    resolve_euroleague_team,
+    resolve_ncaa_team,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +44,7 @@ logger = logging.getLogger(__name__)
 # ==============================================================================
 # Helper Functions
 # ==============================================================================
+
 
 def get_current_season(league: str) -> str:
     """Auto-detect current season based on league calendar
@@ -82,7 +83,7 @@ def get_current_season(league: str) -> str:
     month = now.month
     year = now.year
 
-    if league in ['NCAA-MBB', 'NCAA-WBB']:
+    if league in ["NCAA-MBB", "NCAA-WBB"]:
         # NCAA season: Nov-April
         # Nov-Dec → current year (e.g., Nov 2024 = "2024" for 2024-25 season)
         # Jan-Oct → previous year (e.g., Mar 2024 = "2023" for 2023-24 season)
@@ -91,7 +92,7 @@ def get_current_season(league: str) -> str:
         else:  # Jan-Oct
             return str(year - 1)
 
-    elif league == 'EuroLeague':
+    elif league == "EuroLeague":
         # EuroLeague season: Oct-May
         # Oct-Dec → current year
         # Jan-Sep → previous year
@@ -100,7 +101,7 @@ def get_current_season(league: str) -> str:
         else:  # Jan-Sep
             return f"E{year - 1}"
 
-    elif league == 'WNBA':
+    elif league == "WNBA":
         # WNBA season: May-October (single calendar year)
         return str(year)
 
@@ -113,9 +114,9 @@ def get_current_season(league: str) -> str:
 def get_recent_games(
     league: str,
     days: int = 2,
-    teams: Optional[List[str]] = None,
-    Division: Optional[str] = None,
-    force_fresh: bool = False
+    teams: list[str] | None = None,
+    Division: str | None = None,
+    force_fresh: bool = False,
 ) -> pd.DataFrame:
     """Fetch games from recent days (includes yesterday + today by default)
 
@@ -161,19 +162,13 @@ def get_recent_games(
     start_date = end_date - timedelta(days=days - 1)
 
     # Build filters with date objects (not strings)
-    filters = {
-        'league': league,
-        'date': {
-            'start': start_date,
-            'end': end_date
-        }
-    }
+    filters = {"league": league, "date": {"start": start_date, "end": end_date}}
 
     # Add optional filters
     if teams:
-        filters['team'] = teams
+        filters["team"] = teams
     if Division:
-        filters['Division'] = Division
+        filters["Division"] = Division
 
     logger.info(
         f"Fetching recent games: {league}, "
@@ -182,10 +177,10 @@ def get_recent_games(
     )
 
     # Use get_dataset with force_fresh parameter
-    return get_dataset('schedule', filters, force_fresh=force_fresh)
+    return get_dataset("schedule", filters, force_fresh=force_fresh)
 
 
-def _create_default_name_resolver():
+def _create_default_name_resolver() -> Callable[[str, str, str | None], int | None]:
     """Create a default name resolver function
 
     Returns a resolver function that:
@@ -196,7 +191,8 @@ def _create_default_name_resolver():
     This is a basic implementation. For full ID resolution, implement
     entity lookup logic in entity_resolver.resolve_entity().
     """
-    def resolver(name: str, entity_type: str, league: Optional[str]) -> Optional[int]:
+
+    def resolver(name: str, entity_type: str, league: str | None) -> int | None:
         """Resolve entity name to ID (with name normalization)"""
         if entity_type == "team":
             # Normalize team name based on league
@@ -221,7 +217,8 @@ def _create_default_name_resolver():
 
     return resolver
 
-def _parse_euroleague_season(season_str: Optional[str]) -> int:
+
+def _parse_euroleague_season(season_str: str | None) -> int:
     """Convert EuroLeague season string to integer year
 
     Handles multiple formats:
@@ -240,11 +237,11 @@ def _parse_euroleague_season(season_str: Optional[str]) -> int:
         return datetime.now().year
 
     # Remove 'E' prefix if present
-    season_str = str(season_str).strip().upper().replace('E', '')
+    season_str = str(season_str).strip().upper().replace("E", "")
 
     # If it's a range like "2024-25", take the first year
-    if '-' in season_str:
-        season_str = season_str.split('-')[0]
+    if "-" in season_str:
+        season_str = season_str.split("-")[0]
 
     try:
         return int(season_str)
@@ -257,9 +254,9 @@ def fetch_with_duckdb_cache(
     dataset: str,
     league: str,
     season: str,
-    fetcher_func,
+    fetcher_func: Callable[[], pd.DataFrame],
     force_refresh: bool = False,
-    enable_cache: bool = True
+    enable_cache: bool = True,
 ) -> pd.DataFrame:
     """Fetch data with DuckDB persistent caching for 1000-4000x speedup on cache hits
 
@@ -313,7 +310,7 @@ def fetch_with_duckdb_cache(
                 logger.debug(f"Cache hit: {len(df):,} rows loaded in <1 second")
                 return df
             else:
-                logger.warning(f"Cache returned empty DataFrame - refetching from API")
+                logger.warning("Cache returned empty DataFrame - refetching from API")
 
         # Cache miss or force refresh - fetch from API
         cache_status = "force refresh" if force_refresh else "cache miss"
@@ -325,11 +322,10 @@ def fetch_with_duckdb_cache(
         if not df.empty:
             storage.save(df, dataset, league, season)
             logger.info(
-                f"Saved {len(df):,} rows to DuckDB cache "
-                f"(next fetch will be 1000x faster)"
+                f"Saved {len(df):,} rows to DuckDB cache " f"(next fetch will be 1000x faster)"
             )
         else:
-            logger.warning(f"Empty DataFrame - not caching")
+            logger.warning("Empty DataFrame - not caching")
 
         return df
 
@@ -339,7 +335,7 @@ def fetch_with_duckdb_cache(
         return fetcher_func()
 
 
-def validate_fetch_request(dataset: str, filters: Dict[str, Any], league: str) -> None:
+def validate_fetch_request(dataset: str, filters: dict[str, Any], league: str | None) -> None:
     """Validate request before fetching - fail fast on configuration errors
 
     This function performs pre-fetch validation to catch errors BEFORE making API calls.
@@ -371,20 +367,18 @@ def validate_fetch_request(dataset: str, filters: Dict[str, Any], league: str) -
         # Raises ValueError: Invalid season format
     """
     # 1. Check league is valid
-    valid_leagues = ['NCAA-MBB', 'NCAA-WBB', 'EuroLeague', 'WNBA']
+    valid_leagues = ["NCAA-MBB", "NCAA-WBB", "EuroLeague", "WNBA"]
     if league and league not in valid_leagues:
-        raise ValueError(
-            f"Invalid league '{league}'. Must be one of: {valid_leagues}"
-        )
+        raise ValueError(f"Invalid league '{league}'. Must be one of: {valid_leagues}")
 
     # 2. Check season format (must be YYYY format)
-    season = filters.get('season')
+    season = filters.get("season")
     if season:
         season_str = str(season).strip()
 
         # Allow EuroLeague format "E2024" or NCAA format "2024" or range "2024-25"
         # Extract the year portion
-        cleaned_season = season_str.upper().replace('E', '').split('-')[0]
+        cleaned_season = season_str.upper().replace("E", "").split("-")[0]
 
         # Verify it's a 4-digit year
         if not cleaned_season.isdigit() or len(cleaned_season) != 4:
@@ -404,25 +398,25 @@ def validate_fetch_request(dataset: str, filters: Dict[str, Any], league: str) -
 
     # 3. NCAA Division 1 recommendation
     # (Note: Actual filtering happens in Priority 3 implementation)
-    if league and league.startswith('NCAA'):
-        groups = filters.get('groups')
+    if league and league.startswith("NCAA"):
+        groups = filters.get("groups")
         if groups is None:
             logger.info(
-                f"NCAA query without 'groups' filter will include all divisions. "
-                f"For Division 1 only (recommended), add groups='50' to filters."
+                "NCAA query without 'groups' filter will include all divisions. "
+                "For Division 1 only (recommended), add groups='50' to filters."
             )
 
     # 4. Check for conflicting filters
     # schedule dataset doesn't support player filtering
-    if dataset == 'schedule' and (filters.get('player') or filters.get('player_ids')):
+    if dataset == "schedule" and (filters.get("player") or filters.get("player_ids")):
         raise ValueError(
             "Schedule dataset does not support player filtering. "
             "Use player_game dataset for player-specific queries."
         )
 
     # player_season and team_season require season parameter
-    if dataset in ['player_season', 'team_season', 'player_team_season']:
-        if not filters.get('season'):
+    if dataset in ["player_season", "team_season", "player_team_season"]:
+        if not filters.get("season"):
             raise ValueError(
                 f"Dataset '{dataset}' requires 'season' parameter. "
                 f"Example: {{'season': '2024'}}"
@@ -438,7 +432,8 @@ def validate_fetch_request(dataset: str, filters: Dict[str, Any], league: str) -
 # Dataset Fetch Functions
 # ==============================================================================
 
-def _map_division_to_groups(division) -> str:
+
+def _map_division_to_groups(division: str | list[str] | None) -> str:
     """
     Map division parameter to ESPN groups code.
 
@@ -546,7 +541,7 @@ def _get_season_date_range(season: str, league: str) -> tuple[str, str]:
             end_year = season_year
 
         date_from = f"11/01/{start_year}"  # November 1
-        date_to = f"04/30/{end_year}"      # April 30
+        date_to = f"04/30/{end_year}"  # April 30
 
     # EuroLeague: October (previous year) - May (season year)
     elif league == "EuroLeague":
@@ -558,7 +553,7 @@ def _get_season_date_range(season: str, league: str) -> tuple[str, str]:
             end_year = season_year
 
         date_from = f"10/01/{start_year}"  # October 1
-        date_to = f"05/31/{end_year}"      # May 31
+        date_to = f"05/31/{end_year}"  # May 31
 
     else:
         # Default fallback: assume NCAA-style calendar
@@ -572,7 +567,7 @@ def _get_season_date_range(season: str, league: str) -> tuple[str, str]:
     return (date_from, date_to)
 
 
-def _fetch_schedule(compiled: Dict[str, Any]) -> pd.DataFrame:
+def _fetch_schedule(compiled: dict[str, Any]) -> pd.DataFrame:
     """Fetch schedule/scoreboard data
 
     Supports: ESPN MBB, ESPN WBB, EuroLeague
@@ -598,10 +593,7 @@ def _fetch_schedule(compiled: Dict[str, Any]) -> pd.DataFrame:
             date_to = datetime.strptime(params["DateTo"], "%m/%d/%Y").date()
 
             df = fetchers.espn_mbb.fetch_schedule_range(
-                date_from=date_from,
-                date_to=date_to,
-                season=params.get("Season"),
-                groups=groups
+                date_from=date_from, date_to=date_to, season=params.get("Season"), groups=groups
             )
         elif params.get("Season"):
             # Season-aware date range (when Season provided but no explicit DateFrom/DateTo)
@@ -612,13 +604,12 @@ def _fetch_schedule(compiled: Dict[str, Any]) -> pd.DataFrame:
             date_from = datetime.strptime(date_from_str, "%m/%d/%Y").date()
             date_to = datetime.strptime(date_to_str, "%m/%d/%Y").date()
 
-            logger.info(f"Using season-aware dates for {league} {season}: {date_from_str} to {date_to_str}")
+            logger.info(
+                f"Using season-aware dates for {league} {season}: {date_from_str} to {date_to_str}"
+            )
 
             df = fetchers.espn_mbb.fetch_schedule_range(
-                date_from=date_from,
-                date_to=date_to,
-                season=season,
-                groups=groups
+                date_from=date_from, date_to=date_to, season=season, groups=groups
             )
         else:
             # Fallback: Today's games (when neither DateFrom/DateTo nor Season provided)
@@ -632,10 +623,7 @@ def _fetch_schedule(compiled: Dict[str, Any]) -> pd.DataFrame:
             date_to = datetime.strptime(params["DateTo"], "%m/%d/%Y").date()
 
             df = fetchers.espn_wbb.fetch_wbb_schedule_range(
-                date_from=date_from,
-                date_to=date_to,
-                season=params.get("Season"),
-                groups=groups
+                date_from=date_from, date_to=date_to, season=params.get("Season"), groups=groups
             )
         elif params.get("Season"):
             # Season-aware date range (when Season provided but no explicit DateFrom/DateTo)
@@ -646,13 +634,12 @@ def _fetch_schedule(compiled: Dict[str, Any]) -> pd.DataFrame:
             date_from = datetime.strptime(date_from_str, "%m/%d/%Y").date()
             date_to = datetime.strptime(date_to_str, "%m/%d/%Y").date()
 
-            logger.info(f"Using season-aware dates for {league} {season}: {date_from_str} to {date_to_str}")
+            logger.info(
+                f"Using season-aware dates for {league} {season}: {date_from_str} to {date_to_str}"
+            )
 
             df = fetchers.espn_wbb.fetch_wbb_schedule_range(
-                date_from=date_from,
-                date_to=date_to,
-                season=season,
-                groups=groups
+                date_from=date_from, date_to=date_to, season=season, groups=groups
             )
         else:
             # Fallback: Today's games (when neither DateFrom/DateTo nor Season provided)
@@ -669,14 +656,13 @@ def _fetch_schedule(compiled: Dict[str, Any]) -> pd.DataFrame:
         # Wrap with DuckDB caching for 1000-4000x speedup on cache hits
         # First fetch: 3-7 minutes, subsequent fetches: <1 second
         df = fetch_with_duckdb_cache(
-            dataset='schedule',
-            league='EuroLeague',
+            dataset="schedule",
+            league="EuroLeague",
             season=str(season),
             fetcher_func=lambda: fetchers.euroleague.fetch_euroleague_games(
-                season=season,
-                phase=phase
+                season=season, phase=phase
             ),
-            force_refresh=params.get("ForceRefresh", False)
+            force_refresh=params.get("ForceRefresh", False),
         )
 
     else:
@@ -694,7 +680,7 @@ def _fetch_schedule(compiled: Dict[str, Any]) -> pd.DataFrame:
     return df
 
 
-def _fetch_player_game(compiled: Dict[str, Any]) -> pd.DataFrame:
+def _fetch_player_game(compiled: dict[str, Any]) -> pd.DataFrame:
     """Fetch player/game data (box scores)
 
     Supports: ESPN MBB, ESPN WBB, EuroLeague
@@ -734,7 +720,9 @@ def _fetch_player_game(compiled: Dict[str, Any]) -> pd.DataFrame:
 
             # Check if we have a limit in meta - only fetch enough games to satisfy limit
             limit = meta.get("limit")
-            games_to_fetch = game_id_list if not limit else game_id_list[:limit * 2]  # Fetch 2x limit to ensure enough data
+            games_to_fetch = (
+                game_id_list if not limit else game_id_list[: limit * 2]
+            )  # Fetch 2x limit to ensure enough data
             logger.info(f"_fetch_player_game: Fetching {len(games_to_fetch)} games (limit={limit})")
             logger.info(f"_fetch_player_game: games_to_fetch first 10: {games_to_fetch[:10]}")
 
@@ -782,8 +770,8 @@ def _fetch_player_game(compiled: Dict[str, Any]) -> pd.DataFrame:
 
         # FIX: Normalize GAME_ID to string to prevent type mismatch with post_mask filters
         # CBBpy cache can return different dtypes (object vs int64) on subsequent calls
-        if 'GAME_ID' in df.columns:
-            df['GAME_ID'] = df['GAME_ID'].astype(str)
+        if "GAME_ID" in df.columns:
+            df["GAME_ID"] = df["GAME_ID"].astype(str)
 
     elif league == "EuroLeague":
         # EuroLeague box scores
@@ -796,9 +784,10 @@ def _fetch_player_game(compiled: Dict[str, Any]) -> pd.DataFrame:
 
         # Parallel fetching to avoid timeout on large seasons (330 games)
         from concurrent.futures import ThreadPoolExecutor, as_completed
+
         from tqdm import tqdm
 
-        def fetch_single_game(game_info):
+        def fetch_single_game(game_info: dict[str, Any]) -> pd.DataFrame | None:
             """Fetch box score for a single game"""
             game_code = int(game_info["GAME_CODE"])
             try:
@@ -812,7 +801,7 @@ def _fetch_player_game(compiled: Dict[str, Any]) -> pd.DataFrame:
         with ThreadPoolExecutor(max_workers=5) as executor:
             # Submit all tasks
             futures = {
-                executor.submit(fetch_single_game, game): game["GAME_CODE"]
+                executor.submit(fetch_single_game, game.to_dict()): game["GAME_CODE"]
                 for _, game in games.iterrows()
             }
 
@@ -821,7 +810,7 @@ def _fetch_player_game(compiled: Dict[str, Any]) -> pd.DataFrame:
                 as_completed(futures),
                 total=len(futures),
                 desc=f"Fetching EuroLeague {season}",
-                unit="game"
+                unit="game",
             ):
                 result = future.result()
                 if result is not None and not result.empty:
@@ -830,8 +819,8 @@ def _fetch_player_game(compiled: Dict[str, Any]) -> pd.DataFrame:
         df = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
 
         # FIX: Normalize GAME_CODE to string to prevent type mismatch with post_mask filters
-        if 'GAME_CODE' in df.columns:
-            df['GAME_CODE'] = df['GAME_CODE'].astype(str)
+        if "GAME_CODE" in df.columns:
+            df["GAME_CODE"] = df["GAME_CODE"].astype(str)
 
     else:
         raise ValueError(f"Unsupported league for player_game: {league}")
@@ -847,13 +836,14 @@ def _fetch_player_game(compiled: Dict[str, Any]) -> pd.DataFrame:
     if per_mode and per_mode != "Totals":
         # Import here to avoid circular dependency
         from ..compose.enrichers import aggregate_per_mode
+
         df = aggregate_per_mode(df, per_mode=per_mode)
         logger.info(f"Aggregated player_game data by {per_mode}: {len(df)} players")
 
     return df
 
 
-def _fetch_team_game(compiled: Dict[str, Any]) -> pd.DataFrame:
+def _fetch_team_game(compiled: dict[str, Any]) -> pd.DataFrame:
     """Fetch team/game data (team box scores)
 
     Currently returns schedule with scores as a proxy for team stats.
@@ -863,7 +853,7 @@ def _fetch_team_game(compiled: Dict[str, Any]) -> pd.DataFrame:
     return _fetch_schedule(compiled)
 
 
-def _fetch_play_by_play(compiled: Dict[str, Any]) -> pd.DataFrame:
+def _fetch_play_by_play(compiled: dict[str, Any]) -> pd.DataFrame:
     """Fetch play-by-play data
 
     Requires game_ids filter.
@@ -910,7 +900,7 @@ def _fetch_play_by_play(compiled: Dict[str, Any]) -> pd.DataFrame:
     return df
 
 
-def _fetch_shots(compiled: Dict[str, Any]) -> pd.DataFrame:
+def _fetch_shots(compiled: dict[str, Any]) -> pd.DataFrame:
     """Fetch shot chart data
 
     Supported leagues: NCAA-MBB (CBBpy), EuroLeague
@@ -959,7 +949,7 @@ def _fetch_shots(compiled: Dict[str, Any]) -> pd.DataFrame:
     return df
 
 
-def _fetch_player_season(compiled: Dict[str, Any]) -> pd.DataFrame:
+def _fetch_player_season(compiled: dict[str, Any]) -> pd.DataFrame:
     """Fetch player season aggregates
 
     Strategy:
@@ -970,7 +960,7 @@ def _fetch_player_season(compiled: Dict[str, Any]) -> pd.DataFrame:
     Supports: NCAA-MBB, NCAA-WBB, EuroLeague
     """
     params = compiled["params"]
-    post_mask = compiled["post_mask"]
+    _post_mask = compiled["post_mask"]  # Reserved for future filtering
     meta = compiled["meta"]
 
     league = meta.get("league")
@@ -996,7 +986,7 @@ def _fetch_player_season(compiled: Dict[str, Any]) -> pd.DataFrame:
     schedule_compiled = {
         "params": copy.deepcopy(params),
         "post_mask": {},  # No filters - want ALL games for the season
-        "meta": copy.deepcopy(meta)
+        "meta": copy.deepcopy(meta),
     }
 
     # Get season schedule
@@ -1021,11 +1011,12 @@ def _fetch_player_season(compiled: Dict[str, Any]) -> pd.DataFrame:
     player_games = _fetch_player_game(game_compiled)
 
     if player_games.empty:
-        logger.warning(f"_fetch_player_season: player_games is empty, returning empty DataFrame")
+        logger.warning("_fetch_player_season: player_games is empty, returning empty DataFrame")
         return player_games
 
     # Aggregate to season level using per_mode
     from ..compose.enrichers import aggregate_per_mode
+
     per_mode = params.get("PerMode", "Totals")
 
     # Group by player (and season if available)
@@ -1060,7 +1051,7 @@ def _unpivot_schedule_to_team_games(schedule_df: pd.DataFrame) -> pd.DataFrame:
 
     # FIX: Use .get() to safely handle missing columns (EuroLeague has different column names)
     # Check if this is NCAA-style (HOME_TEAM_ID/AWAY_TEAM_ID) or EuroLeague-style
-    if 'HOME_TEAM_ID' not in schedule_df.columns:
+    if "HOME_TEAM_ID" not in schedule_df.columns:
         # EuroLeague doesn't have separate HOME/AWAY team records in schedule
         # Skip unpivoting - just return as-is
         logger.warning("Schedule data missing HOME_TEAM_ID - cannot unpivot. Returning as-is.")
@@ -1068,47 +1059,53 @@ def _unpivot_schedule_to_team_games(schedule_df: pd.DataFrame) -> pd.DataFrame:
 
     # Create home team records
     home_games = schedule_df.copy()
-    home_games['TEAM_ID'] = home_games.get('HOME_TEAM_ID', '')
-    home_games['TEAM_NAME'] = home_games.get('HOME_TEAM', '')
-    home_games['TEAM_ABBREVIATION'] = home_games.get('HOME_TEAM_ABBREVIATION', '')
-    home_games['OPPONENT_ID'] = home_games.get('AWAY_TEAM_ID', '')
-    home_games['OPPONENT_NAME'] = home_games.get('AWAY_TEAM', '')
-    home_games['OPPONENT_ABBREVIATION'] = home_games.get('AWAY_TEAM_ABBREVIATION', '')
-    home_games['POINTS'] = home_games.get('HOME_SCORE', 0)
-    home_games['OPPONENT_POINTS'] = home_games.get('AWAY_SCORE', 0)
-    home_games['IS_HOME'] = True
+    home_games["TEAM_ID"] = home_games.get("HOME_TEAM_ID", "")
+    home_games["TEAM_NAME"] = home_games.get("HOME_TEAM", "")
+    home_games["TEAM_ABBREVIATION"] = home_games.get("HOME_TEAM_ABBREVIATION", "")
+    home_games["OPPONENT_ID"] = home_games.get("AWAY_TEAM_ID", "")
+    home_games["OPPONENT_NAME"] = home_games.get("AWAY_TEAM", "")
+    home_games["OPPONENT_ABBREVIATION"] = home_games.get("AWAY_TEAM_ABBREVIATION", "")
+    home_games["POINTS"] = home_games.get("HOME_SCORE", 0)
+    home_games["OPPONENT_POINTS"] = home_games.get("AWAY_SCORE", 0)
+    home_games["IS_HOME"] = True
 
     # Create away team records
     away_games = schedule_df.copy()
-    away_games['TEAM_ID'] = away_games.get('AWAY_TEAM_ID', '')
-    away_games['TEAM_NAME'] = away_games.get('AWAY_TEAM', '')
-    away_games['TEAM_ABBREVIATION'] = away_games.get('AWAY_TEAM_ABBREVIATION', '')
-    away_games['OPPONENT_ID'] = away_games.get('HOME_TEAM_ID', '')
-    away_games['OPPONENT_NAME'] = away_games.get('HOME_TEAM', '')
-    away_games['OPPONENT_ABBREVIATION'] = away_games.get('HOME_TEAM_ABBREVIATION', '')
-    away_games['POINTS'] = away_games.get('AWAY_SCORE', 0)
-    away_games['OPPONENT_POINTS'] = away_games.get('HOME_SCORE', 0)
-    away_games['IS_HOME'] = False
+    away_games["TEAM_ID"] = away_games.get("AWAY_TEAM_ID", "")
+    away_games["TEAM_NAME"] = away_games.get("AWAY_TEAM", "")
+    away_games["TEAM_ABBREVIATION"] = away_games.get("AWAY_TEAM_ABBREVIATION", "")
+    away_games["OPPONENT_ID"] = away_games.get("HOME_TEAM_ID", "")
+    away_games["OPPONENT_NAME"] = away_games.get("HOME_TEAM", "")
+    away_games["OPPONENT_ABBREVIATION"] = away_games.get("HOME_TEAM_ABBREVIATION", "")
+    away_games["POINTS"] = away_games.get("AWAY_SCORE", 0)
+    away_games["OPPONENT_POINTS"] = away_games.get("HOME_SCORE", 0)
+    away_games["IS_HOME"] = False
 
     # Add WIN column (only for completed games)
     for df in [home_games, away_games]:
-        df['WIN'] = (df['POINTS'] > df['OPPONENT_POINTS']) & (df['STATUS'] == 'STATUS_FINAL')
-        df['LOSS'] = (df['POINTS'] < df['OPPONENT_POINTS']) & (df['STATUS'] == 'STATUS_FINAL')
+        df["WIN"] = (df["POINTS"] > df["OPPONENT_POINTS"]) & (df["STATUS"] == "STATUS_FINAL")
+        df["LOSS"] = (df["POINTS"] < df["OPPONENT_POINTS"]) & (df["STATUS"] == "STATUS_FINAL")
 
     # Combine and drop old columns
     team_games = pd.concat([home_games, away_games], ignore_index=True)
 
     # Drop the original HOME_/AWAY_ columns
     cols_to_drop = [
-        'HOME_TEAM_ID', 'HOME_TEAM', 'HOME_TEAM_ABBREVIATION', 'HOME_SCORE',
-        'AWAY_TEAM_ID', 'AWAY_TEAM', 'AWAY_TEAM_ABBREVIATION', 'AWAY_SCORE'
+        "HOME_TEAM_ID",
+        "HOME_TEAM",
+        "HOME_TEAM_ABBREVIATION",
+        "HOME_SCORE",
+        "AWAY_TEAM_ID",
+        "AWAY_TEAM",
+        "AWAY_TEAM_ABBREVIATION",
+        "AWAY_SCORE",
     ]
     team_games = team_games.drop(columns=[c for c in cols_to_drop if c in team_games.columns])
 
     return team_games
 
 
-def _fetch_team_season(compiled: Dict[str, Any]) -> pd.DataFrame:
+def _fetch_team_season(compiled: dict[str, Any]) -> pd.DataFrame:
     """Fetch team season aggregates
 
     Strategy: Fetch all team_game data for the season, then aggregate.
@@ -1116,7 +1113,7 @@ def _fetch_team_season(compiled: Dict[str, Any]) -> pd.DataFrame:
     Supports: NCAA-MBB, NCAA-WBB, EuroLeague
     """
     params = compiled["params"]
-    post_mask = compiled["post_mask"]
+    _post_mask = compiled["post_mask"]  # Reserved for future filtering
     meta = compiled["meta"]
 
     league = meta.get("league")
@@ -1149,7 +1146,7 @@ def _fetch_team_season(compiled: Dict[str, Any]) -> pd.DataFrame:
     for col in team_games.columns:
         if col not in group_cols and pd.api.types.is_numeric_dtype(team_games[col]):
             # Sum for WIN/LOSS, mean for other stats
-            if col in ['WIN', 'LOSS', 'POINTS', 'OPPONENT_POINTS']:
+            if col in ["WIN", "LOSS", "POINTS", "OPPONENT_POINTS"]:
                 agg_dict[col] = "sum"
             else:
                 agg_dict[col] = "mean"
@@ -1158,11 +1155,13 @@ def _fetch_team_season(compiled: Dict[str, Any]) -> pd.DataFrame:
         season_stats = team_games.groupby(group_cols, as_index=False).agg(agg_dict)
 
         # Add games played column
-        season_stats['GP'] = team_games.groupby([c for c in group_cols if c in team_games.columns]).size().values
+        season_stats["GP"] = (
+            team_games.groupby([c for c in group_cols if c in team_games.columns]).size().values
+        )
 
         # Add WIN% if we have wins
-        if 'WIN' in season_stats.columns and 'GP' in season_stats.columns:
-            season_stats['WIN_PCT'] = season_stats['WIN'] / season_stats['GP']
+        if "WIN" in season_stats.columns and "GP" in season_stats.columns:
+            season_stats["WIN_PCT"] = season_stats["WIN"] / season_stats["GP"]
 
         logger.info(f"Aggregated {len(team_games)} games into {len(season_stats)} team seasons")
         return season_stats
@@ -1170,7 +1169,7 @@ def _fetch_team_season(compiled: Dict[str, Any]) -> pd.DataFrame:
     return team_games
 
 
-def _fetch_player_team_season(compiled: Dict[str, Any]) -> pd.DataFrame:
+def _fetch_player_team_season(compiled: dict[str, Any]) -> pd.DataFrame:
     """Fetch player × team × season aggregates
 
     This captures mid-season transfers by grouping by BOTH player AND team.
@@ -1184,7 +1183,7 @@ def _fetch_player_team_season(compiled: Dict[str, Any]) -> pd.DataFrame:
     Supports: NCAA-MBB, NCAA-WBB, EuroLeague
     """
     params = compiled["params"]
-    post_mask = compiled["post_mask"]
+    _post_mask = compiled["post_mask"]  # Reserved for future filtering
     meta = compiled["meta"]
 
     league = meta.get("league")
@@ -1208,7 +1207,7 @@ def _fetch_player_team_season(compiled: Dict[str, Any]) -> pd.DataFrame:
     schedule_compiled = {
         "params": copy.deepcopy(params),
         "post_mask": {},  # No filters - want ALL games for the season
-        "meta": copy.deepcopy(meta)
+        "meta": copy.deepcopy(meta),
     }
 
     # Get season schedule
@@ -1237,6 +1236,7 @@ def _fetch_player_team_season(compiled: Dict[str, Any]) -> pd.DataFrame:
 
     # Aggregate to season level, grouped by BOTH player AND team
     from ..compose.enrichers import aggregate_per_mode
+
     per_mode = params.get("PerMode", "Totals")
 
     # Group by player AND team (key difference from player_season)
@@ -1278,18 +1278,46 @@ DatasetRegistry.register(
     description="Game schedules and results",
     sources=["ESPN", "EuroLeague"],
     leagues=["NCAA-MBB", "NCAA-WBB", "EuroLeague"],
-    sample_columns=["GAME_ID", "GAME_DATE", "HOME_TEAM_NAME", "AWAY_TEAM_NAME", "HOME_SCORE", "AWAY_SCORE", "STATUS"],
+    sample_columns=[
+        "GAME_ID",
+        "GAME_DATE",
+        "HOME_TEAM_NAME",
+        "AWAY_TEAM_NAME",
+        "HOME_SCORE",
+        "AWAY_SCORE",
+        "STATUS",
+    ],
 )
 
 DatasetRegistry.register(
     id="player_game",
     keys=["PLAYER_ID", "GAME_ID"],
-    filters=["season", "season_type", "date", "league", "team", "player", "game_ids", "last_n_games", "min_minutes"],
+    filters=[
+        "season",
+        "season_type",
+        "date",
+        "league",
+        "team",
+        "player",
+        "game_ids",
+        "last_n_games",
+        "min_minutes",
+    ],
     fetch=_fetch_player_game,
     description="Per-player per-game statistics (box scores)",
     sources=["ESPN", "EuroLeague"],
     leagues=["NCAA-MBB", "NCAA-WBB", "EuroLeague"],
-    sample_columns=["PLAYER_NAME", "TEAM_NAME", "GAME_ID", "PTS", "REB", "AST", "MIN", "FGM", "FGA"],
+    sample_columns=[
+        "PLAYER_NAME",
+        "TEAM_NAME",
+        "GAME_ID",
+        "PTS",
+        "REB",
+        "AST",
+        "MIN",
+        "FGM",
+        "FGA",
+    ],
     requires_game_id=False,  # Can use team filter
 )
 
@@ -1369,7 +1397,8 @@ DatasetRegistry.register(
 # Public API
 # ==============================================================================
 
-def list_datasets() -> List[Dict[str, Any]]:
+
+def list_datasets() -> list[dict[str, Any]]:
     """List all available datasets with metadata
 
     Returns:
@@ -1396,11 +1425,11 @@ def list_datasets() -> List[Dict[str, Any]]:
 
 def get_dataset(
     grouping: str,
-    filters: Dict[str, Any],
-    columns: Optional[List[str]] = None,
-    limit: Optional[int] = None,
+    filters: dict[str, Any],
+    columns: list[str] | None = None,
+    limit: int | None = None,
     as_format: str = "pandas",
-    name_resolver = None,
+    name_resolver: Callable[[str, str, str | None], int | None] | None = None,
     force_fresh: bool = False,
 ) -> Any:
     """Fetch a dataset with filters
@@ -1458,9 +1487,8 @@ def get_dataset(
     except KeyError:
         available = DatasetRegistry.list_ids()
         raise KeyError(
-            f"Dataset '{grouping}' not found. "
-            f"Available: {', '.join(available)}"
-        )
+            f"Dataset '{grouping}' not found. " f"Available: {', '.join(available)}"
+        ) from None
 
     # Build FilterSpec
     spec = FilterSpec(**filters)
@@ -1470,7 +1498,7 @@ def get_dataset(
         dataset_id=grouping,
         spec=spec,
         dataset_leagues=entry.get("leagues", []),
-        strict=False  # Just warn, don't raise errors
+        strict=False,  # Just warn, don't raise errors
     )
 
     # Log warnings for unsupported/problematic filters
@@ -1547,7 +1575,7 @@ def get_dataset(
         return df.to_dict(orient="records")
     elif as_format == "parquet":
         import tempfile
-        import os
+
         path = tempfile.mkstemp(prefix=f"{grouping}_", suffix=".parquet")[1]
         df.to_parquet(path, index=False)
         return {"path": path, "rows": len(df)}

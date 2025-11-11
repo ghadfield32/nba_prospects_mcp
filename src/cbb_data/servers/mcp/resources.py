@@ -6,7 +6,7 @@ metadata without invoking tools.
 """
 
 import logging
-from typing import Any, Dict, List
+from typing import Any
 
 from cbb_data.api.datasets import list_datasets
 
@@ -17,7 +17,8 @@ logger = logging.getLogger(__name__)
 # Resource Handlers
 # ============================================================================
 
-def resource_list_datasets() -> Dict[str, Any]:
+
+def resource_list_datasets() -> dict[str, Any]:
     """
     List all available datasets.
 
@@ -26,21 +27,13 @@ def resource_list_datasets() -> Dict[str, Any]:
     """
     try:
         datasets = list_datasets()
-        return {
-            "uri": "cbb://datasets/",
-            "mimeType": "application/json",
-            "text": str(datasets)
-        }
+        return {"uri": "cbb://datasets/", "mimeType": "application/json", "text": str(datasets)}
     except Exception as e:
         logger.error(f"Error listing datasets: {e}", exc_info=True)
-        return {
-            "uri": "cbb://datasets/",
-            "mimeType": "text/plain",
-            "text": f"Error: {str(e)}"
-        }
+        return {"uri": "cbb://datasets/", "mimeType": "text/plain", "text": f"Error: {str(e)}"}
 
 
-def resource_get_dataset_info(dataset_id: str) -> Dict[str, Any]:
+def resource_get_dataset_info(dataset_id: str) -> dict[str, Any]:
     """
     Get detailed information about a specific dataset.
 
@@ -58,7 +51,7 @@ def resource_get_dataset_info(dataset_id: str) -> Dict[str, Any]:
             return {
                 "uri": f"cbb://datasets/{dataset_id}",
                 "mimeType": "text/plain",
-                "text": f"Dataset '{dataset_id}' not found"
+                "text": f"Dataset '{dataset_id}' not found",
             }
 
         # Format as readable text
@@ -79,22 +72,18 @@ def resource_get_dataset_info(dataset_id: str) -> Dict[str, Any]:
 **Requires Game ID**: {dataset.get('requires_game_id', False)}
 """
 
-        return {
-            "uri": f"cbb://datasets/{dataset_id}",
-            "mimeType": "text/markdown",
-            "text": info
-        }
+        return {"uri": f"cbb://datasets/{dataset_id}", "mimeType": "text/markdown", "text": info}
 
     except Exception as e:
         logger.error(f"Error getting dataset info: {e}", exc_info=True)
         return {
             "uri": f"cbb://datasets/{dataset_id}",
             "mimeType": "text/plain",
-            "text": f"Error: {str(e)}"
+            "text": f"Error: {str(e)}",
         }
 
 
-def resource_get_league_info(league: str) -> Dict[str, Any]:
+def resource_get_league_info(league: str) -> dict[str, Any]:
     """
     Get information about a specific league.
 
@@ -112,10 +101,16 @@ def resource_get_league_info(league: str) -> Dict[str, Any]:
             "divisions": ["D1", "D2", "D3"],
             "data_sources": ["ESPN", "CBBpy", "Sports-Reference"],
             "available_datasets": [
-                "schedule", "player_game", "team_game", "play_by_play",
-                "shots", "player_season", "team_season", "player_team_season"
+                "schedule",
+                "player_game",
+                "team_game",
+                "play_by_play",
+                "shots",
+                "player_season",
+                "team_season",
+                "player_team_season",
             ],
-            "notes": "Comprehensive coverage of all NCAA divisions with historical data back to 2002."
+            "notes": "Comprehensive coverage of all NCAA divisions with historical data back to 2002.",
         },
         "NCAA-WBB": {
             "name": "NCAA Women's Basketball",
@@ -124,10 +119,14 @@ def resource_get_league_info(league: str) -> Dict[str, Any]:
             "divisions": ["D1", "D2", "D3"],
             "data_sources": ["ESPN", "CBBpy"],
             "available_datasets": [
-                "schedule", "player_game", "team_game", "play_by_play",
-                "player_season", "team_season"
+                "schedule",
+                "player_game",
+                "team_game",
+                "play_by_play",
+                "player_season",
+                "team_season",
             ],
-            "notes": "Growing coverage of women's basketball with focus on D1."
+            "notes": "Growing coverage of women's basketball with focus on D1.",
         },
         "EuroLeague": {
             "name": "EuroLeague Basketball",
@@ -136,11 +135,16 @@ def resource_get_league_info(league: str) -> Dict[str, Any]:
             "divisions": [],
             "data_sources": ["EuroLeague Official API"],
             "available_datasets": [
-                "schedule", "player_game", "team_game", "play_by_play",
-                "shots", "player_season", "team_season"
+                "schedule",
+                "player_game",
+                "team_game",
+                "play_by_play",
+                "shots",
+                "player_season",
+                "team_season",
             ],
-            "notes": "Official EuroLeague data with comprehensive stats and play-by-play."
-        }
+            "notes": "Official EuroLeague data with comprehensive stats and play-by-play.",
+        },
     }
 
     info = league_info.get(league)
@@ -148,7 +152,7 @@ def resource_get_league_info(league: str) -> Dict[str, Any]:
         return {
             "uri": f"cbb://leagues/{league}",
             "mimeType": "text/plain",
-            "text": f"League '{league}' not found. Available: NCAA-MBB, NCAA-WBB, EuroLeague"
+            "text": f"League '{league}' not found. Available: NCAA-MBB, NCAA-WBB, EuroLeague",
         }
 
     # Format as markdown
@@ -168,11 +172,7 @@ def resource_get_league_info(league: str) -> Dict[str, Any]:
 **Notes**: {info['notes']}
 """
 
-    return {
-        "uri": f"cbb://leagues/{league}",
-        "mimeType": "text/markdown",
-        "text": text
-    }
+    return {"uri": f"cbb://leagues/{league}", "mimeType": "text/markdown", "text": text}
 
 
 # ============================================================================
@@ -185,22 +185,22 @@ RESOURCES = [
         "name": "Available Datasets",
         "description": "List of all available basketball datasets",
         "mimeType": "application/json",
-        "handler": lambda: resource_list_datasets()
+        "handler": lambda: resource_list_datasets(),
     },
     {
         "uri": "cbb://datasets/{dataset_id}",
         "name": "Dataset Info",
         "description": "Detailed information about a specific dataset",
         "mimeType": "text/markdown",
-        "handler": lambda dataset_id: resource_get_dataset_info(dataset_id)
+        "handler": lambda dataset_id: resource_get_dataset_info(dataset_id),
     },
     {
         "uri": "cbb://leagues/{league}",
         "name": "League Info",
         "description": "Information about a specific league",
         "mimeType": "text/markdown",
-        "handler": lambda league: resource_get_league_info(league)
-    }
+        "handler": lambda league: resource_get_league_info(league),
+    },
 ]
 
 
@@ -210,66 +210,66 @@ STATIC_RESOURCES = [
         "uri": "cbb://leagues/NCAA-MBB",
         "name": "NCAA Men's Basketball",
         "description": "NCAA Men's Basketball league information",
-        "mimeType": "text/markdown"
+        "mimeType": "text/markdown",
     },
     {
         "uri": "cbb://leagues/NCAA-WBB",
         "name": "NCAA Women's Basketball",
         "description": "NCAA Women's Basketball league information",
-        "mimeType": "text/markdown"
+        "mimeType": "text/markdown",
     },
     {
         "uri": "cbb://leagues/EuroLeague",
         "name": "EuroLeague",
         "description": "EuroLeague basketball information",
-        "mimeType": "text/markdown"
+        "mimeType": "text/markdown",
     },
     {
         "uri": "cbb://datasets/schedule",
         "name": "Schedule Dataset",
         "description": "Game schedules and results",
-        "mimeType": "text/markdown"
+        "mimeType": "text/markdown",
     },
     {
         "uri": "cbb://datasets/player_game",
         "name": "Player Game Stats Dataset",
         "description": "Per-player per-game box scores",
-        "mimeType": "text/markdown"
+        "mimeType": "text/markdown",
     },
     {
         "uri": "cbb://datasets/team_game",
         "name": "Team Game Stats Dataset",
         "description": "Team-level game results",
-        "mimeType": "text/markdown"
+        "mimeType": "text/markdown",
     },
     {
         "uri": "cbb://datasets/play_by_play",
         "name": "Play-by-Play Dataset",
         "description": "Play-by-play event data",
-        "mimeType": "text/markdown"
+        "mimeType": "text/markdown",
     },
     {
         "uri": "cbb://datasets/shots",
         "name": "Shot Chart Dataset",
         "description": "Shot location data with coordinates",
-        "mimeType": "text/markdown"
+        "mimeType": "text/markdown",
     },
     {
         "uri": "cbb://datasets/player_season",
         "name": "Player Season Stats Dataset",
         "description": "Per-player season aggregates",
-        "mimeType": "text/markdown"
+        "mimeType": "text/markdown",
     },
     {
         "uri": "cbb://datasets/team_season",
         "name": "Team Season Stats Dataset",
         "description": "Per-team season aggregates",
-        "mimeType": "text/markdown"
+        "mimeType": "text/markdown",
     },
     {
         "uri": "cbb://datasets/player_team_season",
         "name": "Player-Team Season Dataset",
         "description": "Player stats by team (tracks transfers)",
-        "mimeType": "text/markdown"
-    }
+        "mimeType": "text/markdown",
+    },
 ]

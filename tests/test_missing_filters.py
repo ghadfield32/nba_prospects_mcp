@@ -6,32 +6,27 @@ thought to be missing but are actually already implemented in compiler.py
 """
 
 import sys
+
 sys.path.insert(0, "src")
 
-from datetime import date
-import pandas as pd
-from cbb_data.api.datasets import get_dataset
 import logging
+
+from cbb_data.api.datasets import get_dataset
 
 # Reduce log noise
 logging.getLogger("cbb_data").setLevel(logging.WARNING)
 
-def test_conference_filter():
+
+def test_conference_filter() -> bool:
     """Test conference filter on NCAA schedule"""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("TEST 1: Conference Filter (NCAA-MBB)")
-    print("="*80)
+    print("=" * 80)
 
     try:
         # Get NCAA-MBB schedule with conference filter
         df = get_dataset(
-            "schedule",
-            {
-                "league": "NCAA-MBB",
-                "season": "2024-25",
-                "conference": "ACC"
-            },
-            limit=10
+            "schedule", {"league": "NCAA-MBB", "season": "2024-25", "conference": "ACC"}, limit=10
         )
 
         if df is None or df.empty:
@@ -57,22 +52,15 @@ def test_conference_filter():
         return False
 
 
-def test_venue_filter():
+def test_venue_filter() -> bool:
     """Test venue filter on NCAA schedule"""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("TEST 2: Venue Filter (NCAA-MBB)")
-    print("="*80)
+    print("=" * 80)
 
     try:
         # First get a game to find a venue
-        df_sample = get_dataset(
-            "schedule",
-            {
-                "league": "NCAA-MBB",
-                "season": "2024-25"
-            },
-            limit=20
-        )
+        df_sample = get_dataset("schedule", {"league": "NCAA-MBB", "season": "2024-25"}, limit=20)
 
         if df_sample is None or df_sample.empty:
             print("[SKIP] No games found to test venue filter")
@@ -95,13 +83,7 @@ def test_venue_filter():
 
         # Test venue filter
         df = get_dataset(
-            "schedule",
-            {
-                "league": "NCAA-MBB",
-                "season": "2024-25",
-                "venue": test_venue
-            },
-            limit=10
+            "schedule", {"league": "NCAA-MBB", "season": "2024-25", "venue": test_venue}, limit=10
         )
 
         if df is None or df.empty:
@@ -125,11 +107,11 @@ def test_venue_filter():
         return False
 
 
-def test_tournament_filter():
+def test_tournament_filter() -> bool:
     """Test tournament filter on NCAA schedule"""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("TEST 3: Tournament Filter (NCAA-MBB)")
-    print("="*80)
+    print("=" * 80)
 
     try:
         # Test with NCAA Tournament
@@ -138,9 +120,9 @@ def test_tournament_filter():
             {
                 "league": "NCAA-MBB",
                 "season": "2023-24",  # Use past season for tournament data
-                "tournament": "NCAA"
+                "tournament": "NCAA",
             },
-            limit=10
+            limit=10,
         )
 
         if df is None or df.empty:
@@ -162,22 +144,16 @@ def test_tournament_filter():
         return False
 
 
-def test_division_filter():
+def test_division_filter() -> bool:
     """Test division filter on NCAA schedule"""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("TEST 4: Division Filter (NCAA-MBB)")
-    print("="*80)
+    print("=" * 80)
 
     try:
         # Test with Division I (most common)
         df = get_dataset(
-            "schedule",
-            {
-                "league": "NCAA-MBB",
-                "season": "2024-25",
-                "division": "I"
-            },
-            limit=10
+            "schedule", {"league": "NCAA-MBB", "season": "2024-25", "division": "I"}, limit=10
         )
 
         if df is None or df.empty:
@@ -193,22 +169,15 @@ def test_division_filter():
         return False
 
 
-def test_quarter_filter():
+def test_quarter_filter() -> bool:
     """Test quarter filter on play-by-play data"""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("TEST 5: Quarter Filter (PBP)")
-    print("="*80)
+    print("=" * 80)
 
     try:
         # First get a game ID
-        schedule = get_dataset(
-            "schedule",
-            {
-                "league": "NCAA-MBB",
-                "season": "2024-25"
-            },
-            limit=1
-        )
+        schedule = get_dataset("schedule", {"league": "NCAA-MBB", "season": "2024-25"}, limit=1)
 
         if schedule is None or schedule.empty:
             print("[SKIP] No games found to test quarter filter")
@@ -224,9 +193,9 @@ def test_quarter_filter():
                 "league": "NCAA-MBB",
                 "season": "2024-25",
                 "game_ids": [game_id],
-                "quarter": [1, 2]  # First half only
+                "quarter": [1, 2],  # First half only
             },
-            limit=50
+            limit=50,
         )
 
         if df is None or df.empty:
@@ -252,11 +221,11 @@ def test_quarter_filter():
         return False
 
 
-def test_combined_filters():
+def test_combined_filters() -> bool:
     """Test combination of multiple filters"""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("TEST 6: Combined Filters (Conference + Season Type)")
-    print("="*80)
+    print("=" * 80)
 
     try:
         df = get_dataset(
@@ -265,9 +234,9 @@ def test_combined_filters():
                 "league": "NCAA-MBB",
                 "season": "2024-25",
                 "conference": "Big Ten",
-                "season_type": "Regular Season"
+                "season_type": "Regular Season",
             },
-            limit=10
+            limit=10,
         )
 
         if df is None or df.empty:
@@ -283,18 +252,18 @@ def test_combined_filters():
         return False
 
 
-def main():
+def main() -> int:
     """Run all filter tests"""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("MISSING FILTERS VALIDATION TEST SUITE")
-    print("="*80)
+    print("=" * 80)
     print("Testing filters thought to be missing but already implemented:")
     print("  - conference (NCAA)")
     print("  - division (NCAA)")
     print("  - tournament (NCAA)")
     print("  - venue (NCAA)")
     print("  - quarter (PBP)")
-    print("="*80)
+    print("=" * 80)
 
     results = {
         "conference": test_conference_filter(),
@@ -306,9 +275,9 @@ def main():
     }
 
     # Summary
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("TEST SUMMARY")
-    print("="*80)
+    print("=" * 80)
     passed = sum(1 for v in results.values() if v)
     total = len(results)
 
@@ -321,7 +290,7 @@ def main():
         status = "PASS" if result else "FAIL/SKIP"
         print(f"  [{status}] {test_name}")
 
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("CONCLUSION:")
     if passed >= 4:  # At least 4 out of 6 working
         print("✅ Filters are implemented and working correctly!")
@@ -331,7 +300,7 @@ def main():
         print("   - Lines 243-273: apply_post_mask() implementations")
     else:
         print("⚠️  Some filters may need additional work")
-    print("="*80)
+    print("=" * 80)
 
     return 0 if passed >= 4 else 1
 

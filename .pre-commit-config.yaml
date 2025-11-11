@@ -1,0 +1,114 @@
+# Pre-commit hooks for code quality and consistency
+# Install: pip install pre-commit
+# Setup: pre-commit install
+# Run manually: pre-commit run --all-files
+
+repos:
+  # Ruff - Fast Python linter (replaces flake8, isort, etc.)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      # Run linter with auto-fix
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+        name: ruff-lint
+
+      # Run formatter
+      - id: ruff-format
+        name: ruff-format
+
+  # MyPy - Static type checking (source code only)
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.11.2
+    hooks:
+      - id: mypy
+        name: mypy-type-check
+        files: ^src/
+        exclude: ^tests/
+        additional_dependencies:
+          - pandas-stubs
+          - types-requests
+          - types-redis
+        args: [--config-file=pyproject.toml, --no-warn-return-any]
+
+  # Pre-commit hooks for general file cleanup
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      # Trim trailing whitespace
+      - id: trailing-whitespace
+        name: trim-trailing-whitespace
+
+      # Ensure files end with newline
+      - id: end-of-file-fixer
+        name: fix-end-of-file
+
+      # Check for files that would conflict on case-insensitive filesystems
+      - id: check-case-conflict
+        name: check-case-conflict
+
+      # Check for merge conflict markers
+      - id: check-merge-conflict
+        name: check-merge-conflict
+
+      # Check YAML syntax
+      - id: check-yaml
+        name: check-yaml-syntax
+
+      # Check JSON syntax
+      - id: check-json
+        name: check-json-syntax
+
+      # Check TOML syntax
+      - id: check-toml
+        name: check-toml-syntax
+
+      # Prevent adding large files
+      - id: check-added-large-files
+        name: check-large-files
+        args: [--maxkb=1000]
+
+      # Check for Python syntax errors
+      - id: check-ast
+        name: check-python-ast
+
+      # Check for debugger imports
+      - id: debug-statements
+        name: check-debug-statements
+
+  # Pytest check (run fast tests only)
+  - repo: local
+    hooks:
+      - id: pytest-check
+        name: pytest-quick
+        entry: pytest
+        language: system
+        pass_filenames: false
+        always_run: false
+        args: [--tb=short, -q, tests/]
+        stages: [pre-push]  # Only run on push, not every commit
+
+# Configuration for specific hooks
+default_language_version:
+  python: python3
+
+# Only run on changed files (not all files) for performance
+default_stages: [pre-commit]
+
+# Fail fast - stop after first failure
+fail_fast: false
+
+# Exclude certain files/directories
+exclude: |
+  (?x)^(
+      \.venv/|
+      venv/|
+      __pycache__/|
+      \.pytest_cache/|
+      \.mypy_cache/|
+      \.ruff_cache/|
+      \.git/|
+      data/|
+      \.duckdb|
+      .*\.egg-info/
+  )$

@@ -11,8 +11,12 @@ Each dataset registers:
 """
 
 from __future__ import annotations
-from typing import Callable, Dict, List, Optional
+
+from collections.abc import Callable
+from typing import Any
+
 import pandas as pd
+
 from ..schemas.datasets import DatasetInfo
 
 
@@ -22,10 +26,10 @@ class DatasetRegistry:
     Usage:
         # Register a dataset
         DatasetRegistry.register(
-            id="player_game",
-            keys=["PLAYER_ID", "GAME_ID"],
-            filters=["season", "team", "player", "date"],
-            fetch=fetch_player_game_fn,
+            id="player_game"
+            keys=["PLAYER_ID", "GAME_ID"]
+            filters=["season", "team", "player", "date"]
+            fetch=fetch_player_game_fn
             description="Per-player per-game logs"
         )
 
@@ -37,30 +41,30 @@ class DatasetRegistry:
         df = entry["fetch"](params, post_mask)
     """
 
-    _items: Dict[str, Dict] = {}
+    _items: dict[str, dict[str, Any]] = {}
 
     @classmethod
     def register(
         cls,
         id: str,
         *,
-        keys: List[str],
-        filters: List[str],
-        fetch: Callable[[Dict, Dict], pd.DataFrame],
-        compose: Optional[Callable] = None,
+        keys: list[str],
+        filters: list[str],
+        fetch: Callable[[dict[str, Any]], pd.DataFrame],
+        compose: Callable | None = None,
         description: str = "",
-        sources: Optional[List[str]] = None,
-        leagues: Optional[List[str]] = None,
-        sample_columns: Optional[List[str]] = None,
+        sources: list[str] | None = None,
+        leagues: list[str] | None = None,
+        sample_columns: list[str] | None = None,
         requires_game_id: bool = False,
-    ):
+    ) -> None:
         """Register a dataset in the catalog
 
         Args:
             id: Unique dataset identifier
             keys: Primary key columns
             filters: List of supported filter names (from FilterSpec)
-            fetch: Function that takes (params, post_mask) and returns DataFrame
+            fetch: Function that takes compiled dict and returns DataFrame
             compose: Optional function to enrich/compose the data
             description: Human-readable description
             sources: List of data sources (e.g., ["ESPN", "EuroLeague"])
@@ -82,7 +86,7 @@ class DatasetRegistry:
         }
 
     @classmethod
-    def get(cls, id: str) -> Dict:
+    def get(cls, id: str) -> dict[str, Any]:
         """Get a registered dataset by ID
 
         Args:
@@ -96,18 +100,16 @@ class DatasetRegistry:
         """
         if id not in cls._items:
             available = ", ".join(cls._items.keys())
-            raise KeyError(
-                f"Dataset '{id}' not found. Available datasets: {available}"
-            )
+            raise KeyError(f"Dataset '{id}' not found. Available datasets: {available}")
         return cls._items[id]
 
     @classmethod
-    def list_ids(cls) -> List[str]:
+    def list_ids(cls) -> list[str]:
         """List all registered dataset IDs"""
         return list(cls._items.keys())
 
     @classmethod
-    def list_infos(cls) -> List[DatasetInfo]:
+    def list_infos(cls) -> list[DatasetInfo]:
         """List metadata for all registered datasets
 
         Returns:
@@ -128,12 +130,12 @@ class DatasetRegistry:
         ]
 
     @classmethod
-    def clear(cls):
+    def clear(cls) -> None:
         """Clear all registered datasets (useful for testing)"""
         cls._items.clear()
 
     @classmethod
-    def filter_by_league(cls, league: str) -> List[DatasetInfo]:
+    def filter_by_league(cls, league: str) -> list[DatasetInfo]:
         """Get datasets that support a specific league
 
         Args:
@@ -142,13 +144,10 @@ class DatasetRegistry:
         Returns:
             List of DatasetInfo for datasets supporting this league
         """
-        return [
-            info for info in cls.list_infos()
-            if not info.leagues or league in info.leagues
-        ]
+        return [info for info in cls.list_infos() if not info.leagues or league in info.leagues]
 
     @classmethod
-    def filter_by_source(cls, source: str) -> List[DatasetInfo]:
+    def filter_by_source(cls, source: str) -> list[DatasetInfo]:
         """Get datasets from a specific source
 
         Args:
@@ -157,7 +156,4 @@ class DatasetRegistry:
         Returns:
             List of DatasetInfo for datasets from this source
         """
-        return [
-            info for info in cls.list_infos()
-            if source in info.sources
-        ]
+        return [info for info in cls.list_infos() if source in info.sources]

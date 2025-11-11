@@ -15,20 +15,19 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from datetime import datetime, timedelta, date
-import pandas as pd
+from datetime import date, datetime, timedelta
 
 from cbb_data import get_dataset, list_datasets
 
 
-def print_section(title: str):
+def print_section(title: str) -> None:
     """Print section header"""
     print("\n" + "=" * 70)
     print(title)
     print("=" * 70 + "\n")
 
 
-def test_list_datasets():
+def test_list_datasets() -> None:
     """Test listing all available datasets"""
     print_section("TEST 1: List Available Datasets")
 
@@ -49,7 +48,7 @@ def test_list_datasets():
     return len(datasets) > 0
 
 
-def test_espn_mbb_schedule():
+def test_espn_mbb_schedule() -> bool:
     """Test ESPN MBB schedule"""
     print_section("TEST 2: ESPN Men's Basketball Schedule")
 
@@ -61,11 +60,7 @@ def test_espn_mbb_schedule():
         print(f"Fetching schedule for {today}...")
 
         df = get_dataset(
-            "schedule",
-            {
-                "league": "NCAA-MBB",
-                "date": {"from": str(today), "to": str(tomorrow)}
-            }
+            "schedule", {"league": "NCAA-MBB", "date": {"from": str(today), "to": str(tomorrow)}}
         )
 
         print(f"\nFound {len(df)} games")
@@ -82,10 +77,7 @@ def test_espn_mbb_schedule():
 
             hist_df = get_dataset(
                 "schedule",
-                {
-                    "league": "NCAA-MBB",
-                    "date": {"from": str(old_date), "to": str(old_end)}
-                }
+                {"league": "NCAA-MBB", "date": {"from": str(old_date), "to": str(old_end)}},
             )
 
             if not hist_df.empty:
@@ -101,11 +93,12 @@ def test_espn_mbb_schedule():
     except Exception as e:
         print(f"ERROR: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
 
-def test_espn_wbb_schedule():
+def test_espn_wbb_schedule() -> bool:
     """Test ESPN WBB schedule"""
     print_section("TEST 3: ESPN Women's Basketball Schedule")
 
@@ -116,11 +109,7 @@ def test_espn_wbb_schedule():
         print(f"Fetching WBB schedule for {today}...")
 
         df = get_dataset(
-            "schedule",
-            {
-                "league": "NCAA-WBB",
-                "date": {"from": str(today), "to": str(tomorrow)}
-            }
+            "schedule", {"league": "NCAA-WBB", "date": {"from": str(today), "to": str(tomorrow)}}
         )
 
         print(f"\nFound {len(df)} games")
@@ -135,11 +124,12 @@ def test_espn_wbb_schedule():
     except Exception as e:
         print(f"ERROR: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
 
-def test_espn_mbb_player_game():
+def test_espn_mbb_player_game() -> bool:
     """Test ESPN MBB player/game data"""
     print_section("TEST 4: ESPN MBB Player Game Stats")
 
@@ -148,14 +138,10 @@ def test_espn_mbb_player_game():
         today = datetime.now().date()
         week_ago = today - timedelta(days=7)
 
-        print(f"Finding recent completed games...")
+        print("Finding recent completed games...")
 
         schedule = get_dataset(
-            "schedule",
-            {
-                "league": "NCAA-MBB",
-                "date": {"from": str(week_ago), "to": str(today)}
-            }
+            "schedule", {"league": "NCAA-MBB", "date": {"from": str(week_ago), "to": str(today)}}
         )
 
         # Filter for completed games
@@ -169,13 +155,7 @@ def test_espn_mbb_player_game():
         game_id = completed.iloc[0]["GAME_ID"]
         print(f"\nFetching player stats for game {game_id}...")
 
-        df = get_dataset(
-            "player_game",
-            {
-                "league": "NCAA-MBB",
-                "game_ids": [game_id]
-            }
-        )
+        df = get_dataset("player_game", {"league": "NCAA-MBB", "game_ids": [game_id]})
 
         print(f"\nFound {len(df)} player stats")
 
@@ -189,11 +169,12 @@ def test_espn_mbb_player_game():
     except Exception as e:
         print(f"ERROR: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
 
-def test_espn_pbp():
+def test_espn_pbp() -> bool:
     """Test ESPN play-by-play"""
     print_section("TEST 5: ESPN MBB Play-by-Play")
 
@@ -203,11 +184,7 @@ def test_espn_pbp():
         week_ago = today - timedelta(days=7)
 
         schedule = get_dataset(
-            "schedule",
-            {
-                "league": "NCAA-MBB",
-                "date": {"from": str(week_ago), "to": str(today)}
-            }
+            "schedule", {"league": "NCAA-MBB", "date": {"from": str(week_ago), "to": str(today)}}
         )
 
         completed = schedule[schedule["STATUS"].str.contains("Final", case=False, na=False)]
@@ -219,13 +196,7 @@ def test_espn_pbp():
         game_id = completed.iloc[0]["GAME_ID"]
         print(f"Fetching play-by-play for game {game_id}...")
 
-        df = get_dataset(
-            "pbp",
-            {
-                "league": "NCAA-MBB",
-                "game_ids": [game_id]
-            }
-        )
+        df = get_dataset("pbp", {"league": "NCAA-MBB", "game_ids": [game_id]})
 
         print(f"\nFound {len(df)} plays")
 
@@ -239,11 +210,12 @@ def test_espn_pbp():
     except Exception as e:
         print(f"ERROR: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
 
-def test_euroleague_schedule():
+def test_euroleague_schedule() -> bool:
     """Test EuroLeague schedule"""
     print_section("TEST 6: EuroLeague Schedule")
 
@@ -251,12 +223,7 @@ def test_euroleague_schedule():
         print("Fetching EuroLeague 2024 Regular Season schedule...")
 
         df = get_dataset(
-            "schedule",
-            {
-                "league": "EuroLeague",
-                "season": "E2024",
-                "season_type": "Regular Season"
-            }
+            "schedule", {"league": "EuroLeague", "season": "E2024", "season_type": "Regular Season"}
         )
 
         print(f"\nFound {len(df)} games")
@@ -274,23 +241,19 @@ def test_euroleague_schedule():
     except Exception as e:
         print(f"ERROR: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
 
-def test_euroleague_player_game():
+def test_euroleague_player_game() -> bool:
     """Test EuroLeague player stats"""
     print_section("TEST 7: EuroLeague Player Game Stats")
 
     try:
         # Get schedule first
         schedule = get_dataset(
-            "schedule",
-            {
-                "league": "EuroLeague",
-                "season": "E2024",
-                "season_type": "Regular Season"
-            }
+            "schedule", {"league": "EuroLeague", "season": "E2024", "season_type": "Regular Season"}
         )
 
         if schedule.empty:
@@ -302,12 +265,7 @@ def test_euroleague_player_game():
         print(f"Fetching player stats for game {game_code}...")
 
         df = get_dataset(
-            "player_game",
-            {
-                "league": "EuroLeague",
-                "season": "E2024",
-                "game_ids": [game_code]
-            }
+            "player_game", {"league": "EuroLeague", "season": "E2024", "game_ids": [game_code]}
         )
 
         print(f"\nFound {len(df)} player stats")
@@ -318,30 +276,28 @@ def test_euroleague_player_game():
             if "VALUATION" in df.columns:
                 print(df.nlargest(10, "VALUATION")[cols].to_string(index=False))
             else:
-                print(df[["PLAYER_NAME", "TEAM", "PTS", "REB", "AST"]].head(10).to_string(index=False))
+                print(
+                    df[["PLAYER_NAME", "TEAM", "PTS", "REB", "AST"]].head(10).to_string(index=False)
+                )
 
         return True
 
     except Exception as e:
         print(f"ERROR: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
 
-def test_euroleague_shots():
+def test_euroleague_shots() -> bool:
     """Test EuroLeague shot data"""
     print_section("TEST 8: EuroLeague Shot Data")
 
     try:
         # Get a game
         schedule = get_dataset(
-            "schedule",
-            {
-                "league": "EuroLeague",
-                "season": "E2024",
-                "season_type": "Regular Season"
-            }
+            "schedule", {"league": "EuroLeague", "season": "E2024", "season_type": "Regular Season"}
         )
 
         if schedule.empty:
@@ -352,12 +308,7 @@ def test_euroleague_shots():
         print(f"Fetching shot data for game {game_code}...")
 
         df = get_dataset(
-            "shots",
-            {
-                "league": "EuroLeague",
-                "season": "E2024",
-                "game_ids": [game_code]
-            }
+            "shots", {"league": "EuroLeague", "season": "E2024", "game_ids": [game_code]}
         )
 
         print(f"\nFound {len(df)} shots")
@@ -377,11 +328,12 @@ def test_euroleague_shots():
     except Exception as e:
         print(f"ERROR: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
 
-def main():
+def main() -> int:
     """Run all tests"""
     print_section("COLLEGE & INTERNATIONAL BASKETBALL DATA PIPELINE TEST")
     print(f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")

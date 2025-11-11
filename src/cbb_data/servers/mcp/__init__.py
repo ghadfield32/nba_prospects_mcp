@@ -5,8 +5,8 @@ Provides LLM-friendly tools, resources, and prompts for accessing
 basketball data.
 """
 
-from .tools import TOOLS
-from .resources import RESOURCES
 from .prompts import PROMPTS
+from .resources import RESOURCES
+from .tools import TOOLS
 
 __all__ = ["TOOLS", "RESOURCES", "PROMPTS"]

@@ -11,13 +11,14 @@ Tests all filter combinations across all datasets and leagues to ensure:
 """
 
 import sys
+
 sys.path.insert(0, "src")
 
-from datetime import date, timedelta
-import pandas as pd
-import time
-from cbb_data.api.datasets import get_dataset, list_datasets
 import logging
+import time
+from datetime import date, timedelta
+
+from cbb_data.api.datasets import get_dataset
 
 # Reduce log noise
 logging.getLogger("cbb_data").setLevel(logging.WARNING)
@@ -46,10 +47,11 @@ TEST_DATES = {
 # Test Results Tracking
 # ==============================================================================
 
+
 class TestResults:
     """Track test results across all combinations"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.total = 0
         self.passed = 0
         self.failed = 0
@@ -58,35 +60,24 @@ class TestResults:
         self.warnings = []
         self.performance = []
 
-    def add_pass(self, test_name: str, duration: float, rows: int):
+    def add_pass(self, test_name: str, duration: float, rows: int) -> None:
         self.total += 1
         self.passed += 1
-        self.performance.append({
-            "test": test_name,
-            "duration": duration,
-            "rows": rows,
-            "status": "PASS"
-        })
+        self.performance.append(
+            {"test": test_name, "duration": duration, "rows": rows, "status": "PASS"}
+        )
 
-    def add_fail(self, test_name: str, error: str):
+    def add_fail(self, test_name: str, error: str) -> None:
         self.total += 1
         self.failed += 1
-        self.errors.append({
-            "test": test_name,
-            "error": str(error),
-            "status": "FAIL"
-        })
+        self.errors.append({"test": test_name, "error": str(error), "status": "FAIL"})
 
-    def add_skip(self, test_name: str, reason: str):
+    def add_skip(self, test_name: str, reason: str) -> None:
         self.total += 1
         self.skipped += 1
-        self.warnings.append({
-            "test": test_name,
-            "reason": reason,
-            "status": "SKIP"
-        })
+        self.warnings.append({"test": test_name, "reason": reason, "status": "SKIP"})
 
-    def print_summary(self):
+    def print_summary(self) -> None:
         print("\n" + "=" * 80)
         print("FILTER STRESS TEST SUMMARY")
         print("=" * 80)
@@ -116,17 +107,18 @@ class TestResults:
             print("\n" + "-" * 80)
             print("PERFORMANCE METRICS:")
             print("-" * 80)
-            durations = [p['duration'] for p in self.performance]
+            durations = [p["duration"] for p in self.performance]
             print(f"  Average: {sum(durations)/len(durations):.2f}s")
             print(f"  Median: {sorted(durations)[len(durations)//2]:.2f}s")
             print(f"  Min: {min(durations):.2f}s")
             print(f"  Max: {max(durations):.2f}s")
 
             # Show slowest tests
-            slowest = sorted(self.performance, key=lambda x: x['duration'], reverse=True)[:5]
+            slowest = sorted(self.performance, key=lambda x: x["duration"], reverse=True)[:5]
             print("\n  Slowest Tests:")
             for p in slowest:
                 print(f"    {p['duration']:6.2f}s - {p['test']} ({p['rows']} rows)")
+
 
 results = TestResults()
 
@@ -134,7 +126,8 @@ results = TestResults()
 # Helper Functions
 # ==============================================================================
 
-def run_test(test_name: str, test_fn, should_pass=True):
+
+def run_test(test_name: str, test_fn, should_pass=True) -> None:
     """Run a single test and record results"""
     try:
         start = time.time()
@@ -160,11 +153,13 @@ def run_test(test_name: str, test_fn, should_pass=True):
             results.add_pass(test_name, 0, 0)
             print(f"[PASS] {test_name} - Failed as expected: {str(e)[:50]}")
 
+
 # ==============================================================================
 # Test Suite 1: Basic Dataset × League Combinations
 # ==============================================================================
 
-def test_basic_combinations():
+
+def test_basic_combinations() -> None:
     """Test all dataset × league combinations with minimal filters"""
     print("\n" + "=" * 80)
     print("TEST SUITE 1: Basic Dataset × League Combinations")
@@ -185,41 +180,41 @@ def test_basic_combinations():
                 # First get a schedule to find game_ids
                 try:
                     schedule = get_dataset(
-                        "schedule",
-                        {"league": league, "season": season},
-                        limit=1
+                        "schedule", {"league": league, "season": season}, limit=1
                     )
                     if schedule.empty:
                         results.add_skip(test_name, f"No games found for {league} {season}")
                         continue
 
-                    game_id = str(schedule.iloc[0]["GAME_ID" if league != "EuroLeague" else "GAME_CODE"])
+                    game_id = str(
+                        schedule.iloc[0]["GAME_ID" if league != "EuroLeague" else "GAME_CODE"]
+                    )
 
                     run_test(
                         test_name,
-                        lambda: get_dataset(
-                            dataset,
-                            {"league": league, "season": season, "game_ids": [game_id]},
-                            limit=10
-                        )
+                        lambda d=dataset, lg=league, s=season, gid=game_id: get_dataset(
+                            d,
+                            {"league": lg, "season": s, "game_ids": [gid]},
+                            limit=10,
+                        ),
                     )
                 except Exception as e:
                     results.add_skip(test_name, f"Could not get schedule: {e}")
             else:
                 run_test(
                     test_name,
-                    lambda: get_dataset(
-                        dataset,
-                        {"league": league, "season": season},
-                        limit=10
-                    )
+                    lambda d=dataset, lg=league, s=season: get_dataset(
+                        d, {"league": lg, "season": s}, limit=10
+                    ),
                 )
+
 
 # ==============================================================================
 # Test Suite 2: Temporal Filters
 # ==============================================================================
 
-def test_temporal_filters():
+
+def test_temporal_filters() -> None:
     """Test date, season, season_type filters"""
     print("\n" + "=" * 80)
     print("TEST SUITE 2: Temporal Filters")
@@ -232,14 +227,11 @@ def test_temporal_filters():
 
         run_test(
             test_name,
-            lambda: get_dataset(
+            lambda lg=league, td=test_date: get_dataset(
                 "schedule",
-                {
-                    "league": league,
-                    "date": {"from": str(test_date), "to": str(test_date)}
-                },
-                limit=20
-            )
+                {"league": lg, "date": {"from": str(td), "to": str(td)}},
+                limit=20,
+            ),
         )
 
     # Test season_type
@@ -249,22 +241,20 @@ def test_temporal_filters():
 
         run_test(
             test_name,
-            lambda: get_dataset(
+            lambda lg=league, s=season: get_dataset(
                 "schedule",
-                {
-                    "league": league,
-                    "season": season,
-                    "season_type": "Regular Season"
-                },
-                limit=10
-            )
+                {"league": lg, "season": s, "season_type": "Regular Season"},
+                limit=10,
+            ),
         )
+
 
 # ==============================================================================
 # Test Suite 3: Game ID Filters
 # ==============================================================================
 
-def test_game_id_filters():
+
+def test_game_id_filters() -> None:
     """Test game_ids filter across datasets"""
     print("\n" + "=" * 80)
     print("TEST SUITE 3: Game ID Filters")
@@ -275,11 +265,7 @@ def test_game_id_filters():
 
         # Get some game IDs
         try:
-            schedule = get_dataset(
-                "schedule",
-                {"league": league, "season": season},
-                limit=5
-            )
+            schedule = get_dataset("schedule", {"league": league, "season": season}, limit=5)
 
             if schedule.empty:
                 results.add_skip(f"game_ids_{league}", f"No games for {league} {season}")
@@ -294,10 +280,9 @@ def test_game_id_filters():
 
                 run_test(
                     test_name,
-                    lambda: get_dataset(
-                        dataset,
-                        {"league": league, "season": season, "game_ids": game_ids}
-                    )
+                    lambda d=dataset, lg=league, s=season, gids=game_ids: get_dataset(
+                        d, {"league": lg, "season": s, "game_ids": gids}
+                    ),
                 )
 
             # Test shots for EuroLeague only
@@ -305,20 +290,26 @@ def test_game_id_filters():
                 test_name = f"game_ids_{league}_shots"
                 run_test(
                     test_name,
-                    lambda: get_dataset(
+                    lambda lg=league, s=season, gids=game_ids: get_dataset(
                         "shots",
-                        {"league": league, "season": season, "game_ids": game_ids[:2]}  # Limit to 2 games
-                    )
+                        {
+                            "league": lg,
+                            "season": s,
+                            "game_ids": gids[:2],
+                        },  # Limit to 2 games
+                    ),
                 )
 
         except Exception as e:
             results.add_skip(f"game_ids_{league}", f"Could not get schedule: {e}")
 
+
 # ==============================================================================
 # Test Suite 4: Limit & Column Selection
 # ==============================================================================
 
-def test_limit_and_columns():
+
+def test_limit_and_columns() -> None:
     """Test limit and column selection parameters"""
     print("\n" + "=" * 80)
     print("TEST SUITE 4: Limit & Column Selection")
@@ -331,26 +322,22 @@ def test_limit_and_columns():
         test_name = f"limit_{league}"
         run_test(
             test_name,
-            lambda: get_dataset(
-                "schedule",
-                {"league": league, "season": season},
-                limit=5
-            )
+            lambda lg=league, s=season: get_dataset(
+                "schedule", {"league": lg, "season": s}, limit=5
+            ),
         )
 
         # Verify limit is respected
-        df = get_dataset(
-            "schedule",
-            {"league": league, "season": season},
-            limit=3
-        )
+        df = get_dataset("schedule", {"league": league, "season": season}, limit=3)
         if df is not None and not df.empty:
             if len(df) <= 3:
                 print(f"[PASS] limit_verify_{league} - Got {len(df)} rows (limit=3)")
                 results.add_pass(f"limit_verify_{league}", 0, len(df))
             else:
                 print(f"[FAIL] limit_verify_{league} - Got {len(df)} rows, expected ≤3")
-                results.add_fail(f"limit_verify_{league}", f"Limit not respected: got {len(df)} rows")
+                results.add_fail(
+                    f"limit_verify_{league}", f"Limit not respected: got {len(df)} rows"
+                )
 
         # Test column selection
         test_name = f"columns_{league}"
@@ -360,7 +347,7 @@ def test_limit_and_columns():
             "schedule",
             {"league": league, "season": season},
             columns=[game_id_col, "GAME_DATE", "HOME_TEAM", "AWAY_TEAM"],
-            limit=5
+            limit=5,
         )
 
         if df is not None and not df.empty:
@@ -373,11 +360,13 @@ def test_limit_and_columns():
                 print(f"[FAIL] {test_name} - Missing columns: {expected_cols - actual_cols}")
                 results.add_fail(test_name, f"Missing columns: {expected_cols - actual_cols}")
 
+
 # ==============================================================================
 # Test Suite 5: Edge Cases & Error Handling
 # ==============================================================================
 
-def test_edge_cases():
+
+def test_edge_cases() -> None:
     """Test edge cases and error conditions"""
     print("\n" + "=" * 80)
     print("TEST SUITE 5: Edge Cases & Error Handling")
@@ -387,14 +376,12 @@ def test_edge_cases():
     run_test(
         "invalid_league",
         lambda: get_dataset("schedule", {"league": "InvalidLeague", "season": "2024"}),
-        should_pass=False
+        should_pass=False,
     )
 
     # Test missing required filters
     run_test(
-        "missing_league",
-        lambda: get_dataset("schedule", {"season": "2024"}),
-        should_pass=False
+        "missing_league", lambda: get_dataset("schedule", {"season": "2024"}), should_pass=False
     )
 
     # Test conflicting filters (date range + season for EuroLeague)
@@ -405,20 +392,19 @@ def test_edge_cases():
             {
                 "league": "EuroLeague",
                 "season": "2024",
-                "date": {"from": "2024-01-01", "to": "2024-01-31"}
-            }
+                "date": {"from": "2024-01-01", "to": "2024-01-31"},
+            },
         ),
-        should_pass=True  # Should work, date filter just ignored for EuroLeague
+        should_pass=True,  # Should work, date filter just ignored for EuroLeague
     )
 
     # Test empty game_ids
     run_test(
         "empty_game_ids",
         lambda: get_dataset(
-            "player_game",
-            {"league": "NCAA-MBB", "season": "2024-25", "game_ids": []}
+            "player_game", {"league": "NCAA-MBB", "season": "2024-25", "game_ids": []}
         ),
-        should_pass=False
+        should_pass=False,
     )
 
     # Test shots for NCAA (not supported)
@@ -428,36 +414,30 @@ def test_edge_cases():
             "shots",
             {"league": "NCAA-MBB", "season": "2024-25", "game_ids": ["401"]},
         ),
-        should_pass=False
+        should_pass=False,
     )
 
     # Test very old season (may have no data)
     run_test(
         "old_season_ncaa_mbb",
-        lambda: get_dataset(
-            "schedule",
-            {"league": "NCAA-MBB", "season": "2000-01"},
-            limit=5
-        ),
-        should_pass=True  # Should work but may be empty
+        lambda: get_dataset("schedule", {"league": "NCAA-MBB", "season": "2000-01"}, limit=5),
+        should_pass=True,  # Should work but may be empty
     )
 
     # Test future season (should be empty)
     run_test(
         "future_season",
-        lambda: get_dataset(
-            "schedule",
-            {"league": "NCAA-MBB", "season": "2030-31"},
-            limit=5
-        ),
-        should_pass=True  # Should work but empty
+        lambda: get_dataset("schedule", {"league": "NCAA-MBB", "season": "2030-31"}, limit=5),
+        should_pass=True,  # Should work but empty
     )
+
 
 # ==============================================================================
 # Test Suite 6: Performance Tests
 # ==============================================================================
 
-def test_performance():
+
+def test_performance() -> None:
     """Test performance characteristics"""
     print("\n" + "=" * 80)
     print("TEST SUITE 6: Performance Tests")
@@ -469,7 +449,7 @@ def test_performance():
 
         # First call (cold cache)
         start = time.time()
-        df1 = get_dataset("schedule", {"league": league, "season": season}, limit=10)
+        _ = get_dataset("schedule", {"league": league, "season": season}, limit=10)
         cold_time = time.time() - start
 
         # Second call (warm cache)
@@ -484,15 +464,22 @@ def test_performance():
 
         # Cache should be faster (unless very fast already)
         if cold_time > 0.1 and speedup > 2:
-            results.add_pass(f"cache_performance_{league}", warm_time, len(df2) if df2 is not None else 0)
+            results.add_pass(
+                f"cache_performance_{league}", warm_time, len(df2) if df2 is not None else 0
+            )
         else:
-            results.add_skip(f"cache_performance_{league}", f"Cache speedup: {speedup:.1f}x (too fast to measure)")
+            results.add_skip(
+                f"cache_performance_{league}",
+                f"Cache speedup: {speedup:.1f}x (too fast to measure)",
+            )
+
 
 # ==============================================================================
 # Main Test Runner
 # ==============================================================================
 
-def main():
+
+def main() -> int:
     print("\n" + "=" * 80)
     print("COMPREHENSIVE FILTER STRESS TEST SUITE")
     print("=" * 80)
@@ -516,6 +503,7 @@ def main():
     if results.failed > 0:
         return 1
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

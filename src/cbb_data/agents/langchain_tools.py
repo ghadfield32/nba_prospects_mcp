@@ -18,9 +18,9 @@ Usage:
     # Create agent with tools
     llm = ChatOpenAI(temperature=0)
     agent = initialize_agent(
-        tools=tools,
-        llm=llm,
-        agent=AgentType.OPENAI_FUNCTIONS,
+        tools=tools
+        llm=llm
+        agent=AgentType.OPENAI_FUNCTIONS
         verbose=True
     )
 
@@ -28,71 +28,81 @@ Usage:
     response = agent.run("Show me Duke's schedule this season")
 """
 
-from typing import List, Optional, Dict, Any
+from __future__ import annotations
+
+from typing import Any
 
 try:
+    from langchain_core.pydantic_v1 import BaseModel as LCBaseModel
+    from langchain_core.pydantic_v1 import Field as LCField
     from langchain_core.tools import tool
-    from langchain_core.pydantic_v1 import BaseModel as LCBaseModel, Field as LCField
+
     LANGCHAIN_AVAILABLE = True
 except ImportError:
     LANGCHAIN_AVAILABLE = False
+
     # Define placeholder for when LangChain is not installed
-    def tool(*args, **kwargs):
-        def decorator(func):
+    def tool(*args: Any, **kwargs: Any) -> Any:  # type: ignore[no-untyped-def]
+        def decorator(func: Any) -> Any:  # type: ignore[no-untyped-def]
             return func
+
         # Handle both @tool and @tool(...) syntax
         if len(args) == 1 and callable(args[0]):
             return args[0]
         return decorator
 
-    class LCBaseModel:
+    class LCBaseModel:  # type: ignore[no-redef]
         pass
 
-    def LCField(*args, **kwargs):
+    def LCField(*args: Any, **kwargs: Any) -> None:  # type: ignore[no-untyped-def]
         return None
+
 
 # Import MCP tools
 from cbb_data.servers.mcp.tools import (
-    tool_get_schedule,
     tool_get_player_game_stats,
     tool_get_player_season_stats,
-    tool_get_team_season_stats,
     tool_get_recent_games,
-    tool_list_datasets
+    tool_get_schedule,
+    tool_get_team_season_stats,
+    tool_list_datasets,
 )
-
 
 # ============================================================================
 # LangChain Tool Schemas
 # ============================================================================
 
+
 class GetScheduleInput(LCBaseModel):
     """Input for get_schedule tool."""
+
     league: str = LCField(description="League: NCAA-MBB, NCAA-WBB, or EuroLeague")
-    season: Optional[str] = LCField(None, description="Season year OR 'this season', 'last season'")
-    team: Optional[List[str]] = LCField(None, description="List of team names")
-    date_from: Optional[str] = LCField(None, description="Start date OR 'yesterday', 'last week'")
-    date_to: Optional[str] = LCField(None, description="End date OR 'today'")
+    season: str | None = LCField(None, description="Season year OR 'this season', 'last season'")
+    team: list[str] | None = LCField(None, description="List of team names")
+    date_from: str | None = LCField(None, description="Start date OR 'yesterday', 'last week'")
+    date_to: str | None = LCField(None, description="End date OR 'today'")
     limit: int = LCField(100, description="Max rows to return")
     compact: bool = LCField(True, description="Use compact mode (saves tokens)")
 
 
 class GetPlayerGameStatsInput(LCBaseModel):
     """Input for get_player_game_stats tool."""
+
     league: str = LCField(description="League identifier")
-    season: Optional[str] = LCField(None, description="Season year OR 'this season'")
-    team: Optional[List[str]] = LCField(None, description="Team names")
-    player: Optional[List[str]] = LCField(None, description="Player names")
+    season: str | None = LCField(None, description="Season year OR 'this season'")
+    team: list[str] | None = LCField(None, description="Team names")
+    player: list[str] | None = LCField(None, description="Player names")
     limit: int = LCField(100, description="Max rows")
     compact: bool = LCField(True, description="Use compact mode")
 
 
 class GetPlayerSeasonStatsInput(LCBaseModel):
     """Input for get_player_season_stats tool."""
+
     league: str = LCField(description="League identifier")
     season: str = LCField(description="Season year OR 'this season'")
-    team: Optional[List[str]] = LCField(None, description="Team names")
-    player: Optional[List[str]] = LCField(None, description="Player names")
+    team: list[str] | None = LCField(None, description="Team names")
+    player: list[str] | None = LCField(None, description="Player names")
     per_mode: str = LCField("PerGame", description="Totals, PerGame, or Per40")
     limit: int = LCField(100, description="Max rows")
     compact: bool = LCField(True, description="Use compact mode")
@@ -100,18 +110,20 @@ class GetPlayerSeasonStatsInput(LCBaseModel):
 
 class GetTeamSeasonStatsInput(LCBaseModel):
     """Input for get_team_season_stats tool."""
+
     league: str = LCField(description="League identifier")
     season: str = LCField(description="Season year OR 'this season'")
-    team: Optional[List[str]] = LCField(None, description="Team names")
+    team: list[str] | None = LCField(None, description="Team names")
     limit: int = LCField(100, description="Max rows")
     compact: bool = LCField(True, description="Use compact mode")
 
 
 class GetRecentGamesInput(LCBaseModel):
     """Input for get_recent_games tool."""
+
     league: str = LCField(description="League identifier")
     days: str = LCField("2", description="Number of days OR 'today', 'last week'")
-    teams: Optional[List[str]] = LCField(None, description="Team names")
+    teams: list[str] | None = LCField(None, description="Team names")
     compact: bool = LCField(True, description="Use compact mode")
 
 
@@ -119,15 +131,16 @@ class GetRecentGamesInput(LCBaseModel):
 # LangChain Tool Wrappers
 # ============================================================================
 
+
 @tool("get_schedule", args_schema=GetScheduleInput)
 def langchain_get_schedule(
     league: str,
-    season: Optional[str] = None,
-    team: Optional[List[str]] = None,
-    date_from: Optional[str] = None,
-    date_to: Optional[str] = None,
+    season: str | None = None,
+    team: list[str] | None = None,
+    date_from: str | None = None,
+    date_to: str | None = None,
     limit: int = 100,
-    compact: bool = True
+    compact: bool = True,
 ) -> str:
     """
     Get game schedules and results with natural language support.
@@ -153,11 +166,11 @@ def langchain_get_schedule(
 @tool("get_player_game_stats", args_schema=GetPlayerGameStatsInput)
 def langchain_get_player_game_stats(
     league: str,
-    season: Optional[str] = None,
-    team: Optional[List[str]] = None,
-    player: Optional[List[str]] = None,
+    season: str | None = None,
+    team: list[str] | None = None,
+    player: list[str] | None = None,
     limit: int = 100,
-    compact: bool = True
+    compact: bool = True,
 ) -> str:
     """
     Get per-player per-game box score statistics.
@@ -181,11 +194,11 @@ def langchain_get_player_game_stats(
 def langchain_get_player_season_stats(
     league: str,
     season: str,
-    team: Optional[List[str]] = None,
-    player: Optional[List[str]] = None,
+    team: list[str] | None = None,
+    player: list[str] | None = None,
     per_mode: str = "PerGame",
     limit: int = 100,
-    compact: bool = True
+    compact: bool = True,
 ) -> str:
     """
     Get per-player season aggregate statistics.
@@ -208,9 +221,9 @@ def langchain_get_player_season_stats(
 def langchain_get_team_season_stats(
     league: str,
     season: str,
-    team: Optional[List[str]] = None,
+    team: list[str] | None = None,
     limit: int = 100,
-    compact: bool = True
+    compact: bool = True,
 ) -> str:
     """
     Get per-team season aggregate statistics and standings.
@@ -229,10 +242,7 @@ def langchain_get_team_season_stats(
 
 @tool("get_recent_games", args_schema=GetRecentGamesInput)
 def langchain_get_recent_games(
-    league: str,
-    days: str = "2",
-    teams: Optional[List[str]] = None,
-    compact: bool = True
+    league: str, days: str = "2", teams: list[str] | None = None, compact: bool = True
 ) -> str:
     """
     Get recent games with natural language day support.
@@ -272,7 +282,8 @@ def langchain_list_datasets() -> str:
 # Helper Functions
 # ============================================================================
 
-def _format_result(result: Dict[str, Any]) -> str:
+
+def _format_result(result: dict[str, Any]) -> str:
     """Format result for LLM consumption."""
     data = result.get("data")
 
@@ -312,7 +323,8 @@ def _format_result(result: Dict[str, Any]) -> str:
 # Main Function
 # ============================================================================
 
-def get_langchain_tools() -> List:
+
+def get_langchain_tools() -> list:
     """
     Get all LangChain basketball data tools.
 
@@ -333,8 +345,8 @@ def get_langchain_tools() -> List:
         >>>
         >>> llm = ChatOpenAI(temperature=0)
         >>> agent = initialize_agent(
-        ...     tools=tools,
-        ...     llm=llm,
+        ...     tools=tools
+        ...     llm=llm
         ...     agent=AgentType.OPENAI_FUNCTIONS
         ... )
         >>>
@@ -351,7 +363,7 @@ def get_langchain_tools() -> List:
         langchain_get_player_season_stats,
         langchain_get_team_season_stats,
         langchain_get_recent_games,
-        langchain_list_datasets
+        langchain_list_datasets,
     ]
 
 

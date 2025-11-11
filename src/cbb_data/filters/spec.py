@@ -5,12 +5,16 @@ across different data sources (NCAA, EuroLeague, FIBA, NBL, etc.)
 """
 
 from __future__ import annotations
-from pydantic import BaseModel, Field, ConfigDict, field_validator, AliasChoices
-from typing import Literal, Optional, List
+
 from datetime import date
+from typing import Any, Literal
+
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator
 
 # Type definitions for common enums
-SeasonType = Literal["Regular Season", "Playoffs", "Conference Tournament", "Pre Season", "All Star"]
+SeasonType = Literal[
+    "Regular Season", "Playoffs", "Conference Tournament", "Pre Season", "All Star"
+]
 PerMode = Literal["Totals", "PerGame", "Per40"]  # Per48 not currently implemented in aggregators
 League = Literal[
     "NCAA-MBB",  # NCAA Men's Basketball (Division I)
@@ -35,12 +39,12 @@ class DateSpan(BaseModel):
 
     model_config = ConfigDict(populate_by_name=True)
 
-    start: Optional[date] = Field(default=None, alias="from", description="Start date (inclusive)")
-    end: Optional[date] = Field(default=None, alias="to", description="End date (inclusive)")
+    start: date | None = Field(default=None, alias="from", description="Start date (inclusive)")
+    end: date | None = Field(default=None, alias="to", description="End date (inclusive)")
 
     @field_validator("end")
     @classmethod
-    def _validate_order(cls, v, info):
+    def _validate_order(cls, v: date | None, info: Any) -> date | None:
         """Ensure end date is not before start date"""
         start = info.data.get("start")
         if v and start and v < start:
@@ -81,133 +85,107 @@ class FilterSpec(BaseModel):
     """
 
     # League/competition
-    league: Optional[League] = Field(
-        default=None,
-        description="Basketball league or competition"
-    )
+    league: League | None = Field(default=None, description="Basketball league or competition")
 
     # Season & timing
-    season: Optional[str] = Field(
+    season: str | None = Field(
         default=None,
-        description="Season identifier (e.g., '2024-25' for NCAA, '2024' for EuroLeague)"
+        description="Season identifier (e.g., '2024-25' for NCAA, '2024' for EuroLeague)",
     )
-    season_type: Optional[SeasonType] = Field(
+    season_type: SeasonType | None = Field(
         default="Regular Season",
         validation_alias=AliasChoices("season_type", "SeasonType"),
-        description="Type of season/competition phase"
+        description="Type of season/competition phase",
     )
-    date: Optional[DateSpan] = Field(
-        default=None,
-        description="Date range for games"
-    )
+    date: DateSpan | None = Field(default=None, description="Date range for games")
 
     # NCAA-specific
-    conference: Optional[str] = Field(
-        default=None,
-        description="NCAA conference (e.g., 'ACC', 'Big Ten', 'SEC')"
+    conference: str | None = Field(
+        default=None, description="NCAA conference (e.g., 'ACC', 'Big Ten', 'SEC')"
     )
-    division: Optional[Literal["D-I", "D-II", "D-III"]] = Field(
-        default=None,
-        description="NCAA division (defaults to D-I if league is NCAA-*)"
+    division: Literal["D-I", "D-II", "D-III"] | None = Field(
+        default=None, description="NCAA division (defaults to D-I if league is NCAA-*)"
     )
-    tournament: Optional[str] = Field(
+    tournament: str | None = Field(
         default=None,
-        description="Tournament name (e.g., 'NCAA Tournament', 'NIT', 'EuroLeague Playoffs')"
+        description="Tournament name (e.g., 'NCAA Tournament', 'NIT', 'EuroLeague Playoffs')",
     )
 
     # Team filters
-    team_ids: Optional[List[int]] = Field(
-        default=None,
-        description="List of team IDs (source-specific)"
+    team_ids: list[int] | None = Field(
+        default=None, description="List of team IDs (source-specific)"
     )
-    team: Optional[List[str]] = Field(
-        default=None,
-        description="List of team names (resolved to IDs via entity resolver)"
+    team: list[str] | None = Field(
+        default=None, description="List of team names (resolved to IDs via entity resolver)"
     )
-    opponent_ids: Optional[List[int]] = Field(
-        default=None,
-        description="List of opponent team IDs"
-    )
-    opponent: Optional[List[str]] = Field(
-        default=None,
-        description="List of opponent team names"
-    )
+    opponent_ids: list[int] | None = Field(default=None, description="List of opponent team IDs")
+    opponent: list[str] | None = Field(default=None, description="List of opponent team names")
 
     # Player filters
-    player_ids: Optional[List[int]] = Field(
-        default=None,
-        description="List of player IDs (source-specific)"
+    player_ids: list[int] | None = Field(
+        default=None, description="List of player IDs (source-specific)"
     )
-    player: Optional[List[str]] = Field(
-        default=None,
-        description="List of player names (resolved to IDs via entity resolver)"
+    player: list[str] | None = Field(
+        default=None, description="List of player names (resolved to IDs via entity resolver)"
     )
 
     # Game filters
-    game_ids: Optional[List[str]] = Field(
-        default=None,
-        description="Specific game IDs to fetch"
-    )
-    home_away: Optional[Literal["Home", "Away"]] = Field(
+    game_ids: list[str] | None = Field(default=None, description="Specific game IDs to fetch")
+    home_away: Literal["Home", "Away"] | None = Field(
         default=None,
         validation_alias=AliasChoices("home_away", "HomeAway"),
-        description="Filter by home or away games"
+        description="Filter by home or away games",
     )
-    venue: Optional[str] = Field(
-        default=None,
-        description="Venue name filter"
-    )
+    venue: str | None = Field(default=None, description="Venue name filter")
 
     # Statistical filters
-    per_mode: Optional[PerMode] = Field(
+    per_mode: PerMode | None = Field(
         default=None,
         validation_alias=AliasChoices("per_mode", "PerMode"),
-        description="Aggregation mode for statistics"
+        description="Aggregation mode for statistics",
     )
-    last_n_games: Optional[int] = Field(
+    last_n_games: int | None = Field(
         default=None,
         ge=1,
         validation_alias=AliasChoices("last_n_games", "LastNGames"),
-        description="Limit to last N games"
+        description="Limit to last N games",
     )
-    min_minutes: Optional[int] = Field(
+    min_minutes: int | None = Field(
         default=None,
         ge=0,
         validation_alias=AliasChoices("min_minutes", "MinMinutes"),
-        description="Minimum minutes played filter (for player stats)"
+        description="Minimum minutes played filter (for player stats)",
     )
-    quarter: Optional[List[int]] = Field(
-        default=None,
-        description="Filter by specific quarters/periods (1-4, plus OT)"
+    quarter: list[int] | None = Field(
+        default=None, description="Filter by specific quarters/periods (1-4, plus OT)"
     )
 
     # Shot/play-level filters (for shots/pbp datasets)
-    context_measure: Optional[str] = Field(
+    context_measure: str | None = Field(
         default=None,
         validation_alias=AliasChoices("context_measure", "ContextMeasure"),
-        description="Context for shot charts (e.g., 'FGA', 'FG3A')"
+        description="Context for shot charts (e.g., 'FGA', 'FG3A')",
     )
 
     # Data quality/completeness
-    only_complete: Optional[bool] = Field(
+    only_complete: bool | None = Field(
         default=False,
         validation_alias=AliasChoices("only_complete", "OnlyComplete"),
-        description="Only return games with complete data (PBP, box scores, etc.)"
+        description="Only return games with complete data (PBP, box scores, etc.)",
     )
 
     # Convenience: normalize empty lists to None and coerce types
     @field_validator(
-        "team", "opponent", "player", "quarter",
-        "team_ids", "opponent_ids", "player_ids"
+        "team", "opponent", "player", "quarter", "team_ids", "opponent_ids", "player_ids"
     )
     @classmethod
-    def _empty_to_none(cls, v):
+    def _empty_to_none(cls, v: Any) -> Any:
         """Convert empty lists to None for cleaner processing"""
         return v if v else None
 
-    @field_validator("game_ids", mode='before')
+    @field_validator("game_ids", mode="before")
     @classmethod
-    def _coerce_game_ids(cls, v):
+    def _coerce_game_ids(cls, v: Any) -> list[str] | None:
         """Convert game_ids to strings and handle empty lists
 
         Game IDs from DataFrames may be numpy int64 or other types.
@@ -223,7 +201,7 @@ class FilterSpec(BaseModel):
 
     @field_validator("season")
     @classmethod
-    def _validate_season_format(cls, v):
+    def _validate_season_format(cls, v: Any) -> str | None:
         """Validate season format
 
         Accepts multiple formats:
@@ -233,18 +211,18 @@ class FilterSpec(BaseModel):
         - Other: Any alphanumeric string for flexibility
         """
         if not v:
-            return v
+            return None
 
         # Relaxed validation: allow any non-empty string
         # Source-specific logic will handle format requirements
         if not isinstance(v, str):
             return str(v)
 
-        return v
+        return str(v)
 
     @field_validator("quarter")
     @classmethod
-    def _validate_quarters(cls, v):
+    def _validate_quarters(cls, v: list[int] | None) -> list[int] | None:
         """Validate quarter numbers (1-4 plus OT periods 5+)"""
         if not v:
             return v

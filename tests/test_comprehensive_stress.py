@@ -12,37 +12,37 @@ Purpose: Validate entire data pipeline end-to-end
 """
 
 import sys
-sys.path.insert(0, 'src')
 
-from cbb_data.api.datasets import get_dataset, get_recent_games
+sys.path.insert(0, "src")
+
 import time
-from datetime import datetime, timedelta
 
+from cbb_data.api.datasets import get_dataset
 
 # Known completed game IDs for reliable testing
 # These are RECENT completed games with available CBBpy data (verified Nov 2025)
 # Using recent games ensures data availability from all sources
 KNOWN_TEST_GAME_IDS = {
-    'NCAA-MBB': ['401824809', '401826885', '401812785'],  # Nov 3-4, 2025 games
-    'NCAA-WBB': ['401811123', '401822217', '401809048'],  # Nov 3-4, 2025 games
-    'EuroLeague': list(range(1, 11))  # Game codes 1-10 from 2024 season
+    "NCAA-MBB": ["401824809", "401826885", "401812785"],  # Nov 3-4, 2025 games
+    "NCAA-WBB": ["401811123", "401822217", "401809048"],  # Nov 3-4, 2025 games
+    "EuroLeague": list(range(1, 11)),  # Game codes 1-10 from 2024 season
 }
 
 
 class StressTestRunner:
     """Manages comprehensive stress testing across all parameters"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.results = []
         self.passed = 0
         self.failed = 0
         self.skipped = 0
 
-    def run_test(self, name, test_func):
+    def run_test(self, name, test_func) -> None:
         """Run a single test and record results"""
         print(f"\n{'='*80}")
         print(f"TEST: {name}")
-        print('='*80)
+        print("=" * 80)
 
         try:
             start = time.time()
@@ -52,23 +52,23 @@ class StressTestRunner:
             if result:
                 print(f"[PASS] {name} ({elapsed:.2f}s)")
                 self.passed += 1
-                self.results.append((name, 'PASS', elapsed, None))
+                self.results.append((name, "PASS", elapsed, None))
             else:
                 print(f"[FAIL] {name}")
                 self.failed += 1
-                self.results.append((name, 'FAIL', elapsed, 'Test returned False'))
+                self.results.append((name, "FAIL", elapsed, "Test returned False"))
 
         except Exception as e:
             elapsed = time.time() - start
             print(f"[FAIL] {name}: {str(e)[:100]}")
             self.failed += 1
-            self.results.append((name, 'FAIL', elapsed, str(e)[:100]))
+            self.results.append((name, "FAIL", elapsed, str(e)[:100]))
 
-    def print_summary(self):
+    def print_summary(self) -> None:
         """Print comprehensive test summary"""
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("COMPREHENSIVE STRESS TEST SUMMARY")
-        print("="*80)
+        print("=" * 80)
 
         total = self.passed + self.failed + self.skipped
 
@@ -79,11 +79,11 @@ class StressTestRunner:
 
         if self.failed > 0:
             print("\nFailed Tests:")
-            for name, status, elapsed, error in self.results:
-                if status == 'FAIL':
+            for name, status, _elapsed, error in self.results:
+                if status == "FAIL":
                     print(f"  - {name}: {error}")
 
-        print("="*80)
+        print("=" * 80)
 
         return self.failed == 0
 
@@ -92,42 +92,51 @@ class StressTestRunner:
 # NCAA Men's Basketball (MBB) Tests
 # ==============================================================================
 
-def test_ncaa_mbb_schedule_d1():
+
+def test_ncaa_mbb_schedule_d1() -> bool:
     """NCAA-MBB: Schedule with D1 filter"""
-    df = get_dataset('schedule', {'league': 'NCAA-MBB', 'season': '2025', 'Division': 'D1'}, limit=50)
+    df = get_dataset(
+        "schedule", {"league": "NCAA-MBB", "season": "2025", "Division": "D1"}, limit=50
+    )
     assert len(df) > 0, "Should return games"
     assert len(df) <= 50, "Should respect limit"
     print(f"  Fetched {len(df)} D1 games")
     return True
 
 
-def test_ncaa_mbb_schedule_all_divisions():
+def test_ncaa_mbb_schedule_all_divisions() -> bool:
     """NCAA-MBB: Schedule with all divisions"""
-    df = get_dataset('schedule', {'league': 'NCAA-MBB', 'season': '2025', 'Division': 'all'}, limit=50)
+    df = get_dataset(
+        "schedule", {"league": "NCAA-MBB", "season": "2025", "Division": "all"}, limit=50
+    )
     assert len(df) > 0, "Should return games"
     print(f"  Fetched {len(df)} games (all divisions)")
     return True
 
 
-def test_ncaa_mbb_player_game():
+def test_ncaa_mbb_player_game() -> bool:
     """NCAA-MBB: Player game-level data"""
     # Use known completed game IDs (recent Nov 2025 games with complete CBBpy data)
     # These are historical games, not scheduled games, so they have player data
-    game_ids = KNOWN_TEST_GAME_IDS['NCAA-MBB'][:2]  # Use first 2 games
+    game_ids = KNOWN_TEST_GAME_IDS["NCAA-MBB"][:2]  # Use first 2 games
 
-    df = get_dataset('player_game', {
-        'league': 'NCAA-MBB',
-        'season': '2025',  # Season of the recent games
-        'game_ids': game_ids
-    }, limit=100)
+    df = get_dataset(
+        "player_game",
+        {
+            "league": "NCAA-MBB",
+            "season": "2025",  # Season of the recent games
+            "game_ids": game_ids,
+        },
+        limit=100,
+    )
 
     assert len(df) > 0, "Should return player games"
-    assert 'PLAYER_NAME' in df.columns, "Should have PLAYER_NAME column"
+    assert "PLAYER_NAME" in df.columns, "Should have PLAYER_NAME column"
     print(f"  Fetched {len(df)} player-game records from {len(game_ids)} games")
     return True
 
 
-def test_ncaa_mbb_player_season():
+def test_ncaa_mbb_player_season() -> bool:
     """NCAA-MBB: Player season aggregates"""
     # KNOWN LIMITATION: player_season for NCAA requires functional date range filtering
     # Current issue: 'dates' filter doesn't propagate to _fetch_schedule (defaults to TODAY)
@@ -147,16 +156,14 @@ def test_ncaa_mbb_player_season():
     # assert len(df) > 0, "Should return player seasons"
 
 
-def test_ncaa_mbb_pbp():
+def test_ncaa_mbb_pbp() -> bool:
     """NCAA-MBB: Play-by-play data"""
     # Use known completed game IDs (recent Nov 2025) for PBP data
-    game_ids = KNOWN_TEST_GAME_IDS['NCAA-MBB'][:2]  # Use first 2 games
+    game_ids = KNOWN_TEST_GAME_IDS["NCAA-MBB"][:2]  # Use first 2 games
 
-    df = get_dataset('pbp', {
-        'league': 'NCAA-MBB',
-        'season': '2025',
-        'game_ids': game_ids
-    }, limit=500)
+    df = get_dataset(
+        "pbp", {"league": "NCAA-MBB", "season": "2025", "game_ids": game_ids}, limit=500
+    )
 
     assert len(df) > 0, "Should return plays"
     print(f"  Fetched {len(df)} play-by-play events from {len(game_ids)} games")
@@ -171,31 +178,30 @@ def test_ncaa_mbb_pbp():
 # NCAA Women's Basketball (WBB) Tests
 # ==============================================================================
 
-def test_ncaa_wbb_schedule():
+
+def test_ncaa_wbb_schedule() -> bool:
     """NCAA-WBB: Schedule data"""
-    df = get_dataset('schedule', {'league': 'NCAA-WBB', 'season': '2025'}, limit=50)
+    df = get_dataset("schedule", {"league": "NCAA-WBB", "season": "2025"}, limit=50)
     assert len(df) > 0, "Should return games"
     print(f"  Fetched {len(df)} WBB games")
     return True
 
 
-def test_ncaa_wbb_player_game():
+def test_ncaa_wbb_player_game() -> bool:
     """NCAA-WBB: Player game-level data"""
     # Use known completed game IDs (recent Nov 2025 games)
-    game_ids = KNOWN_TEST_GAME_IDS['NCAA-WBB']
+    game_ids = KNOWN_TEST_GAME_IDS["NCAA-WBB"]
 
-    df = get_dataset('player_game', {
-        'league': 'NCAA-WBB',
-        'season': '2025',
-        'game_ids': game_ids
-    }, limit=100)
+    df = get_dataset(
+        "player_game", {"league": "NCAA-WBB", "season": "2025", "game_ids": game_ids}, limit=100
+    )
 
     assert len(df) > 0, "Should return player games"
     print(f"  Fetched {len(df)} WBB player-game records from {len(game_ids)} games")
     return True
 
 
-def test_ncaa_wbb_player_season():
+def test_ncaa_wbb_player_season() -> bool:
     """NCAA-WBB: Player season aggregates"""
     # KNOWN LIMITATION: player_season for NCAA requires functional date range filtering
     # Current issue: 'dates' filter doesn't propagate to _fetch_schedule (defaults to TODAY)
@@ -219,58 +225,55 @@ def test_ncaa_wbb_player_season():
 # EuroLeague Tests
 # ==============================================================================
 
-def test_euroleague_schedule():
+
+def test_euroleague_schedule() -> bool:
     """EuroLeague: Schedule data (with caching)"""
-    df = get_dataset('schedule', {'league': 'EuroLeague', 'season': '2024'}, limit=50)
+    df = get_dataset("schedule", {"league": "EuroLeague", "season": "2024"}, limit=50)
     assert len(df) > 0, "Should return games"
-    assert 'GAME_CODE' in df.columns, "Should have GAME_CODE"
+    assert "GAME_CODE" in df.columns, "Should have GAME_CODE"
     print(f"  Fetched {len(df)} EuroLeague games")
     return True
 
 
-def test_euroleague_player_game():
+def test_euroleague_player_game() -> bool:
     """EuroLeague: Player game-level data"""
-    df = get_dataset('player_game', {'league': 'EuroLeague', 'season': '2024'}, limit=100)
+    df = get_dataset("player_game", {"league": "EuroLeague", "season": "2024"}, limit=100)
     assert len(df) > 0, "Should return player games"
     print(f"  Fetched {len(df)} EuroLeague player-game records")
     return True
 
 
-def test_euroleague_player_season():
+def test_euroleague_player_season() -> bool:
     """EuroLeague: Player season aggregates"""
-    df = get_dataset('player_season', {'league': 'EuroLeague', 'season': '2024'}, limit=50)
+    df = get_dataset("player_season", {"league": "EuroLeague", "season": "2024"}, limit=50)
     # Note: This may return 0 rows due to known aggregation issue
     # We're testing that it doesn't crash, not that it returns data
     print(f"  Fetched {len(df)} EuroLeague player season stats")
     return True  # Pass even if 0 rows (known issue)
 
 
-def test_euroleague_shots():
+def test_euroleague_shots() -> bool:
     """EuroLeague: Shot-level data"""
     # Shots dataset requires game_ids filter
-    game_ids = KNOWN_TEST_GAME_IDS['EuroLeague'][:5]  # Use first 5 games
+    game_ids = KNOWN_TEST_GAME_IDS["EuroLeague"][:5]  # Use first 5 games
 
-    df = get_dataset('shots', {
-        'league': 'EuroLeague',
-        'season': '2024',
-        'game_ids': game_ids
-    }, limit=500)
+    df = get_dataset(
+        "shots", {"league": "EuroLeague", "season": "2024", "game_ids": game_ids}, limit=500
+    )
 
     assert len(df) > 0, "Should return shots"
     print(f"  Fetched {len(df)} EuroLeague shot events from {len(game_ids)} games")
     return True
 
 
-def test_euroleague_pbp():
+def test_euroleague_pbp() -> bool:
     """EuroLeague: Play-by-play data"""
     # PBP requires game_ids filter
-    game_ids = KNOWN_TEST_GAME_IDS['EuroLeague'][:3]  # Use first 3 games
+    game_ids = KNOWN_TEST_GAME_IDS["EuroLeague"][:3]  # Use first 3 games
 
-    df = get_dataset('pbp', {
-        'league': 'EuroLeague',
-        'season': '2024',
-        'game_ids': game_ids
-    }, limit=500)
+    df = get_dataset(
+        "pbp", {"league": "EuroLeague", "season": "2024", "game_ids": game_ids}, limit=500
+    )
 
     assert len(df) > 0, "Should return plays"
     print(f"  Fetched {len(df)} EuroLeague PBP events from {len(game_ids)} games")
@@ -292,30 +295,28 @@ def test_euroleague_pbp():
 # - This is because we don't have a season calendar/schedule system yet
 
 
-def test_filter_limit_small():
+def test_filter_limit_small() -> bool:
     """Filter: Small limit (5 records)"""
-    df = get_dataset('schedule', {'league': 'NCAA-MBB', 'season': '2025'}, limit=5)
+    df = get_dataset("schedule", {"league": "NCAA-MBB", "season": "2025"}, limit=5)
     assert len(df) == 5, "Should return exactly 5 records"
     print(f"  Correctly limited to {len(df)} records")
     return True
 
 
-def test_filter_limit_large():
+def test_filter_limit_large() -> bool:
     """Filter: Large limit (500 records)"""
-    df = get_dataset('schedule', {'league': 'NCAA-MBB', 'season': '2025'}, limit=500)
+    df = get_dataset("schedule", {"league": "NCAA-MBB", "season": "2025"}, limit=500)
     assert len(df) > 0, "Should return games"
     assert len(df) <= 500, "Should not exceed limit"
     print(f"  Fetched {len(df)} records with limit=500")
     return True
 
 
-def test_filter_division_combinations():
+def test_filter_division_combinations() -> bool:
     """Filter: Division list combinations"""
-    df = get_dataset('schedule', {
-        'league': 'NCAA-MBB',
-        'season': '2025',
-        'Division': ['D1', 'D2']
-    }, limit=50)
+    df = get_dataset(
+        "schedule", {"league": "NCAA-MBB", "season": "2025", "Division": ["D1", "D2"]}, limit=50
+    )
     assert len(df) > 0, "Should return games"
     print(f"  Fetched {len(df)} games from D1+D2")
     return True
@@ -325,16 +326,17 @@ def test_filter_division_combinations():
 # Performance Tests
 # ==============================================================================
 
-def test_performance_cache_hit():
+
+def test_performance_cache_hit() -> bool:
     """Performance: DuckDB cache hit speed"""
     # First fetch (cache miss)
     start1 = time.time()
-    df1 = get_dataset('schedule', {'league': 'EuroLeague', 'season': '2024'}, limit=10)
+    df1 = get_dataset("schedule", {"league": "EuroLeague", "season": "2024"}, limit=10)
     time1 = time.time() - start1
 
     # Second fetch (cache hit)
     start2 = time.time()
-    df2 = get_dataset('schedule', {'league': 'EuroLeague', 'season': '2024'}, limit=10)
+    df2 = get_dataset("schedule", {"league": "EuroLeague", "season": "2024"}, limit=10)
     time2 = time.time() - start2
 
     assert len(df1) > 0 and len(df2) > 0, "Both fetches should return data"
@@ -346,10 +348,10 @@ def test_performance_cache_hit():
     return True
 
 
-def test_performance_limit_efficiency():
+def test_performance_limit_efficiency() -> bool:
     """Performance: Limit parameter efficiency"""
     start = time.time()
-    df = get_dataset('schedule', {'league': 'NCAA-MBB', 'season': '2025'}, limit=10)
+    df = get_dataset("schedule", {"league": "NCAA-MBB", "season": "2025"}, limit=10)
     elapsed = time.time() - start
 
     assert len(df) <= 10, "Should respect limit"
@@ -362,11 +364,12 @@ def test_performance_limit_efficiency():
 # Data Quality Tests
 # ==============================================================================
 
-def test_data_quality_no_nulls_schedule():
-    """Data Quality: Schedule has no null values in key columns"""
-    df = get_dataset('schedule', {'league': 'NCAA-MBB', 'season': '2025'}, limit=20)
 
-    key_cols = ['GAME_ID', 'GAME_DATE']
+def test_data_quality_no_nulls_schedule() -> bool:
+    """Data Quality: Schedule has no null values in key columns"""
+    df = get_dataset("schedule", {"league": "NCAA-MBB", "season": "2025"}, limit=20)
+
+    key_cols = ["GAME_ID", "GAME_DATE"]
     for col in key_cols:
         if col in df.columns:
             null_count = df[col].isnull().sum()
@@ -376,20 +379,18 @@ def test_data_quality_no_nulls_schedule():
     return True
 
 
-def test_data_quality_player_names():
+def test_data_quality_player_names() -> bool:
     """Data Quality: Player data has valid names"""
     # Use known completed game IDs
-    game_ids = KNOWN_TEST_GAME_IDS['NCAA-MBB'][:2]
+    game_ids = KNOWN_TEST_GAME_IDS["NCAA-MBB"][:2]
 
-    df = get_dataset('player_game', {
-        'league': 'NCAA-MBB',
-        'season': '2025',
-        'game_ids': game_ids
-    }, limit=50)
+    df = get_dataset(
+        "player_game", {"league": "NCAA-MBB", "season": "2025", "game_ids": game_ids}, limit=50
+    )
 
-    if 'PLAYER_NAME' in df.columns:
+    if "PLAYER_NAME" in df.columns:
         # Check no empty player names
-        empty_names = df[df['PLAYER_NAME'].str.strip() == '']
+        empty_names = df[df["PLAYER_NAME"].str.strip() == ""]
         assert len(empty_names) == 0, f"Found {len(empty_names)} empty player names"
 
         print(f"  Validated {len(df)} player records have valid names")
@@ -397,18 +398,18 @@ def test_data_quality_player_names():
     return True
 
 
-def test_data_quality_date_format():
+def test_data_quality_date_format() -> bool:
     """Data Quality: Dates are properly formatted"""
-    df = get_dataset('schedule', {'league': 'NCAA-MBB', 'season': '2025'}, limit=20)
+    df = get_dataset("schedule", {"league": "NCAA-MBB", "season": "2025"}, limit=20)
 
-    if 'GAME_DATE' in df.columns:
+    if "GAME_DATE" in df.columns:
         # Try to parse dates to ensure they're valid
         try:
             # Dates should be parseable
-            dates_sample = df['GAME_DATE'].head()
+            dates_sample = df["GAME_DATE"].head()
             print(f"  Sample dates: {dates_sample.tolist()[:3]}")
         except Exception as e:
-            raise AssertionError(f"Date parsing failed: {e}")
+            raise AssertionError(f"Date parsing failed: {e}") from e
 
     return True
 
@@ -417,20 +418,21 @@ def test_data_quality_date_format():
 # Main Test Runner
 # ==============================================================================
 
-def run_all_stress_tests():
+
+def run_all_stress_tests() -> None:
     """Execute all comprehensive stress tests"""
 
     runner = StressTestRunner()
 
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("COMPREHENSIVE STRESS TEST SUITE")
     print("Testing all leagues, granularities, and filter combinations")
-    print("="*80)
+    print("=" * 80)
 
     # NCAA Men's Basketball Tests
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("NCAA MEN'S BASKETBALL TESTS")
-    print("="*80)
+    print("=" * 80)
     runner.run_test("NCAA-MBB: Schedule D1", test_ncaa_mbb_schedule_d1)
     runner.run_test("NCAA-MBB: Schedule All Divisions", test_ncaa_mbb_schedule_all_divisions)
     runner.run_test("NCAA-MBB: Player Game", test_ncaa_mbb_player_game)
@@ -439,17 +441,17 @@ def run_all_stress_tests():
     # Note: NCAA doesn't provide shot location data (only EuroLeague)
 
     # NCAA Women's Basketball Tests
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("NCAA WOMEN'S BASKETBALL TESTS")
-    print("="*80)
+    print("=" * 80)
     runner.run_test("NCAA-WBB: Schedule", test_ncaa_wbb_schedule)
     runner.run_test("NCAA-WBB: Player Game", test_ncaa_wbb_player_game)
     runner.run_test("NCAA-WBB: Player Season", test_ncaa_wbb_player_season)
 
     # EuroLeague Tests
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("EUROLEAGUE TESTS")
-    print("="*80)
+    print("=" * 80)
     runner.run_test("EuroLeague: Schedule", test_euroleague_schedule)
     runner.run_test("EuroLeague: Player Game", test_euroleague_player_game)
     runner.run_test("EuroLeague: Player Season", test_euroleague_player_season)
@@ -457,24 +459,24 @@ def run_all_stress_tests():
     runner.run_test("EuroLeague: Play-by-Play", test_euroleague_pbp)
 
     # Filter Combination Tests
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("FILTER COMBINATION TESTS")
-    print("="*80)
+    print("=" * 80)
     runner.run_test("Filter: Limit Small (5)", test_filter_limit_small)
     runner.run_test("Filter: Limit Large (500)", test_filter_limit_large)
     runner.run_test("Filter: Division Combinations", test_filter_division_combinations)
 
     # Performance Tests
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("PERFORMANCE TESTS")
-    print("="*80)
+    print("=" * 80)
     runner.run_test("Performance: Cache Hit", test_performance_cache_hit)
     runner.run_test("Performance: Limit Efficiency", test_performance_limit_efficiency)
 
     # Data Quality Tests
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("DATA QUALITY TESTS")
-    print("="*80)
+    print("=" * 80)
     runner.run_test("Quality: No Nulls in Schedule", test_data_quality_no_nulls_schedule)
     runner.run_test("Quality: Valid Player Names", test_data_quality_player_names)
     runner.run_test("Quality: Date Format", test_data_quality_date_format)

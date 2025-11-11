@@ -9,6 +9,7 @@ Usage: python tests/source_validation/validate_espn_mbb.py
 import sys
 from datetime import datetime
 
+
 def validate_espn_mbb():
     """Validate ESPN Men's College Basketball data source"""
 
@@ -19,7 +20,8 @@ def validate_espn_mbb():
 
     # Check if sportsdataverse is available
     try:
-        from sportsdataverse.mbb import mbb_schedule, mbb_teams, mbb_game_all
+        from sportsdataverse.mbb import mbb_game_all, mbb_schedule, mbb_teams
+
         print("✓ sportsdataverse package installed")
     except ImportError as e:
         print(f"[X] sportsdataverse not available: {e}")
@@ -65,7 +67,9 @@ def validate_espn_mbb():
     try:
         # Get a game ID
         if not schedule_df.empty:
-            game_id_col = [c for c in schedule_df.columns if "game" in c.lower() and "id" in c.lower()][0]
+            game_id_col = [
+                c for c in schedule_df.columns if "game" in c.lower() and "id" in c.lower()
+            ][0]
             game_id = schedule_df.iloc[0][game_id_col]
 
             game_data = mbb_game_all(game_id=int(game_id))
@@ -110,6 +114,7 @@ def validate_espn_mbb():
     print("\n[5/6] Testing rate limits...")
     try:
         import time
+
         start = time.time()
         for _ in range(3):
             mbb_teams()

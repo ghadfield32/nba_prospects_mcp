@@ -52,15 +52,14 @@ API USAGE EXAMPLES:
     curl http://localhost:8000/datasets/schedule/info
 """
 
-import pytest
-import requests
-from typing import Dict, Any
 import time
 
+import pytest
 
 # ============================================================================
 # Health Check Tests
 # ============================================================================
+
 
 @pytest.mark.api
 @pytest.mark.smoke
@@ -86,7 +85,7 @@ class TestHealthEndpoint:
         }
     """
 
-    def test_health_returns_200(self, api_client, api_base_url):
+    def test_health_returns_200(self, api_client, api_base_url) -> None:
         """
         Test that /health endpoint returns HTTP 200 OK.
 
@@ -102,7 +101,7 @@ class TestHealthEndpoint:
         response = api_client.get(f"{api_base_url}/health")
         assert response.status_code == 200, "Health endpoint should return 200 OK"
 
-    def test_health_has_required_fields(self, api_client, api_base_url):
+    def test_health_has_required_fields(self, api_client, api_base_url) -> None:
         """
         Test that /health response contains all required fields.
 
@@ -125,7 +124,7 @@ class TestHealthEndpoint:
         for field in required_fields:
             assert field in data, f"Health response missing field: {field}"
 
-    def test_health_status_is_healthy(self, api_client, api_base_url):
+    def test_health_status_is_healthy(self, api_client, api_base_url) -> None:
         """
         Test that server reports healthy status.
 
@@ -143,11 +142,9 @@ class TestHealthEndpoint:
         response = api_client.get(f"{api_base_url}/health")
         data = response.json()
 
-        assert data["status"] == "healthy", (
-            f"Server status is {data['status']}, expected 'healthy'"
-        )
+        assert data["status"] == "healthy", f"Server status is {data['status']}, expected 'healthy'"
 
-    def test_health_response_time(self, api_client, api_base_url):
+    def test_health_response_time(self, api_client, api_base_url) -> None:
         """
         Test that /health endpoint responds quickly.
 
@@ -169,14 +166,13 @@ class TestHealthEndpoint:
         elapsed_time = (time.time() - start_time) * 1000  # Convert to ms
 
         assert response.status_code == 200, "Health check failed"
-        assert elapsed_time < 500, (
-            f"Health check took {elapsed_time:.0f}ms, should be <500ms"
-        )
+        assert elapsed_time < 500, f"Health check took {elapsed_time:.0f}ms, should be <500ms"
 
 
 # ============================================================================
 # Dataset Listing Tests
 # ============================================================================
+
 
 @pytest.mark.api
 @pytest.mark.smoke
@@ -202,7 +198,7 @@ class TestListDatasetsEndpoint:
         }
     """
 
-    def test_list_datasets_returns_200(self, api_client, api_base_url):
+    def test_list_datasets_returns_200(self, api_client, api_base_url) -> None:
         """
         Test that /datasets endpoint returns HTTP 200 OK.
 
@@ -212,7 +208,7 @@ class TestListDatasetsEndpoint:
         response = api_client.get(f"{api_base_url}/datasets")
         assert response.status_code == 200
 
-    def test_list_datasets_has_correct_structure(self, api_client, api_base_url):
+    def test_list_datasets_has_correct_structure(self, api_client, api_base_url) -> None:
         """
         Test that /datasets response has the correct structure.
 
@@ -247,7 +243,9 @@ class TestListDatasetsEndpoint:
         assert isinstance(data["datasets"], list), "'datasets' should be a list"
         assert data["count"] == len(data["datasets"]), "Count doesn't match array length"
 
-    def test_list_datasets_contains_expected_datasets(self, api_client, api_base_url, all_datasets):
+    def test_list_datasets_contains_expected_datasets(
+        self, api_client, api_base_url, all_datasets
+    ) -> None:
         """
         Test that all expected datasets are present.
 
@@ -276,11 +274,11 @@ class TestListDatasetsEndpoint:
         dataset_ids = [ds["id"] for ds in data["datasets"]]
 
         for expected_id in all_datasets:
-            assert expected_id in dataset_ids, (
-                f"Expected dataset '{expected_id}' not found in response"
-            )
+            assert (
+                expected_id in dataset_ids
+            ), f"Expected dataset '{expected_id}' not found in response"
 
-    def test_dataset_metadata_completeness(self, api_client, api_base_url):
+    def test_dataset_metadata_completeness(self, api_client, api_base_url) -> None:
         """
         Test that each dataset has complete metadata.
 
@@ -306,21 +304,19 @@ class TestListDatasetsEndpoint:
         response = api_client.get(f"{api_base_url}/datasets")
         data = response.json()
 
-        required_fields = [
-            "id", "name", "description",
-            "supported_filters", "supported_leagues"
-        ]
+        required_fields = ["id", "name", "description", "supported_filters", "supported_leagues"]
 
         for dataset in data["datasets"]:
             for field in required_fields:
-                assert field in dataset, (
-                    f"Dataset '{dataset.get('id', 'unknown')}' missing field: {field}"
-                )
+                assert (
+                    field in dataset
+                ), f"Dataset '{dataset.get('id', 'unknown')}' missing field: {field}"
 
 
 # ============================================================================
 # Dataset Query Tests
 # ============================================================================
+
 
 @pytest.mark.api
 class TestDatasetQueryEndpoint:
@@ -358,7 +354,7 @@ class TestDatasetQueryEndpoint:
     """
 
     @pytest.mark.parametrize("league", ["NCAA-MBB", "NCAA-WBB", "EuroLeague"])
-    def test_query_schedule_all_leagues(self, api_client, api_base_url, league):
+    def test_query_schedule_all_leagues(self, api_client, api_base_url, league) -> None:
         """
         Test querying schedule dataset for all supported leagues.
 
@@ -387,23 +383,20 @@ class TestDatasetQueryEndpoint:
               -d '{"filters": {"league": "EuroLeague", "season": "2024"}, "limit": 5}'
         """
         request_data = {
-            "filters": {
-                "league": league,
-                "season": "2024"
-            },
+            "filters": {"league": league, "season": "2024"},
             "limit": 5,
-            "include_metadata": True
+            "include_metadata": True,
         }
 
         response = api_client.post(
             f"{api_base_url}/datasets/schedule",
             json=request_data,
-            timeout=180  # Increased from 60s to handle first-time data fetches
+            timeout=180,  # Increased from 60s to handle first-time data fetches
         )
 
-        assert response.status_code == 200, (
-            f"Failed to query schedule for {league}: {response.text}"
-        )
+        assert (
+            response.status_code == 200
+        ), f"Failed to query schedule for {league}: {response.text}"
 
         data = response.json()
         assert "data" in data, "Response missing 'data' field"
@@ -411,7 +404,7 @@ class TestDatasetQueryEndpoint:
         assert data["metadata"]["dataset_id"] == "schedule"
 
     @pytest.mark.parametrize("per_mode", ["Totals", "PerGame", "Per40"])
-    def test_player_season_all_per_modes(self, api_client, api_base_url, per_mode):
+    def test_player_season_all_per_modes(self, api_client, api_base_url, per_mode) -> None:
         """
         Test querying player season stats with all aggregation modes.
 
@@ -463,19 +456,15 @@ class TestDatasetQueryEndpoint:
               }'
         """
         request_data = {
-            "filters": {
-                "league": "NCAA-MBB",
-                "season": "2024",
-                "per_mode": per_mode
-            },
+            "filters": {"league": "NCAA-MBB", "season": "2024", "per_mode": per_mode},
             "limit": 5,
-            "include_metadata": True
+            "include_metadata": True,
         }
 
         response = api_client.post(
             f"{api_base_url}/datasets/player_season",
             json=request_data,
-            timeout=180  # Increased from 60s to handle first-time data fetches
+            timeout=180,  # Increased from 60s to handle first-time data fetches
         )
 
         # Some per_modes might take longer on first fetch
@@ -486,7 +475,7 @@ class TestDatasetQueryEndpoint:
         else:
             pytest.skip(f"Timeout on first fetch for per_mode={per_mode}")
 
-    def test_query_with_metadata(self, api_client, api_base_url):
+    def test_query_with_metadata(self, api_client, api_base_url) -> None:
         """
         Test that metadata is included when requested.
 
@@ -516,18 +505,15 @@ class TestDatasetQueryEndpoint:
             print(f"Rows: {metadata['row_count']}")
         """
         request_data = {
-            "filters": {
-                "league": "NCAA-MBB",
-                "season": "2024"
-            },
+            "filters": {"league": "NCAA-MBB", "season": "2024"},
             "limit": 5,
-            "include_metadata": True  # Request metadata
+            "include_metadata": True,  # Request metadata
         }
 
         response = api_client.post(
             f"{api_base_url}/datasets/schedule",
             json=request_data,
-            timeout=180  # Increased from 60s to handle first-time data fetches
+            timeout=180,  # Increased from 60s to handle first-time data fetches
         )
 
         assert response.status_code == 200
@@ -537,8 +523,11 @@ class TestDatasetQueryEndpoint:
 
         metadata = data["metadata"]
         required_metadata_fields = [
-            "dataset_id", "row_count", "execution_time_ms",
-            "cached", "filters_applied"
+            "dataset_id",
+            "row_count",
+            "execution_time_ms",
+            "cached",
+            "filters_applied",
         ]
 
         for field in required_metadata_fields:
@@ -548,6 +537,7 @@ class TestDatasetQueryEndpoint:
 # ============================================================================
 # Recent Games Tests
 # ============================================================================
+
 
 @pytest.mark.api
 @pytest.mark.smoke
@@ -575,7 +565,7 @@ class TestRecentGamesEndpoint:
     """
 
     @pytest.mark.parametrize("league", ["NCAA-MBB", "NCAA-WBB", "EuroLeague"])
-    def test_recent_games_all_leagues(self, api_client, api_base_url, league):
+    def test_recent_games_all_leagues(self, api_client, api_base_url, league) -> None:
         """
         Test getting recent games for all leagues.
 
@@ -594,19 +584,17 @@ class TestRecentGamesEndpoint:
         """
         response = api_client.get(
             f"{api_base_url}/recent-games/{league}?days=2",
-            timeout=180  # Increased from 60s to handle first-time data fetches
+            timeout=180,  # Increased from 60s to handle first-time data fetches
         )
 
-        assert response.status_code == 200, (
-            f"Failed to get recent games for {league}"
-        )
+        assert response.status_code == 200, f"Failed to get recent games for {league}"
 
         data = response.json()
         assert "data" in data
         assert "metadata" in data
         print(f"✓ {league}: {data['metadata']['row_count']} recent games")
 
-    def test_recent_games_date_range_validation(self, api_client, api_base_url):
+    def test_recent_games_date_range_validation(self, api_client, api_base_url) -> None:
         """
         Test that days parameter is properly validated.
 
@@ -629,7 +617,7 @@ class TestRecentGamesEndpoint:
         # Test valid range
         response = api_client.get(
             f"{api_base_url}/recent-games/NCAA-MBB?days=7",
-            timeout=180  # Increased from 60s to handle first-time data fetches
+            timeout=180,  # Increased from 60s to handle first-time data fetches
         )
         assert response.status_code == 200, "Valid days parameter should work"
 
@@ -637,6 +625,7 @@ class TestRecentGamesEndpoint:
 # ============================================================================
 # Error Handling Tests
 # ============================================================================
+
 
 @pytest.mark.api
 class TestErrorHandling:
@@ -650,7 +639,7 @@ class TestErrorHandling:
         - Rate limits exceeded
     """
 
-    def test_nonexistent_dataset_returns_404(self, api_client, api_base_url):
+    def test_nonexistent_dataset_returns_404(self, api_client, api_base_url) -> None:
         """
         Test that querying a non-existent dataset returns 404.
 
@@ -662,18 +651,15 @@ class TestErrorHandling:
               "message": "Dataset 'nonexistent' not found"
             }
         """
-        request_data = {
-            "filters": {"league": "NCAA-MBB"}
-        }
+        request_data = {"filters": {"league": "NCAA-MBB"}}
 
         response = api_client.post(
-            f"{api_base_url}/datasets/nonexistent_dataset",
-            json=request_data
+            f"{api_base_url}/datasets/nonexistent_dataset", json=request_data
         )
 
         assert response.status_code == 404, "Should return 404 for non-existent dataset"
 
-    def test_invalid_league_returns_400(self, api_client, api_base_url):
+    def test_invalid_league_returns_400(self, api_client, api_base_url) -> None:
         """
         Test that invalid league parameter returns 400 Bad Request.
 
@@ -692,21 +678,14 @@ class TestErrorHandling:
               "message": "Invalid league: INVALID_LEAGUE"
             }
         """
-        request_data = {
-            "filters": {"league": "INVALID_LEAGUE"}
-        }
+        request_data = {"filters": {"league": "INVALID_LEAGUE"}}
 
-        response = api_client.post(
-            f"{api_base_url}/datasets/schedule",
-            json=request_data
-        )
+        response = api_client.post(f"{api_base_url}/datasets/schedule", json=request_data)
 
         # Should return 400 or 500 with validation error
-        assert response.status_code in [400, 500], (
-            "Invalid league should return error status"
-        )
+        assert response.status_code in [400, 500], "Invalid league should return error status"
 
-    def test_rate_limit_headers_present(self, api_client, api_base_url):
+    def test_rate_limit_headers_present(self, api_client, api_base_url) -> None:
         """
         Test that rate limit headers are included in responses.
 
@@ -727,20 +706,21 @@ class TestErrorHandling:
         """
         response = api_client.get(f"{api_base_url}/datasets")
 
-        assert "X-RateLimit-Limit" in response.headers, (
-            "Missing rate limit header: X-RateLimit-Limit"
-        )
-        assert "X-RateLimit-Remaining" in response.headers, (
-            "Missing rate limit header: X-RateLimit-Remaining"
-        )
-        assert "X-RateLimit-Reset" in response.headers, (
-            "Missing rate limit header: X-RateLimit-Reset"
-        )
+        assert (
+            "X-RateLimit-Limit" in response.headers
+        ), "Missing rate limit header: X-RateLimit-Limit"
+        assert (
+            "X-RateLimit-Remaining" in response.headers
+        ), "Missing rate limit header: X-RateLimit-Remaining"
+        assert (
+            "X-RateLimit-Reset" in response.headers
+        ), "Missing rate limit header: X-RateLimit-Reset"
 
 
 # ============================================================================
 # Performance Tests
 # ============================================================================
+
 
 @pytest.mark.api
 @pytest.mark.slow
@@ -755,7 +735,7 @@ class TestPerformance:
         - Rate limit: 60 requests/minute
     """
 
-    def test_performance_headers_present(self, api_client, api_base_url):
+    def test_performance_headers_present(self, api_client, api_base_url) -> None:
         """
         Test that performance tracking headers are included.
 
@@ -769,15 +749,13 @@ class TestPerformance:
         """
         response = api_client.get(f"{api_base_url}/datasets")
 
-        assert "X-Process-Time" in response.headers, (
-            "Missing performance header: X-Process-Time"
-        )
+        assert "X-Process-Time" in response.headers, "Missing performance header: X-Process-Time"
 
         # Verify format
         process_time = response.headers["X-Process-Time"]
         assert "ms" in process_time, "X-Process-Time should be in milliseconds"
 
-    def test_caching_improves_performance(self, api_client, api_base_url):
+    def test_caching_improves_performance(self, api_client, api_base_url) -> None:
         """
         Test that caching significantly improves query performance.
 
@@ -810,9 +788,9 @@ class TestPerformance:
         request_data = {
             "filters": {
                 "league": "EuroLeague",  # EuroLeague is usually fast
-                "season": "2024"
+                "season": "2024",
             },
-            "limit": 5
+            "limit": 5,
         }
 
         # First query
@@ -820,7 +798,7 @@ class TestPerformance:
         response1 = api_client.post(
             f"{api_base_url}/datasets/schedule",
             json=request_data,
-            timeout=180  # Increased from 60s to handle first-time data fetches
+            timeout=180,  # Increased from 60s to handle first-time data fetches
         )
         first_query_time = time.time() - start_time
 
@@ -829,7 +807,7 @@ class TestPerformance:
         response2 = api_client.post(
             f"{api_base_url}/datasets/schedule",
             json=request_data,
-            timeout=180  # Increased from 60s to handle first-time data fetches
+            timeout=180,  # Increased from 60s to handle first-time data fetches
         )
         second_query_time = time.time() - start_time
 
@@ -842,4 +820,4 @@ class TestPerformance:
             print(f"✓ Cache speedup: {speedup:.1f}x faster")
         else:
             # Even if not faster, both should complete
-            print(f"✓ Both queries completed")
+            print("✓ Both queries completed")

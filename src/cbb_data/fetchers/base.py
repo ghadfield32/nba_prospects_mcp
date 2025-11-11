@@ -8,28 +8,31 @@ This module provides the core infrastructure for all data fetchers:
 """
 
 from __future__ import annotations
-import os
-import json
-import time
-import hashlib
+
 import functools
+import hashlib
+import json
 import logging
+import os
+import time
+from collections.abc import Callable
 from io import StringIO
-from typing import Any, Dict, Optional, Callable, TypeVar, cast
+from typing import Any, TypeVar
+
 import pandas as pd
 
 # Try to import Redis; it's optional
 try:
     import redis
+
     REDIS_AVAILABLE = True
 except ImportError:
-    redis = None
+    redis = None  # type: ignore[assignment]
     REDIS_AVAILABLE = False
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -46,7 +49,7 @@ class Cache:
     Cache keys are SHA256 hashes of (function_name, json_params)
     """
 
-    def __init__(self, ttl_seconds: int = 3600, redis_enabled: Optional[bool] = None):
+    def __init__(self, ttl_seconds: int = 3600, redis_enabled: bool | None = None):
         """Initialize cache
 
         Args:
@@ -54,8 +57,8 @@ class Cache:
             redis_enabled: Override Redis detection (default: auto-detect via env)
         """
         self.ttl = ttl_seconds
-        self._mem: Dict[str, tuple[float, Any]] = {}
-        self._redis: Optional[Any] = None
+        self._mem: dict[str, tuple[float, Any]] = {}
+        self._redis: Any | None = None
 
         # Determine if Redis should be enabled
         if redis_enabled is None:
@@ -82,12 +85,12 @@ class Cache:
         else:
             logger.info("Using memory-only cache")
 
-    def _key(self, *parts) -> str:
+    def _key(self, *parts: Any) -> str:
         """Generate cache key from parts"""
         key_str = "|".join(str(p) for p in parts)
         return hashlib.sha256(key_str.encode()).hexdigest()
 
-    def get(self, *parts) -> Optional[Any]:
+    def get(self, *parts: Any) -> Any | None:
         """Get cached value if exists and not expired"""
         key = self._key(*parts)
         now = time.time()
@@ -120,7 +123,7 @@ class Cache:
         logger.debug(f"Cache miss: {key[:12]}...")
         return None
 
-    def set(self, value: Any, *parts):
+    def set(self, value: Any, *parts: Any) -> None:
         """Set cache value"""
         key = self._key(*parts)
         now = time.time()
@@ -136,7 +139,7 @@ class Cache:
         # Always store in memory as fallback
         self._mem[key] = (now, value)
 
-    def clear(self):
+    def clear(self) -> None:
         """Clear all cache entries"""
         self._mem.clear()
         if self._redis:
@@ -148,7 +151,7 @@ class Cache:
         else:
             logger.info("Cache cleared (memory)")
 
-    def stats(self) -> Dict[str, Any]:
+    def stats(self) -> dict[str, Any]:
         """Get cache statistics"""
         mem_size = len(self._mem)
         redis_size = None
@@ -175,7 +178,7 @@ def get_cache() -> Cache:
     return _cache
 
 
-def set_cache(cache: Cache):
+def set_cache(cache: Cache) -> None:
     """Set a custom cache instance"""
     global _cache
     _cache = cache
@@ -195,7 +198,7 @@ def cached_dataframe(fn: Callable[..., pd.DataFrame]) -> Callable[..., pd.DataFr
     """
 
     @functools.wraps(fn)
-    def wrapper(*args, **kwargs) -> pd.DataFrame:
+    def wrapper(*args: Any, **kwargs: Any) -> pd.DataFrame:
         # Create cache key from function name + kwargs
         cache_key = (fn.__name__, json.dumps(kwargs, sort_keys=True, default=str))
 
@@ -245,7 +248,7 @@ def retry_on_error(
 
     def decorator(fn: Callable[..., T]) -> Callable[..., T]:
         @functools.wraps(fn)
-        def wrapper(*args, **kwargs) -> T:
+        def wrapper(*args: Any, **kwargs: Any) -> T:
             last_exception = None
             for attempt in range(1, max_attempts + 1):
                 try:
@@ -260,9 +263,7 @@ def retry_on_error(
                         )
                         time.sleep(wait)
                     else:
-                        logger.error(
-                            f"{fn.__name__} failed after {max_attempts} attempts: {e}"
-                        )
+                        logger.error(f"{fn.__name__} failed after {max_attempts} attempts: {e}")
 
             # All attempts failed
             raise last_exception  # type: ignore
@@ -288,7 +289,7 @@ def rate_limited(calls_per_second: float = 1.0) -> Callable[[Callable[..., T]], 
 
     def decorator(fn: Callable[..., T]) -> Callable[..., T]:
         @functools.wraps(fn)
-        def wrapper(*args, **kwargs) -> T:
+        def wrapper(*args: Any, **kwargs: Any) -> T:
             now = time.time()
             elapsed = now - last_called[0]
             if elapsed < min_interval:
@@ -306,7 +307,7 @@ def rate_limited(calls_per_second: float = 1.0) -> Callable[[Callable[..., T]], 
 # Utility functions for common data operations
 
 
-def normalize_columns(df: pd.DataFrame, rename_map: Optional[Dict[str, str]] = None) -> pd.DataFrame:
+def normalize_columns(df: pd.DataFrame, rename_map: dict[str, str] | None = None) -> pd.DataFrame:
     """Normalize DataFrame column names and types
 
     Args:

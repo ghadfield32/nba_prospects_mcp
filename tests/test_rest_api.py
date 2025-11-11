@@ -12,7 +12,7 @@ from cbb_data.api.rest_api import app
 
 
 @pytest.fixture
-def client():
+def client() -> None:
     """Create a test client for the API."""
     return TestClient(app)
 
@@ -20,7 +20,7 @@ def client():
 class TestHealthEndpoint:
     """Tests for health check endpoint."""
 
-    def test_health_check(self, client):
+    def test_health_check(self, client) -> None:
         """Test that health endpoint returns 200 OK."""
         response = client.get("/health")
         assert response.status_code == 200
@@ -31,7 +31,7 @@ class TestHealthEndpoint:
         assert "timestamp" in data
         assert "services" in data
 
-    def test_health_check_has_cors_headers(self, client):
+    def test_health_check_has_cors_headers(self, client) -> None:
         """Test that CORS headers are present."""
         response = client.get("/health")
         # CORS headers should be present via middleware
@@ -41,7 +41,7 @@ class TestHealthEndpoint:
 class TestDatasetsListEndpoint:
     """Tests for datasets listing endpoint."""
 
-    def test_list_datasets(self, client):
+    def test_list_datasets(self, client) -> None:
         """Test that we can list all datasets."""
         response = client.get("/datasets")
         assert response.status_code == 200
@@ -60,7 +60,7 @@ class TestDatasetsListEndpoint:
             assert "supported_filters" in dataset
             assert "supported_leagues" in dataset
 
-    def test_list_datasets_includes_expected_datasets(self, client):
+    def test_list_datasets_includes_expected_datasets(self, client) -> None:
         """Test that common datasets are present."""
         response = client.get("/datasets")
         data = response.json()
@@ -76,15 +76,9 @@ class TestDatasetsListEndpoint:
 class TestDatasetQueryEndpoint:
     """Tests for dataset query endpoint."""
 
-    def test_query_schedule_valid_request(self, client):
+    def test_query_schedule_valid_request(self, client) -> None:
         """Test querying schedule with valid parameters."""
-        request_data = {
-            "filters": {
-                "league": "NCAA-MBB",
-                "season": "2024"
-            },
-            "limit": 10
-        }
+        request_data = {"filters": {"league": "NCAA-MBB", "season": "2024"}, "limit": 10}
 
         response = client.post("/datasets/schedule", json=request_data)
 
@@ -102,24 +96,18 @@ class TestDatasetQueryEndpoint:
             assert "execution_time_ms" in metadata
             assert "row_count" in metadata
 
-    def test_query_nonexistent_dataset(self, client):
+    def test_query_nonexistent_dataset(self, client) -> None:
         """Test querying a dataset that doesn't exist."""
-        request_data = {
-            "filters": {"league": "NCAA-MBB"}
-        }
+        request_data = {"filters": {"league": "NCAA-MBB"}}
 
         response = client.post("/datasets/nonexistent_dataset", json=request_data)
 
         # Should return 404
         assert response.status_code == 404
 
-    def test_query_with_invalid_filters(self, client):
+    def test_query_with_invalid_filters(self, client) -> None:
         """Test that invalid filters return 400."""
-        request_data = {
-            "filters": {
-                "league": "INVALID_LEAGUE"
-            }
-        }
+        request_data = {"filters": {"league": "INVALID_LEAGUE"}}
 
         response = client.post("/datasets/schedule", json=request_data)
 
@@ -130,7 +118,7 @@ class TestDatasetQueryEndpoint:
 class TestRecentGamesEndpoint:
     """Tests for recent games convenience endpoint."""
 
-    def test_get_recent_games(self, client):
+    def test_get_recent_games(self, client) -> None:
         """Test getting recent games for a league."""
         response = client.get("/recent-games/NCAA-MBB?days=2")
 
@@ -142,13 +130,13 @@ class TestRecentGamesEndpoint:
             assert "data" in data
             assert "metadata" in data
 
-    def test_get_recent_games_with_teams_filter(self, client):
+    def test_get_recent_games_with_teams_filter(self, client) -> None:
         """Test recent games with team filter."""
         response = client.get("/recent-games/NCAA-MBB?days=2&teams=Duke,UNC")
 
         assert response.status_code in [200, 500]
 
-    def test_get_recent_games_invalid_league(self, client):
+    def test_get_recent_games_invalid_league(self, client) -> None:
         """Test recent games with invalid league."""
         response = client.get("/recent-games/INVALID?days=2")
 
@@ -159,7 +147,7 @@ class TestRecentGamesEndpoint:
 class TestDatasetInfoEndpoint:
     """Tests for dataset info endpoint."""
 
-    def test_get_dataset_info(self, client):
+    def test_get_dataset_info(self, client) -> None:
         """Test getting info about a specific dataset."""
         response = client.get("/datasets/schedule/info")
 
@@ -171,7 +159,7 @@ class TestDatasetInfoEndpoint:
         assert "supported_filters" in data
         assert "supported_leagues" in data
 
-    def test_get_nonexistent_dataset_info(self, client):
+    def test_get_nonexistent_dataset_info(self, client) -> None:
         """Test getting info for non-existent dataset."""
         response = client.get("/datasets/nonexistent/info")
 
@@ -181,7 +169,7 @@ class TestDatasetInfoEndpoint:
 class TestRateLimiting:
     """Tests for rate limiting middleware."""
 
-    def test_rate_limit_headers_present(self, client):
+    def test_rate_limit_headers_present(self, client) -> None:
         """Test that rate limit headers are included in responses."""
         response = client.get("/datasets")
 
@@ -194,13 +182,13 @@ class TestRateLimiting:
 class TestErrorHandling:
     """Tests for error handling middleware."""
 
-    def test_404_for_invalid_endpoint(self, client):
+    def test_404_for_invalid_endpoint(self, client) -> None:
         """Test that invalid endpoints return 404."""
         response = client.get("/invalid/endpoint")
 
         assert response.status_code == 404
 
-    def test_process_time_header_present(self, client):
+    def test_process_time_header_present(self, client) -> None:
         """Test that X-Process-Time header is added."""
         response = client.get("/health")
 

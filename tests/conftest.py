@@ -11,20 +11,21 @@ Usage:
     Fixtures are automatically discovered by pytest. Simply add them as
     function parameters to your test functions:
 
-    def test_something(api_client, sample_filters):
+    def test_something(api_client, sample_filters) -> None:
         response = api_client.get("/datasets")
         assert response.status_code == 200
 """
 
+from datetime import datetime, timedelta
+from typing import Any
+
 import pytest
 import requests
-from typing import Dict, Any, List
-from datetime import datetime, timedelta
-
 
 # ============================================================================
 # REST API Fixtures
 # ============================================================================
+
 
 @pytest.fixture(scope="session")
 def api_base_url() -> str:
@@ -38,11 +39,12 @@ def api_base_url() -> str:
         Override with environment variable: CBB_API_URL
     """
     import os
+
     return os.getenv("CBB_API_URL", "http://localhost:8000")
 
 
 @pytest.fixture(scope="session")
-def api_client(api_base_url):
+def api_client(api_base_url) -> None:
     """
     Requests session configured for API testing.
 
@@ -55,7 +57,7 @@ def api_client(api_base_url):
         requests.Session: Configured session
 
     Example:
-        def test_health(api_client):
+        def test_health(api_client) -> None:
             response = api_client.get("/health")
             assert response.status_code == 200
     """
@@ -82,7 +84,7 @@ def api_client(api_base_url):
 
 
 @pytest.fixture
-def sample_filters() -> Dict[str, Any]:
+def sample_filters() -> dict[str, Any]:
     """
     Sample filter configurations for testing datasets.
 
@@ -90,59 +92,28 @@ def sample_filters() -> Dict[str, Any]:
         Dict with common filter combinations
 
     Example:
-        def test_query(api_client, sample_filters):
+        def test_query(api_client, sample_filters) -> None:
             filters = sample_filters["ncaa_mbb_schedule"]
             response = api_client.post("/datasets/schedule", json=filters)
     """
     return {
-        "ncaa_mbb_schedule": {
-            "filters": {
-                "league": "NCAA-MBB",
-                "season": "2024"
-            },
-            "limit": 5
-        },
-        "ncaa_wbb_schedule": {
-            "filters": {
-                "league": "NCAA-WBB",
-                "season": "2024"
-            },
-            "limit": 5
-        },
-        "euroleague_schedule": {
-            "filters": {
-                "league": "EuroLeague",
-                "season": "2024"
-            },
-            "limit": 5
-        },
+        "ncaa_mbb_schedule": {"filters": {"league": "NCAA-MBB", "season": "2024"}, "limit": 5},
+        "ncaa_wbb_schedule": {"filters": {"league": "NCAA-WBB", "season": "2024"}, "limit": 5},
+        "euroleague_schedule": {"filters": {"league": "EuroLeague", "season": "2024"}, "limit": 5},
         "player_season_totals": {
-            "filters": {
-                "league": "NCAA-MBB",
-                "season": "2024",
-                "per_mode": "Totals"
-            },
-            "limit": 10
+            "filters": {"league": "NCAA-MBB", "season": "2024", "per_mode": "Totals"},
+            "limit": 10,
         },
         "player_season_pergame": {
-            "filters": {
-                "league": "NCAA-MBB",
-                "season": "2024",
-                "per_mode": "PerGame"
-            },
-            "limit": 10
+            "filters": {"league": "NCAA-MBB", "season": "2024", "per_mode": "PerGame"},
+            "limit": 10,
         },
-        "recent_games": {
-            "filters": {
-                "league": "NCAA-MBB"
-            },
-            "days": 2
-        }
+        "recent_games": {"filters": {"league": "NCAA-MBB"}, "days": 2},
     }
 
 
 @pytest.fixture
-def all_leagues() -> List[str]:
+def all_leagues() -> list[str]:
     """
     List of all supported leagues for parametrized testing.
 
@@ -151,7 +122,7 @@ def all_leagues() -> List[str]:
 
     Example:
         @pytest.mark.parametrize("league", all_leagues())
-        def test_all_leagues(league):
+        def test_all_leagues(league) -> None:
             # Test runs once for each league
             pass
     """
@@ -159,7 +130,7 @@ def all_leagues() -> List[str]:
 
 
 @pytest.fixture
-def all_datasets() -> List[str]:
+def all_datasets() -> list[str]:
     """
     List of all available datasets for parametrized testing.
 
@@ -168,7 +139,7 @@ def all_datasets() -> List[str]:
 
     Example:
         @pytest.mark.parametrize("dataset_id", all_datasets())
-        def test_all_datasets(dataset_id):
+        def test_all_datasets(dataset_id) -> None:
             # Test runs once for each dataset
             pass
     """
@@ -180,12 +151,12 @@ def all_datasets() -> List[str]:
         "shots",
         "player_season",
         "team_season",
-        "player_team_season"
+        "player_team_season",
     ]
 
 
 @pytest.fixture
-def per_modes() -> List[str]:
+def per_modes() -> list[str]:
     """
     List of all per_mode aggregation options.
 
@@ -194,7 +165,7 @@ def per_modes() -> List[str]:
 
     Example:
         @pytest.mark.parametrize("per_mode", per_modes())
-        def test_aggregations(per_mode):
+        def test_aggregations(per_mode) -> None:
             # Test each aggregation mode
             pass
     """
@@ -205,8 +176,9 @@ def per_modes() -> List[str]:
 # MCP Server Fixtures
 # ============================================================================
 
+
 @pytest.fixture
-def mcp_tools():
+def mcp_tools() -> None:
     """
     Provide all MCP tool definitions for testing.
 
@@ -220,16 +192,17 @@ def mcp_tools():
         - handler: Function to execute
 
     Example:
-        def test_tool(mcp_tools):
+        def test_tool(mcp_tools) -> None:
             tool_names = [tool["name"] for tool in mcp_tools]
             assert "get_schedule" in tool_names
     """
     from cbb_data.servers.mcp import tools
+
     return tools.TOOLS
 
 
 @pytest.fixture
-def mcp_resources():
+def mcp_resources() -> None:
     """
     Provide all MCP resource definitions for testing.
 
@@ -244,16 +217,17 @@ def mcp_resources():
         - handler: Function to fetch content
 
     Example:
-        def test_resource(mcp_resources):
+        def test_resource(mcp_resources) -> None:
             resource_uris = [r["uri"] for r in mcp_resources]
             assert "cbb://leagues" in resource_uris
     """
     from cbb_data.servers.mcp import resources
+
     return resources.RESOURCES
 
 
 @pytest.fixture
-def mcp_prompts():
+def mcp_prompts() -> None:
     """
     Provide all MCP prompt definitions for testing.
 
@@ -267,16 +241,17 @@ def mcp_prompts():
         - template: Prompt text template
 
     Example:
-        def test_prompts(mcp_prompts):
+        def test_prompts(mcp_prompts) -> None:
             prompt_names = [p["name"] for p in mcp_prompts]
             assert "top-scorers" in prompt_names
     """
     from cbb_data.servers.mcp import prompts
+
     return prompts.PROMPTS
 
 
 @pytest.fixture
-def sample_tool_params() -> Dict[str, Dict]:
+def sample_tool_params() -> dict[str, dict]:
     """
     Sample parameters for testing MCP tools.
 
@@ -284,31 +259,20 @@ def sample_tool_params() -> Dict[str, Dict]:
         Dict mapping tool names to parameter sets
 
     Example:
-        def test_tools(mcp_tools, sample_tool_params):
+        def test_tools(mcp_tools, sample_tool_params) -> None:
             params = sample_tool_params["get_schedule"]
             result = mcp_tools.tool_get_schedule(**params)
     """
     return {
-        "get_schedule": {
-            "league": "NCAA-MBB",
-            "season": "2024",
-            "limit": 5
-        },
+        "get_schedule": {"league": "NCAA-MBB", "season": "2024", "limit": 5},
         "get_player_season_stats": {
             "league": "NCAA-MBB",
             "season": "2024",
             "per_mode": "PerGame",
-            "limit": 5
+            "limit": 5,
         },
-        "get_team_season_stats": {
-            "league": "NCAA-MBB",
-            "season": "2024",
-            "limit": 5
-        },
-        "get_recent_games": {
-            "league": "NCAA-MBB",
-            "days": 2
-        }
+        "get_team_season_stats": {"league": "NCAA-MBB", "season": "2024", "limit": 5},
+        "get_recent_games": {"league": "NCAA-MBB", "days": 2},
     }
 
 
@@ -316,8 +280,9 @@ def sample_tool_params() -> Dict[str, Dict]:
 # Utility Fixtures
 # ============================================================================
 
+
 @pytest.fixture
-def sample_dates():
+def sample_dates() -> None:
     """
     Sample date ranges for testing date filters.
 
@@ -325,29 +290,20 @@ def sample_dates():
         Dict with date range configurations
 
     Example:
-        def test_dates(sample_dates):
+        def test_dates(sample_dates) -> None:
             date_range = sample_dates["last_week"]
             # Use in filters
     """
     today = datetime.now().date()
     return {
-        "today": {
-            "start": today,
-            "end": today
-        },
-        "last_week": {
-            "start": today - timedelta(days=7),
-            "end": today
-        },
-        "last_month": {
-            "start": today - timedelta(days=30),
-            "end": today
-        }
+        "today": {"start": today, "end": today},
+        "last_week": {"start": today - timedelta(days=7), "end": today},
+        "last_month": {"start": today - timedelta(days=30), "end": today},
     }
 
 
 @pytest.fixture
-def expected_columns():
+def expected_columns() -> None:
     """
     Expected column names for each dataset.
 
@@ -355,23 +311,42 @@ def expected_columns():
         Dict mapping dataset IDs to expected columns
 
     Example:
-        def test_columns(expected_columns):
+        def test_columns(expected_columns) -> None:
             cols = expected_columns["schedule"]
             assert "GAME_DATE" in cols
     """
     return {
         "schedule": [
-            "GAME_ID", "GAME_DATE", "HOME_TEAM", "AWAY_TEAM",
-            "HOME_SCORE", "AWAY_SCORE", "SEASON"
+            "GAME_ID",
+            "GAME_DATE",
+            "HOME_TEAM",
+            "AWAY_TEAM",
+            "HOME_SCORE",
+            "AWAY_SCORE",
+            "SEASON",
         ],
         "player_game": [
-            "PLAYER_NAME", "TEAM", "GAME_DATE", "PTS", "REB", "AST",
-            "MIN", "FG_PCT", "FT_PCT"
+            "PLAYER_NAME",
+            "TEAM",
+            "GAME_DATE",
+            "PTS",
+            "REB",
+            "AST",
+            "MIN",
+            "FG_PCT",
+            "FT_PCT",
         ],
         "player_season": [
-            "PLAYER_NAME", "TEAM", "SEASON", "GP", "PTS", "REB", "AST",
-            "MIN", "FG_PCT"
-        ]
+            "PLAYER_NAME",
+            "TEAM",
+            "SEASON",
+            "GP",
+            "PTS",
+            "REB",
+            "AST",
+            "MIN",
+            "FG_PCT",
+        ],
     }
 
 
@@ -379,7 +354,8 @@ def expected_columns():
 # Markers
 # ============================================================================
 
-def pytest_configure(config):
+
+def pytest_configure(config) -> None:
     """
     Register custom pytest markers.
 
@@ -392,7 +368,7 @@ def pytest_configure(config):
 
     Usage:
         @pytest.mark.slow
-        def test_large_dataset():
+        def test_large_dataset() -> None:
             pass
 
         Run only fast tests:
@@ -401,35 +377,11 @@ def pytest_configure(config):
         Run only API tests:
         pytest -m api
     """
-    config.addinivalue_line(
-        "markers",
-        "slow: mark test as slow running (>10 seconds)"
-    )
-    config.addinivalue_line(
-        "markers",
-        "integration: mark test as integration test"
-    )
-    config.addinivalue_line(
-        "markers",
-        "api: mark test as REST API test"
-    )
-    config.addinivalue_line(
-        "markers",
-        "mcp: mark test as MCP server test"
-    )
-    config.addinivalue_line(
-        "markers",
-        "smoke: mark test as smoke test (quick validation)"
-    )
-    config.addinivalue_line(
-        "markers",
-        "stress: mark test as stress test (comprehensive coverage)"
-    )
-    config.addinivalue_line(
-        "markers",
-        "benchmark: mark test as performance benchmark"
-    )
-    config.addinivalue_line(
-        "markers",
-        "concurrent: mark test as concurrent request test"
-    )
+    config.addinivalue_line("markers", "slow: mark test as slow running (>10 seconds)")
+    config.addinivalue_line("markers", "integration: mark test as integration test")
+    config.addinivalue_line("markers", "api: mark test as REST API test")
+    config.addinivalue_line("markers", "mcp: mark test as MCP server test")
+    config.addinivalue_line("markers", "smoke: mark test as smoke test (quick validation)")
+    config.addinivalue_line("markers", "stress: mark test as stress test (comprehensive coverage)")
+    config.addinivalue_line("markers", "benchmark: mark test as performance benchmark")
+    config.addinivalue_line("markers", "concurrent: mark test as concurrent request test")

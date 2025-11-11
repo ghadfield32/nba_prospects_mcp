@@ -5,29 +5,43 @@ All routes are thin wrappers around the existing get_dataset() function,
 ensuring we reuse all existing logic without duplication.
 """
 
-import time
-import logging
 import io
-from typing import Any, Dict, List
-from datetime import datetime
-
-from fastapi import APIRouter, HTTPException, Path, Query, status
-from fastapi.responses import StreamingResponse
-import pandas as pd
 import json
+import logging
+import time
+from collections.abc import Generator
+from datetime import datetime
+from typing import Any
+
+import pandas as pd
+from fastapi import APIRouter, HTTPException, Path, Query, status
+from fastapi.responses import Response, StreamingResponse
 
 # Import existing library functions - NO modifications needed!
-from cbb_data.api.datasets import get_dataset, list_datasets, get_recent_games
+from cbb_data.api.datasets import get_dataset, get_recent_games, list_datasets
+
+# Import metrics module for /metrics endpoint
+try:
+    from cbb_data.servers.metrics import (
+        CONTENT_TYPE_LATEST,
+        PROMETHEUS_AVAILABLE,
+        generate_latest,
+        get_metrics_snapshot,
+    )
+
+    METRICS_AVAILABLE = PROMETHEUS_AVAILABLE
+except ImportError:
+    METRICS_AVAILABLE = False
+    generate_latest = None  # type: ignore[assignment]
+    CONTENT_TYPE_LATEST = "text/plain"
 
 from .models import (
+    DatasetInfo,
+    DatasetMetadata,
     DatasetRequest,
     DatasetResponse,
-    DatasetMetadata,
-    DatasetInfo,
     DatasetsListResponse,
     HealthResponse,
-    RecentGamesRequest,
-    ErrorResponse
 )
 
 # Configure logging
@@ -41,7 +55,8 @@ router = APIRouter()
 # Helper Functions
 # ============================================================================
 
-def _generate_ndjson_stream(df: pd.DataFrame):
+
+def _generate_ndjson_stream(df: pd.DataFrame) -> Generator[str, None, None]:
     """
     Generate NDJSON (newline-delimited JSON) stream for DataFrame.
 
@@ -69,9 +84,8 @@ def _generate_ndjson_stream(df: pd.DataFrame):
 
 
 def _dataframe_to_response_data(
-    df: pd.DataFrame,
-    output_format: str
-) -> tuple[List[Any], List[str]]:
+    df: pd.DataFrame, output_format: str
+) -> tuple[list[Any] | str | bytes | list[dict[str, Any]], list[str] | None]:
     """
     Convert DataFrame to response format.
 
@@ -81,7 +95,7 @@ def _dataframe_to_response_data(
 
     Returns:
         Tuple of (data, columns) where:
-        - data: Response data in requested format (List, str, or bytes)
+        - data: Response data in requested format (list[list], str, bytes, or list[dict])
         - columns: Column names (None for self-describing formats like csv/parquet/ndjson)
 
     Supported formats:
@@ -94,7 +108,8 @@ def _dataframe_to_response_data(
     if df is None or df.empty:
         return [], []
 
-    columns = df.columns.tolist()
+    columns: list[str] | None = df.columns.tolist()
+    data: list[Any] | str | bytes | list[dict[str, Any]]
 
     if output_format == "json":
         # Array of arrays format (most compact)
@@ -110,15 +125,17 @@ def _dataframe_to_response_data(
             buffer = io.BytesIO()
             df.to_parquet(
                 buffer,
-                engine='pyarrow',
-                compression='zstd',  # Best balance of speed/size
-                index=False
+                engine="pyarrow",
+                compression="zstd",  # Best balance of speed/size
+                index=False,
             )
             data = buffer.getvalue()  # bytes (auto base64-encoded by FastAPI)
             columns = None  # Parquet includes schema
         except Exception as e:
             logger.error(f"Failed to serialize to parquet: {str(e)}", exc_info=True)
-            raise ValueError(f"Parquet serialization failed: {str(e)}. Ensure pyarrow is installed.")
+            raise ValueError(
+                f"Parquet serialization failed: {str(e)}. Ensure pyarrow is installed."
+            ) from e
     elif output_format == "records":
         # Array of objects (most readable)
         data = df.to_dict(orient="records")
@@ -138,12 +155,13 @@ def _dataframe_to_response_data(
 # Health Check Endpoint
 # ============================================================================
 
+
 @router.get(
     "/health",
     response_model=HealthResponse,
     tags=["Health"],
     summary="Health check",
-    description="Check if the API server is running and healthy"
+    description="Check if the API server is running and healthy",
 )
 async def health_check() -> HealthResponse:
     """
@@ -155,11 +173,7 @@ async def health_check() -> HealthResponse:
         status="healthy",
         version="1.0.0",
         timestamp=datetime.utcnow(),
-        services={
-            "api": "healthy",
-            "cache": "healthy",
-            "data_sources": "healthy"
-        }
+        services={"api": "healthy", "cache": "healthy", "data_sources": "healthy"},
     )
 
 
@@ -167,12 +181,13 @@ async def health_check() -> HealthResponse:
 # Dataset Listing Endpoint
 # ============================================================================
 
+
 @router.get(
     "/datasets",
     response_model=DatasetsListResponse,
     tags=["Datasets"],
     summary="List all datasets",
-    description="Get metadata about all available datasets"
+    description="Get metadata about all available datasets",
 )
 async def list_all_datasets() -> DatasetsListResponse:
     """
@@ -194,42 +209,40 @@ async def list_all_datasets() -> DatasetsListResponse:
                 supported_filters=ds.get("supports", []),
                 supported_leagues=ds.get("leagues", []),
                 data_sources=ds.get("sources", []),
-                sample_columns=ds.get("sample_columns", [])
+                sample_columns=ds.get("sample_columns", []),
             )
             for ds in datasets_raw
         ]
 
-        return DatasetsListResponse(
-            datasets=datasets,
-            count=len(datasets)
-        )
+        return DatasetsListResponse(datasets=datasets, count=len(datasets))
 
     except Exception as e:
         logger.error(f"Error listing datasets: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to list datasets: {str(e)}"
-        )
+            detail=f"Failed to list datasets: {str(e)}",
+        ) from e
 
 
 # ============================================================================
 # Dataset Query Endpoint
 # ============================================================================
 
+
 @router.post(
     "/datasets/{dataset_id}",
     tags=["Datasets"],
     summary="Query a dataset",
-    description="Fetch data from a specific dataset with filters. Supports streaming with output_format=ndjson"
+    description="Fetch data from a specific dataset with filters. Supports streaming with output_format=ndjson",
 )
 async def query_dataset(
     dataset_id: str = Path(
         ...,
         description="Dataset ID (e.g., 'player_game', 'schedule', 'pbp')",
-        examples=["player_game", "schedule", "play_by_play"]
+        examples=["player_game", "schedule", "play_by_play"],
     ),
-    request: DatasetRequest = DatasetRequest()
-):
+    request: DatasetRequest = DatasetRequest(),
+) -> StreamingResponse | DatasetResponse:
     """
     Query a dataset with filters.
 
@@ -253,9 +266,7 @@ async def query_dataset(
 
     try:
         # Log the request
-        logger.info(
-            f"Dataset query: {dataset_id} with filters {request.filters}"
-        )
+        logger.info(f"Dataset query: {dataset_id} with filters {request.filters}")
 
         # Call existing get_dataset() function - NO CHANGES NEEDED!
         df = get_dataset(
@@ -265,12 +276,12 @@ async def query_dataset(
             limit=request.limit,
             as_format="pandas",  # We'll convert to requested format
             name_resolver=None,  # Use default name resolution
-            force_fresh=False  # Use cache when available
+            force_fresh=False,  # Use cache when available
         )
 
         # Handle pagination with offset
         if request.offset and request.offset > 0:
-            df = df.iloc[request.offset:]
+            df = df.iloc[request.offset :]
 
         # Check if NDJSON streaming is requested
         if request.output_format == "ndjson":
@@ -285,8 +296,8 @@ async def query_dataset(
                 headers={
                     "X-Dataset-ID": dataset_id,
                     "X-Row-Count": str(len(df) if df is not None else 0),
-                    "X-Execution-Time-MS": f"{(time.time() - start_time) * 1000:.2f}"
-                }
+                    "X-Execution-Time-MS": f"{(time.time() - start_time) * 1000:.2f}",
+                },
             )
 
         # Convert DataFrame to response format (non-streaming)
@@ -306,7 +317,7 @@ async def query_dataset(
                 execution_time_ms=round(execution_time, 2),
                 cached=execution_time < 100,  # Heuristic: <100ms likely cached
                 cache_key=None,  # Not exposed in current implementation
-                timestamp=datetime.utcnow()
+                timestamp=datetime.utcnow(),
             )
 
         logger.info(
@@ -315,76 +326,53 @@ async def query_dataset(
             f"{execution_time:.2f}ms"
         )
 
-        return DatasetResponse(
-            data=data,
-            columns=columns,
-            metadata=metadata
-        )
+        return DatasetResponse(data=data, columns=columns, metadata=metadata)
 
     except KeyError as e:
         # Dataset not found
         logger.warning(f"Dataset not found: {dataset_id}")
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
     except ValueError as e:
         # Invalid filters
         logger.warning(f"Invalid filters for {dataset_id}: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
 
     except Exception as e:
         # Unexpected error
-        logger.error(
-            f"Error querying dataset {dataset_id}: {str(e)}",
-            exc_info=True
-        )
+        logger.error(f"Error querying dataset {dataset_id}: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to query dataset: {str(e)}"
-        )
+            detail=f"Failed to query dataset: {str(e)}",
+        ) from e
 
 
 # ============================================================================
 # Recent Games Convenience Endpoint
 # ============================================================================
 
+
 @router.get(
     "/recent-games/{league}",
     response_model=DatasetResponse,
     tags=["Convenience"],
     summary="Get recent games",
-    description="Convenience endpoint for fetching recent games without date filters"
+    description="Convenience endpoint for fetching recent games without date filters",
 )
 async def get_recent_games_endpoint(
     league: str = Path(
-        ...,
-        description="League identifier",
-        examples=["NCAA-MBB", "NCAA-WBB", "EuroLeague"]
+        ..., description="League identifier", examples=["NCAA-MBB", "NCAA-WBB", "EuroLeague"]
     ),
     days: int = Query(
-        default=2,
-        description="Number of days to look back (1 = today only)",
-        ge=1,
-        le=30
+        default=2, description="Number of days to look back (1 = today only)", ge=1, le=30
     ),
-    teams: str = Query(
-        default=None,
-        description="Comma-separated list of team names (optional)"
-    ),
-    division: str = Query(
-        default=None,
-        description="Division filter for NCAA (D1, D2, D3, all)"
-    ),
+    teams: str = Query(default=None, description="Comma-separated list of team names (optional)"),
+    division: str = Query(default=None, description="Division filter for NCAA (D1, D2, D3, all)"),
     output_format: str = Query(
         default="json",
         description="Output format (json, csv, parquet, records, ndjson)",
-        pattern="^(json|csv|parquet|records|ndjson)$"
-    )
+        pattern="^(json|csv|parquet|records|ndjson)$",
+    ),
 ) -> DatasetResponse:
     """
     Get recent games for a league.
@@ -417,11 +405,7 @@ async def get_recent_games_endpoint(
 
         # Call existing get_recent_games() function - NO CHANGES!
         df = get_recent_games(
-            league=league,
-            days=days,
-            teams=teams_list,
-            Division=division,
-            force_fresh=False
+            league=league, days=days, teams=teams_list, Division=division, force_fresh=False
         )
 
         # Convert to response format
@@ -437,49 +421,39 @@ async def get_recent_games_endpoint(
                 "league": league,
                 "days": days,
                 "teams": teams_list,
-                "division": division
+                "division": division,
             },
             row_count=len(data) if isinstance(data, list) else 0,
             total_rows=len(df) if df is not None else 0,
             execution_time_ms=round(execution_time, 2),
             cached=execution_time < 100,
-            timestamp=datetime.utcnow()
+            timestamp=datetime.utcnow(),
         )
 
-        return DatasetResponse(
-            data=data,
-            columns=columns,
-            metadata=metadata
-        )
+        return DatasetResponse(data=data, columns=columns, metadata=metadata)
 
     except Exception as e:
-        logger.error(
-            f"Error fetching recent games for {league}: {str(e)}",
-            exc_info=True
-        )
+        logger.error(f"Error fetching recent games for {league}: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to fetch recent games: {str(e)}"
-        )
+            detail=f"Failed to fetch recent games: {str(e)}",
+        ) from e
 
 
 # ============================================================================
 # Dataset Info Endpoint
 # ============================================================================
 
+
 @router.get(
     "/datasets/{dataset_id}/info",
     response_model=DatasetInfo,
     tags=["Datasets"],
     summary="Get dataset info",
-    description="Get metadata about a specific dataset"
+    description="Get metadata about a specific dataset",
 )
 async def get_dataset_info(
-    dataset_id: str = Path(
-        ...,
-        description="Dataset ID",
-        examples=["player_game", "schedule"]
-    )
+    dataset_id: str = Path(..., description="Dataset ID", examples=["player_game", "schedule"]),
 ) -> DatasetInfo:
     """
     Get information about a specific dataset.
@@ -500,15 +474,11 @@ async def get_dataset_info(
         datasets_raw = list_datasets()
 
         # Find the requested dataset
-        dataset = next(
-            (ds for ds in datasets_raw if ds["id"] == dataset_id),
-            None
-        )
+        dataset = next((ds for ds in datasets_raw if ds["id"] == dataset_id), None)
 
         if not dataset:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Dataset '{dataset_id}' not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"Dataset '{dataset_id}' not found"
             )
 
         # Convert to response model
@@ -520,7 +490,7 @@ async def get_dataset_info(
             supported_filters=dataset.get("supports", []),
             supported_leagues=dataset.get("leagues", []),
             data_sources=dataset.get("sources", []),
-            sample_columns=dataset.get("sample_columns", [])
+            sample_columns=dataset.get("sample_columns", []),
         )
 
     except HTTPException:
@@ -529,21 +499,22 @@ async def get_dataset_info(
         logger.error(f"Error getting dataset info: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get dataset info: {str(e)}"
-        )
+            detail=f"Failed to get dataset info: {str(e)}",
+        ) from e
 
 
 # ============================================================================
 # Schema Endpoints (Self-Documentation)
 # ============================================================================
 
+
 @router.get(
     "/schema/datasets",
     tags=["Schema"],
     summary="Get dataset schemas",
-    description="Self-documenting endpoint that returns all available datasets with their metadata"
+    description="Self-documenting endpoint that returns all available datasets with their metadata",
 )
-async def get_datasets_schema() -> Dict[str, Any]:
+async def get_datasets_schema() -> dict[str, Any]:
     """
     Get comprehensive schema for all datasets.
 
@@ -576,30 +547,30 @@ async def get_datasets_schema() -> Dict[str, Any]:
                 "supported_leagues": ds.get("leagues", []),
                 "data_sources": ds.get("sources", []),
                 "sample_columns": ds.get("sample_columns", []),
-                "endpoint": f"/datasets/{ds['id']}"
+                "endpoint": f"/datasets/{ds['id']}",
             }
 
         return {
             "schemas": schemas,
             "count": len(schemas),
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
     except Exception as e:
         logger.error(f"Error generating dataset schemas: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to generate schemas: {str(e)}"
-        )
+            detail=f"Failed to generate schemas: {str(e)}",
+        ) from e
 
 
 @router.get(
     "/schema/filters",
     tags=["Schema"],
     summary="Get available filters",
-    description="Returns all available filter options for querying datasets"
+    description="Returns all available filter options for querying datasets",
 )
-async def get_filters_schema() -> Dict[str, Any]:
+async def get_filters_schema() -> dict[str, Any]:
     """
     Get comprehensive schema for all available filters.
 
@@ -625,7 +596,7 @@ async def get_filters_schema() -> Dict[str, Any]:
                 "enum": ["NCAA-MBB", "NCAA-WBB", "EuroLeague"],
                 "required": True,
                 "description": "League identifier",
-                "examples": ["NCAA-MBB", "NCAA-WBB", "EuroLeague"]
+                "examples": ["NCAA-MBB", "NCAA-WBB", "EuroLeague"],
             },
             "season": {
                 "type": "string",
@@ -634,20 +605,20 @@ async def get_filters_schema() -> Dict[str, Any]:
                 "accepted_values": [
                     "YYYY format (e.g., '2025')",
                     "YYYY-YY format (e.g., '2024-25')",
-                    "Natural language: 'this season', 'last season', 'current season'"
+                    "Natural language: 'this season', 'last season', 'current season'",
                 ],
                 "description": "Season year. Basketball seasons named by ending year (2024-25 = '2025')",
-                "examples": ["2025", "2024-25", "this season", "last season"]
+                "examples": ["2025", "2024-25", "this season", "last season"],
             },
             "team": {
                 "type": "array[string]",
                 "description": "List of team names to filter",
-                "examples": [["Duke"], ["Duke", "UNC"], ["Michigan State"]]
+                "examples": [["Duke"], ["Duke", "UNC"], ["Michigan State"]],
             },
             "player": {
                 "type": "array[string]",
                 "description": "List of player names to filter",
-                "examples": [["Cooper Flagg"], ["Caitlin Clark"], ["John Doe"]]
+                "examples": [["Cooper Flagg"], ["Caitlin Clark"], ["John Doe"]],
             },
             "date": {
                 "type": "string or object",
@@ -656,10 +627,14 @@ async def get_filters_schema() -> Dict[str, Any]:
                 "accepted_values": [
                     "YYYY-MM-DD format (e.g., '2025-01-15')",
                     "Natural language: 'today', 'yesterday', '3 days ago'",
-                    "Date range object: {start: 'YYYY-MM-DD', end: 'YYYY-MM-DD'}"
+                    "Date range object: {start: 'YYYY-MM-DD', end: 'YYYY-MM-DD'}",
                 ],
                 "description": "Single date or date range",
-                "examples": ["2025-01-15", "yesterday", {"start": "2025-01-01", "end": "2025-01-31"}]
+                "examples": [
+                    "2025-01-15",
+                    "yesterday",
+                    {"start": "2025-01-01", "end": "2025-01-31"},
+                ],
             },
             "date_from": {
                 "type": "string",
@@ -667,23 +642,23 @@ async def get_filters_schema() -> Dict[str, Any]:
                 "natural_language": True,
                 "accepted_values": [
                     "YYYY-MM-DD format",
-                    "Natural language: 'yesterday', 'last week', '3 days ago'"
+                    "Natural language: 'yesterday', 'last week', '3 days ago'",
                 ],
                 "description": "Start date for date range filtering",
-                "examples": ["2025-01-01", "yesterday", "last week"]
+                "examples": ["2025-01-01", "yesterday", "last week"],
             },
             "date_to": {
                 "type": "string",
                 "format": "YYYY-MM-DD or natural language",
                 "natural_language": True,
                 "description": "End date for date range filtering",
-                "examples": ["2025-01-31", "today"]
+                "examples": ["2025-01-31", "today"],
             },
             "game_ids": {
                 "type": "array[string]",
                 "required_for": ["play_by_play", "shots"],
                 "description": "List of game IDs",
-                "examples": [["401635571"], ["401635571", "401635572"]]
+                "examples": [["401635571"], ["401635571", "401635572"]],
             },
             "per_mode": {
                 "type": "string",
@@ -694,14 +669,14 @@ async def get_filters_schema() -> Dict[str, Any]:
                 "recommendations": {
                     "Totals": "Cumulative stats (raw numbers)",
                     "PerGame": "Per-game averages (best for comparisons)",
-                    "Per40": "Per 40 minutes (normalizes playing time)"
-                }
+                    "Per40": "Per 40 minutes (normalizes playing time)",
+                },
             },
             "Division": {
                 "type": "string",
                 "enum": ["D1", "D2", "D3", "all"],
                 "description": "NCAA division filter",
-                "examples": ["D1", "D2", "D3", "all"]
+                "examples": ["D1", "D2", "D3", "all"],
             },
             "limit": {
                 "type": "integer",
@@ -709,15 +684,15 @@ async def get_filters_schema() -> Dict[str, Any]:
                 "min": 1,
                 "max": 10000,
                 "description": "Maximum number of rows to return",
-                "examples": [10, 100, 1000]
+                "examples": [10, 100, 1000],
             },
             "compact": {
                 "type": "boolean",
                 "default": False,
                 "description": "Return arrays instead of markdown (saves ~70% tokens)",
                 "examples": [True, False],
-                "recommendation": "Use compact=True for queries returning >50 rows"
-            }
+                "recommendation": "Use compact=True for queries returning >50 rows",
+            },
         }
 
         return {
@@ -726,26 +701,26 @@ async def get_filters_schema() -> Dict[str, Any]:
             "natural_language_support": {
                 "dates": ["yesterday", "today", "last week", "3 days ago", "last month"],
                 "seasons": ["this season", "last season", "current season", "2024-25"],
-                "days": ["today", "yesterday", "last week", "last 5 days", "last month"]
+                "days": ["today", "yesterday", "last week", "last 5 days", "last month"],
             },
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
     except Exception as e:
         logger.error(f"Error generating filters schema: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to generate filters schema: {str(e)}"
-        )
+            detail=f"Failed to generate filters schema: {str(e)}",
+        ) from e
 
 
 @router.get(
     "/schema/tools",
     tags=["Schema"],
     summary="Get MCP tool schemas",
-    description="Returns schemas for all MCP tools available via the MCP server"
+    description="Returns schemas for all MCP tools available via the MCP server",
 )
-async def get_tools_schema() -> Dict[str, Any]:
+async def get_tools_schema() -> dict[str, Any]:
     """
     Get comprehensive schema for all MCP tools.
 
@@ -771,17 +746,30 @@ async def get_tools_schema() -> Dict[str, Any]:
         # Convert TOOLS registry to schema format
         tools_schema = {}
         for tool in TOOLS:
-            tools_schema[tool["name"]] = {
-                "name": tool["name"],
-                "description": tool["description"],
-                "inputSchema": tool["inputSchema"],
+            # Extract schema with type assertion
+            input_schema: dict[str, Any] = tool["inputSchema"]  # type: ignore[index,assignment]
+            properties: dict[str, Any] = input_schema.get("properties", {})
+
+            tools_schema[tool["name"]] = {  # type: ignore[index]
+                "name": tool["name"],  # type: ignore[index]
+                "description": tool["description"],  # type: ignore[index]
+                "inputSchema": input_schema,
                 "natural_language_support": {
-                    "season": tool["inputSchema"]["properties"].get("season", {}).get("description", "").find("natural language") != -1,
-                    "dates": tool["inputSchema"]["properties"].get("date_from", {}).get("description", "").find("natural language") != -1,
-                    "days": tool["inputSchema"]["properties"].get("days", {}).get("description", "").find("natural language") != -1
+                    "season": properties.get("season", {})
+                    .get("description", "")
+                    .find("natural language")
+                    != -1,
+                    "dates": properties.get("date_from", {})
+                    .get("description", "")
+                    .find("natural language")
+                    != -1,
+                    "days": properties.get("days", {})
+                    .get("description", "")
+                    .find("natural language")
+                    != -1,
                 },
-                "compact_mode": "compact" in tool["inputSchema"]["properties"],
-                "required_params": tool["inputSchema"].get("required", [])
+                "compact_mode": "compact" in properties,
+                "required_params": input_schema.get("required", []),
             }
 
         return {
@@ -791,20 +779,109 @@ async def get_tools_schema() -> Dict[str, Any]:
                 "natural_language": True,
                 "compact_mode": True,
                 "type_validation": True,
-                "token_efficiency": "~70% savings with compact=True"
+                "token_efficiency": "~70% savings with compact=True",
             },
             "usage_tips": {
                 "dates": "Use natural language like 'yesterday', 'last week' instead of calculating dates",
                 "seasons": "Use 'this season', 'last season' instead of figuring out current year",
                 "compact": "Always use compact=True for queries returning >50 rows to save tokens",
-                "per_mode": "Use per_mode='PerGame' for fair player comparisons"
+                "per_mode": "Use per_mode='PerGame' for fair player comparisons",
             },
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
     except Exception as e:
         logger.error(f"Error generating tools schema: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to generate tools schema: {str(e)}"
+            detail=f"Failed to generate tools schema: {str(e)}",
+        ) from e
+
+
+# ============================================================================
+# Metrics Endpoint (Prometheus)
+# ============================================================================
+
+
+@router.get(
+    "/metrics",
+    tags=["Observability"],
+    summary="Get Prometheus metrics",
+    description="Prometheus-compatible metrics endpoint for monitoring",
+)
+async def get_metrics() -> Response:
+    """
+    Get Prometheus metrics.
+
+    Exposes metrics in Prometheus text format for scraping by monitoring systems.
+
+    Metrics include:
+        - cbb_tool_calls_total: Tool call counters
+        - cbb_cache_hits_total: Cache hit counters
+        - cbb_cache_misses_total: Cache miss counters
+        - cbb_tool_latency_ms: Tool execution latency histograms
+        - cbb_rows_returned: Rows returned histograms
+        - cbb_duckdb_size_mb: DuckDB cache size gauge
+        - cbb_request_total: HTTP request counters
+        - cbb_request_duration_seconds: Request duration histograms
+        - cbb_error_total: Error counters
+
+    Returns:
+        Prometheus text format metrics
+
+    Examples:
+        GET /metrics
+    """
+    if not METRICS_AVAILABLE:
+        raise HTTPException(
+            status_code=status.HTTP_501_NOT_IMPLEMENTED,
+            detail="Metrics not available. Install prometheus-client: pip install prometheus-client",
         )
+
+    try:
+        # Generate Prometheus metrics text format
+        metrics_data = generate_latest()
+        return Response(content=metrics_data, media_type=CONTENT_TYPE_LATEST)
+
+    except Exception as e:
+        logger.error(f"Error generating metrics: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate metrics: {str(e)}",
+        ) from e
+
+
+@router.get(
+    "/metrics/snapshot",
+    tags=["Observability"],
+    summary="Get metrics snapshot (JSON)",
+    description="Get a compact JSON snapshot of key metrics for LLMs",
+)
+async def get_metrics_json() -> dict[str, Any]:
+    """
+    Get metrics snapshot in JSON format.
+
+    Returns a compact summary of key metrics suitable for LLM consumption.
+
+    Returns:
+        JSON with metrics summary
+
+    Examples:
+        GET /metrics/snapshot
+    """
+    if not METRICS_AVAILABLE:
+        return {
+            "metrics_enabled": False,
+            "message": "Metrics not available. Install prometheus-client: pip install prometheus-client",
+        }
+
+    try:
+        snapshot = get_metrics_snapshot()
+        return snapshot
+
+    except Exception as e:
+        logger.error(f"Error generating metrics snapshot: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate metrics snapshot: {str(e)}",
+        ) from e

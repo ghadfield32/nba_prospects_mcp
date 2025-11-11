@@ -74,14 +74,11 @@ The MCP server exposes 10 tools, 11+ resources, and 10 prompts to LLMs:
 """
 
 import pytest
-import asyncio
-from typing import Dict, Any, List
-from unittest.mock import Mock, patch
-
 
 # ============================================================================
 # MCP Tools Tests
 # ============================================================================
+
 
 @pytest.mark.mcp
 @pytest.mark.smoke
@@ -100,7 +97,7 @@ class TestMCPTools:
         LLM: Presents results to user
     """
 
-    def test_get_schedule_tool_exists(self, mcp_tools):
+    def test_get_schedule_tool_exists(self, mcp_tools) -> None:
         """
         Test that get_schedule tool is registered.
 
@@ -125,7 +122,7 @@ class TestMCPTools:
         tool_names = [tool["name"] for tool in mcp_tools]
         assert "get_schedule" in tool_names, "get_schedule tool not registered"
 
-    def test_get_player_game_stats_tool_exists(self, mcp_tools):
+    def test_get_player_game_stats_tool_exists(self, mcp_tools) -> None:
         """
         Test that get_player_game_stats tool is registered.
 
@@ -154,7 +151,7 @@ class TestMCPTools:
         tool_names = [tool["name"] for tool in mcp_tools]
         assert "get_player_game_stats" in tool_names, "get_player_game_stats tool not registered"
 
-    def test_get_player_season_stats_tool_exists(self, mcp_tools):
+    def test_get_player_season_stats_tool_exists(self, mcp_tools) -> None:
         """
         Test that get_player_season_stats tool is registered.
 
@@ -181,9 +178,11 @@ class TestMCPTools:
             -> args: {league: "NCAA-MBB", season: "2025", team: ["Duke"], per_mode: "Totals"}
         """
         tool_names = [tool["name"] for tool in mcp_tools]
-        assert "get_player_season_stats" in tool_names, "get_player_season_stats tool not registered"
+        assert (
+            "get_player_season_stats" in tool_names
+        ), "get_player_season_stats tool not registered"
 
-    def test_get_recent_games_tool_exists(self, mcp_tools):
+    def test_get_recent_games_tool_exists(self, mcp_tools) -> None:
         """
         Test that get_recent_games tool is registered.
 
@@ -209,7 +208,7 @@ class TestMCPTools:
         tool_names = [tool["name"] for tool in mcp_tools]
         assert "get_recent_games" in tool_names, "get_recent_games tool not registered"
 
-    def test_list_available_datasets_tool_exists(self, mcp_tools):
+    def test_list_available_datasets_tool_exists(self, mcp_tools) -> None:
         """
         Test that list_available_datasets tool is registered.
 
@@ -234,9 +233,11 @@ class TestMCPTools:
             - player_team_season: Player×team season stats
         """
         tool_names = [tool["name"] for tool in mcp_tools]
-        assert "list_available_datasets" in tool_names, "list_available_datasets tool not registered"
+        assert (
+            "list_available_datasets" in tool_names
+        ), "list_available_datasets tool not registered"
 
-    def test_all_expected_tools_registered(self, mcp_tools):
+    def test_all_expected_tools_registered(self, mcp_tools) -> None:
         """
         Test that all 10 expected tools are registered.
 
@@ -262,7 +263,7 @@ class TestMCPTools:
             "get_team_season_stats",
             "get_recent_games",
             "list_available_datasets",
-            "search_teams"
+            "search_teams",
         ]
 
         tool_names = [tool["name"] for tool in mcp_tools]
@@ -270,7 +271,7 @@ class TestMCPTools:
         for expected in expected_tools:
             assert expected in tool_names, f"Expected tool '{expected}' not found"
 
-    def test_tools_have_required_fields(self, mcp_tools):
+    def test_tools_have_required_fields(self, mcp_tools) -> None:
         """
         Test that all tools have required metadata fields.
 
@@ -289,11 +290,9 @@ class TestMCPTools:
 
         for tool in mcp_tools:
             for field in required_fields:
-                assert field in tool, (
-                    f"Tool '{tool.get('name', 'unknown')}' missing field: {field}"
-                )
+                assert field in tool, f"Tool '{tool.get('name', 'unknown')}' missing field: {field}"
 
-    def test_tool_schemas_are_valid(self, mcp_tools):
+    def test_tool_schemas_are_valid(self, mcp_tools) -> None:
         """
         Test that all tool input schemas are valid JSON Schema.
 
@@ -324,24 +323,23 @@ class TestMCPTools:
             schema = tool["inputSchema"]
 
             # Must be object type
-            assert schema.get("type") == "object", (
-                f"Tool '{tool['name']}' schema must be type 'object'"
-            )
+            assert (
+                schema.get("type") == "object"
+            ), f"Tool '{tool['name']}' schema must be type 'object'"
 
             # Must have properties
-            assert "properties" in schema, (
-                f"Tool '{tool['name']}' schema missing 'properties'"
-            )
+            assert "properties" in schema, f"Tool '{tool['name']}' schema missing 'properties'"
 
             # Properties should be a dict
-            assert isinstance(schema["properties"], dict), (
-                f"Tool '{tool['name']}' schema properties must be a dict"
-            )
+            assert isinstance(
+                schema["properties"], dict
+            ), f"Tool '{tool['name']}' schema properties must be a dict"
 
 
 # ============================================================================
 # MCP Resources Tests
 # ============================================================================
+
 
 @pytest.mark.mcp
 @pytest.mark.smoke
@@ -365,7 +363,7 @@ class TestMCPResources:
         LLM: Explains dataset to user
     """
 
-    def test_leagues_resource_exists(self, mcp_resources):
+    def test_leagues_resource_exists(self, mcp_resources) -> None:
         """
         Test that leagues resource is available.
 
@@ -390,7 +388,7 @@ class TestMCPResources:
         resource_uris = [r["uri"] for r in mcp_resources]
         assert "cbb://leagues" in resource_uris, "leagues resource not found"
 
-    def test_datasets_resource_exists(self, mcp_resources):
+    def test_datasets_resource_exists(self, mcp_resources) -> None:
         """
         Test that datasets resource is available.
 
@@ -415,7 +413,7 @@ class TestMCPResources:
         resource_uris = [r["uri"] for r in mcp_resources]
         assert "cbb://datasets" in resource_uris, "datasets resource not found"
 
-    def test_league_specific_resources_exist(self, mcp_resources):
+    def test_league_specific_resources_exist(self, mcp_resources) -> None:
         """
         Test that league-specific info resources exist.
 
@@ -441,13 +439,13 @@ class TestMCPResources:
         league_resources = [
             "cbb://leagues/NCAA-MBB",
             "cbb://leagues/NCAA-WBB",
-            "cbb://leagues/EuroLeague"
+            "cbb://leagues/EuroLeague",
         ]
 
         for uri in league_resources:
             assert uri in resource_uris, f"League resource '{uri}' not found"
 
-    def test_dataset_specific_resources_exist(self, mcp_resources, all_datasets):
+    def test_dataset_specific_resources_exist(self, mcp_resources, all_datasets) -> None:
         """
         Test that dataset-specific info resources exist.
 
@@ -477,11 +475,9 @@ class TestMCPResources:
 
         for dataset_id in all_datasets:
             expected_uri = f"cbb://datasets/{dataset_id}"
-            assert expected_uri in resource_uris, (
-                f"Dataset resource '{expected_uri}' not found"
-            )
+            assert expected_uri in resource_uris, f"Dataset resource '{expected_uri}' not found"
 
-    def test_resources_have_required_fields(self, mcp_resources):
+    def test_resources_have_required_fields(self, mcp_resources) -> None:
         """
         Test that all resources have required metadata.
 
@@ -501,11 +497,11 @@ class TestMCPResources:
 
         for resource in mcp_resources:
             for field in required_fields:
-                assert field in resource, (
-                    f"Resource '{resource.get('uri', 'unknown')}' missing field: {field}"
-                )
+                assert (
+                    field in resource
+                ), f"Resource '{resource.get('uri', 'unknown')}' missing field: {field}"
 
-    def test_resources_use_markdown_format(self, mcp_resources):
+    def test_resources_use_markdown_format(self, mcp_resources) -> None:
         """
         Test that resources use text/markdown MIME type.
 
@@ -520,14 +516,15 @@ class TestMCPResources:
             - Generate help text
         """
         for resource in mcp_resources:
-            assert resource["mimeType"] == "text/markdown", (
-                f"Resource '{resource['uri']}' should use text/markdown"
-            )
+            assert (
+                resource["mimeType"] == "text/markdown"
+            ), f"Resource '{resource['uri']}' should use text/markdown"
 
 
 # ============================================================================
 # MCP Prompts Tests
 # ============================================================================
+
 
 @pytest.mark.mcp
 @pytest.mark.smoke
@@ -546,7 +543,7 @@ class TestMCPPrompts:
         LLM: Returns formatted results
     """
 
-    def test_top_scorers_prompt_exists(self, mcp_prompts):
+    def test_top_scorers_prompt_exists(self, mcp_prompts) -> None:
         """
         Test that top-scorers prompt is available.
 
@@ -573,7 +570,7 @@ class TestMCPPrompts:
         prompt_names = [p["name"] for p in mcp_prompts]
         assert "top-scorers" in prompt_names, "top-scorers prompt not found"
 
-    def test_team_schedule_prompt_exists(self, mcp_prompts):
+    def test_team_schedule_prompt_exists(self, mcp_prompts) -> None:
         """
         Test that team-schedule prompt is available.
 
@@ -599,7 +596,7 @@ class TestMCPPrompts:
         prompt_names = [p["name"] for p in mcp_prompts]
         assert "team-schedule" in prompt_names, "team-schedule prompt not found"
 
-    def test_player_stats_prompt_exists(self, mcp_prompts):
+    def test_player_stats_prompt_exists(self, mcp_prompts) -> None:
         """
         Test that player-stats prompt is available.
 
@@ -626,7 +623,7 @@ class TestMCPPrompts:
         prompt_names = [p["name"] for p in mcp_prompts]
         assert "player-stats" in prompt_names, "player-stats prompt not found"
 
-    def test_prompts_have_required_fields(self, mcp_prompts):
+    def test_prompts_have_required_fields(self, mcp_prompts) -> None:
         """
         Test that all prompts have required metadata.
 
@@ -646,11 +643,11 @@ class TestMCPPrompts:
 
         for prompt in mcp_prompts:
             for field in required_fields:
-                assert field in prompt, (
-                    f"Prompt '{prompt.get('name', 'unknown')}' missing field: {field}"
-                )
+                assert (
+                    field in prompt
+                ), f"Prompt '{prompt.get('name', 'unknown')}' missing field: {field}"
 
-    def test_prompt_arguments_are_defined(self, mcp_prompts):
+    def test_prompt_arguments_are_defined(self, mcp_prompts) -> None:
         """
         Test that prompt arguments are properly defined.
 
@@ -668,20 +665,19 @@ class TestMCPPrompts:
             arguments = prompt.get("arguments", [])
 
             for arg in arguments:
-                assert "name" in arg, (
-                    f"Prompt '{prompt['name']}' has argument missing 'name'"
-                )
-                assert "description" in arg, (
-                    f"Prompt '{prompt['name']}' argument '{arg.get('name')}' missing 'description'"
-                )
-                assert "required" in arg, (
-                    f"Prompt '{prompt['name']}' argument '{arg.get('name')}' missing 'required'"
-                )
+                assert "name" in arg, f"Prompt '{prompt['name']}' has argument missing 'name'"
+                assert (
+                    "description" in arg
+                ), f"Prompt '{prompt['name']}' argument '{arg.get('name')}' missing 'description'"
+                assert (
+                    "required" in arg
+                ), f"Prompt '{prompt['name']}' argument '{arg.get('name')}' missing 'required'"
 
 
 # ============================================================================
 # Integration Tests
 # ============================================================================
+
 
 @pytest.mark.mcp
 @pytest.mark.integration
@@ -696,7 +692,7 @@ class TestMCPIntegration:
         4. All components return consistent, usable results
     """
 
-    def test_can_import_mcp_server(self):
+    def test_can_import_mcp_server(self) -> None:
         """
         Test that MCP server module can be imported.
 
@@ -710,12 +706,13 @@ class TestMCPIntegration:
             server = BasketballDataMCPServer()
         """
         try:
-            from cbb_data.servers.mcp_server import BasketballDataMCPServer
+            from cbb_data.servers.mcp_server import BasketballDataMCPServer  # noqa: F401
+
             assert True
         except ImportError as e:
             pytest.fail(f"Failed to import MCP server: {e}")
 
-    def test_can_create_mcp_server_instance(self):
+    def test_can_create_mcp_server_instance(self) -> None:
         """
         Test that MCP server can be instantiated.
 
@@ -731,15 +728,18 @@ class TestMCPIntegration:
         """
         try:
             from cbb_data.servers.mcp_server import BasketballDataMCPServer
+
             server = BasketballDataMCPServer()
             assert server is not None
-            assert hasattr(server, 'tools_registry')
-            assert hasattr(server, 'resources_registry')
-            assert hasattr(server, 'prompts_registry')
+            assert hasattr(server, "tools_registry")
+            assert hasattr(server, "resources_registry")
+            assert hasattr(server, "prompts_registry")
         except Exception as e:
             pytest.fail(f"Failed to create MCP server instance: {e}")
 
-    def test_tools_resources_prompts_counts_match(self, mcp_tools, mcp_resources, mcp_prompts):
+    def test_tools_resources_prompts_counts_match(
+        self, mcp_tools, mcp_resources, mcp_prompts
+    ) -> None:
         """
         Test that component counts match expected values.
 
@@ -753,17 +753,15 @@ class TestMCPIntegration:
             - Nothing was accidentally removed
             - New components are properly added
         """
-        assert len(mcp_tools) == 10, (
-            f"Expected 10 tools, found {len(mcp_tools)}"
-        )
-        assert len(mcp_resources) >= 11, (
-            f"Expected at least 11 resources, found {len(mcp_resources)}"
-        )
-        assert len(mcp_prompts) == 10, (
-            f"Expected 10 prompts, found {len(mcp_prompts)}"
-        )
+        assert len(mcp_tools) == 10, f"Expected 10 tools, found {len(mcp_tools)}"
+        assert (
+            len(mcp_resources) >= 11
+        ), f"Expected at least 11 resources, found {len(mcp_resources)}"
+        assert len(mcp_prompts) == 10, f"Expected 10 prompts, found {len(mcp_prompts)}"
 
-    def test_all_leagues_supported_across_components(self, mcp_tools, mcp_resources, all_leagues):
+    def test_all_leagues_supported_across_components(
+        self, mcp_tools, mcp_resources, all_leagues
+    ) -> None:
         """
         Test that all leagues are consistently supported.
 
@@ -787,14 +785,13 @@ class TestMCPIntegration:
 
         for league in all_leagues:
             league_uri = f"cbb://leagues/{league}"
-            assert league_uri in resource_uris, (
-                f"League resource for '{league}' not found"
-            )
+            assert league_uri in resource_uris, f"League resource for '{league}' not found"
 
 
 # ============================================================================
 # Error Handling Tests
 # ============================================================================
+
 
 @pytest.mark.mcp
 class TestMCPErrorHandling:
@@ -809,7 +806,7 @@ class TestMCPErrorHandling:
         - Timeout conditions
     """
 
-    def test_tools_validate_required_parameters(self, mcp_tools):
+    def test_tools_validate_required_parameters(self, mcp_tools) -> None:
         """
         Test that tools define required parameters.
 
@@ -843,7 +840,7 @@ class TestMCPErrorHandling:
                         f"but it's not in properties"
                     )
 
-    def test_resource_handlers_are_callable(self, mcp_resources):
+    def test_resource_handlers_are_callable(self, mcp_resources) -> None:
         """
         Test that all resource handlers are callable functions.
 
@@ -858,11 +855,9 @@ class TestMCPErrorHandling:
         """
         for resource in mcp_resources:
             handler = resource["handler"]
-            assert callable(handler), (
-                f"Resource '{resource['uri']}' handler is not callable"
-            )
+            assert callable(handler), f"Resource '{resource['uri']}' handler is not callable"
 
-    def test_tool_handlers_are_callable(self, mcp_tools):
+    def test_tool_handlers_are_callable(self, mcp_tools) -> None:
         """
         Test that all tool handlers are callable functions.
 
@@ -878,14 +873,13 @@ class TestMCPErrorHandling:
         """
         for tool in mcp_tools:
             handler = tool["handler"]
-            assert callable(handler), (
-                f"Tool '{tool['name']}' handler is not callable"
-            )
+            assert callable(handler), f"Tool '{tool['name']}' handler is not callable"
 
 
 # ============================================================================
 # Performance Tests
 # ============================================================================
+
 
 @pytest.mark.mcp
 @pytest.mark.slow
@@ -900,7 +894,7 @@ class TestMCPPerformance:
         - Memory usage: Reasonable (shared cache with REST API)
     """
 
-    def test_resource_fetches_are_fast(self, mcp_resources):
+    def test_resource_fetches_are_fast(self, mcp_resources) -> None:
         """
         Test that resource fetches are fast (<10ms).
 
@@ -920,10 +914,7 @@ class TestMCPPerformance:
         import time
 
         # Test fetching a resource
-        leagues_resource = next(
-            (r for r in mcp_resources if r["uri"] == "cbb://leagues"),
-            None
-        )
+        leagues_resource = next((r for r in mcp_resources if r["uri"] == "cbb://leagues"), None)
 
         assert leagues_resource is not None, "leagues resource not found"
 
@@ -933,13 +924,13 @@ class TestMCPPerformance:
         content = handler("cbb://leagues")
         elapsed_time = time.time() - start_time
 
-        assert elapsed_time < 0.01, (
-            f"Resource fetch took {elapsed_time*1000:.1f}ms, should be <10ms"
-        )
+        assert (
+            elapsed_time < 0.01
+        ), f"Resource fetch took {elapsed_time*1000:.1f}ms, should be <10ms"
         assert isinstance(content, str), "Resource content should be string"
         assert len(content) > 0, "Resource content should not be empty"
 
-    def test_tool_registry_lookup_is_fast(self, mcp_tools):
+    def test_tool_registry_lookup_is_fast(self, mcp_tools) -> None:
         """
         Test that tool registry lookups are fast.
 
@@ -966,7 +957,5 @@ class TestMCPPerformance:
         tool = tools_by_name.get("get_schedule")
         elapsed_time = time.time() - start_time
 
-        assert elapsed_time < 0.001, (
-            f"Tool lookup took {elapsed_time*1000:.3f}ms, should be <1ms"
-        )
+        assert elapsed_time < 0.001, f"Tool lookup took {elapsed_time*1000:.3f}ms, should be <1ms"
         assert tool is not None, "get_schedule tool should exist"

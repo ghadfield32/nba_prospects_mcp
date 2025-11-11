@@ -13,13 +13,15 @@ Validates:
 Run: python -m pytest tests/source_validation/test_espn_mbb.py -v
 """
 
-import pytest
+from datetime import datetime
+
 import pandas as pd
-from datetime import datetime, timedelta
+import pytest
 
 # Check if sportsdataverse is installed
 try:
-    from sportsdataverse.mbb import mbb_schedule, mbb_teams, mbb_game_all
+    from sportsdataverse.mbb import mbb_game_all, mbb_schedule, mbb_teams
+
     SPORTSDATAVERSE_AVAILABLE = True
 except ImportError:
     SPORTSDATAVERSE_AVAILABLE = False
@@ -48,7 +50,9 @@ class TestESPNMBB:
             teams_df = mbb_teams()
             assert teams_df is not None, "Teams data is None"
             assert not teams_df.empty, "Teams data is empty"
-            assert "team_id" in teams_df.columns or "id" in teams_df.columns, "Missing team ID column"
+            assert (
+                "team_id" in teams_df.columns or "id" in teams_df.columns
+            ), "Missing team ID column"
 
             print(f"✓ Successfully fetched {len(teams_df)} teams")
             print(f"  Sample teams: {teams_df.head(3).to_dict('records')}")
@@ -75,7 +79,9 @@ class TestESPNMBB:
                 ), f"Missing column: {col}"
 
             print(f"✓ Successfully fetched {len(schedule_df)} games")
-            print(f"  Date range: {schedule_df['game_date'].min()} to {schedule_df['game_date'].max()}")
+            print(
+                f"  Date range: {schedule_df['game_date'].min()} to {schedule_df['game_date'].max()}"
+            )
 
             return schedule_df
 
@@ -84,7 +90,7 @@ class TestESPNMBB:
 
     def test_3_box_score_accessible(self, current_season):
         """Test 3: Can we fetch box scores for specific games?"""
-        print(f"\n[TEST 3] Fetching box scores...")
+        print("\n[TEST 3] Fetching box scores...")
 
         try:
             # Get a recent game
@@ -93,7 +99,9 @@ class TestESPNMBB:
                 pytest.skip("No games in schedule")
 
             # Find a completed game (has final score)
-            game_id_col = [c for c in schedule_df.columns if "game" in c.lower() and "id" in c.lower()][0]
+            game_id_col = [
+                c for c in schedule_df.columns if "game" in c.lower() and "id" in c.lower()
+            ][0]
             status_col = [c for c in schedule_df.columns if "status" in c.lower()]
 
             if status_col:
@@ -131,7 +139,7 @@ class TestESPNMBB:
 
     def test_4_pbp_accessible(self, current_season):
         """Test 4: Can we fetch play-by-play data?"""
-        print(f"\n[TEST 4] Fetching play-by-play...")
+        print("\n[TEST 4] Fetching play-by-play...")
 
         try:
             # Get a recent game
@@ -139,7 +147,9 @@ class TestESPNMBB:
             if schedule_df.empty:
                 pytest.skip("No games in schedule")
 
-            game_id_col = [c for c in schedule_df.columns if "game" in c.lower() and "id" in c.lower()][0]
+            game_id_col = [
+                c for c in schedule_df.columns if "game" in c.lower() and "id" in c.lower()
+            ][0]
             game_id = schedule_df.iloc[0][game_id_col]
 
             game_data = mbb_game_all(game_id=int(game_id))
@@ -165,25 +175,39 @@ class TestESPNMBB:
             # Teams
             teams_df = mbb_teams()
             team_required = ["team", "id", "abbreviation", "displayName"]
-            team_has = [c for c in team_required if any(col for col in teams_df.columns if c.lower() in col.lower())]
+            team_has = [
+                c
+                for c in team_required
+                if any(col for col in teams_df.columns if c.lower() in col.lower())
+            ]
             print(f"  Teams: {len(team_has)}/{len(team_required)} required fields")
 
             # Schedule
             schedule_df = mbb_schedule(season=current_season)
             schedule_required = ["game_id", "home", "away", "date", "status"]
-            schedule_has = [c for c in schedule_required if any(col for col in schedule_df.columns if c.lower() in col.lower())]
+            schedule_has = [
+                c
+                for c in schedule_required
+                if any(col for col in schedule_df.columns if c.lower() in col.lower())
+            ]
             print(f"  Schedule: {len(schedule_has)}/{len(schedule_required)} required fields")
 
             # Box score (from a game)
             if not schedule_df.empty:
-                game_id_col = [c for c in schedule_df.columns if "game" in c.lower() and "id" in c.lower()][0]
+                game_id_col = [
+                    c for c in schedule_df.columns if "game" in c.lower() and "id" in c.lower()
+                ][0]
                 game_id = schedule_df.iloc[0][game_id_col]
                 game_data = mbb_game_all(game_id=int(game_id))
 
                 if "BoxScore" in game_data:
                     box_df = pd.DataFrame(game_data["BoxScore"])
                     box_required = ["player", "minutes", "points", "rebounds", "assists"]
-                    box_has = [c for c in box_required if any(col for col in box_df.columns if c.lower() in col.lower())]
+                    box_has = [
+                        c
+                        for c in box_required
+                        if any(col for col in box_df.columns if c.lower() in col.lower())
+                    ]
                     print(f"  Box Score: {len(box_has)}/{len(box_required)} required fields")
 
             print("✓ Data completeness check passed")
@@ -211,10 +235,11 @@ class TestESPNMBB:
 
         try:
             import time
+
             start = time.time()
 
             # Make multiple requests
-            for i in range(3):
+            for _i in range(3):
                 mbb_teams()
 
             elapsed = time.time() - start

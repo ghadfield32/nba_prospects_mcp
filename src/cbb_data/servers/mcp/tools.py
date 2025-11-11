@@ -6,11 +6,12 @@ functions, providing an LLM-friendly interface with natural language support.
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 import pandas as pd
 
 # Import existing library functions - NO modifications needed!
-from cbb_data.api.datasets import get_dataset, list_datasets, get_recent_games
+from cbb_data.api.datasets import get_dataset, get_recent_games, list_datasets
 
 # Import natural language parser for LLM-friendly inputs
 from cbb_data.utils.natural_language import normalize_filters_for_llm, parse_days_parameter
@@ -21,6 +22,7 @@ logger = logging.getLogger(__name__)
 # ============================================================================
 # Helper Functions
 # ============================================================================
+
 
 def _format_dataframe_for_llm(df: pd.DataFrame, max_rows: int = 50) -> str:
     """
@@ -44,7 +46,7 @@ def _format_dataframe_for_llm(df: pd.DataFrame, max_rows: int = 50) -> str:
         truncated = False
 
     # Convert to markdown table for readability
-    result = df.to_markdown(index=False)
+    result: str = df.to_markdown(index=False)  # type: ignore[assignment]
 
     if truncated:
         result += f"\n\n(Showing first {max_rows} of {len(df)} rows)"
@@ -52,7 +54,9 @@ def _format_dataframe_for_llm(df: pd.DataFrame, max_rows: int = 50) -> str:
     return result
 
 
-def _safe_execute(func_name: str, func, compact: bool = False, **kwargs) -> Dict[str, Any]:
+def _safe_execute(
+    func_name: str, func: Any, compact: bool = False, **kwargs: Any
+) -> dict[str, Any]:
     """
     Safely execute a function and return structured result.
 
@@ -74,53 +78,40 @@ def _safe_execute(func_name: str, func, compact: bool = False, **kwargs) -> Dict
                 # Compact mode: return arrays (70% token savings)
                 # Convert datetime columns to strings for JSON serialization
                 df_copy = result.copy()
-                for col in df_copy.select_dtypes(include=['datetime64', 'datetimetz']).columns:
+                for col in df_copy.select_dtypes(include=["datetime64", "datetimetz"]).columns:
                     df_copy[col] = df_copy[col].astype(str)
 
                 return {
                     "success": True,
-                    "data": {
-                        "columns": df_copy.columns.tolist(),
-                        "rows": df_copy.values.tolist()
-                    },
-                    "row_count": len(result)
+                    "data": {"columns": df_copy.columns.tolist(), "rows": df_copy.values.tolist()},
+                    "row_count": len(result),
                 }
             else:
                 # Regular mode: return markdown table
                 formatted = _format_dataframe_for_llm(result)
-                return {
-                    "success": True,
-                    "data": formatted,
-                    "row_count": len(result)
-                }
+                return {"success": True, "data": formatted, "row_count": len(result)}
         else:
-            return {
-                "success": True,
-                "data": result
-            }
+            return {"success": True, "data": result}
 
     except Exception as e:
         logger.error(f"Error in {func_name}: {str(e)}", exc_info=True)
-        return {
-            "success": False,
-            "error": str(e),
-            "error_type": type(e).__name__
-        }
+        return {"success": False, "error": str(e), "error_type": type(e).__name__}
 
 
 # ============================================================================
 # MCP Tools
 # ============================================================================
 
+
 def tool_get_schedule(
     league: str,
-    season: Optional[str] = None,
-    team: Optional[List[str]] = None,
-    date_from: Optional[str] = None,
-    date_to: Optional[str] = None,
-    limit: Optional[int] = 100,
-    compact: bool = False
-) -> Dict[str, Any]:
+    season: str | None = None,
+    team: list[str] | None = None,
+    date_from: str | None = None,
+    date_to: str | None = None,
+    limit: int | None = 100,
+    compact: bool = False,
+) -> dict[str, Any]:
     """
     Get game schedules and results with natural language support.
 
@@ -151,11 +142,7 @@ def tool_get_schedule(
         >>> tool_get_schedule("EuroLeague", date_from="yesterday", compact=True)
     """
     # Build filters
-    filters = {
-        "league": league,
-        "season": season,
-        "team": team
-    }
+    filters = {"league": league, "season": season, "team": team}
 
     # Add date filters if provided
     if date_from:
@@ -175,19 +162,19 @@ def tool_get_schedule(
         compact=compact,
         grouping="schedule",
         filters=filters,
-        limit=limit
+        limit=limit,
     )
 
 
 def tool_get_player_game_stats(
     league: str,
-    season: Optional[str] = None,
-    team: Optional[List[str]] = None,
-    player: Optional[List[str]] = None,
-    game_ids: Optional[List[str]] = None,
-    limit: Optional[int] = 100,
-    compact: bool = False
-) -> Dict[str, Any]:
+    season: str | None = None,
+    team: list[str] | None = None,
+    player: list[str] | None = None,
+    game_ids: list[str] | None = None,
+    limit: int | None = 100,
+    compact: bool = False,
+) -> dict[str, Any]:
     """
     Get per-player per-game box score statistics with natural language support.
 
@@ -220,7 +207,7 @@ def tool_get_player_game_stats(
         "season": season,
         "team": team,
         "player": player,
-        "game_ids": game_ids
+        "game_ids": game_ids,
     }
 
     # Normalize natural language
@@ -235,17 +222,17 @@ def tool_get_player_game_stats(
         compact=compact,
         grouping="player_game",
         filters=filters,
-        limit=limit
+        limit=limit,
     )
 
 
 def tool_get_team_game_stats(
     league: str,
-    season: Optional[str] = None,
-    team: Optional[List[str]] = None,
-    limit: Optional[int] = 100,
-    compact: bool = False
-) -> Dict[str, Any]:
+    season: str | None = None,
+    team: list[str] | None = None,
+    limit: int | None = 100,
+    compact: bool = False,
+) -> dict[str, Any]:
     """
     Get team-level game results and statistics with natural language support.
 
@@ -267,11 +254,7 @@ def tool_get_team_game_stats(
         Structured result with team game statistics
     """
     # Build filters
-    filters = {
-        "league": league,
-        "season": season,
-        "team": team
-    }
+    filters = {"league": league, "season": season, "team": team}
 
     # Normalize natural language
     filters = normalize_filters_for_llm(filters)
@@ -285,15 +268,13 @@ def tool_get_team_game_stats(
         compact=compact,
         grouping="team_game",
         filters=filters,
-        limit=limit
+        limit=limit,
     )
 
 
 def tool_get_play_by_play(
-    league: str,
-    game_ids: List[str],
-    compact: bool = False
-) -> Dict[str, Any]:
+    league: str, game_ids: list[str], compact: bool = False
+) -> dict[str, Any]:
     """
     Get play-by-play event data for specific games.
 
@@ -309,26 +290,16 @@ def tool_get_play_by_play(
         >>> tool_get_play_by_play("NCAA-MBB", game_ids=["401635571"])
         >>> tool_get_play_by_play("NCAA-MBB", game_ids=["401635571"], compact=True)
     """
-    filters = {
-        "league": league,
-        "game_ids": game_ids
-    }
+    filters = {"league": league, "game_ids": game_ids}
 
     return _safe_execute(
-        "get_play_by_play",
-        get_dataset,
-        compact=compact,
-        grouping="play_by_play",
-        filters=filters
+        "get_play_by_play", get_dataset, compact=compact, grouping="play_by_play", filters=filters
     )
 
 
 def tool_get_shot_chart(
-    league: str,
-    game_ids: List[str],
-    player: Optional[List[str]] = None,
-    compact: bool = False
-) -> Dict[str, Any]:
+    league: str, game_ids: list[str], player: list[str] | None = None, compact: bool = False
+) -> dict[str, Any]:
     """
     Get shot chart data with X/Y coordinates.
 
@@ -341,32 +312,25 @@ def tool_get_shot_chart(
     Returns:
         Structured result with shot location data
     """
-    filters = {
-        "league": league,
-        "game_ids": game_ids
-    }
+    filters = {"league": league, "game_ids": game_ids}
 
     if player:
         filters["player"] = player
 
     return _safe_execute(
-        "get_shot_chart",
-        get_dataset,
-        compact=compact,
-        grouping="shots",
-        filters=filters
+        "get_shot_chart", get_dataset, compact=compact, grouping="shots", filters=filters
     )
 
 
 def tool_get_player_season_stats(
     league: str,
     season: str,
-    team: Optional[List[str]] = None,
-    player: Optional[List[str]] = None,
+    team: list[str] | None = None,
+    player: list[str] | None = None,
     per_mode: str = "Totals",
-    limit: Optional[int] = 100,
-    compact: bool = False
-) -> Dict[str, Any]:
+    limit: int | None = 100,
+    compact: bool = False,
+) -> dict[str, Any]:
     """
     Get per-player season aggregate statistics with natural language support.
 
@@ -407,7 +371,7 @@ def tool_get_player_season_stats(
         "season": season,
         "team": team,
         "player": player,
-        "per_mode": per_mode
+        "per_mode": per_mode,
     }
 
     # Normalize natural language
@@ -422,18 +386,18 @@ def tool_get_player_season_stats(
         compact=compact,
         grouping="player_season",
         filters=filters,
-        limit=limit
+        limit=limit,
     )
 
 
 def tool_get_team_season_stats(
     league: str,
     season: str,
-    team: Optional[List[str]] = None,
-    division: Optional[str] = None,
-    limit: Optional[int] = 100,
-    compact: bool = False
-) -> Dict[str, Any]:
+    team: list[str] | None = None,
+    division: str | None = None,
+    limit: int | None = 100,
+    compact: bool = False,
+) -> dict[str, Any]:
     """
     Get per-team season aggregate statistics and standings with natural language support.
 
@@ -456,11 +420,7 @@ def tool_get_team_season_stats(
         Structured result with team season statistics
     """
     # Build filters
-    filters = {
-        "league": league,
-        "season": season,
-        "team": team
-    }
+    filters = {"league": league, "season": season, "team": team}
 
     if division:
         filters["Division"] = division
@@ -477,17 +437,17 @@ def tool_get_team_season_stats(
         compact=compact,
         grouping="team_season",
         filters=filters,
-        limit=limit
+        limit=limit,
     )
 
 
 def tool_get_player_team_season(
     league: str,
     season: str,
-    player: Optional[List[str]] = None,
-    limit: Optional[int] = 100,
-    compact: bool = False
-) -> Dict[str, Any]:
+    player: list[str] | None = None,
+    limit: int | None = 100,
+    compact: bool = False,
+) -> dict[str, Any]:
     """
     Get player statistics split by team with natural language support.
 
@@ -508,11 +468,7 @@ def tool_get_player_team_season(
         Structured result with player×team×season statistics
     """
     # Build filters
-    filters = {
-        "league": league,
-        "season": season,
-        "player": player
-    }
+    filters = {"league": league, "season": season, "player": player}
 
     # Normalize natural language
     filters = normalize_filters_for_llm(filters)
@@ -526,11 +482,11 @@ def tool_get_player_team_season(
         compact=compact,
         grouping="player_team_season",
         filters=filters,
-        limit=limit
+        limit=limit,
     )
 
 
-def tool_list_datasets() -> Dict[str, Any]:
+def tool_list_datasets() -> dict[str, Any]:
     """
     List all available datasets with their metadata.
 
@@ -544,11 +500,8 @@ def tool_list_datasets() -> Dict[str, Any]:
 
 
 def tool_get_recent_games(
-    league: str,
-    days: Optional[str] = "2",
-    teams: Optional[List[str]] = None,
-    compact: bool = False
-) -> Dict[str, Any]:
+    league: str, days: str | None = "2", teams: list[str] | None = None, compact: bool = False
+) -> dict[str, Any]:
     """
     Get recent games with natural language day support.
 
@@ -578,9 +531,13 @@ def tool_get_recent_games(
         >>> tool_get_recent_games("NCAA-MBB", days="7", compact=True)
     """
     # Parse natural language days parameter
-    days_int = parse_days_parameter(days) if isinstance(days, str) else int(days)
-    if days_int is None:
+    if days is None:
         days_int = 2  # Default fallback
+    elif isinstance(days, str):
+        parsed = parse_days_parameter(days)
+        days_int = parsed if parsed is not None else 2  # Default fallback
+    else:
+        days_int = int(days)
 
     return _safe_execute(
         "get_recent_games",
@@ -588,7 +545,7 @@ def tool_get_recent_games(
         compact=compact,
         league=league,
         days=days_int,
-        teams=teams
+        teams=teams,
     )
 
 
@@ -617,39 +574,39 @@ Tips: Use compact=True for large result sets to save ~70% tokens.""",
                 "league": {
                     "type": "string",
                     "enum": ["NCAA-MBB", "NCAA-WBB", "EuroLeague"],
-                    "description": "League identifier"
+                    "description": "League identifier",
                 },
                 "season": {
                     "type": "string",
-                    "description": "Season year (e.g., '2025') OR natural language ('this season', 'last season', '2024-25')"
+                    "description": "Season year (e.g., '2025') OR natural language ('this season', 'last season', '2024-25')",
                 },
                 "team": {
                     "type": "array",
                     "items": {"type": "string"},
-                    "description": "List of team names to filter"
+                    "description": "List of team names to filter",
                 },
                 "date_from": {
                     "type": "string",
-                    "description": "Start date (YYYY-MM-DD) OR natural language ('yesterday', 'last week')"
+                    "description": "Start date (YYYY-MM-DD) OR natural language ('yesterday', 'last week')",
                 },
                 "date_to": {
                     "type": "string",
-                    "description": "End date (YYYY-MM-DD) OR natural language"
+                    "description": "End date (YYYY-MM-DD) OR natural language",
                 },
                 "limit": {
                     "type": "integer",
                     "description": "Maximum rows to return",
-                    "default": 100
+                    "default": 100,
                 },
                 "compact": {
                     "type": "boolean",
                     "description": "Return arrays instead of markdown (saves ~70% tokens)",
-                    "default": False
-                }
+                    "default": False,
+                },
             },
-            "required": ["league"]
+            "required": ["league"],
         },
-        "handler": tool_get_schedule
+        "handler": tool_get_schedule,
     },
     {
         "name": "get_player_game_stats",
@@ -671,41 +628,41 @@ Tips: Use compact=True for large result sets.""",
                 "league": {
                     "type": "string",
                     "enum": ["NCAA-MBB", "NCAA-WBB", "EuroLeague"],
-                    "description": "League identifier"
+                    "description": "League identifier",
                 },
                 "season": {
                     "type": "string",
-                    "description": "Season year OR natural language ('this season', 'last season')"
+                    "description": "Season year OR natural language ('this season', 'last season')",
                 },
                 "team": {
                     "type": "array",
                     "items": {"type": "string"},
-                    "description": "List of team names to filter"
+                    "description": "List of team names to filter",
                 },
                 "player": {
                     "type": "array",
                     "items": {"type": "string"},
-                    "description": "List of player names to filter"
+                    "description": "List of player names to filter",
                 },
                 "game_ids": {
                     "type": "array",
                     "items": {"type": "string"},
-                    "description": "List of specific game IDs"
+                    "description": "List of specific game IDs",
                 },
                 "limit": {
                     "type": "integer",
                     "description": "Maximum rows to return",
-                    "default": 100
+                    "default": 100,
                 },
                 "compact": {
                     "type": "boolean",
                     "description": "Return arrays instead of markdown",
-                    "default": False
-                }
+                    "default": False,
+                },
             },
-            "required": ["league"]
+            "required": ["league"],
         },
-        "handler": tool_get_player_game_stats
+        "handler": tool_get_player_game_stats,
     },
     {
         "name": "get_team_game_stats",
@@ -724,30 +681,24 @@ Tips: Use compact=True for large result sets.""",
                 "league": {
                     "type": "string",
                     "enum": ["NCAA-MBB", "NCAA-WBB", "EuroLeague"],
-                    "description": "League identifier"
+                    "description": "League identifier",
                 },
-                "season": {
-                    "type": "string",
-                    "description": "Season year OR natural language"
-                },
+                "season": {"type": "string", "description": "Season year OR natural language"},
                 "team": {
                     "type": "array",
                     "items": {"type": "string"},
-                    "description": "List of team names"
+                    "description": "List of team names",
                 },
-                "limit": {
-                    "type": "integer",
-                    "default": 100
-                },
+                "limit": {"type": "integer", "default": 100},
                 "compact": {
                     "type": "boolean",
                     "description": "Return arrays instead of markdown",
-                    "default": False
-                }
+                    "default": False,
+                },
             },
-            "required": ["league"]
+            "required": ["league"],
         },
-        "handler": tool_get_team_game_stats
+        "handler": tool_get_team_game_stats,
     },
     {
         "name": "get_play_by_play",
@@ -758,22 +709,22 @@ Tips: Use compact=True for large result sets.""",
                 "league": {
                     "type": "string",
                     "enum": ["NCAA-MBB", "NCAA-WBB", "EuroLeague"],
-                    "description": "League identifier"
+                    "description": "League identifier",
                 },
                 "game_ids": {
                     "type": "array",
                     "items": {"type": "string"},
-                    "description": "List of game IDs (required)"
+                    "description": "List of game IDs (required)",
                 },
                 "compact": {
                     "type": "boolean",
                     "description": "Return arrays instead of markdown",
-                    "default": False
-                }
+                    "default": False,
+                },
             },
-            "required": ["league", "game_ids"]
+            "required": ["league", "game_ids"],
         },
-        "handler": tool_get_play_by_play
+        "handler": tool_get_play_by_play,
     },
     {
         "name": "get_shot_chart",
@@ -784,27 +735,27 @@ Tips: Use compact=True for large result sets.""",
                 "league": {
                     "type": "string",
                     "enum": ["NCAA-MBB", "EuroLeague"],
-                    "description": "League identifier"
+                    "description": "League identifier",
                 },
                 "game_ids": {
                     "type": "array",
                     "items": {"type": "string"},
-                    "description": "List of game IDs (required)"
+                    "description": "List of game IDs (required)",
                 },
                 "player": {
                     "type": "array",
                     "items": {"type": "string"},
-                    "description": "List of player names to filter"
+                    "description": "List of player names to filter",
                 },
                 "compact": {
                     "type": "boolean",
                     "description": "Return arrays instead of markdown",
-                    "default": False
-                }
+                    "default": False,
+                },
             },
-            "required": ["league", "game_ids"]
+            "required": ["league", "game_ids"],
         },
-        "handler": tool_get_shot_chart
+        "handler": tool_get_shot_chart,
     },
     {
         "name": "get_player_season_stats",
@@ -829,41 +780,38 @@ Tips:
                 "league": {
                     "type": "string",
                     "enum": ["NCAA-MBB", "NCAA-WBB", "EuroLeague"],
-                    "description": "League identifier"
+                    "description": "League identifier",
                 },
                 "season": {
                     "type": "string",
-                    "description": "Season year OR natural language ('this season', 'last season', '2024-25')"
+                    "description": "Season year OR natural language ('this season', 'last season', '2024-25')",
                 },
                 "team": {
                     "type": "array",
                     "items": {"type": "string"},
-                    "description": "List of team names"
+                    "description": "List of team names",
                 },
                 "player": {
                     "type": "array",
                     "items": {"type": "string"},
-                    "description": "List of player names"
+                    "description": "List of player names",
                 },
                 "per_mode": {
                     "type": "string",
                     "enum": ["Totals", "PerGame", "Per40"],
                     "description": "Aggregation mode: Totals (cumulative), PerGame (averages), Per40 (per 40 minutes)",
-                    "default": "Totals"
+                    "default": "Totals",
                 },
-                "limit": {
-                    "type": "integer",
-                    "default": 100
-                },
+                "limit": {"type": "integer", "default": 100},
                 "compact": {
                     "type": "boolean",
                     "description": "Return arrays instead of markdown (saves ~70% tokens)",
-                    "default": False
-                }
+                    "default": False,
+                },
             },
-            "required": ["league", "season"]
+            "required": ["league", "season"],
         },
-        "handler": tool_get_player_season_stats
+        "handler": tool_get_player_season_stats,
     },
     {
         "name": "get_team_season_stats",
@@ -883,35 +831,29 @@ Tips: Use compact=True for large result sets.""",
                 "league": {
                     "type": "string",
                     "enum": ["NCAA-MBB", "NCAA-WBB", "EuroLeague"],
-                    "description": "League identifier"
+                    "description": "League identifier",
                 },
-                "season": {
-                    "type": "string",
-                    "description": "Season year OR natural language"
-                },
+                "season": {"type": "string", "description": "Season year OR natural language"},
                 "team": {
                     "type": "array",
                     "items": {"type": "string"},
-                    "description": "List of team names"
+                    "description": "List of team names",
                 },
                 "division": {
                     "type": "string",
                     "enum": ["D1", "D2", "D3", "all"],
-                    "description": "Division filter (NCAA only)"
+                    "description": "Division filter (NCAA only)",
                 },
-                "limit": {
-                    "type": "integer",
-                    "default": 100
-                },
+                "limit": {"type": "integer", "default": 100},
                 "compact": {
                     "type": "boolean",
                     "description": "Return arrays instead of markdown",
-                    "default": False
-                }
+                    "default": False,
+                },
             },
-            "required": ["league", "season"]
+            "required": ["league", "season"],
         },
-        "handler": tool_get_team_season_stats
+        "handler": tool_get_team_season_stats,
     },
     {
         "name": "get_player_team_season",
@@ -930,39 +872,30 @@ Tips: Use compact=True for large result sets.""",
                 "league": {
                     "type": "string",
                     "enum": ["NCAA-MBB", "NCAA-WBB", "EuroLeague"],
-                    "description": "League identifier"
+                    "description": "League identifier",
                 },
-                "season": {
-                    "type": "string",
-                    "description": "Season year OR natural language"
-                },
+                "season": {"type": "string", "description": "Season year OR natural language"},
                 "player": {
                     "type": "array",
                     "items": {"type": "string"},
-                    "description": "List of player names"
+                    "description": "List of player names",
                 },
-                "limit": {
-                    "type": "integer",
-                    "default": 100
-                },
+                "limit": {"type": "integer", "default": 100},
                 "compact": {
                     "type": "boolean",
                     "description": "Return arrays instead of markdown",
-                    "default": False
-                }
+                    "default": False,
+                },
             },
-            "required": ["league", "season"]
+            "required": ["league", "season"],
         },
-        "handler": tool_get_player_team_season
+        "handler": tool_get_player_team_season,
     },
     {
         "name": "list_datasets",
         "description": "List all available datasets with their metadata, supported filters, and leagues.",
-        "inputSchema": {
-            "type": "object",
-            "properties": {}
-        },
-        "handler": tool_list_datasets
+        "inputSchema": {"type": "object", "properties": {}},
+        "handler": tool_list_datasets,
     },
     {
         "name": "get_recent_games",
@@ -983,26 +916,26 @@ Tips: Use compact=True for large result sets.""",
                 "league": {
                     "type": "string",
                     "enum": ["NCAA-MBB", "NCAA-WBB", "EuroLeague"],
-                    "description": "League identifier"
+                    "description": "League identifier",
                 },
                 "days": {
                     "type": "string",
                     "description": "Number of days OR natural language ('today', 'last week', 'last 5 days')",
-                    "default": "2"
+                    "default": "2",
                 },
                 "teams": {
                     "type": "array",
                     "items": {"type": "string"},
-                    "description": "List of team names to filter"
+                    "description": "List of team names to filter",
                 },
                 "compact": {
                     "type": "boolean",
                     "description": "Return arrays instead of markdown",
-                    "default": False
-                }
+                    "default": False,
+                },
             },
-            "required": ["league"]
+            "required": ["league"],
         },
-        "handler": tool_get_recent_games
-    }
+        "handler": tool_get_recent_games,
+    },
 ]

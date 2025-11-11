@@ -20,23 +20,24 @@ Usage:
     save_to_disk(df, 'output/schedule_2024.parquet')  # automatically uses Parquet
 """
 
-import pandas as pd
-from pathlib import Path
-from typing import Optional, Literal
 import logging
+from pathlib import Path
+from typing import Any, Literal
+
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 
 # Type alias for supported formats
-FormatType = Literal['csv', 'parquet', 'json', 'duckdb']
+FormatType = Literal["csv", "parquet", "json", "duckdb"]
 
 
 def save_to_disk(
     df: pd.DataFrame,
-    output_path: str,
-    format: Optional[FormatType] = None,
-    compression: str = 'zstd',
-    **kwargs
+    output_path: str | Path,
+    format: FormatType | None = None,
+    compression: str = "zstd",
+    **kwargs: Any,
 ) -> None:
     """
     Save DataFrame to disk in various formats.
@@ -95,42 +96,42 @@ def save_to_disk(
         logger.warning("DataFrame is empty - nothing to save")
         return
 
-    output_path = Path(output_path)
+    # Convert to Path object for consistent handling
+    path: Path = Path(output_path)
 
     # Auto-detect format from extension if not specified
     if format is None:
-        format = _detect_format(output_path)
+        format = _detect_format(path)
 
     # Create parent directories if needed
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    path.parent.mkdir(parents=True, exist_ok=True)
 
     # Save based on format
     try:
-        if format == 'csv':
-            _save_csv(df, output_path, compression, **kwargs)
+        if format == "csv":
+            _save_csv(df, path, compression, **kwargs)
 
-        elif format == 'parquet':
-            _save_parquet(df, output_path, compression, **kwargs)
+        elif format == "parquet":
+            _save_parquet(df, path, compression, **kwargs)
 
-        elif format == 'json':
-            _save_json(df, output_path, **kwargs)
+        elif format == "json":
+            _save_json(df, path, **kwargs)
 
-        elif format == 'duckdb':
-            _save_duckdb(df, output_path, **kwargs)
+        elif format == "duckdb":
+            _save_duckdb(df, path, **kwargs)
 
         else:
             raise ValueError(f"Unsupported format: {format}")
 
         # Log success with file size
-        file_size_mb = output_path.stat().st_size / (1024 * 1024)
+        file_size_mb = path.stat().st_size / (1024 * 1024)
         logger.info(
-            f"✓ Saved {len(df):,} rows to {output_path.name} "
-            f"({file_size_mb:.2f} MB, {format})"
+            f"✓ Saved {len(df):,} rows to {path.name} " f"({file_size_mb:.2f} MB, {format})"
         )
 
     except Exception as e:
         logger.error(f"Failed to save DataFrame: {e}")
-        raise IOError(f"Failed to write {output_path}: {e}") from e
+        raise OSError(f"Failed to write {path}: {e}") from e
 
 
 def _detect_format(path: Path) -> FormatType:
@@ -141,20 +142,20 @@ def _detect_format(path: Path) -> FormatType:
     # Handle double extensions like .csv.gz
     if path.suffixes:
         suffixes = [s.lower() for s in path.suffixes]
-        if '.csv' in suffixes:
-            return 'csv'
-        elif '.json' in suffixes:
-            return 'json'
+        if ".csv" in suffixes:
+            return "csv"
+        elif ".json" in suffixes:
+            return "json"
 
     # Single extension detection
     format_map = {
-        '.csv': 'csv',
-        '.parquet': 'parquet',
-        '.pq': 'parquet',
-        '.json': 'json',
-        '.jsonl': 'json',
-        '.duckdb': 'duckdb',
-        '.db': 'duckdb',
+        ".csv": "csv",
+        ".parquet": "parquet",
+        ".pq": "parquet",
+        ".json": "json",
+        ".jsonl": "json",
+        ".duckdb": "duckdb",
+        ".db": "duckdb",
     }
 
     detected = format_map.get(suffix)
@@ -165,21 +166,22 @@ def _detect_format(path: Path) -> FormatType:
             f"Supported extensions: {list(format_map.keys())}"
         )
 
-    return detected
+    # Type is guaranteed to be FormatType after None check
+    return detected  # type: ignore[return-value]
 
 
-def _save_csv(df: pd.DataFrame, path: Path, compression: str, **kwargs):
+def _save_csv(df: pd.DataFrame, path: Path, compression: str, **kwargs: Any) -> None:
     """Save DataFrame as CSV."""
 
     # Default CSV options
     default_args = {
-        'index': False,
-        'encoding': 'utf-8',
+        "index": False,
+        "encoding": "utf-8",
     }
 
     # Handle compression
-    if compression and compression != 'None':
-        default_args['compression'] = compression
+    if compression and compression != "None":
+        default_args["compression"] = compression
 
     # Merge with user-provided kwargs
     save_args = {**default_args, **kwargs}
@@ -188,18 +190,18 @@ def _save_csv(df: pd.DataFrame, path: Path, compression: str, **kwargs):
     logger.debug(f"CSV saved with args: {save_args}")
 
 
-def _save_parquet(df: pd.DataFrame, path: Path, compression: str, **kwargs):
+def _save_parquet(df: pd.DataFrame, path: Path, compression: str, **kwargs: Any) -> None:
     """Save DataFrame as Parquet."""
 
     # Default Parquet options
     default_args = {
-        'index': False,
-        'engine': 'pyarrow',  # Faster than fastparquet
+        "index": False,
+        "engine": "pyarrow",  # Faster than fastparquet
     }
 
     # Set compression (ZSTD = best balance of speed/size)
     if compression:
-        default_args['compression'] = compression
+        default_args["compression"] = compression
 
     # Merge with user-provided kwargs
     save_args = {**default_args, **kwargs}
@@ -208,28 +210,28 @@ def _save_parquet(df: pd.DataFrame, path: Path, compression: str, **kwargs):
     logger.debug(f"Parquet saved with args: {save_args}")
 
 
-def _save_json(df: pd.DataFrame, path: Path, **kwargs):
+def _save_json(df: pd.DataFrame, path: Path, **kwargs: Any) -> None:
     """Save DataFrame as JSON."""
 
     # Default JSON options
     default_args = {
-        'orient': 'records',  # List of records (most common)
-        'lines': False,       # Pretty JSON by default
+        "orient": "records",  # List of records (most common)
+        "lines": False,  # Pretty JSON by default
     }
 
     # Merge with user-provided kwargs
     save_args = {**default_args, **kwargs}
 
     # Handle JSONL (newline-delimited JSON)
-    if path.suffix == '.jsonl':
-        save_args['orient'] = 'records'
-        save_args['lines'] = True
+    if path.suffix == ".jsonl":
+        save_args["orient"] = "records"
+        save_args["lines"] = True
 
     df.to_json(path, **save_args)
     logger.debug(f"JSON saved with args: {save_args}")
 
 
-def _save_duckdb(df: pd.DataFrame, path: Path, **kwargs):
+def _save_duckdb(df: pd.DataFrame, path: Path, **kwargs: Any) -> None:
     """Save DataFrame to DuckDB table."""
 
     try:
@@ -237,10 +239,10 @@ def _save_duckdb(df: pd.DataFrame, path: Path, **kwargs):
     except ImportError:
         raise ImportError(
             "DuckDB is required for this feature. Install it with: pip install duckdb"
-        )
+        ) from None
 
     # Get table name from kwargs or use filename
-    table_name = kwargs.pop('table', path.stem)
+    table_name = kwargs.pop("table", path.stem)
 
     # Connect to DuckDB (creates file if doesn't exist)
     conn = duckdb.connect(str(path))
@@ -254,10 +256,7 @@ def _save_duckdb(df: pd.DataFrame, path: Path, **kwargs):
         conn.close()
 
 
-def get_recommended_format(
-    row_count: int,
-    use_case: str = 'general'
-) -> FormatType:
+def get_recommended_format(row_count: int, use_case: str = "general") -> FormatType:
     """
     Get recommended file format based on data size and use case.
 
@@ -279,31 +278,27 @@ def get_recommended_format(
         'parquet'
     """
 
-    if use_case == 'web':
-        return 'json'
+    if use_case == "web":
+        return "json"
 
-    if use_case == 'sharing':
+    if use_case == "sharing":
         # CSV is more widely understood
-        return 'csv' if row_count < 100_000 else 'parquet'
+        return "csv" if row_count < 100_000 else "parquet"
 
-    if use_case == 'analytics':
+    if use_case == "analytics":
         # Parquet or DuckDB for analytics
-        return 'parquet' if row_count < 10_000_000 else 'duckdb'
+        return "parquet" if row_count < 10_000_000 else "duckdb"
 
     # General recommendation: Parquet for larger datasets
     if row_count < 10_000:
-        return 'csv'  # Small enough that format doesn't matter
+        return "csv"  # Small enough that format doesn't matter
     elif row_count < 1_000_000:
-        return 'parquet'  # Good balance
+        return "parquet"  # Good balance
     else:
-        return 'duckdb'  # Best for very large datasets
+        return "duckdb"  # Best for very large datasets
 
 
-def estimate_file_size(
-    row_count: int,
-    column_count: int,
-    format: FormatType
-) -> float:
+def estimate_file_size(row_count: int, column_count: int, format: FormatType) -> float:
     """
     Estimate file size in MB for a given format.
 
@@ -325,10 +320,10 @@ def estimate_file_size(
 
     # Bytes per row (rough estimates)
     bytes_per_row = {
-        'csv': 200,
-        'parquet': 40,
-        'json': 300,
-        'duckdb': 50,
+        "csv": 200,
+        "parquet": 40,
+        "json": 300,
+        "duckdb": 50,
     }
 
     base_bytes = bytes_per_row.get(format, 100)

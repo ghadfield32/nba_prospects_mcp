@@ -19,11 +19,13 @@ Usage:
     )
 """
 
-import pandas as pd
 import logging
-from typing import Callable, Optional, Any
-from cbb_data.storage.duckdb_storage import get_storage
+from collections.abc import Callable
+
+import pandas as pd
+
 from cbb_data.fetchers.base import Cache
+from cbb_data.storage.duckdb_storage import get_storage
 
 logger = logging.getLogger(__name__)
 
@@ -34,9 +36,9 @@ def fetch_with_storage(
     season: str,
     fetcher_func: Callable[[], pd.DataFrame],
     cache_key: str,
-    cache: Optional[Cache] = None,
+    cache: Cache | None = None,
     use_storage: bool = True,
-    force_refresh: bool = False
+    force_refresh: bool = False,
 ) -> pd.DataFrame:
     """
     Fetch data with intelligent caching across multiple layers.
@@ -96,7 +98,7 @@ def fetch_with_storage(
             # Update memory cache for future requests
             if cache and not df.empty:
                 cache.set(cache_key, df)
-                logger.debug(f"Updated memory cache with DuckDB data")
+                logger.debug("Updated memory cache with DuckDB data")
 
             return df
         logger.debug(f"DuckDB storage MISS for {dataset}/{league}/{season}")
@@ -114,8 +116,8 @@ def _fetch_and_cache(
     season: str,
     fetcher_func: Callable[[], pd.DataFrame],
     cache_key: str,
-    cache: Optional[Cache],
-    use_storage: bool
+    cache: Cache | None,
+    use_storage: bool,
 ) -> pd.DataFrame:
     """
     Fetch data from API and update all cache layers.
@@ -161,10 +163,10 @@ def fetch_multi_season_with_storage(
     league: str,
     seasons: list,
     fetcher_func_factory: Callable[[str], Callable[[], pd.DataFrame]],
-    cache: Optional[Cache] = None,
+    cache: Cache | None = None,
     use_storage: bool = True,
     force_refresh: bool = False,
-    limit: Optional[int] = None
+    limit: int | None = None,
 ) -> pd.DataFrame:
     """
     Fetch data for multiple seasons with intelligent caching.
@@ -215,7 +217,9 @@ def fetch_multi_season_with_storage(
             else:
                 missing_seasons.append(season)
 
-        logger.info(f"Multi-season query: {len(available_in_storage)} in storage, {len(missing_seasons)} need fetching")
+        logger.info(
+            f"Multi-season query: {len(available_in_storage)} in storage, {len(missing_seasons)} need fetching"
+        )
     else:
         missing_seasons = seasons
 
@@ -232,7 +236,7 @@ def fetch_multi_season_with_storage(
             cache_key=cache_key,
             cache=cache,
             use_storage=use_storage,
-            force_refresh=force_refresh
+            force_refresh=force_refresh,
         )
 
         if not df.empty:
@@ -242,14 +246,11 @@ def fetch_multi_season_with_storage(
     if storage and available_in_storage:
         logger.info(f"Loading {len(available_in_storage)} seasons using DuckDB SQL UNION ALL")
         df = storage.load_multi_season(
-            dataset=dataset,
-            league=league,
-            seasons=available_in_storage,
-            limit=limit
+            dataset=dataset, league=league, seasons=available_in_storage, limit=limit
         )
 
         # Add SEASON column if not present
-        if not df.empty and 'SEASON' not in df.columns:
+        if not df.empty and "SEASON" not in df.columns:
             # Try to infer season from table name or other columns
             logger.debug("SEASON column not found in multi-season result")
 

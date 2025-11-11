@@ -1,8 +1,8 @@
 """Schema definitions for datasets"""
 
 from __future__ import annotations
+
 from pydantic import BaseModel, Field
-from typing import List, Optional
 
 
 class DatasetInfo(BaseModel):
@@ -14,36 +14,30 @@ class DatasetInfo(BaseModel):
 
     id: str = Field(description="Unique dataset identifier (e.g., 'player_game')")
 
-    keys: List[str] = Field(
+    keys: list[str] = Field(
         description="Primary key columns for this dataset (e.g., ['PLAYER_ID', 'GAME_ID'])"
     )
 
-    filters: List[str] = Field(
+    filters: list[str] = Field(
         description="List of filter types supported (e.g., ['season', 'team', 'player'])"
     )
 
-    description: str = Field(
-        description="Human-readable description of the dataset"
+    description: str = Field(description="Human-readable description of the dataset")
+
+    sources: list[str] = Field(
+        default=[], description="Data sources used (e.g., ['ESPN', 'EuroLeague API'])"
     )
 
-    sources: List[str] = Field(
-        default=[],
-        description="Data sources used (e.g., ['ESPN', 'EuroLeague API'])"
+    leagues: list[str] = Field(
+        default=[], description="Supported leagues (e.g., ['NCAA-MBB', 'NCAA-WBB', 'EuroLeague'])"
     )
 
-    leagues: List[str] = Field(
-        default=[],
-        description="Supported leagues (e.g., ['NCAA-MBB', 'NCAA-WBB', 'EuroLeague'])"
-    )
-
-    sample_columns: List[str] = Field(
-        default=[],
-        description="Sample of available columns in the dataset"
+    sample_columns: list[str] = Field(
+        default=[], description="Sample of available columns in the dataset"
     )
 
     requires_game_id: bool = Field(
-        default=False,
-        description="Whether this dataset requires specific game_ids (e.g., PBP)"
+        default=False, description="Whether this dataset requires specific game_ids (e.g., PBP)"
     )
 
 

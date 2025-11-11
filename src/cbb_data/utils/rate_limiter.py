@@ -8,10 +8,9 @@ This module provides rate limiting for API calls to respect source limits:
 """
 
 from __future__ import annotations
-import time
+
 import threading
-from typing import Dict, Optional
-from collections import deque
+import time
 
 
 class RateLimiter:
@@ -36,7 +35,7 @@ class RateLimiter:
     def __init__(
         self,
         calls_per_second: float = 1.0,
-        burst_size: Optional[int] = None,
+        burst_size: int | None = None,
     ):
         """Initialize rate limiter
 
@@ -46,11 +45,11 @@ class RateLimiter:
         """
         self.rate = calls_per_second
         self.burst_size = burst_size or int(calls_per_second * 2)
-        self.tokens = self.burst_size
+        self.tokens = float(self.burst_size)
         self.last_refill = time.time()
         self.lock = threading.Lock()
 
-    def _refill(self):
+    def _refill(self) -> None:
         """Refill tokens based on elapsed time"""
         now = time.time()
         elapsed = now - self.last_refill
@@ -60,7 +59,7 @@ class RateLimiter:
         self.tokens = min(self.burst_size, self.tokens + tokens_to_add)
         self.last_refill = now
 
-    def acquire(self, block: bool = True, timeout: Optional[float] = None) -> bool:
+    def acquire(self, block: bool = True, timeout: float | None = None) -> bool:
         """Acquire a token (may block if rate limit exceeded)
 
         Args:
@@ -95,10 +94,10 @@ class RateLimiter:
             wait_time = min(1.0 / self.rate, 0.1)
             time.sleep(wait_time)
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset the rate limiter (refill all tokens)"""
         with self.lock:
-            self.tokens = self.burst_size
+            self.tokens = float(self.burst_size)
             self.last_refill = time.time()
 
 
@@ -130,15 +129,17 @@ class SourceRateLimiter:
         "fiba": 1.0,  # FIBA: unknown, be conservative
     }
 
-    def __init__(self):
-        self._limiters: Dict[str, RateLimiter] = {}
+    def __init__(self) -> None:
+        self._limiters: dict[str, RateLimiter] = {}
         self._lock = threading.Lock()
 
         # Initialize default limiters
         for source, rate in self.DEFAULT_LIMITS.items():
             self._limiters[source] = RateLimiter(calls_per_second=rate)
 
-    def set_limit(self, source: str, calls_per_second: float, burst_size: Optional[int] = None):
+    def set_limit(
+        self, source: str, calls_per_second: float, burst_size: int | None = None
+    ) -> None:
         """Set rate limit for a source
 
         Args:
@@ -152,7 +153,7 @@ class SourceRateLimiter:
                 burst_size=burst_size,
             )
 
-    def acquire(self, source: str, block: bool = True, timeout: Optional[float] = None) -> bool:
+    def acquire(self, source: str, block: bool = True, timeout: float | None = None) -> bool:
         """Acquire a token for a source
 
         Args:
@@ -173,7 +174,7 @@ class SourceRateLimiter:
 
         return limiter.acquire(block=block, timeout=timeout)
 
-    def reset(self, source: Optional[str] = None):
+    def reset(self, source: str | None = None) -> None:
         """Reset rate limiter(s)
 
         Args:
@@ -197,7 +198,7 @@ def get_source_limiter() -> SourceRateLimiter:
     return _source_limiter
 
 
-def set_source_limit(source: str, calls_per_second: float):
+def set_source_limit(source: str, calls_per_second: float) -> None:
     """Set rate limit for a source (convenience function)
 
     Args:

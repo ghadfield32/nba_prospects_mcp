@@ -11,68 +11,58 @@ Test Coverage:
 5. Sub-league/tournament filtering
 """
 
-import sys
 import os
-if os.name == 'nt':
-    sys.stdout.reconfigure(encoding='utf-8')
+import sys
+
+if os.name == "nt":
+    sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[union-attr]
 
 # Add parent directory to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-sys.path.insert(0, 'src')
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+sys.path.insert(0, "src")
 
-from get_basketball_data import get_basketball_data
 import pytest
-
+from get_basketball_data import get_basketball_data
 
 # Test configuration
-LEAGUE_NCAA = 'NCAA-MBB'
-LEAGUE_EURO = 'EuroLeague'
-TEST_SEASON_NCAA = '2024'
-TEST_SEASON_EURO = '2024'
+LEAGUE_NCAA = "NCAA-MBB"
+LEAGUE_EURO = "EuroLeague"
+TEST_SEASON_NCAA = "2024"
+TEST_SEASON_EURO = "2024"
 
 
 class TestDatasetParity:
     """Test that both leagues support the same datasets"""
 
-    def test_schedule_available_both_leagues(self):
+    def test_schedule_available_both_leagues(self) -> None:
         """Test schedule dataset available for both leagues"""
         print("\n[TEST] Schedule dataset parity")
 
         ncaa_df = get_basketball_data(
-            dataset='schedule',
-            league=LEAGUE_NCAA,
-            season=TEST_SEASON_NCAA,
-            limit=5
+            dataset="schedule", league=LEAGUE_NCAA, season=TEST_SEASON_NCAA, limit=5
         )
 
         euro_df = get_basketball_data(
-            dataset='schedule',
-            league=LEAGUE_EURO,
-            season=TEST_SEASON_EURO,
-            limit=5
+            dataset="schedule", league=LEAGUE_EURO, season=TEST_SEASON_EURO, limit=5
         )
 
         assert not ncaa_df.empty, "NCAA-MBB should have schedule data"
         assert not euro_df.empty, "EuroLeague should have schedule data"
 
-        print(f"✓ Schedule available: NCAA ({len(ncaa_df)} games), EuroLeague ({len(euro_df)} games)")
+        print(
+            f"✓ Schedule available: NCAA ({len(ncaa_df)} games), EuroLeague ({len(euro_df)} games)"
+        )
 
-    def test_player_game_available_both_leagues(self):
+    def test_player_game_available_both_leagues(self) -> None:
         """Test player_game dataset available for both leagues"""
         print("\n[TEST] Player game dataset parity")
 
         ncaa_df = get_basketball_data(
-            dataset='player_game',
-            league=LEAGUE_NCAA,
-            season=TEST_SEASON_NCAA,
-            limit=10
+            dataset="player_game", league=LEAGUE_NCAA, season=TEST_SEASON_NCAA, limit=10
         )
 
         euro_df = get_basketball_data(
-            dataset='player_game',
-            league=LEAGUE_EURO,
-            season=TEST_SEASON_EURO,
-            limit=10
+            dataset="player_game", league=LEAGUE_EURO, season=TEST_SEASON_EURO, limit=10
         )
 
         ncaa_available = not ncaa_df.empty
@@ -83,22 +73,16 @@ class TestDatasetParity:
 
         assert ncaa_available, "NCAA-MBB should have player_game data"
 
-    def test_player_season_available_both_leagues(self):
+    def test_player_season_available_both_leagues(self) -> None:
         """Test player_season dataset available for both leagues"""
         print("\n[TEST] Player season dataset parity")
 
         ncaa_df = get_basketball_data(
-            dataset='player_season',
-            league=LEAGUE_NCAA,
-            season=TEST_SEASON_NCAA,
-            limit=10
+            dataset="player_season", league=LEAGUE_NCAA, season=TEST_SEASON_NCAA, limit=10
         )
 
         euro_df = get_basketball_data(
-            dataset='player_season',
-            league=LEAGUE_EURO,
-            season=TEST_SEASON_EURO,
-            limit=10
+            dataset="player_season", league=LEAGUE_EURO, season=TEST_SEASON_EURO, limit=10
         )
 
         ncaa_available = not ncaa_df.empty
@@ -111,26 +95,26 @@ class TestDatasetParity:
 class TestFilteringParity:
     """Test that filtering works comparably for both leagues"""
 
-    def test_team_filtering_both_leagues(self):
+    def test_team_filtering_both_leagues(self) -> None:
         """Test team filtering works for both leagues"""
         print("\n[TEST] Team filtering parity")
 
         # NCAA: Duke
         ncaa_df = get_basketball_data(
-            dataset='schedule',
+            dataset="schedule",
             league=LEAGUE_NCAA,
             season=TEST_SEASON_NCAA,
-            teams=['Duke'],
-            limit=10
+            teams=["Duke"],
+            limit=10,
         )
 
         # EuroLeague: Barcelona or Real Madrid
         euro_df = get_basketball_data(
-            dataset='schedule',
+            dataset="schedule",
             league=LEAGUE_EURO,
             season=TEST_SEASON_EURO,
-            teams=['Barcelona'],
-            limit=10
+            teams=["Barcelona"],
+            limit=10,
         )
 
         ncaa_works = not ncaa_df.empty
@@ -139,28 +123,28 @@ class TestFilteringParity:
         print(f"  NCAA team filter: {'✓' if ncaa_works else '✗'} ({len(ncaa_df)} games)")
         print(f"  EuroLeague team filter: {'✓' if euro_works else '✗'} ({len(euro_df)} games)")
 
-    def test_date_filtering_both_leagues(self):
+    def test_date_filtering_both_leagues(self) -> None:
         """Test date filtering works for both leagues"""
         print("\n[TEST] Date filtering parity")
 
         # NCAA: November 2024
         ncaa_df = get_basketball_data(
-            dataset='schedule',
+            dataset="schedule",
             league=LEAGUE_NCAA,
             season=TEST_SEASON_NCAA,
-            start_date='2024-11-01',
-            end_date='2024-11-30',
-            limit=20
+            start_date="2024-11-01",
+            end_date="2024-11-30",
+            limit=20,
         )
 
         # EuroLeague: October 2024 (season typically starts in October)
         euro_df = get_basketball_data(
-            dataset='schedule',
+            dataset="schedule",
             league=LEAGUE_EURO,
             season=TEST_SEASON_EURO,
-            start_date='2024-10-01',
-            end_date='2024-10-31',
-            limit=20
+            start_date="2024-10-01",
+            end_date="2024-10-31",
+            limit=20,
         )
 
         ncaa_works = not ncaa_df.empty
@@ -174,44 +158,38 @@ class TestGranularityParity:
     """Test that granularity features work for both leagues"""
 
     @pytest.mark.skip(reason="EuroLeague quarter aggregation pending PBP implementation")
-    def test_quarter_granularity_euroleague(self):
+    def test_quarter_granularity_euroleague(self) -> None:
         """Test quarter-level granularity for EuroLeague"""
         print("\n[TEST] EuroLeague quarter granularity")
 
         df = get_basketball_data(
-            dataset='player_game',
+            dataset="player_game",
             league=LEAGUE_EURO,
             season=TEST_SEASON_EURO,
-            granularity='quarter',
-            limit=50
+            granularity="quarter",
+            limit=50,
         )
 
         assert not df.empty, "EuroLeague should have quarter-level data"
-        assert 'QUARTER' in df.columns, "Should have QUARTER column"
+        assert "QUARTER" in df.columns, "Should have QUARTER column"
 
-        quarters = sorted(df['QUARTER'].unique())
+        quarters = sorted(df["QUARTER"].unique())
         assert quarters == [1, 2, 3, 4], f"Should have quarters 1-4, got {quarters}"
 
         print(f"✓ EuroLeague quarter granularity works: {len(df)} records")
 
-    def test_play_level_both_leagues(self):
+    def test_play_level_both_leagues(self) -> None:
         """Test play-by-play level data for both leagues"""
         print("\n[TEST] Play-level data parity")
 
         # NCAA PBP
         ncaa_df = get_basketball_data(
-            dataset='pbp',
-            league=LEAGUE_NCAA,
-            season=TEST_SEASON_NCAA,
-            limit=100
+            dataset="pbp", league=LEAGUE_NCAA, season=TEST_SEASON_NCAA, limit=100
         )
 
         # EuroLeague PBP
         euro_df = get_basketball_data(
-            dataset='pbp',
-            league=LEAGUE_EURO,
-            season=TEST_SEASON_EURO,
-            limit=100
+            dataset="pbp", league=LEAGUE_EURO, season=TEST_SEASON_EURO, limit=100
         )
 
         ncaa_available = not ncaa_df.empty
@@ -224,26 +202,20 @@ class TestGranularityParity:
 class TestSchemaConsistency:
     """Test schema standardization across leagues"""
 
-    def test_schedule_core_columns(self):
+    def test_schedule_core_columns(self) -> None:
         """Test that schedule has consistent core columns"""
         print("\n[TEST] Schedule schema consistency")
 
         ncaa_df = get_basketball_data(
-            dataset='schedule',
-            league=LEAGUE_NCAA,
-            season=TEST_SEASON_NCAA,
-            limit=5
+            dataset="schedule", league=LEAGUE_NCAA, season=TEST_SEASON_NCAA, limit=5
         )
 
         euro_df = get_basketball_data(
-            dataset='schedule',
-            league=LEAGUE_EURO,
-            season=TEST_SEASON_EURO,
-            limit=5
+            dataset="schedule", league=LEAGUE_EURO, season=TEST_SEASON_EURO, limit=5
         )
 
         # Core columns that should exist in both
-        core_cols = {'GAME_ID', 'GAME_DATE'}
+        core_cols = {"GAME_ID", "GAME_DATE"}
 
         if not ncaa_df.empty and not euro_df.empty:
             ncaa_cols = set(ncaa_df.columns)
@@ -260,26 +232,20 @@ class TestSchemaConsistency:
         else:
             print("  Note: Insufficient data to compare")
 
-    def test_player_game_stat_columns(self):
+    def test_player_game_stat_columns(self) -> None:
         """Test that player_game has consistent stat columns"""
         print("\n[TEST] Player game stats schema consistency")
 
         ncaa_df = get_basketball_data(
-            dataset='player_game',
-            league=LEAGUE_NCAA,
-            season=TEST_SEASON_NCAA,
-            limit=10
+            dataset="player_game", league=LEAGUE_NCAA, season=TEST_SEASON_NCAA, limit=10
         )
 
         euro_df = get_basketball_data(
-            dataset='player_game',
-            league=LEAGUE_EURO,
-            season=TEST_SEASON_EURO,
-            limit=10
+            dataset="player_game", league=LEAGUE_EURO, season=TEST_SEASON_EURO, limit=10
         )
 
         # Core stat columns
-        stat_cols = {'PLAYER_NAME', 'PTS'}
+        stat_cols = {"PLAYER_NAME", "PTS"}
 
         if not ncaa_df.empty and not euro_df.empty:
             ncaa_cols = set(ncaa_df.columns)
@@ -299,62 +265,50 @@ class TestSchemaConsistency:
 class TestDataQualityParity:
     """Test data quality is comparable across leagues"""
 
-    def test_no_null_game_ids(self):
+    def test_no_null_game_ids(self) -> None:
         """Test that neither league has null GAME_IDs"""
         print("\n[TEST] Game ID completeness parity")
 
         ncaa_df = get_basketball_data(
-            dataset='schedule',
-            league=LEAGUE_NCAA,
-            season=TEST_SEASON_NCAA,
-            limit=20
+            dataset="schedule", league=LEAGUE_NCAA, season=TEST_SEASON_NCAA, limit=20
         )
 
         euro_df = get_basketball_data(
-            dataset='schedule',
-            league=LEAGUE_EURO,
-            season=TEST_SEASON_EURO,
-            limit=20
+            dataset="schedule", league=LEAGUE_EURO, season=TEST_SEASON_EURO, limit=20
         )
 
         if not ncaa_df.empty:
-            ncaa_nulls = ncaa_df['GAME_ID'].isnull().sum()
+            ncaa_nulls = ncaa_df["GAME_ID"].isnull().sum()
             assert ncaa_nulls == 0, f"NCAA has {ncaa_nulls} null GAME_IDs"
             print(f"  NCAA: ✓ No null GAME_IDs ({len(ncaa_df)} games)")
 
         if not euro_df.empty:
             # EuroLeague might use GAME_CODE instead
-            id_col = 'GAME_ID' if 'GAME_ID' in euro_df.columns else 'GAME_CODE'
+            id_col = "GAME_ID" if "GAME_ID" in euro_df.columns else "GAME_CODE"
             if id_col in euro_df.columns:
                 euro_nulls = euro_df[id_col].isnull().sum()
                 assert euro_nulls == 0, f"EuroLeague has {euro_nulls} null {id_col}s"
                 print(f"  EuroLeague: ✓ No null {id_col}s ({len(euro_df)} games)")
 
-    def test_no_null_player_names(self):
+    def test_no_null_player_names(self) -> None:
         """Test that neither league has null PLAYER_NAMEs"""
         print("\n[TEST] Player name completeness parity")
 
         ncaa_df = get_basketball_data(
-            dataset='player_game',
-            league=LEAGUE_NCAA,
-            season=TEST_SEASON_NCAA,
-            limit=50
+            dataset="player_game", league=LEAGUE_NCAA, season=TEST_SEASON_NCAA, limit=50
         )
 
         euro_df = get_basketball_data(
-            dataset='player_game',
-            league=LEAGUE_EURO,
-            season=TEST_SEASON_EURO,
-            limit=50
+            dataset="player_game", league=LEAGUE_EURO, season=TEST_SEASON_EURO, limit=50
         )
 
-        if not ncaa_df.empty and 'PLAYER_NAME' in ncaa_df.columns:
-            ncaa_nulls = ncaa_df['PLAYER_NAME'].isnull().sum()
+        if not ncaa_df.empty and "PLAYER_NAME" in ncaa_df.columns:
+            ncaa_nulls = ncaa_df["PLAYER_NAME"].isnull().sum()
             assert ncaa_nulls == 0, f"NCAA has {ncaa_nulls} null PLAYER_NAMEs"
             print(f"  NCAA: ✓ No null PLAYER_NAMEs ({len(ncaa_df)} records)")
 
-        if not euro_df.empty and 'PLAYER_NAME' in euro_df.columns:
-            euro_nulls = euro_df['PLAYER_NAME'].isnull().sum()
+        if not euro_df.empty and "PLAYER_NAME" in euro_df.columns:
+            euro_nulls = euro_df["PLAYER_NAME"].isnull().sum()
             assert euro_nulls == 0, f"EuroLeague has {euro_nulls} null PLAYER_NAMEs"
             print(f"  EuroLeague: ✓ No null PLAYER_NAMEs ({len(euro_df)} records)")
 
@@ -362,16 +316,16 @@ class TestDataQualityParity:
 class TestEuroLeagueSpecificFeatures:
     """Test EuroLeague-specific features (sub-league, tournaments)"""
 
-    def test_season_type_regular_season(self):
+    def test_season_type_regular_season(self) -> None:
         """Test filtering by regular season"""
         print("\n[TEST] EuroLeague Regular Season filtering")
 
         df = get_basketball_data(
-            dataset='schedule',
+            dataset="schedule",
             league=LEAGUE_EURO,
             season=TEST_SEASON_EURO,
-            season_type='regular',
-            limit=10
+            season_type="regular",
+            limit=10,
         )
 
         if not df.empty:
@@ -379,32 +333,28 @@ class TestEuroLeagueSpecificFeatures:
         else:
             print("  Note: No regular season games found")
 
-    def test_season_type_playoffs(self):
+    def test_season_type_playoffs(self) -> None:
         """Test filtering by playoffs"""
         print("\n[TEST] EuroLeague Playoffs filtering")
 
         df = get_basketball_data(
-            dataset='schedule',
+            dataset="schedule",
             league=LEAGUE_EURO,
             season=TEST_SEASON_EURO,
-            season_type='playoffs',
-            limit=10
+            season_type="playoffs",
+            limit=10,
         )
 
         # Playoffs may or may not have data depending on season timing
         print(f"  Playoffs data: {'✓' if not df.empty else '✗'} ({len(df)} games)")
 
-    def test_season_type_final_four(self):
+    def test_season_type_final_four(self) -> None:
         """Test filtering by Final Four"""
         print("\n[TEST] EuroLeague Final Four filtering")
 
         # Try 2023 season (completed, should have Final Four)
         df = get_basketball_data(
-            dataset='schedule',
-            league=LEAGUE_EURO,
-            season='2023',
-            season_type='finals',
-            limit=10
+            dataset="schedule", league=LEAGUE_EURO, season="2023", season_type="finals", limit=10
         )
 
         # Final Four may be sparse
@@ -414,26 +364,26 @@ class TestEuroLeagueSpecificFeatures:
 class TestUseCaseParity:
     """Test common use cases work for both leagues"""
 
-    def test_get_team_schedule_use_case(self):
+    def test_get_team_schedule_use_case(self) -> None:
         """Test getting a team's schedule (common use case)"""
         print("\n[TEST] Get team schedule use case")
 
         # NCAA: Duke's schedule
         ncaa_df = get_basketball_data(
-            dataset='schedule',
+            dataset="schedule",
             league=LEAGUE_NCAA,
             season=TEST_SEASON_NCAA,
-            teams=['Duke'],
-            limit=20
+            teams=["Duke"],
+            limit=20,
         )
 
         # EuroLeague: Barcelona's schedule
         euro_df = get_basketball_data(
-            dataset='schedule',
+            dataset="schedule",
             league=LEAGUE_EURO,
             season=TEST_SEASON_EURO,
-            teams=['Barcelona'],
-            limit=20
+            teams=["Barcelona"],
+            limit=20,
         )
 
         ncaa_works = not ncaa_df.empty
@@ -442,24 +392,18 @@ class TestUseCaseParity:
         print(f"  NCAA (Duke): {'✓' if ncaa_works else '✗'} ({len(ncaa_df)} games)")
         print(f"  EuroLeague (Barcelona): {'✓' if euro_works else '✗'} ({len(euro_df)} games)")
 
-    def test_get_player_season_stats_use_case(self):
+    def test_get_player_season_stats_use_case(self) -> None:
         """Test getting player season stats (common use case)"""
         print("\n[TEST] Get player season stats use case")
 
         # NCAA
         ncaa_df = get_basketball_data(
-            dataset='player_season',
-            league=LEAGUE_NCAA,
-            season=TEST_SEASON_NCAA,
-            limit=20
+            dataset="player_season", league=LEAGUE_NCAA, season=TEST_SEASON_NCAA, limit=20
         )
 
         # EuroLeague
         euro_df = get_basketball_data(
-            dataset='player_season',
-            league=LEAGUE_EURO,
-            season=TEST_SEASON_EURO,
-            limit=20
+            dataset="player_season", league=LEAGUE_EURO, season=TEST_SEASON_EURO, limit=20
         )
 
         ncaa_works = not ncaa_df.empty
@@ -469,7 +413,7 @@ class TestUseCaseParity:
         print(f"  EuroLeague: {'✓' if euro_works else '✗'} ({len(euro_df)} players)")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     """Run tests with detailed output"""
     print("=" * 80)
     print("EUROLEAGUE PARITY VALIDATION TESTS")
@@ -489,30 +433,34 @@ if __name__ == '__main__':
         TestSchemaConsistency,
         TestDataQualityParity,
         TestEuroLeagueSpecificFeatures,
-        TestUseCaseParity
+        TestUseCaseParity,
     ]
 
     for test_class in test_classes:
         print(f"\n{'=' * 80}")
         print(f"TEST CLASS: {test_class.__name__}")
-        print('=' * 80)
+        print("=" * 80)
 
         instance = test_class()
         for method_name in dir(instance):
-            if method_name.startswith('test_'):
+            if method_name.startswith("test_"):
                 method = getattr(instance, method_name)
 
                 # Check if marked as skip
                 skip_marker = None
-                if hasattr(method, 'pytestmark'):
-                    marks = method.pytestmark if isinstance(method.pytestmark, list) else [method.pytestmark]
+                if hasattr(method, "pytestmark"):
+                    marks = (
+                        method.pytestmark
+                        if isinstance(method.pytestmark, list)
+                        else [method.pytestmark]
+                    )
                     for mark in marks:
-                        if mark.name == 'skip':
+                        if mark.name == "skip":
                             skip_marker = mark
                             break
 
                 if skip_marker:
-                    reason = skip_marker.kwargs.get('reason', 'No reason provided')
+                    reason = skip_marker.kwargs.get("reason", "No reason provided")
                     print(f"\n⊘ SKIPPED: {method_name}")
                     print(f"  Reason: {reason}")
                     skipped += 1

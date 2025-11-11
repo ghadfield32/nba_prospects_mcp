@@ -7,8 +7,8 @@ This module provides functions to:
 """
 
 from __future__ import annotations
+
 import pandas as pd
-from typing import Dict, Optional
 
 
 def coerce_common_columns(df: pd.DataFrame, source: str = "generic") -> pd.DataFrame:
@@ -112,8 +112,10 @@ def add_home_away(df: pd.DataFrame) -> pd.DataFrame:
 
     # ESPN MATCHUP format: "DUK vs. UNC" (home) or "DUK @ UNC" (away)
     # Use "vs." as home indicator (more robust than "@")
-    out["HOME_AWAY"] = out["MATCHUP"].str.contains(" vs. ", case=False, na=False).map(
-        {True: "Home", False: "Away"}
+    out["HOME_AWAY"] = (
+        out["MATCHUP"]
+        .str.contains(" vs. ", case=False, na=False)
+        .map({True: "Home", False: "Away"})
     )
 
     return out
@@ -142,9 +144,7 @@ def extract_opponent(df: pd.DataFrame) -> pd.DataFrame:
     # Extract opponent from MATCHUP
     # Format: "DUK vs. UNC" or "DUK @ UNC"
     out["OPPONENT_ABBREVIATION"] = (
-        out["MATCHUP"]
-        .str.replace(r"^.+?\s+(?:vs\.|@)\s+", "", regex=True)
-        .str.strip()
+        out["MATCHUP"].str.replace(r"^.+?\s+(?:vs\.|@)\s+", "", regex=True).str.strip()
     )
 
     return out
@@ -186,10 +186,18 @@ def compose_player_team_game(
 
     # Select team columns to add (avoid duplicates)
     team_cols = [
-        c for c in tg.columns
+        c
+        for c in tg.columns
         if c in keys  # join keys
-        or c in ["MATCHUP", "HOME_AWAY", "TEAM_ABBREVIATION", "OPPONENT_ABBREVIATION",
-                 "OPPONENT_TEAM_ID", "OPPONENT_ID"]
+        or c
+        in [
+            "MATCHUP",
+            "HOME_AWAY",
+            "TEAM_ABBREVIATION",
+            "OPPONENT_ABBREVIATION",
+            "OPPONENT_TEAM_ID",
+            "OPPONENT_ID",
+        ]
         or c.endswith("_PCT")  # team shooting percentages
     ]
 
@@ -293,9 +301,7 @@ def standardize_stats_columns(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def aggregate_per_mode(
-    df: pd.DataFrame,
-    per_mode: str = "Totals",
-    group_by: Optional[list[str]] = None
+    df: pd.DataFrame, per_mode: str = "Totals", group_by: list[str] | None = None
 ) -> pd.DataFrame:
     """Aggregate player stats by per_mode
 
@@ -339,9 +345,22 @@ def aggregate_per_mode(
 
     # Stat columns to aggregate (numeric only)
     stat_cols = [
-        "PTS", "AST", "REB", "STL", "BLK", "TOV", "PF",
-        "FGM", "FGA", "FG3M", "FG3A", "FTM", "FTA",
-        "OREB", "DREB", "MIN"
+        "PTS",
+        "AST",
+        "REB",
+        "STL",
+        "BLK",
+        "TOV",
+        "PF",
+        "FGM",
+        "FGA",
+        "FG3M",
+        "FG3A",
+        "FTM",
+        "FTA",
+        "OREB",
+        "DREB",
+        "MIN",
     ]
 
     # Filter to columns that exist
@@ -363,10 +382,12 @@ def aggregate_per_mode(
         )
 
     # Count games played using the detected column
-    df_agg = df.groupby(group_by, as_index=False).agg({
-        **{col: "sum" for col in agg_cols},
-        game_id_col: "nunique"  # Count unique games played
-    })
+    df_agg = df.groupby(group_by, as_index=False).agg(
+        {
+            **{col: "sum" for col in agg_cols},
+            game_id_col: "nunique",  # Count unique games played
+        }
+    )
 
     # Rename game ID count to GP (games played)
     df_agg = df_agg.rename(columns={game_id_col: "GP"})
@@ -417,3 +438,187 @@ def aggregate_per_mode(
     df_agg[numeric_cols] = df_agg[numeric_cols].round(1)
 
     return df_agg
+
+
+# ============================================================================
+# Guardrails: Decimal Rounding & Datetime Standardization
+# ============================================================================
+
+
+def apply_decimal_rounding(
+    df: pd.DataFrame, precision: int = 4, compact: bool = False
+) -> pd.DataFrame:
+    """
+    Round all float columns to specified precision for token stability.
+
+    Rounding benefits:
+        - Reduces token count (0.3333333333 → 0.3333)
+        - Stabilizes LLM parsing (no floating point noise)
+        - Improves readability
+
+    Args:
+        df: Input DataFrame
+        precision: Decimal places to round to (default: 4)
+        compact: If True, use reduced precision (1-2 decimals) for better token savings
+
+    Returns:
+        DataFrame with rounded float columns
+
+    Examples:
+        >>> df = pd.DataFrame({"PTS": [20.123456], "FG_PCT": [0.456789]})
+        >>> rounded = apply_decimal_rounding(df, precision=2)
+        >>> rounded["FG_PCT"].iloc[0]
+        0.46
+
+        >>> # Compact mode for aggressive token savings
+        >>> compact = apply_decimal_rounding(df, compact=True)
+        >>> compact["PTS"].iloc[0]
+        20.1  # 1 decimal for counting stats
+    """
+    if df.empty:
+        return df
+
+    out = df.copy()
+
+    # Determine precision based on mode
+    if compact:
+        # Compact mode: aggressive rounding
+        # - Percentages: 3 decimals (0.456 = 45.6%)
+        # - Counting stats: 1 decimal (20.1 points)
+        # - Advanced stats: 2 decimals (110.25 ORTG)
+
+        pct_cols = [c for c in out.columns if "PCT" in c.upper() or "_RATE" in c.upper()]
+        counting_cols = ["PTS", "AST", "REB", "STL", "BLK", "TOV", "MIN"]
+        advanced_cols = [c for c in out.columns if "RATING" in c.upper() or "USG" in c.upper()]
+
+        for col in out.select_dtypes(include=["float", "float64"]).columns:
+            if col in pct_cols:
+                out[col] = out[col].round(3)
+            elif col in counting_cols:
+                out[col] = out[col].round(1)
+            elif col in advanced_cols:
+                out[col] = out[col].round(2)
+            else:
+                out[col] = out[col].round(2)  # Default: 2 decimals
+    else:
+        # Standard mode: uniform precision
+        for col in out.select_dtypes(include=["float", "float64"]).columns:
+            out[col] = out[col].round(precision)
+
+    return out
+
+
+def standardize_datetimes(
+    df: pd.DataFrame, timezone: str = "UTC", format: str = "iso"
+) -> pd.DataFrame:
+    """
+    Standardize all datetime columns to ISO-8601 UTC format.
+
+    Benefits:
+        - Consistent format across all datasets
+        - Timezone-aware (prevents ambiguity)
+        - LLM-friendly (ISO-8601 is widely recognized)
+        - Sortable as strings
+
+    Args:
+        df: Input DataFrame
+        timezone: Target timezone (default: "UTC")
+        format: Output format - "iso" for ISO-8601, "unix" for Unix timestamp
+
+    Returns:
+        DataFrame with standardized datetime columns
+
+    Examples:
+        >>> df = pd.DataFrame({"GAME_DATE": [pd.Timestamp("2025-01-15 19:00:00")]})
+        >>> standardized = standardize_datetimes(df)
+        >>> standardized["GAME_DATE"].iloc[0]
+        '2025-01-15T19:00:00+00:00'  # ISO-8601 UTC
+
+        >>> # Unix timestamp format
+        >>> unix = standardize_datetimes(df, format="unix")
+        >>> unix["GAME_DATE"].iloc[0]
+        1736967600  # Seconds since epoch
+    """
+    if df.empty:
+        return df
+
+    out = df.copy()
+
+    # Find datetime columns
+    datetime_cols = out.select_dtypes(include=["datetime64", "datetimetz"]).columns
+
+    for col in datetime_cols:
+        if format == "iso":
+            # Convert to UTC and format as ISO-8601
+            if out[col].dt.tz is None:
+                # Localize to UTC if naive
+                out[col] = out[col].dt.tz_localize("UTC")
+            else:
+                # Convert to UTC if already timezone-aware
+                out[col] = out[col].dt.tz_convert("UTC")
+
+            # Convert to ISO-8601 string
+            out[col] = out[col].dt.strftime("%Y-%m-%dT%H:%M:%S+00:00")
+
+        elif format == "unix":
+            # Convert to Unix timestamp (seconds since epoch)
+            out[col] = out[col].astype("int64") // 10**9  # nanoseconds → seconds
+
+        else:
+            raise ValueError(f"Invalid format: {format}. Must be 'iso' or 'unix'")
+
+    return out
+
+
+def apply_guardrails(
+    df: pd.DataFrame,
+    round_decimals: bool = True,
+    precision: int = 4,
+    compact: bool = False,
+    standardize_dates: bool = True,
+    timezone: str = "UTC",
+) -> pd.DataFrame:
+    """
+    Apply all guardrails (rounding + datetime standardization) in one pass.
+
+    This is the recommended function to use for LLM-friendly data preparation.
+
+    Args:
+        df: Input DataFrame
+        round_decimals: Enable decimal rounding (default: True)
+        precision: Decimal places (default: 4)
+        compact: Use compact mode for aggressive token savings (default: False)
+        standardize_dates: Standardize datetimes to ISO-8601 UTC (default: True)
+        timezone: Target timezone (default: "UTC")
+
+    Returns:
+        DataFrame with all guardrails applied
+
+    Examples:
+        >>> df = pd.DataFrame({
+        ...     "GAME_DATE": [pd.Timestamp("2025-01-15")],
+        ...     "PTS": [20.123456],
+        ...     "FG_PCT": [0.456789]
+        ... })
+        >>> clean = apply_guardrails(df, compact=True)
+        >>> clean["PTS"].iloc[0]
+        20.1
+        >>> clean["FG_PCT"].iloc[0]
+        0.457
+        >>> clean["GAME_DATE"].iloc[0]
+        '2025-01-15T00:00:00+00:00'
+    """
+    if df.empty:
+        return df
+
+    out = df.copy()
+
+    # Apply decimal rounding
+    if round_decimals:
+        out = apply_decimal_rounding(out, precision=precision, compact=compact)
+
+    # Standardize datetimes
+    if standardize_dates:
+        out = standardize_datetimes(out, timezone=timezone)
+
+    return out

@@ -11,12 +11,12 @@ Examples:
     - "last season" → previous season year
 """
 
-from datetime import datetime, timedelta
-from typing import Optional, Dict, Tuple
 import re
+from datetime import datetime, timedelta
+from typing import Any
 
 
-def parse_relative_date(date_str: str) -> Optional[str]:
+def parse_relative_date(date_str: str) -> str | None:
     """
     Parse natural language date references into ISO format dates.
 
@@ -81,7 +81,7 @@ def parse_relative_date(date_str: str) -> Optional[str]:
     return None
 
 
-def parse_relative_date_range(range_str: str) -> Optional[Dict[str, str]]:
+def parse_relative_date_range(range_str: str) -> dict[str, str] | None:
     """
     Parse natural language date range into start/end dates.
 
@@ -114,44 +114,29 @@ def parse_relative_date_range(range_str: str) -> Optional[Dict[str, str]]:
     last_days_match = re.match(r"last\s+(\d+)\s+days?", range_str)
     if last_days_match:
         days = int(last_days_match.group(1))
-        return {
-            "start": (today - timedelta(days=days-1)).isoformat(),
-            "end": today.isoformat()
-        }
+        return {"start": (today - timedelta(days=days - 1)).isoformat(), "end": today.isoformat()}
 
     # Direct mappings for common ranges
     if range_str in ["last week", "past week"]:
-        return {
-            "start": (today - timedelta(days=7)).isoformat(),
-            "end": today.isoformat()
-        }
+        return {"start": (today - timedelta(days=7)).isoformat(), "end": today.isoformat()}
 
     if range_str in ["last month", "past month"]:
-        return {
-            "start": (today - timedelta(days=30)).isoformat(),
-            "end": today.isoformat()
-        }
+        return {"start": (today - timedelta(days=30)).isoformat(), "end": today.isoformat()}
 
     if range_str in ["this week"]:
         # Monday to today
         monday = today - timedelta(days=today.weekday())
-        return {
-            "start": monday.isoformat(),
-            "end": today.isoformat()
-        }
+        return {"start": monday.isoformat(), "end": today.isoformat()}
 
     if range_str in ["this month"]:
         # 1st of month to today
         first_of_month = today.replace(day=1)
-        return {
-            "start": first_of_month.isoformat(),
-            "end": today.isoformat()
-        }
+        return {"start": first_of_month.isoformat(), "end": today.isoformat()}
 
     return None
 
 
-def parse_relative_season(season_str: str, current_month: Optional[int] = None) -> Optional[str]:
+def parse_relative_season(season_str: str, current_month: int | None = None) -> str | None:
     """
     Parse natural language season references into season year.
 
@@ -238,7 +223,7 @@ def parse_relative_season(season_str: str, current_month: Optional[int] = None) 
     return None
 
 
-def parse_days_parameter(days_str: str) -> Optional[int]:
+def parse_days_parameter(days_str: str) -> int | None:
     """
     Parse natural language "days" parameter for recent games.
 
@@ -293,7 +278,7 @@ def parse_days_parameter(days_str: str) -> Optional[int]:
     return None
 
 
-def normalize_filters_for_llm(filters: Dict[str, any]) -> Dict[str, any]:
+def normalize_filters_for_llm(filters: dict[str, Any]) -> dict[str, Any]:
     """
     Normalize filter values from natural language to API format.
 
@@ -350,7 +335,7 @@ def normalize_filters_for_llm(filters: Dict[str, any]) -> Dict[str, any]:
 
 
 # Convenience function for testing
-def test_parser():
+def test_parser() -> None:
     """Test the natural language parser with various inputs."""
     print("=== Testing Date Parser ===")
     test_dates = ["today", "yesterday", "3 days ago", "last week"]
@@ -361,20 +346,20 @@ def test_parser():
     print("\n=== Testing Date Range Parser ===")
     test_ranges = ["last 7 days", "last week", "this month"]
     for range_str in test_ranges:
-        result = parse_relative_date_range(range_str)
-        print(f"{range_str:20} → {result}")
+        range_result = parse_relative_date_range(range_str)
+        print(f"{range_str:20} → {range_result}")
 
     print("\n=== Testing Season Parser ===")
     test_seasons = ["this season", "last season", "2024-25", "2024 season"]
     for season_str in test_seasons:
-        result = parse_relative_season(season_str)
-        print(f"{season_str:20} → {result}")
+        season_result = parse_relative_season(season_str)
+        print(f"{season_str:20} → {season_result}")
 
     print("\n=== Testing Days Parameter ===")
     test_days = ["today", "last week", "last 5 days"]
     for days_str in test_days:
-        result = parse_days_parameter(days_str)
-        print(f"{days_str:20} → {result}")
+        days_result = parse_days_parameter(days_str)
+        print(f"{days_str:20} → {days_result}")
 
 
 if __name__ == "__main__":

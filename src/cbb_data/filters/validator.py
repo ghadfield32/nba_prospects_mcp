@@ -8,7 +8,7 @@ This module validates filter combinations before compilation to:
 """
 
 from __future__ import annotations
-from typing import Dict, List, Optional, Set
+
 import logging
 
 from .spec import FilterSpec
@@ -17,58 +17,95 @@ logger = logging.getLogger(__name__)
 
 
 # Filter support matrix: which filters work with which datasets
-DATASET_SUPPORTED_FILTERS: Dict[str, Set[str]] = {
+DATASET_SUPPORTED_FILTERS: dict[str, set[str]] = {
     "schedule": {
-        "league", "season", "season_type", "date", "game_ids",
-        "team", "team_ids", "opponent", "opponent_ids",
-        "home_away", "venue", "conference", "tournament"
+        "league",
+        "season",
+        "season_type",
+        "date",
+        "game_ids",
+        "team",
+        "team_ids",
+        "opponent",
+        "opponent_ids",
+        "home_away",
+        "venue",
+        "conference",
+        "tournament",
     },
     "player_game": {
-        "league", "season", "season_type", "date", "game_ids",
-        "team", "team_ids", "player", "player_ids",
-        "last_n_games", "min_minutes", "per_mode"
+        "league",
+        "season",
+        "season_type",
+        "date",
+        "game_ids",
+        "team",
+        "team_ids",
+        "player",
+        "player_ids",
+        "last_n_games",
+        "min_minutes",
+        "per_mode",
     },
     "team_game": {
-        "league", "season", "season_type", "date", "game_ids",
-        "team", "team_ids", "opponent", "opponent_ids",
-        "home_away"
+        "league",
+        "season",
+        "season_type",
+        "date",
+        "game_ids",
+        "team",
+        "team_ids",
+        "opponent",
+        "opponent_ids",
+        "home_away",
     },
-    "pbp": {
-        "league", "game_ids", "season",
-        "team", "team_ids", "player", "player_ids",
-        "quarter"
-    },
+    "pbp": {"league", "game_ids", "season", "team", "team_ids", "player", "player_ids", "quarter"},
     "shots": {
-        "league", "game_ids", "season",
-        "team", "team_ids", "player", "player_ids",
-        "quarter", "context_measure"
+        "league",
+        "game_ids",
+        "season",
+        "team",
+        "team_ids",
+        "player",
+        "player_ids",
+        "quarter",
+        "context_measure",
     },
     # Phase 3.3: Season Aggregate Datasets
     "player_season": {
-        "league", "season", "season_type",
-        "team", "team_ids", "player", "player_ids",
-        "per_mode", "min_minutes"
+        "league",
+        "season",
+        "season_type",
+        "team",
+        "team_ids",
+        "player",
+        "player_ids",
+        "per_mode",
+        "min_minutes",
     },
-    "team_season": {
-        "league", "season", "season_type",
-        "team", "team_ids", "conference"
-    },
+    "team_season": {"league", "season", "season_type", "team", "team_ids", "conference"},
     "player_team_season": {
-        "league", "season", "season_type",
-        "team", "team_ids", "player", "player_ids",
-        "per_mode", "min_minutes"
+        "league",
+        "season",
+        "season_type",
+        "team",
+        "team_ids",
+        "player",
+        "player_ids",
+        "per_mode",
+        "min_minutes",
     },
 }
 
 # League-specific filter restrictions
-LEAGUE_RESTRICTIONS: Dict[str, Set[str]] = {
+LEAGUE_RESTRICTIONS: dict[str, set[str]] = {
     "NCAA-MBB": {"date", "conference", "division", "tournament"},
     "NCAA-WBB": {"date", "conference", "division", "tournament"},
     "EuroLeague": {"season", "season_type"},  # No date filtering for EuroLeague
 }
 
 # Filters that require other filters to be present
-FILTER_DEPENDENCIES: Dict[str, List[str]] = {
+FILTER_DEPENDENCIES: dict[str, list[str]] = {
     "last_n_games": ["team", "team_ids"],  # Requires team context
     "min_minutes": ["player", "player_ids"],  # Requires player context
 }
@@ -76,25 +113,27 @@ FILTER_DEPENDENCIES: Dict[str, List[str]] = {
 
 class FilterValidationError(ValueError):
     """Raised when filter validation fails"""
+
     pass
 
 
 class FilterValidationWarning:
     """Container for validation warnings"""
+
     def __init__(self, message: str, filter_name: str):
         self.message = message
         self.filter_name = filter_name
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"[{self.filter_name}] {self.message}"
 
 
 def validate_filters(
     dataset_id: str,
     spec: FilterSpec,
-    dataset_leagues: Optional[List[str]] = None,
-    strict: bool = False
-) -> List[FilterValidationWarning]:
+    dataset_leagues: list[str] | None = None,
+    strict: bool = False,
+) -> list[FilterValidationWarning]:
     """Validate filter specification for a dataset
 
     Args:
@@ -116,7 +155,7 @@ def validate_filters(
         ...     print(w)
         [venue] Filter 'venue' is defined but not fully implemented. Results may be partial.
     """
-    warnings: List[FilterValidationWarning] = []
+    warnings: list[FilterValidationWarning] = []
 
     # Get supported filters for this dataset
     supported = DATASET_SUPPORTED_FILTERS.get(dataset_id, set())
@@ -143,8 +182,8 @@ def validate_filters(
                 # Date filter on EuroLeague
                 if filter_name == "date" and spec.league == "EuroLeague":
                     msg = (
-                        f"Filter 'date' is not supported for EuroLeague. "
-                        f"Use 'season' filter instead."
+                        "Filter 'date' is not supported for EuroLeague. "
+                        "Use 'season' filter instead."
                     )
                     warnings.append(FilterValidationWarning(msg, filter_name))
 
@@ -168,20 +207,14 @@ def validate_filters(
 
     # Check 5: Dataset-specific validations
     if dataset_id == "pbp" and "game_ids" not in active_filters:
-        msg = (
-            "Dataset 'pbp' requires 'game_ids' filter. "
-            "Add game_ids to your query."
-        )
+        msg = "Dataset 'pbp' requires 'game_ids' filter. " "Add game_ids to your query."
         if strict:
             raise FilterValidationError(msg)
         warnings.append(FilterValidationWarning(msg, "game_ids"))
 
     if dataset_id == "shots":
         if "game_ids" not in active_filters:
-            msg = (
-                "Dataset 'shots' requires 'game_ids' filter. "
-                "Add game_ids to your query."
-            )
+            msg = "Dataset 'shots' requires 'game_ids' filter. " "Add game_ids to your query."
             if strict:
                 raise FilterValidationError(msg)
             warnings.append(FilterValidationWarning(msg, "game_ids"))
@@ -201,7 +234,7 @@ def validate_filters(
     # Verified by tests/test_missing_filters.py
     partially_implemented = {
         "context_measure",  # Shots context - needs verification
-        "only_complete"     # Game completion filter - needs verification
+        "only_complete",  # Game completion filter - needs verification
     }
     for filter_name in active_filters:
         if filter_name in partially_implemented:
@@ -214,7 +247,7 @@ def validate_filters(
     return warnings
 
 
-def _get_active_filters(spec: FilterSpec) -> Set[str]:
+def _get_active_filters(spec: FilterSpec) -> set[str]:
     """Get names of all non-None filters in spec
 
     Args:
@@ -274,7 +307,7 @@ def _get_active_filters(spec: FilterSpec) -> Set[str]:
     return active
 
 
-def get_supported_filters(dataset_id: str) -> Set[str]:
+def get_supported_filters(dataset_id: str) -> set[str]:
     """Get set of supported filters for a dataset
 
     Args:
@@ -293,7 +326,7 @@ def get_supported_filters(dataset_id: str) -> Set[str]:
     return DATASET_SUPPORTED_FILTERS.get(dataset_id, set()).copy()
 
 
-def get_league_restrictions(league: str) -> Set[str]:
+def get_league_restrictions(league: str) -> set[str]:
     """Get filters that work specifically with this league
 
     Args:

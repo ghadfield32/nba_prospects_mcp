@@ -36,10 +36,11 @@ Limitations:
 """
 
 from __future__ import annotations
-import pandas as pd
-import numpy as np
-from typing import Optional, List, Dict, Any
+
 import logging
+
+import numpy as np
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +65,7 @@ def filter_pbp_by_half(pbp_df: pd.DataFrame, half: int) -> pd.DataFrame:
     if pbp_df.empty:
         return pbp_df
 
-    if 'half' not in pbp_df.columns:
+    if "half" not in pbp_df.columns:
         logger.warning("PBP data does not have 'half' column - cannot filter by half")
         return pbp_df
 
@@ -72,7 +73,7 @@ def filter_pbp_by_half(pbp_df: pd.DataFrame, half: int) -> pd.DataFrame:
         logger.warning(f"Invalid half number: {half}. Must be 1 or 2.")
         return pbp_df
 
-    filtered = pbp_df[pbp_df['half'] == half].copy()
+    filtered = pbp_df[pbp_df["half"] == half].copy()
     logger.debug(f"Filtered PBP to half {half}: {len(filtered)} events (from {len(pbp_df)} total)")
 
     return filtered
@@ -99,7 +100,7 @@ def filter_pbp_by_quarter(pbp_df: pd.DataFrame, quarter: int) -> pd.DataFrame:
 
     # Try different column names (QUARTER, PERIOD, quarter)
     quarter_col = None
-    for col in ['QUARTER', 'quarter', 'PERIOD', 'period']:
+    for col in ["QUARTER", "quarter", "PERIOD", "period"]:
         if col in pbp_df.columns:
             quarter_col = col
             break
@@ -113,15 +114,15 @@ def filter_pbp_by_quarter(pbp_df: pd.DataFrame, quarter: int) -> pd.DataFrame:
         return pbp_df
 
     filtered = pbp_df[pbp_df[quarter_col] == quarter].copy()
-    logger.debug(f"Filtered PBP to quarter {quarter}: {len(filtered)} events (from {len(pbp_df)} total)")
+    logger.debug(
+        f"Filtered PBP to quarter {quarter}: {len(filtered)} events (from {len(pbp_df)} total)"
+    )
 
     return filtered
 
 
 def aggregate_pbp_to_box_score(
-    pbp_df: pd.DataFrame,
-    group_by: List[str],
-    league: str = 'NCAA-MBB'
+    pbp_df: pd.DataFrame, group_by: list[str], league: str = "NCAA-MBB"
 ) -> pd.DataFrame:
     """Aggregate play-by-play events into box score statistics
 
@@ -163,94 +164,101 @@ def aggregate_pbp_to_box_score(
 
     # 1. SCORING STATS (shooter-based)
     # Filter to plays with a shooter (shooting plays + free throws)
-    shooter_plays = pbp_df[pbp_df['shooter'].notna()].copy()
+    shooter_plays = pbp_df[pbp_df["shooter"].notna()].copy()
 
     if shooter_plays.empty:
         logger.warning("No shooter plays found in PBP - cannot derive scoring stats")
         return pd.DataFrame()
 
     # Rename 'shooter' to 'player' for consistent grouping
-    shooter_plays['player'] = shooter_plays['shooter']
-
-    # Calculate shooting stats
-    shooting_stats = shooter_plays.groupby(group_by + ['player']).agg({
-        'scoring_play': 'sum',  # Total made shots
-        'shooting_play': 'sum',  # Total shot attempts
-        'is_three': lambda x: (x == True).sum(),  # 3PM (3-pointers made)
-        'is_assisted': lambda x: (x == True).sum(),  # Won't use directly (assists come from assist_player)
-    }).reset_index()
+    shooter_plays["player"] = shooter_plays["shooter"]
 
     # Calculate points from scoring plays
     # Need to distinguish FG (2 or 3 pts) from FT (1 pt)
-    shooter_plays['is_free_throw'] = shooter_plays['play_type'].str.contains('free throw', case=False, na=False)
-    shooter_plays['is_two_pointer'] = (shooter_plays['shooting_play'] == True) & (shooter_plays['is_three'] == False) & (shooter_plays['is_free_throw'] == False)
-    shooter_plays['is_three_pointer'] = (shooter_plays['shooting_play'] == True) & (shooter_plays['is_three'] == True)
+    shooter_plays["is_free_throw"] = shooter_plays["play_type"].str.contains(
+        "free throw", case=False, na=False
+    )
+    shooter_plays["is_two_pointer"] = (
+        shooter_plays["shooting_play"]
+        & ~shooter_plays["is_three"]
+        & ~shooter_plays["is_free_throw"]
+    )
+    shooter_plays["is_three_pointer"] = shooter_plays["shooting_play"] & shooter_plays["is_three"]
 
     # Calculate points: FTM=1, FG2M=2, FG3M=3
-    shooter_plays['points'] = (
-        (shooter_plays['is_free_throw'] & shooter_plays['scoring_play']).astype(int) * 1 +
-        (shooter_plays['is_two_pointer'] & shooter_plays['scoring_play']).astype(int) * 2 +
-        (shooter_plays['is_three_pointer'] & shooter_plays['scoring_play']).astype(int) * 3
+    shooter_plays["points"] = (
+        (shooter_plays["is_free_throw"] & shooter_plays["scoring_play"]).astype(int) * 1
+        + (shooter_plays["is_two_pointer"] & shooter_plays["scoring_play"]).astype(int) * 2
+        + (shooter_plays["is_three_pointer"] & shooter_plays["scoring_play"]).astype(int) * 3
     )
 
     # Calculate detailed shooting stats
-    detailed_shooting = shooter_plays.groupby(group_by + ['player']).agg({
-        'points': 'sum',  # Total points
-        'is_free_throw': 'sum',  # FTA
-        'is_two_pointer': 'sum',  # FG2A
-        'is_three_pointer': 'sum',  # FG3A
-    }).reset_index()
+    detailed_shooting = (
+        shooter_plays.groupby(group_by + ["player"])
+        .agg(
+            {
+                "points": "sum",  # Total points
+                "is_free_throw": "sum",  # FTA
+                "is_two_pointer": "sum",  # FG2A
+                "is_three_pointer": "sum",  # FG3A
+            }
+        )
+        .reset_index()
+    )
 
     # Calculate makes
-    shooter_plays['ftm'] = (shooter_plays['is_free_throw'] & shooter_plays['scoring_play']).astype(int)
-    shooter_plays['fg2m'] = (shooter_plays['is_two_pointer'] & shooter_plays['scoring_play']).astype(int)
-    shooter_plays['fg3m'] = (shooter_plays['is_three_pointer'] & shooter_plays['scoring_play']).astype(int)
+    shooter_plays["ftm"] = (shooter_plays["is_free_throw"] & shooter_plays["scoring_play"]).astype(
+        int
+    )
+    shooter_plays["fg2m"] = (
+        shooter_plays["is_two_pointer"] & shooter_plays["scoring_play"]
+    ).astype(int)
+    shooter_plays["fg3m"] = (
+        shooter_plays["is_three_pointer"] & shooter_plays["scoring_play"]
+    ).astype(int)
 
-    makes = shooter_plays.groupby(group_by + ['player']).agg({
-        'ftm': 'sum',
-        'fg2m': 'sum',
-        'fg3m': 'sum',
-    }).reset_index()
+    makes = (
+        shooter_plays.groupby(group_by + ["player"])
+        .agg(
+            {
+                "ftm": "sum",
+                "fg2m": "sum",
+                "fg3m": "sum",
+            }
+        )
+        .reset_index()
+    )
 
     # Merge shooting stats
-    shooting_combined = detailed_shooting.merge(makes, on=group_by + ['player'], how='outer')
+    shooting_combined = detailed_shooting.merge(makes, on=group_by + ["player"], how="outer")
 
     # 2. ASSISTS (assist_player-based)
-    assist_plays = pbp_df[pbp_df['assist_player'].notna()].copy()
+    assist_plays = pbp_df[pbp_df["assist_player"].notna()].copy()
     if not assist_plays.empty:
-        assist_plays['player'] = assist_plays['assist_player']
-        assists = assist_plays.groupby(group_by + ['player']).size().reset_index(name='AST')
+        assist_plays["player"] = assist_plays["assist_player"]
+        assists = assist_plays.groupby(group_by + ["player"]).size().reset_index(name="AST")
     else:
-        assists = pd.DataFrame(columns=group_by + ['player', 'AST'])
+        assists = pd.DataFrame(columns=group_by + ["player", "AST"])
 
     # 3. REBOUNDS (rebound play_type)
-    rebound_plays = pbp_df[pbp_df['play_type'].str.contains('rebound', case=False, na=False)].copy()
+    # CBBpy PBP doesn't have player-level rebound attribution - will be set to 0 later
+    rebound_plays = pbp_df[pbp_df["play_type"].str.contains("rebound", case=False, na=False)].copy()
     if not rebound_plays.empty:
-        # Rebounds are assigned to play_team, but we need individual player
-        # CBBpy PBP doesn't have player-level rebound attribution
-        # We'll skip rebounds for now (limitation of PBP data)
         logger.debug("Rebounds detected in PBP but player attribution not available")
-        rebounds = pd.DataFrame(columns=group_by + ['player', 'REB'])
-    else:
-        rebounds = pd.DataFrame(columns=group_by + ['player', 'REB'])
 
     # 4. TURNOVERS
-    turnover_plays = pbp_df[pbp_df['play_type'].str.contains('turnover', case=False, na=False)].copy()
+    # Turnovers might be assigned to play_team, not individual player - will be set to 0 later
+    turnover_plays = pbp_df[
+        pbp_df["play_type"].str.contains("turnover", case=False, na=False)
+    ].copy()
     if not turnover_plays.empty:
-        # Turnovers might be assigned to play_team, not individual player
-        # Check if we can extract player from play_desc
         logger.debug("Turnovers detected but player attribution may be limited")
-        turnovers = pd.DataFrame(columns=group_by + ['player', 'TOV'])
-    else:
-        turnovers = pd.DataFrame(columns=group_by + ['player', 'TOV'])
 
     # 5. FOULS
-    foul_plays = pbp_df[pbp_df['play_type'].str.contains('foul', case=False, na=False)].copy()
+    # Fouls have limited player attribution in PBP - will be set to 0 later
+    foul_plays = pbp_df[pbp_df["play_type"].str.contains("foul", case=False, na=False)].copy()
     if not foul_plays.empty:
         logger.debug("Fouls detected but player attribution may be limited")
-        fouls = pd.DataFrame(columns=group_by + ['player', 'PF'])
-    else:
-        fouls = pd.DataFrame(columns=group_by + ['player', 'PF'])
 
     # COMBINE ALL STATS
     # Start with shooting stats (has all players who took shots)
@@ -258,81 +266,92 @@ def aggregate_pbp_to_box_score(
 
     # Add assists
     if not assists.empty:
-        box_score = box_score.merge(assists, on=group_by + ['player'], how='outer')
+        box_score = box_score.merge(assists, on=group_by + ["player"], how="outer")
     else:
-        box_score['AST'] = 0
+        box_score["AST"] = 0
 
     # Fill NaN values with 0
     box_score = box_score.fillna(0)
 
     # Calculate derived stats
-    box_score['PTS'] = box_score['points'].astype(int)
-    box_score['FTM'] = box_score['ftm'].astype(int)
-    box_score['FTA'] = box_score['is_free_throw'].astype(int)
-    box_score['FG2M'] = box_score['fg2m'].astype(int)
-    box_score['FG2A'] = box_score['is_two_pointer'].astype(int)
-    box_score['FG3M'] = box_score['fg3m'].astype(int)
-    box_score['FG3A'] = box_score['is_three_pointer'].astype(int)
-    box_score['FGM'] = (box_score['FG2M'] + box_score['FG3M']).astype(int)
-    box_score['FGA'] = (box_score['FG2A'] + box_score['FG3A']).astype(int)
+    box_score["PTS"] = box_score["points"].astype(int)
+    box_score["FTM"] = box_score["ftm"].astype(int)
+    box_score["FTA"] = box_score["is_free_throw"].astype(int)
+    box_score["FG2M"] = box_score["fg2m"].astype(int)
+    box_score["FG2A"] = box_score["is_two_pointer"].astype(int)
+    box_score["FG3M"] = box_score["fg3m"].astype(int)
+    box_score["FG3A"] = box_score["is_three_pointer"].astype(int)
+    box_score["FGM"] = (box_score["FG2M"] + box_score["FG3M"]).astype(int)
+    box_score["FGA"] = (box_score["FG2A"] + box_score["FG3A"]).astype(int)
 
     # Calculate percentages
-    box_score['FG_PCT'] = np.where(
-        box_score['FGA'] > 0,
-        box_score['FGM'] / box_score['FGA'],
-        0.0
+    box_score["FG_PCT"] = np.where(box_score["FGA"] > 0, box_score["FGM"] / box_score["FGA"], 0.0)
+    box_score["FG3_PCT"] = np.where(
+        box_score["FG3A"] > 0, box_score["FG3M"] / box_score["FG3A"], 0.0
     )
-    box_score['FG3_PCT'] = np.where(
-        box_score['FG3A'] > 0,
-        box_score['FG3M'] / box_score['FG3A'],
-        0.0
-    )
-    box_score['FT_PCT'] = np.where(
-        box_score['FTA'] > 0,
-        box_score['FTM'] / box_score['FTA'],
-        0.0
-    )
+    box_score["FT_PCT"] = np.where(box_score["FTA"] > 0, box_score["FTM"] / box_score["FTA"], 0.0)
 
     # Add missing stats with placeholder values
-    box_score['REB'] = 0  # PBP doesn't have player-level rebounds
-    box_score['OREB'] = 0
-    box_score['DREB'] = 0
-    box_score['STL'] = 0  # Not in CBBpy PBP
-    box_score['BLK'] = 0  # Not in CBBpy PBP
-    box_score['TOV'] = 0  # Player attribution difficult
-    box_score['PF'] = 0  # Player attribution difficult
-    box_score['MIN'] = 0  # Requires time tracking
+    box_score["REB"] = 0  # PBP doesn't have player-level rebounds
+    box_score["OREB"] = 0
+    box_score["DREB"] = 0
+    box_score["STL"] = 0  # Not in CBBpy PBP
+    box_score["BLK"] = 0  # Not in CBBpy PBP
+    box_score["TOV"] = 0  # Player attribution difficult
+    box_score["PF"] = 0  # Player attribution difficult
+    box_score["MIN"] = 0  # Requires time tracking
 
     # Rename columns to match unified schema
-    if 'player' in box_score.columns:
-        box_score = box_score.rename(columns={'player': 'PLAYER_NAME'})
+    if "player" in box_score.columns:
+        box_score = box_score.rename(columns={"player": "PLAYER_NAME"})
 
-    if 'game_id' in box_score.columns:
-        box_score = box_score.rename(columns={'game_id': 'GAME_ID'})
+    if "game_id" in box_score.columns:
+        box_score = box_score.rename(columns={"game_id": "GAME_ID"})
 
-    if 'half' in box_score.columns:
-        box_score = box_score.rename(columns={'half': 'HALF'})
+    if "half" in box_score.columns:
+        box_score = box_score.rename(columns={"half": "HALF"})
 
-    if 'quarter' in box_score.columns:
-        box_score = box_score.rename(columns={'quarter': 'QUARTER'})
+    if "quarter" in box_score.columns:
+        box_score = box_score.rename(columns={"quarter": "QUARTER"})
 
     # Add metadata columns
-    box_score['LEAGUE'] = league
-    box_score['SOURCE'] = 'pbp_aggregation'
+    box_score["LEAGUE"] = league
+    box_score["SOURCE"] = "pbp_aggregation"
 
     # Select final columns (matching unified schema where possible)
     final_columns = [
-        'GAME_ID', 'PLAYER_NAME', 'PTS', 'FGM', 'FGA', 'FG_PCT',
-        'FG2M', 'FG2A', 'FG3M', 'FG3A', 'FG3_PCT',
-        'FTM', 'FTA', 'FT_PCT', 'AST', 'REB', 'OREB', 'DREB',
-        'STL', 'BLK', 'TOV', 'PF', 'MIN', 'LEAGUE', 'SOURCE'
+        "GAME_ID",
+        "PLAYER_NAME",
+        "PTS",
+        "FGM",
+        "FGA",
+        "FG_PCT",
+        "FG2M",
+        "FG2A",
+        "FG3M",
+        "FG3A",
+        "FG3_PCT",
+        "FTM",
+        "FTA",
+        "FT_PCT",
+        "AST",
+        "REB",
+        "OREB",
+        "DREB",
+        "STL",
+        "BLK",
+        "TOV",
+        "PF",
+        "MIN",
+        "LEAGUE",
+        "SOURCE",
     ]
 
     # Add granularity column if present
-    if 'HALF' in box_score.columns:
-        final_columns.insert(2, 'HALF')
-    if 'QUARTER' in box_score.columns:
-        final_columns.insert(2, 'QUARTER')
+    if "HALF" in box_score.columns:
+        final_columns.insert(2, "HALF")
+    if "QUARTER" in box_score.columns:
+        final_columns.insert(2, "QUARTER")
 
     # Keep only columns that exist
     available_columns = [c for c in final_columns if c in box_score.columns]
@@ -343,7 +362,7 @@ def aggregate_pbp_to_box_score(
     return box_score
 
 
-def aggregate_by_half(pbp_df: pd.DataFrame, league: str = 'NCAA-MBB') -> pd.DataFrame:
+def aggregate_by_half(pbp_df: pd.DataFrame, league: str = "NCAA-MBB") -> pd.DataFrame:
     """Aggregate play-by-play data to half-level box scores
 
     Returns box scores for each player for each half (1st half, 2nd half).
@@ -365,23 +384,23 @@ def aggregate_by_half(pbp_df: pd.DataFrame, league: str = 'NCAA-MBB') -> pd.Data
     if pbp_df.empty:
         return pd.DataFrame()
 
-    if 'half' not in pbp_df.columns:
+    if "half" not in pbp_df.columns:
         logger.error("PBP data does not have 'half' column - cannot aggregate by half")
         return pd.DataFrame()
 
     logger.info("Aggregating PBP to half-level box scores")
 
     # Group by game, player, and half
-    group_by = ['game_id']
-    if 'half' in pbp_df.columns:
-        group_by.append('half')
+    group_by = ["game_id"]
+    if "half" in pbp_df.columns:
+        group_by.append("half")
 
     box_score = aggregate_pbp_to_box_score(pbp_df, group_by=group_by, league=league)
 
     return box_score
 
 
-def aggregate_by_quarter(pbp_df: pd.DataFrame, league: str = 'EuroLeague') -> pd.DataFrame:
+def aggregate_by_quarter(pbp_df: pd.DataFrame, league: str = "EuroLeague") -> pd.DataFrame:
     """Aggregate play-by-play data to quarter-level box scores
 
     Returns box scores for each player for each quarter (Q1, Q2, Q3, Q4).
@@ -404,7 +423,7 @@ def aggregate_by_quarter(pbp_df: pd.DataFrame, league: str = 'EuroLeague') -> pd
 
     # Try different column names
     quarter_col = None
-    for col in ['QUARTER', 'quarter', 'PERIOD', 'period']:
+    for col in ["QUARTER", "quarter", "PERIOD", "period"]:
         if col in pbp_df.columns:
             quarter_col = col
             break
@@ -416,11 +435,11 @@ def aggregate_by_quarter(pbp_df: pd.DataFrame, league: str = 'EuroLeague') -> pd
     logger.info("Aggregating PBP to quarter-level box scores")
 
     # Normalize column name to 'quarter'
-    if quarter_col != 'quarter':
-        pbp_df = pbp_df.rename(columns={quarter_col: 'quarter'})
+    if quarter_col != "quarter":
+        pbp_df = pbp_df.rename(columns={quarter_col: "quarter"})
 
     # Group by game, player, and quarter
-    group_by = ['game_id', 'quarter'] if 'game_id' in pbp_df.columns else ['quarter']
+    group_by = ["game_id", "quarter"] if "game_id" in pbp_df.columns else ["quarter"]
 
     box_score = aggregate_pbp_to_box_score(pbp_df, group_by=group_by, league=league)
 

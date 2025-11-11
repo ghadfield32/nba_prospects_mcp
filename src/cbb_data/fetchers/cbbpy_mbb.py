@@ -14,10 +14,11 @@ Source: https://github.com/dcstats/cbbpy
 """
 
 from __future__ import annotations
-import pandas as pd
-import numpy as np
-from typing import Optional
+
 import logging
+
+import numpy as np
+import pandas as pd
 
 from .base import cached_dataframe, retry_on_error
 
@@ -26,19 +27,17 @@ logger = logging.getLogger(__name__)
 # Try to import cbbpy
 try:
     import cbbpy.mens_scraper as cbb
+
     CBBPY_AVAILABLE = True
 except ImportError:
     CBBPY_AVAILABLE = False
     logger.warning("cbbpy not installed. Install with: uv pip install cbbpy")
 
 
-def _check_cbbpy_available():
+def _check_cbbpy_available() -> None:
     """Check if CBBpy is available"""
     if not CBBPY_AVAILABLE:
-        raise ImportError(
-            "cbbpy not installed. "
-            "Install with: uv pip install cbbpy"
-        )
+        raise ImportError("cbbpy not installed. " "Install with: uv pip install cbbpy")
 
 
 def _filter_team_totals(df: pd.DataFrame) -> pd.DataFrame:
@@ -61,12 +60,12 @@ def _filter_team_totals(df: pd.DataFrame) -> pd.DataFrame:
     if df.empty:
         return df
 
-    if 'player_id' not in df.columns:
+    if "player_id" not in df.columns:
         logger.warning("No player_id column found - cannot filter team totals")
         return df
 
     before_count = len(df)
-    filtered = df[df['player_id'] != 'TOTAL'].copy()
+    filtered = df[df["player_id"] != "TOTAL"].copy()
     after_count = len(filtered)
 
     removed = before_count - after_count
@@ -77,9 +76,7 @@ def _filter_team_totals(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def transform_cbbpy_to_unified(
-    df: pd.DataFrame,
-    season: int,
-    league: str = 'NCAA-MBB'
+    df: pd.DataFrame, season: int, league: str = "NCAA-MBB"
 ) -> pd.DataFrame:
     """
     Transform CBBpy box score (27 columns) to unified schema (33 columns).
@@ -107,53 +104,53 @@ def transform_cbbpy_to_unified(
 
     # Column mapping: CBBpy → Unified
     column_map = {
-        'game_id': 'GAME_CODE',
-        'team': 'TEAM',
-        'player': 'PLAYER_NAME',
-        'player_id': 'PLAYER_ID',
-        'starter': 'STARTER',
-        'min': 'MIN',
-        'pts': 'PTS',
-        'fgm': 'FGM',
-        'fga': 'FGA',
-        '2pm': 'FG2M',
-        '2pa': 'FG2A',
-        '3pm': 'FG3M',
-        '3pa': 'FG3A',
-        'ftm': 'FTM',
-        'fta': 'FTA',
-        'oreb': 'OREB',
-        'dreb': 'DREB',
-        'reb': 'REB',
-        'ast': 'AST',
-        'stl': 'STL',
-        'blk': 'BLK',
-        'to': 'TOV',
-        'pf': 'PF',
-        'fg%': 'FG_PCT',
+        "game_id": "GAME_CODE",
+        "team": "TEAM",
+        "player": "PLAYER_NAME",
+        "player_id": "PLAYER_ID",
+        "starter": "STARTER",
+        "min": "MIN",
+        "pts": "PTS",
+        "fgm": "FGM",
+        "fga": "FGA",
+        "2pm": "FG2M",
+        "2pa": "FG2A",
+        "3pm": "FG3M",
+        "3pa": "FG3A",
+        "ftm": "FTM",
+        "fta": "FTA",
+        "oreb": "OREB",
+        "dreb": "DREB",
+        "reb": "REB",
+        "ast": "AST",
+        "stl": "STL",
+        "blk": "BLK",
+        "to": "TOV",
+        "pf": "PF",
+        "fg%": "FG_PCT",
     }
 
     # Rename columns
     out = df.rename(columns=column_map)
 
     # Add metadata columns
-    out['SEASON'] = season
-    out['LEAGUE'] = league
-    out['SOURCE'] = 'cbbpy'
+    out["SEASON"] = season
+    out["LEAGUE"] = league
+    out["SOURCE"] = "cbbpy"
 
     # Add GAME_ID as alias for GAME_CODE (for compatibility with aggregation functions)
-    if 'GAME_CODE' in out.columns:
-        out['GAME_ID'] = out['GAME_CODE']
+    if "GAME_CODE" in out.columns:
+        out["GAME_ID"] = out["GAME_CODE"]
 
     # Add missing columns (not available in CBBpy)
     missing_columns = {
-        'Home': 0,  # Not available
-        'IsPlaying': 1,  # Assume all are playing
-        'Dorsal': pd.NA,  # Jersey number not available
-        'BLK_AGAINST': 0,  # Blocks against not available
-        'PF_DRAWN': 0,  # Fouls drawn not available
-        'VALUATION': 0,  # EuroLeague-specific stat
-        'PLUS_MINUS': 0,  # +/- not available
+        "Home": 0,  # Not available
+        "IsPlaying": 1,  # Assume all are playing
+        "Dorsal": pd.NA,  # Jersey number not available
+        "BLK_AGAINST": 0,  # Blocks against not available
+        "PF_DRAWN": 0,  # Fouls drawn not available
+        "VALUATION": 0,  # EuroLeague-specific stat
+        "PLUS_MINUS": 0,  # +/- not available
     }
 
     for col, default_value in missing_columns.items():
@@ -161,41 +158,61 @@ def transform_cbbpy_to_unified(
             out[col] = default_value
 
     # Calculate derived percentages if missing
-    if 'FG3_PCT' not in out.columns:
-        out['FG3_PCT'] = np.where(
-            out['FG3A'] > 0,
-            out['FG3M'] / out['FG3A'],
-            0.0
-        )
+    if "FG3_PCT" not in out.columns:
+        out["FG3_PCT"] = np.where(out["FG3A"] > 0, out["FG3M"] / out["FG3A"], 0.0)
 
-    if 'FT_PCT' not in out.columns:
-        out['FT_PCT'] = np.where(
-            out['FTA'] > 0,
-            out['FTM'] / out['FTA'],
-            0.0
-        )
+    if "FT_PCT" not in out.columns:
+        out["FT_PCT"] = np.where(out["FTA"] > 0, out["FTM"] / out["FTA"], 0.0)
 
     # Ensure STARTER is boolean
-    if 'STARTER' in out.columns:
-        out['STARTER'] = out['STARTER'].astype(bool)
+    if "STARTER" in out.columns:
+        out["STARTER"] = out["STARTER"].astype(bool)
 
     # Define canonical column order (matching EuroLeague)
     canonical_columns = [
-        'SEASON', 'GAME_CODE', 'Home', 'PLAYER_ID', 'STARTER', 'IsPlaying',
-        'TEAM', 'Dorsal', 'PLAYER_NAME', 'MIN', 'PTS', 'FG2M', 'FG2A',
-        'FG3M', 'FG3A', 'FTM', 'FTA', 'OREB', 'DREB', 'REB', 'AST', 'STL',
-        'TOV', 'BLK', 'BLK_AGAINST', 'PF', 'PF_DRAWN', 'VALUATION',
-        'PLUS_MINUS', 'LEAGUE', 'FGM', 'FGA', 'FG_PCT'
+        "SEASON",
+        "GAME_CODE",
+        "Home",
+        "PLAYER_ID",
+        "STARTER",
+        "IsPlaying",
+        "TEAM",
+        "Dorsal",
+        "PLAYER_NAME",
+        "MIN",
+        "PTS",
+        "FG2M",
+        "FG2A",
+        "FG3M",
+        "FG3A",
+        "FTM",
+        "FTA",
+        "OREB",
+        "DREB",
+        "REB",
+        "AST",
+        "STL",
+        "TOV",
+        "BLK",
+        "BLK_AGAINST",
+        "PF",
+        "PF_DRAWN",
+        "VALUATION",
+        "PLUS_MINUS",
+        "LEAGUE",
+        "FGM",
+        "FGA",
+        "FG_PCT",
     ]
 
     # Add SOURCE and GAME_ID columns to canonical order
-    canonical_columns.append('SOURCE')
-    canonical_columns.append('GAME_ID')  # Add for compatibility with aggregation functions
+    canonical_columns.append("SOURCE")
+    canonical_columns.append("GAME_ID")  # Add for compatibility with aggregation functions
 
     # Ensure all columns exist
     for col in canonical_columns:
         if col not in out.columns:
-            out[col] = 0 if col not in ['PLAYER_NAME', 'TEAM', 'LEAGUE', 'SOURCE'] else ''
+            out[col] = 0 if col not in ["PLAYER_NAME", "TEAM", "LEAGUE", "SOURCE"] else ""
 
     # Return in canonical order
     return out[canonical_columns]
@@ -344,9 +361,9 @@ def extract_shots_from_pbp(pbp_df: pd.DataFrame) -> pd.DataFrame:
 
     # Filter to shooting plays with coordinates
     shots = pbp_df[
-        (pbp_df['shooting_play'] == True) &  # noqa: E712
-        (pbp_df['shot_x'].notna()) &
-        (pbp_df['shot_y'].notna())
+        (pbp_df["shooting_play"] == True)  # noqa: E712
+        & (pbp_df["shot_x"].notna())
+        & (pbp_df["shot_y"].notna())
     ].copy()
 
     logger.debug(f"Extracted {len(shots)} shots with coordinates from {len(pbp_df)} PBP events")

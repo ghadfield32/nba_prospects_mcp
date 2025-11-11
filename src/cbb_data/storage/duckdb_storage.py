@@ -30,16 +30,17 @@ Usage:
     )
 """
 
-import pandas as pd
-import duckdb
-from pathlib import Path
-from typing import Optional, List
 import logging
+from pathlib import Path
+from typing import Optional
+
+import duckdb
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 
 # Global storage instance (singleton pattern)
-_storage_instance: Optional['DuckDBStorage'] = None
+_storage_instance: Optional["DuckDBStorage"] = None
 
 
 class DuckDBStorage:
@@ -72,16 +73,10 @@ class DuckDBStorage:
         Example: schedule_NCAA_MBB_2024
         """
         # Sanitize league name (replace hyphens with underscores)
-        league_clean = league.replace('-', '_')
+        league_clean = league.replace("-", "_")
         return f"{dataset}_{league_clean}_{season}"
 
-    def save(
-        self,
-        df: pd.DataFrame,
-        dataset: str,
-        league: str,
-        season: str
-    ) -> None:
+    def save(self, df: pd.DataFrame, dataset: str, league: str, season: str) -> None:
         """
         Save DataFrame to DuckDB table.
 
@@ -119,8 +114,8 @@ class DuckDBStorage:
         dataset: str,
         league: str,
         season: str,
-        filter_sql: Optional[str] = None,
-        limit: Optional[int] = None
+        filter_sql: str | None = None,
+        limit: int | None = None,
     ) -> pd.DataFrame:
         """
         Load data from DuckDB table.
@@ -168,9 +163,9 @@ class DuckDBStorage:
         self,
         dataset: str,
         league: str,
-        seasons: List[str],
-        filter_sql: Optional[str] = None,
-        limit: Optional[int] = None
+        seasons: list[str],
+        filter_sql: str | None = None,
+        limit: int | None = None,
     ) -> pd.DataFrame:
         """
         Load data from multiple seasons using SQL UNION ALL.
@@ -224,7 +219,9 @@ class DuckDBStorage:
 
         try:
             df = self.conn.execute(union_query).df()
-            logger.info(f"Loaded {len(df):,} rows from {len(available_tables)} seasons using SQL UNION ALL")
+            logger.info(
+                f"Loaded {len(df):,} rows from {len(available_tables)} seasons using SQL UNION ALL"
+            )
             return df
 
         except Exception as e:
@@ -251,7 +248,10 @@ class DuckDBStorage:
                 f"SELECT COUNT(*) FROM information_schema.tables WHERE table_name = '{table_name}'"
             ).fetchone()
 
-            exists = result[0] > 0
+            if result is None:
+                return False
+
+            exists: bool = bool(result[0] > 0)
             return exists
 
         except Exception as e:
@@ -259,12 +259,7 @@ class DuckDBStorage:
             return False
 
     def export_to_parquet(
-        self,
-        dataset: str,
-        league: str,
-        season: str,
-        output_path: str,
-        compression: str = 'zstd'
+        self, dataset: str, league: str, season: str, output_path: str, compression: str = "zstd"
     ) -> None:
         """
         Export DuckDB table to Parquet file.
@@ -288,22 +283,22 @@ class DuckDBStorage:
             logger.error(f"Table not found: {table_name}")
             return
 
-        output_path = Path(output_path)
-        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_file = Path(output_path)
+        output_file.parent.mkdir(parents=True, exist_ok=True)
 
         try:
             # DuckDB can export directly to Parquet (very fast)
-            query = f"COPY {table_name} TO '{output_path}' (FORMAT PARQUET, COMPRESSION {compression.upper()})"
+            query = f"COPY {table_name} TO '{output_file}' (FORMAT PARQUET, COMPRESSION {compression.upper()})"
             self.conn.execute(query)
 
-            file_size_mb = output_path.stat().st_size / (1024 * 1024)
-            logger.info(f"Exported {table_name} to {output_path.name} ({file_size_mb:.2f} MB)")
+            file_size_mb = output_file.stat().st_size / (1024 * 1024)
+            logger.info(f"Exported {table_name} to {output_file.name} ({file_size_mb:.2f} MB)")
 
         except Exception as e:
             logger.error(f"Failed to export to Parquet: {e}")
             raise
 
-    def list_tables(self) -> List[str]:
+    def list_tables(self) -> list[str]:
         """
         List all tables in the database.
 
@@ -322,9 +317,9 @@ class DuckDBStorage:
             logger.error(f"Failed to list tables: {e}")
             return []
 
-    def close(self):
+    def close(self) -> None:
         """Close DuckDB connection."""
-        if hasattr(self, 'conn'):
+        if hasattr(self, "conn"):
             self.conn.close()
             logger.debug("DuckDB connection closed")
 

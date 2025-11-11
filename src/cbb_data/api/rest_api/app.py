@@ -4,19 +4,20 @@ FastAPI application for college basketball data API.
 Main application setup with middleware, routes, and OpenAPI documentation.
 """
 
+from __future__ import annotations
+
 import logging
-from typing import Dict, Any
+from typing import Any
 
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
-from .routes import router
 from .middleware import add_middleware
+from .routes import router
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,8 @@ logger = logging.getLogger(__name__)
 # Application Factory
 # ============================================================================
 
-def create_app(config: Dict[str, Any] = None) -> FastAPI:
+
+def create_app(config: dict[str, Any] | None = None) -> FastAPI:
     """
     Create and configure the FastAPI application.
 
@@ -103,20 +105,14 @@ GET /recent-games/NCAA-MBB?days=2
 
 - Documentation: https://github.com/ghadfield32/nba_prospects_mcp
 - Issues: https://github.com/ghadfield32/nba_prospects_mcp/issues
-            """
+            """,
         ),
         version=config.get("version", "1.0.0"),
         docs_url="/docs",
         redoc_url="/redoc",
         openapi_url="/openapi.json",
-        contact={
-            "name": "API Support",
-            "url": "https://github.com/ghadfield32/nba_prospects_mcp"
-        },
-        license_info={
-            "name": "MIT",
-            "url": "https://opensource.org/licenses/MIT"
-        }
+        contact={"name": "API Support", "url": "https://github.com/ghadfield32/nba_prospects_mcp"},
+        license_info={"name": "MIT", "url": "https://opensource.org/licenses/MIT"},
     )
 
     # Add middleware (CORS, rate limiting, error handling)
@@ -127,7 +123,7 @@ GET /recent-games/NCAA-MBB?days=2
 
     # Root endpoint - redirect to docs
     @app.get("/", include_in_schema=False)
-    async def root():
+    async def root() -> RedirectResponse:
         """Redirect root to API documentation."""
         return RedirectResponse(url="/docs")
 

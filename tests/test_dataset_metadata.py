@@ -11,50 +11,54 @@ Stress tests each data source to determine:
 """
 
 import sys
+
 sys.path.insert(0, "src")
 
-from datetime import datetime, date, timedelta
-import pandas as pd
-from cbb_data.api.datasets import get_dataset, list_datasets
 import time
+from datetime import date, datetime, timedelta
 
-def test_dataset_metadata():
+import pandas as pd
+
+from cbb_data.api.datasets import get_dataset
+
+
+def test_dataset_metadata() -> None:
     """Comprehensive validation of all dataset metadata"""
 
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("DATASET METADATA VALIDATION")
-    print("="*80)
+    print("=" * 80)
 
     metadata = {}
 
     # ESPN MBB
-    print("\n" + "-"*80)
+    print("\n" + "-" * 80)
     print("ESPN MEN'S BASKETBALL")
-    print("-"*80)
+    print("-" * 80)
 
     espn_mbb_meta = validate_espn_mbb()
     metadata["ESPN_MBB"] = espn_mbb_meta
 
     # ESPN WBB
-    print("\n" + "-"*80)
+    print("\n" + "-" * 80)
     print("ESPN WOMEN'S BASKETBALL")
-    print("-"*80)
+    print("-" * 80)
 
     espn_wbb_meta = validate_espn_wbb()
     metadata["ESPN_WBB"] = espn_wbb_meta
 
     # EuroLeague
-    print("\n" + "-"*80)
+    print("\n" + "-" * 80)
     print("EUROLEAGUE")
-    print("-"*80)
+    print("-" * 80)
 
     euroleague_meta = validate_euroleague()
     metadata["EUROLEAGUE"] = euroleague_meta
 
     # Print summary
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("METADATA SUMMARY")
-    print("="*80)
+    print("=" * 80)
 
     for source, meta in metadata.items():
         print(f"\n{source}:")
@@ -64,7 +68,7 @@ def test_dataset_metadata():
     return metadata
 
 
-def validate_espn_mbb():
+def validate_espn_mbb() -> None:
     """Validate ESPN Men's Basketball metadata"""
     meta = {
         "source": "ESPN",
@@ -84,10 +88,7 @@ def validate_espn_mbb():
             test_date = date(year, 1, 2)  # January 2nd (during season)
             df = get_dataset(
                 "schedule",
-                {
-                    "league": "NCAA-MBB",
-                    "date": {"from": str(test_date), "to": str(test_date)}
-                }
+                {"league": "NCAA-MBB", "date": {"from": str(test_date), "to": str(test_date)}},
             )
 
             if not df.empty:
@@ -111,19 +112,12 @@ def validate_espn_mbb():
 
     try:
         df_today = get_dataset(
-            "schedule",
-            {
-                "league": "NCAA-MBB",
-                "date": {"from": str(today), "to": str(today)}
-            }
+            "schedule", {"league": "NCAA-MBB", "date": {"from": str(today), "to": str(today)}}
         )
 
         df_yesterday = get_dataset(
             "schedule",
-            {
-                "league": "NCAA-MBB",
-                "date": {"from": str(yesterday), "to": str(yesterday)}
-            }
+            {"league": "NCAA-MBB", "date": {"from": str(yesterday), "to": str(yesterday)}},
         )
 
         print(f"   Today ({today}): {len(df_today)} games")
@@ -145,10 +139,7 @@ def validate_espn_mbb():
 
         df_week = get_dataset(
             "schedule",
-            {
-                "league": "NCAA-MBB",
-                "date": {"from": str(week_start), "to": str(week_end)}
-            }
+            {"league": "NCAA-MBB", "date": {"from": str(week_start), "to": str(week_end)}},
         )
 
         if not df_week.empty:
@@ -172,7 +163,9 @@ def validate_espn_mbb():
 
     # Schedule
     try:
-        df = get_dataset("schedule", {"league": "NCAA-MBB", "date": {"from": str(today), "to": str(today)}})
+        df = get_dataset(
+            "schedule", {"league": "NCAA-MBB", "date": {"from": str(today), "to": str(today)}}
+        )
         datasets_working.append("schedule")
         print(f"   [OK] schedule - {len(df)} rows")
     except Exception as e:
@@ -180,7 +173,10 @@ def validate_espn_mbb():
 
     # Player stats (requires game_ids)
     try:
-        schedule_df = get_dataset("schedule", {"league": "NCAA-MBB", "date": {"from": str(yesterday), "to": str(yesterday)}})
+        schedule_df = get_dataset(
+            "schedule",
+            {"league": "NCAA-MBB", "date": {"from": str(yesterday), "to": str(yesterday)}},
+        )
         if not schedule_df.empty:
             game_id = str(schedule_df.iloc[0]["GAME_ID"])
             df = get_dataset("player_game", {"league": "NCAA-MBB", "game_ids": [game_id]})
@@ -208,8 +204,10 @@ def validate_espn_mbb():
     request_count = 0
 
     try:
-        for i in range(10):
-            df = get_dataset("schedule", {"league": "NCAA-MBB", "date": {"from": str(today), "to": str(today)}})
+        for _i in range(10):
+            df = get_dataset(
+                "schedule", {"league": "NCAA-MBB", "date": {"from": str(today), "to": str(today)}}
+            )
             request_count += 1
 
         elapsed = time.time() - start_time
@@ -226,7 +224,7 @@ def validate_espn_mbb():
     return meta
 
 
-def validate_espn_wbb():
+def validate_espn_wbb() -> None:
     """Validate ESPN Women's Basketball metadata"""
     meta = {
         "source": "ESPN",
@@ -246,10 +244,7 @@ def validate_espn_wbb():
             test_date = date(year, 1, 2)
             df = get_dataset(
                 "schedule",
-                {
-                    "league": "NCAA-WBB",
-                    "date": {"from": str(test_date), "to": str(test_date)}
-                }
+                {"league": "NCAA-WBB", "date": {"from": str(test_date), "to": str(test_date)}},
             )
 
             if not df.empty:
@@ -272,11 +267,7 @@ def validate_espn_wbb():
 
     try:
         df_today = get_dataset(
-            "schedule",
-            {
-                "league": "NCAA-WBB",
-                "date": {"from": str(today), "to": str(today)}
-            }
+            "schedule", {"league": "NCAA-WBB", "date": {"from": str(today), "to": str(today)}}
         )
 
         print(f"   Today ({today}): {len(df_today)} games")
@@ -293,7 +284,7 @@ def validate_espn_wbb():
     return meta
 
 
-def validate_euroleague():
+def validate_euroleague() -> None:
     """Validate EuroLeague metadata"""
     meta = {
         "source": "EuroLeague Official API",
@@ -312,11 +303,8 @@ def validate_euroleague():
         try:
             df = get_dataset(
                 "schedule",
-                {
-                    "league": "EuroLeague",
-                    "season": str(year)
-                },
-                limit=10  # Just test availability
+                {"league": "EuroLeague", "season": str(year)},
+                limit=10,  # Just test availability
             )
 
             if not df.empty:
@@ -336,13 +324,7 @@ def validate_euroleague():
     # Current season
     print("\n2. Testing Current Season (2024)...")
     try:
-        df_current = get_dataset(
-            "schedule",
-            {
-                "league": "EuroLeague",
-                "season": "2024"
-            }
-        )
+        df_current = get_dataset("schedule", {"league": "EuroLeague", "season": "2024"})
 
         print(f"   Season 2024: {len(df_current)} total games")
 
@@ -361,14 +343,7 @@ def validate_euroleague():
     # Data structure
     print("\n3. Testing Data Structure...")
     try:
-        df = get_dataset(
-            "schedule",
-            {
-                "league": "EuroLeague",
-                "season": "2024"
-            },
-            limit=10
-        )
+        df = get_dataset("schedule", {"league": "EuroLeague", "season": "2024"}, limit=10)
 
         print(f"   Columns: {list(df.columns)}")
         meta["schedule_columns"] = list(df.columns)
@@ -390,7 +365,10 @@ def validate_euroleague():
 
             # Player stats
             try:
-                df = get_dataset("player_game", {"league": "EuroLeague", "season": "2024", "game_ids": [game_code]})
+                df = get_dataset(
+                    "player_game",
+                    {"league": "EuroLeague", "season": "2024", "game_ids": [game_code]},
+                )
                 datasets_working.append("player_game")
                 print(f"   [OK] player_game - {len(df)} rows")
             except Exception as e:
@@ -398,7 +376,9 @@ def validate_euroleague():
 
             # Shots
             try:
-                df = get_dataset("shots", {"league": "EuroLeague", "season": "2024", "game_ids": [game_code]})
+                df = get_dataset(
+                    "shots", {"league": "EuroLeague", "season": "2024", "game_ids": [game_code]}
+                )
                 datasets_working.append("shots")
                 print(f"   [OK] shots - {len(df)} rows")
             except Exception as e:
@@ -426,25 +406,27 @@ if __name__ == "__main__":
 
         # Export to JSON
         import json
+
         with open("dataset_metadata.json", "w") as f:
             # Convert dates to strings for JSON serialization
             metadata_json = {}
             for source, meta in metadata.items():
                 metadata_json[source] = {}
                 for key, value in meta.items():
-                    if isinstance(value, (date, datetime)):
+                    if isinstance(value, date | datetime):
                         metadata_json[source][key] = str(value)
                     else:
                         metadata_json[source][key] = value
 
             json.dump(metadata_json, f, indent=2)
 
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("Metadata exported to: dataset_metadata.json")
-        print("="*80)
+        print("=" * 80)
 
     except Exception as e:
         print(f"\nFATAL ERROR: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)

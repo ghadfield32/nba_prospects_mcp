@@ -16,14 +16,16 @@ Key Features:
 """
 
 from __future__ import annotations
-import requests
-import pandas as pd
-from datetime import datetime, timedelta, date
-from typing import Optional, List, Dict, Any
-import logging
 
-from .base import cached_dataframe, retry_on_error, get_cache
+import logging
+from datetime import date, timedelta
+from typing import Any
+
+import pandas as pd
+import requests
+
 from ..utils.rate_limiter import get_source_limiter
+from .base import cached_dataframe, retry_on_error
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +36,7 @@ ESPN_BASE_URL = "https://site.api.espn.com/apis/site/v2/sports/basketball/mens-c
 rate_limiter = get_source_limiter()
 
 
-def _espn_request(endpoint: str, params: Optional[Dict] = None) -> Dict[str, Any]:
+def _espn_request(endpoint: str, params: dict | None = None) -> dict[str, Any]:
     """Make rate-limited request to ESPN API
 
     Args:
@@ -55,7 +57,7 @@ def _espn_request(endpoint: str, params: Optional[Dict] = None) -> Dict[str, Any
     try:
         response = requests.get(url, params=params, timeout=30)
         response.raise_for_status()
-        return response.json()
+        return dict(response.json())
     except requests.RequestException as e:
         logger.error(f"ESPN API request failed: {url} - {e}")
         raise
@@ -63,7 +65,9 @@ def _espn_request(endpoint: str, params: Optional[Dict] = None) -> Dict[str, Any
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
 @cached_dataframe
-def fetch_espn_scoreboard(date: str = None, season: int = None, groups: str = "50") -> pd.DataFrame:
+def fetch_espn_scoreboard(
+    date: str | None = None, season: int | None = None, groups: str = "50"
+) -> pd.DataFrame:
     """Fetch ESPN MBB scoreboard/schedule for a specific date
 
     Args:
@@ -85,7 +89,7 @@ def fetch_espn_scoreboard(date: str = None, season: int = None, groups: str = "5
         - VENUE: Venue name
         - BROADCAST: TV/streaming info
     """
-    params = {}
+    params: dict[str, Any] = {}
 
     if date:
         params["dates"] = date
@@ -111,8 +115,12 @@ def fetch_espn_scoreboard(date: str = None, season: int = None, groups: str = "5
         competitions = event.get("competitions", [{}])[0]
         competitors = competitions.get("competitors", [])
 
-        home_team = next((c for c in competitors if c.get("homeAway") == "home"), {})
-        away_team = next((c for c in competitors if c.get("homeAway") == "away"), {})
+        home_team: dict[str, Any] = next(
+            (c for c in competitors if c.get("homeAway") == "home"), {}
+        )
+        away_team: dict[str, Any] = next(
+            (c for c in competitors if c.get("homeAway") == "away"), {}
+        )
 
         # Venue
         venue_info = competitions.get("venue", {})
@@ -126,22 +134,24 @@ def fetch_espn_scoreboard(date: str = None, season: int = None, groups: str = "5
         else:
             broadcast = ""
 
-        games.append({
-            "GAME_ID": game_id,
-            "GAME_DATE": game_date,
-            "SEASON": season_year,
-            "HOME_TEAM_ID": home_team.get("team", {}).get("id"),
-            "HOME_TEAM_NAME": home_team.get("team", {}).get("displayName"),
-            "HOME_TEAM_ABBREVIATION": home_team.get("team", {}).get("abbreviation"),
-            "HOME_SCORE": home_team.get("score"),
-            "AWAY_TEAM_ID": away_team.get("team", {}).get("id"),
-            "AWAY_TEAM_NAME": away_team.get("team", {}).get("displayName"),
-            "AWAY_TEAM_ABBREVIATION": away_team.get("team", {}).get("abbreviation"),
-            "AWAY_SCORE": away_team.get("score"),
-            "STATUS": status,
-            "VENUE": venue_name,
-            "BROADCAST": broadcast,
-        })
+        games.append(
+            {
+                "GAME_ID": game_id,
+                "GAME_DATE": game_date,
+                "SEASON": season_year,
+                "HOME_TEAM_ID": home_team.get("team", {}).get("id"),
+                "HOME_TEAM_NAME": home_team.get("team", {}).get("displayName"),
+                "HOME_TEAM_ABBREVIATION": home_team.get("team", {}).get("abbreviation"),
+                "HOME_SCORE": home_team.get("score"),
+                "AWAY_TEAM_ID": away_team.get("team", {}).get("id"),
+                "AWAY_TEAM_NAME": away_team.get("team", {}).get("displayName"),
+                "AWAY_TEAM_ABBREVIATION": away_team.get("team", {}).get("abbreviation"),
+                "AWAY_SCORE": away_team.get("score"),
+                "STATUS": status,
+                "VENUE": venue_name,
+                "BROADCAST": broadcast,
+            }
+        )
 
     df = pd.DataFrame(games)
 
@@ -189,16 +199,22 @@ def fetch_espn_teams(groups: str = "50") -> pd.DataFrame:
     for team in data.get("sports", [{}])[0].get("leagues", [{}])[0].get("teams", []):
         team_data = team.get("team", {})
 
-        teams.append({
-            "TEAM_ID": team_data.get("id"),
-            "TEAM_NAME": team_data.get("name"),
-            "TEAM_ABBREVIATION": team_data.get("abbreviation"),
-            "TEAM_DISPLAY_NAME": team_data.get("displayName"),
-            "TEAM_SHORT_NAME": team_data.get("shortDisplayName"),
-            "CONFERENCE": team_data.get("groups", {}).get("name") if isinstance(team_data.get("groups"), dict) else None,
-            "LOCATION": team_data.get("location"),
-            "LOGO": team_data.get("logos", [{}])[0].get("href") if team_data.get("logos") else None,
-        })
+        teams.append(
+            {
+                "TEAM_ID": team_data.get("id"),
+                "TEAM_NAME": team_data.get("name"),
+                "TEAM_ABBREVIATION": team_data.get("abbreviation"),
+                "TEAM_DISPLAY_NAME": team_data.get("displayName"),
+                "TEAM_SHORT_NAME": team_data.get("shortDisplayName"),
+                "CONFERENCE": team_data.get("groups", {}).get("name")
+                if isinstance(team_data.get("groups"), dict)
+                else None,
+                "LOCATION": team_data.get("location"),
+                "LOGO": team_data.get("logos", [{}])[0].get("href")
+                if team_data.get("logos")
+                else None,
+            }
+        )
 
     df = pd.DataFrame(teams)
 
@@ -211,7 +227,7 @@ def fetch_espn_teams(groups: str = "50") -> pd.DataFrame:
 
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
-def fetch_espn_game_summary(game_id: str) -> Dict[str, pd.DataFrame]:
+def fetch_espn_game_summary(game_id: str) -> dict[str, pd.DataFrame]:
     """Fetch comprehensive game data (box score + play-by-play)
 
     Note: This function is not cached since it returns a dict of DataFrames.
@@ -263,7 +279,9 @@ def fetch_espn_game_summary(game_id: str) -> Dict[str, pd.DataFrame]:
 
         # Check if player data exists in statistics[0]
         if "athletes" not in statistics[0]:
-            logger.warning(f"No player box scores in statistics for team {team_name} in game {game_id}")
+            logger.warning(
+                f"No player box scores in statistics for team {team_name} in game {game_id}"
+            )
             continue
 
         for player_stat in statistics[0].get("athletes", []):
@@ -281,24 +299,26 @@ def fetch_espn_game_summary(game_id: str) -> Dict[str, pd.DataFrame]:
 
             # Parse stats (MIN, FGM-FGA, FG%, 3PM-3PA, 3P%, FTM-FTA, FT%, OREB, DREB, REB, AST, STL, BLK, TO, PF, PTS)
             if len(stats) >= 16:
-                player_row.update({
-                    "MIN": stats[0],
-                    "FG": stats[1],
-                    "FG_PCT": stats[2],
-                    "FG3": stats[3],
-                    "FG3_PCT": stats[4],
-                    "FT": stats[5],
-                    "FT_PCT": stats[6],
-                    "OREB": stats[7],
-                    "DREB": stats[8],
-                    "REB": stats[9],
-                    "AST": stats[10],
-                    "STL": stats[11],
-                    "BLK": stats[12],
-                    "TOV": stats[13],
-                    "PF": stats[14],
-                    "PTS": stats[15],
-                })
+                player_row.update(
+                    {
+                        "MIN": stats[0],
+                        "FG": stats[1],
+                        "FG_PCT": stats[2],
+                        "FG3": stats[3],
+                        "FG3_PCT": stats[4],
+                        "FT": stats[5],
+                        "FT_PCT": stats[6],
+                        "OREB": stats[7],
+                        "DREB": stats[8],
+                        "REB": stats[9],
+                        "AST": stats[10],
+                        "STL": stats[11],
+                        "BLK": stats[12],
+                        "TOV": stats[13],
+                        "PF": stats[14],
+                        "PTS": stats[15],
+                    }
+                )
 
             players_list.append(player_row)
 
@@ -317,38 +337,46 @@ def fetch_espn_game_summary(game_id: str) -> Dict[str, pd.DataFrame]:
             if stat_group.get("type") == "teamStats":
                 stats = stat_group.get("stats", [])
 
-                team_stats_list.append({
-                    "GAME_ID": game_id,
-                    "TEAM_ID": team_id,
-                    "TEAM_NAME": team_name,
-                    # Add team stats parsing here if available
-                })
+                team_stats_list.append(
+                    {
+                        "GAME_ID": game_id,
+                        "TEAM_ID": team_id,
+                        "TEAM_NAME": team_name,
+                        # Add team stats parsing here if available
+                    }
+                )
 
     result["team_stats"] = pd.DataFrame(team_stats_list) if team_stats_list else pd.DataFrame()
 
     # Play-by-play
     plays_list = []
     for play in data.get("plays", []):
-        plays_list.append({
-            "GAME_ID": game_id,
-            "PLAY_ID": play.get("id"),
-            "PERIOD": play.get("period", {}).get("number"),
-            "CLOCK": play.get("clock", {}).get("displayValue"),
-            "TEAM_ID": play.get("team", {}).get("id") if play.get("team") else None,
-            "PLAY_TYPE": play.get("type", {}).get("text"),
-            "TEXT": play.get("text"),
-            "SCORE_VALUE": play.get("scoreValue"),
-            "HOME_SCORE": play.get("homeScore"),
-            "AWAY_SCORE": play.get("awayScore"),
-            "PARTICIPANTS": [p.get("athlete", {}).get("id") for p in play.get("participants", [])],
-        })
+        plays_list.append(
+            {
+                "GAME_ID": game_id,
+                "PLAY_ID": play.get("id"),
+                "PERIOD": play.get("period", {}).get("number"),
+                "CLOCK": play.get("clock", {}).get("displayValue"),
+                "TEAM_ID": play.get("team", {}).get("id") if play.get("team") else None,
+                "PLAY_TYPE": play.get("type", {}).get("text"),
+                "TEXT": play.get("text"),
+                "SCORE_VALUE": play.get("scoreValue"),
+                "HOME_SCORE": play.get("homeScore"),
+                "AWAY_SCORE": play.get("awayScore"),
+                "PARTICIPANTS": [
+                    p.get("athlete", {}).get("id") for p in play.get("participants", [])
+                ],
+            }
+        )
 
     result["plays"] = pd.DataFrame(plays_list)
 
     # Coerce types in box_score
     if not result["box_score"].empty:
         for col in ["TEAM_ID", "PLAYER_ID"]:
-            result["box_score"][col] = pd.to_numeric(result["box_score"][col], errors="coerce").astype("Int64")
+            result["box_score"][col] = pd.to_numeric(
+                result["box_score"][col], errors="coerce"
+            ).astype("Int64")
 
         # Parse FG, FG3, FT (format: "X-Y")
         for prefix in ["FG", "FG3", "FT"]:
@@ -368,15 +396,14 @@ def fetch_espn_game_summary(game_id: str) -> Dict[str, pd.DataFrame]:
             if col in result["box_score"].columns:
                 result["box_score"][col] = pd.to_numeric(result["box_score"][col], errors="coerce")
 
-    logger.info(f"Fetched game summary: {len(result['box_score'])} player stats, {len(result['plays'])} plays")
+    logger.info(
+        f"Fetched game summary: {len(result['box_score'])} player stats, {len(result['plays'])} plays"
+    )
     return result
 
 
 def fetch_schedule_range(
-    date_from: date,
-    date_to: date,
-    season: Optional[int] = None,
-    groups: str = "50"
+    date_from: date, date_to: date, season: int | None = None, groups: str = "50"
 ) -> pd.DataFrame:
     """Fetch ESPN MBB schedule for a date range
 
@@ -411,11 +438,7 @@ def fetch_schedule_range(
     return pd.DataFrame()
 
 
-def fetch_team_games(
-    team_id: int,
-    season: int,
-    season_type: str = "2"
-) -> pd.DataFrame:
+def fetch_team_games(team_id: int, season: int, season_type: str = "2") -> pd.DataFrame:
     """Fetch all games for a specific team in a season
 
     Uses ESPN's team-specific schedule endpoint for efficient fetching.
@@ -452,9 +475,7 @@ def fetch_team_games(
     # This fetches ONLY this team's games, not the entire season
     url = f"https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/teams/{team_id}/schedule"
 
-    params = {
-        "season": season
-    }
+    params: dict[str, Any] = {"season": season}
 
     # Only add seasontype if not default (regular season)
     # API defaults to all season types if not specified
@@ -482,8 +503,12 @@ def fetch_team_games(
         competitions = event.get("competitions", [{}])[0]
         competitors = competitions.get("competitors", [])
 
-        home_team = next((c for c in competitors if c.get("homeAway") == "home"), {})
-        away_team = next((c for c in competitors if c.get("homeAway") == "away"), {})
+        home_team: dict[str, Any] = next(
+            (c for c in competitors if c.get("homeAway") == "home"), {}
+        )
+        away_team: dict[str, Any] = next(
+            (c for c in competitors if c.get("homeAway") == "away"), {}
+        )
 
         # Venue
         venue_info = competitions.get("venue", {})
@@ -497,22 +522,24 @@ def fetch_team_games(
         else:
             broadcast = ""
 
-        games.append({
-            "GAME_ID": game_id,
-            "GAME_DATE": game_date,
-            "SEASON": season_year,
-            "HOME_TEAM_ID": home_team.get("team", {}).get("id"),
-            "HOME_TEAM_NAME": home_team.get("team", {}).get("displayName"),
-            "HOME_TEAM_ABBREVIATION": home_team.get("team", {}).get("abbreviation"),
-            "HOME_SCORE": home_team.get("score"),
-            "AWAY_TEAM_ID": away_team.get("team", {}).get("id"),
-            "AWAY_TEAM_NAME": away_team.get("team", {}).get("displayName"),
-            "AWAY_TEAM_ABBREVIATION": away_team.get("team", {}).get("abbreviation"),
-            "AWAY_SCORE": away_team.get("score"),
-            "STATUS": status,
-            "VENUE": venue_name,
-            "BROADCAST": broadcast,
-        })
+        games.append(
+            {
+                "GAME_ID": game_id,
+                "GAME_DATE": game_date,
+                "SEASON": season_year,
+                "HOME_TEAM_ID": home_team.get("team", {}).get("id"),
+                "HOME_TEAM_NAME": home_team.get("team", {}).get("displayName"),
+                "HOME_TEAM_ABBREVIATION": home_team.get("team", {}).get("abbreviation"),
+                "HOME_SCORE": home_team.get("score"),
+                "AWAY_TEAM_ID": away_team.get("team", {}).get("id"),
+                "AWAY_TEAM_NAME": away_team.get("team", {}).get("displayName"),
+                "AWAY_TEAM_ABBREVIATION": away_team.get("team", {}).get("abbreviation"),
+                "AWAY_SCORE": away_team.get("score"),
+                "STATUS": status,
+                "VENUE": venue_name,
+                "BROADCAST": broadcast,
+            }
+        )
 
     df = pd.DataFrame(games)
 
@@ -527,8 +554,7 @@ def fetch_team_games(
 
         # Add HOME_AWAY indicator (same as old implementation)
         df["HOME_AWAY"] = df.apply(
-            lambda row: "Home" if row["HOME_TEAM_ID"] == team_id else "Away",
-            axis=1
+            lambda row: "Home" if row["HOME_TEAM_ID"] == team_id else "Away", axis=1
         )
 
     logger.info(f"Found {len(df)} games for team {team_id} (fetched directly from team endpoint)")
@@ -536,10 +562,7 @@ def fetch_team_games(
 
 
 def fetch_team_history(
-    team_id: int,
-    start_season: int,
-    end_season: int,
-    season_type: str = "2"
+    team_id: int, start_season: int, end_season: int, season_type: str = "2"
 ) -> pd.DataFrame:
     """Fetch team's complete history across multiple seasons - EFFICIENTLY
 
@@ -572,9 +595,7 @@ def fetch_team_history(
     """
     # Pre-validation: Fail fast if invalid parameters
     if end_season < start_season:
-        raise ValueError(
-            f"end_season ({end_season}) must be >= start_season ({start_season})"
-        )
+        raise ValueError(f"end_season ({end_season}) must be >= start_season ({start_season})")
 
     num_seasons = end_season - start_season + 1
     if num_seasons > 30:
@@ -608,21 +629,14 @@ def fetch_team_history(
     # Combine all seasons
     if all_games:
         df = pd.concat(all_games, ignore_index=True)
-        logger.info(
-            f"Fetched {len(df)} games across {num_seasons} seasons for team {team_id}"
-        )
+        logger.info(f"Fetched {len(df)} games across {num_seasons} seasons for team {team_id}")
         return df
     else:
-        logger.warning(
-            f"No games found for team {team_id} in seasons {start_season}-{end_season}"
-        )
+        logger.warning(f"No games found for team {team_id} in seasons {start_season}-{end_season}")
         return pd.DataFrame()
 
 
-def fetch_player_game_logs(
-    player_id: int,
-    season: int
-) -> pd.DataFrame:
+def fetch_player_game_logs(player_id: int, season: int) -> pd.DataFrame:
     """Fetch game logs for a specific player
 
     Note: ESPN doesn't provide a direct player game log endpoint.

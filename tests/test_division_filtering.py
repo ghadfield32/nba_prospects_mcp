@@ -9,27 +9,25 @@ Part of: Phase 3 - Division Filtering implementation
 """
 
 import sys
-sys.path.insert(0, 'src')
 
-from cbb_data.api.datasets import get_dataset
+sys.path.insert(0, "src")
+
 import time
 
+from cbb_data.api.datasets import get_dataset
 
-def test_ncaa_mbb_d1_only():
+
+def test_ncaa_mbb_d1_only() -> bool:
     """Test NCAA-MBB with Division 1 only (default)"""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("TEST 1: NCAA-MBB Division 1 Only (Default)")
-    print("="*80)
+    print("=" * 80)
 
     try:
         start = time.time()
 
         # Fetch D1 only (default behavior)
-        df = get_dataset(
-            'schedule',
-            {'league': 'NCAA-MBB', 'season': '2025'},
-            limit=100
-        )
+        df = get_dataset("schedule", {"league": "NCAA-MBB", "season": "2025"}, limit=100)
 
         elapsed = time.time() - start
 
@@ -48,20 +46,18 @@ def test_ncaa_mbb_d1_only():
         return False
 
 
-def test_ncaa_mbb_all_divisions():
+def test_ncaa_mbb_all_divisions() -> bool:
     """Test NCAA-MBB with all divisions"""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("TEST 2: NCAA-MBB All Divisions")
-    print("="*80)
+    print("=" * 80)
 
     try:
         start = time.time()
 
         # Fetch all divisions
         df = get_dataset(
-            'schedule',
-            {'league': 'NCAA-MBB', 'season': '2025', 'Division': 'all'},
-            limit=100
+            "schedule", {"league": "NCAA-MBB", "season": "2025", "Division": "all"}, limit=100
         )
 
         elapsed = time.time() - start
@@ -81,20 +77,20 @@ def test_ncaa_mbb_all_divisions():
         return False
 
 
-def test_ncaa_mbb_division_list():
+def test_ncaa_mbb_division_list() -> bool:
     """Test NCAA-MBB with division list ["D1", "D2"]"""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("TEST 3: NCAA-MBB Multiple Divisions [D1, D2]")
-    print("="*80)
+    print("=" * 80)
 
     try:
         start = time.time()
 
         # Fetch D1 and D2
         df = get_dataset(
-            'schedule',
-            {'league': 'NCAA-MBB', 'season': '2025', 'Division': ['D1', 'D2']},
-            limit=100
+            "schedule",
+            {"league": "NCAA-MBB", "season": "2025", "Division": ["D1", "D2"]},
+            limit=100,
         )
 
         elapsed = time.time() - start
@@ -114,20 +110,18 @@ def test_ncaa_mbb_division_list():
         return False
 
 
-def test_ncaa_mbb_d1_explicit():
+def test_ncaa_mbb_d1_explicit() -> bool:
     """Test NCAA-MBB with explicit D1 filter"""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("TEST 4: NCAA-MBB Explicit Division 1")
-    print("="*80)
+    print("=" * 80)
 
     try:
         start = time.time()
 
         # Fetch D1 explicitly
         df = get_dataset(
-            'schedule',
-            {'league': 'NCAA-MBB', 'season': '2025', 'Division': 'D1'},
-            limit=100
+            "schedule", {"league": "NCAA-MBB", "season": "2025", "Division": "D1"}, limit=100
         )
 
         elapsed = time.time() - start
@@ -147,21 +141,17 @@ def test_ncaa_mbb_d1_explicit():
         return False
 
 
-def test_ncaa_wbb_d1_only():
+def test_ncaa_wbb_d1_only() -> bool:
     """Test NCAA-WBB with Division 1 only (default)"""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("TEST 5: NCAA-WBB Division 1 Only (Default)")
-    print("="*80)
+    print("=" * 80)
 
     try:
         start = time.time()
 
         # Fetch D1 only (default behavior)
-        df = get_dataset(
-            'schedule',
-            {'league': 'NCAA-WBB', 'season': '2025'},
-            limit=100
-        )
+        df = get_dataset("schedule", {"league": "NCAA-WBB", "season": "2025"}, limit=100)
 
         elapsed = time.time() - start
 
@@ -181,20 +171,18 @@ def test_ncaa_wbb_d1_only():
         return False
 
 
-def test_ncaa_wbb_all_divisions():
+def test_ncaa_wbb_all_divisions() -> bool:
     """Test NCAA-WBB with all divisions"""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("TEST 6: NCAA-WBB All Divisions")
-    print("="*80)
+    print("=" * 80)
 
     try:
         start = time.time()
 
         # Fetch all divisions
         df = get_dataset(
-            'schedule',
-            {'league': 'NCAA-WBB', 'season': '2025', 'Division': 'all'},
-            limit=100
+            "schedule", {"league": "NCAA-WBB", "season": "2025", "Division": "all"}, limit=100
         )
 
         elapsed = time.time() - start
@@ -215,20 +203,18 @@ def test_ncaa_wbb_all_divisions():
         return False
 
 
-def test_euroleague_ignores_division():
+def test_euroleague_ignores_division() -> bool:
     """Test EuroLeague ignores division parameter"""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("TEST 7: EuroLeague (Should Ignore Division Parameter)")
-    print("="*80)
+    print("=" * 80)
 
     try:
         start = time.time()
 
         # EuroLeague should ignore Division parameter
         df = get_dataset(
-            'schedule',
-            {'league': 'EuroLeague', 'season': '2024', 'Division': 'D1'},
-            limit=50
+            "schedule", {"league": "EuroLeague", "season": "2024", "Division": "D1"}, limit=50
         )
 
         elapsed = time.time() - start
@@ -249,11 +235,11 @@ def test_euroleague_ignores_division():
         return False
 
 
-def test_division_filter_combinations():
+def test_division_filter_combinations() -> None:
     """Test various division filter combinations"""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("TEST 8: Division Filter Combinations (Validation)")
-    print("="*80)
+    print("=" * 80)
 
     test_cases = [
         ("D1", "50"),
@@ -284,22 +270,20 @@ def test_division_filter_combinations():
     return all_passed
 
 
-def test_data_completeness():
+def test_data_completeness() -> bool:
     """Test that division filtering returns complete data"""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("TEST 9: Data Completeness Check")
-    print("="*80)
+    print("=" * 80)
 
     try:
         # Fetch D1 games
         df_d1 = get_dataset(
-            'schedule',
-            {'league': 'NCAA-MBB', 'season': '2025', 'Division': 'D1'},
-            limit=100
+            "schedule", {"league": "NCAA-MBB", "season": "2025", "Division": "D1"}, limit=100
         )
 
         # Verify required columns exist
-        required_cols = ['GAME_ID', 'GAME_DATE', 'HOME_TEAM_NAME', 'AWAY_TEAM_NAME']
+        required_cols = ["GAME_ID", "GAME_DATE", "HOME_TEAM_NAME", "AWAY_TEAM_NAME"]
         missing_cols = [col for col in required_cols if col not in df_d1.columns]
 
         if missing_cols:
@@ -313,8 +297,8 @@ def test_data_completeness():
             return False
 
         print(f"  ✓ All required columns present: {required_cols}")
-        print(f"  ✓ No null values in key columns")
-        print(f"  ✓ Data completeness verified")
+        print("  ✓ No null values in key columns")
+        print("  ✓ Data completeness verified")
 
         return True
 
@@ -323,14 +307,14 @@ def test_data_completeness():
         return False
 
 
-def run_all_tests():
+def run_all_tests() -> None:
     """Run all division filtering stress tests"""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("DIVISION FILTERING COMPREHENSIVE STRESS TESTS")
-    print("="*80)
-    print(f"Date: 2025-11-05")
-    print(f"Testing division filtering across all leagues")
-    print("="*80)
+    print("=" * 80)
+    print("Date: 2025-11-05")
+    print("Testing division filtering across all leagues")
+    print("=" * 80)
 
     tests = [
         test_ncaa_mbb_d1_only,
@@ -358,9 +342,9 @@ def run_all_tests():
     total_time = time.time() - start_time
 
     # Print summary
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("TEST SUMMARY")
-    print("="*80)
+    print("=" * 80)
 
     passed = sum(1 for _, result in results if result)
     failed = len(results) - passed
@@ -369,13 +353,13 @@ def run_all_tests():
         status = "✓ PASS" if result else "✗ FAIL"
         print(f"  {status}: {test_name}")
 
-    print("="*80)
+    print("=" * 80)
     print(f"Total tests: {len(results)}")
     print(f"Passed: {passed}")
     print(f"Failed: {failed}")
     print(f"Success rate: {passed/len(results)*100:.1f}%")
     print(f"Total time: {total_time:.2f}s")
-    print("="*80)
+    print("=" * 80)
 
     return failed == 0
 

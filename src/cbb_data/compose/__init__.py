@@ -1,8 +1,8 @@
 """Data composition and enrichment utilities"""
 
 from .enrichers import (
-    coerce_common_columns,
     add_home_away,
+    coerce_common_columns,
     compose_player_team_game,
 )
 

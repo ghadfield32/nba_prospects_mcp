@@ -17,7 +17,6 @@ Usage:
 import argparse
 import logging
 import sys
-from typing import Optional
 
 try:
     import uvicorn
@@ -27,17 +26,15 @@ except ImportError:
     print("  or: uv pip install uvicorn[standard]")
     sys.exit(1)
 
-from cbb_data.api.rest_api import app
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
         description="Start the College Basketball Data REST API server"
@@ -47,27 +44,22 @@ def parse_args():
         "--host",
         type=str,
         default="127.0.0.1",
-        help="Host to bind to (default: 127.0.0.1, use 0.0.0.0 for all interfaces)"
+        help="Host to bind to (default: 127.0.0.1, use 0.0.0.0 for all interfaces)",
     )
 
-    parser.add_argument(
-        "--port",
-        type=int,
-        default=8000,
-        help="Port to bind to (default: 8000)"
-    )
+    parser.add_argument("--port", type=int, default=8000, help="Port to bind to (default: 8000)")
 
     parser.add_argument(
         "--reload",
         action="store_true",
-        help="Enable auto-reload on code changes (development mode)"
+        help="Enable auto-reload on code changes (development mode)",
     )
 
     parser.add_argument(
         "--workers",
         type=int,
         default=1,
-        help="Number of worker processes (default: 1, use >1 for production)"
+        help="Number of worker processes (default: 1, use >1 for production)",
     )
 
     parser.add_argument(
@@ -75,13 +67,13 @@ def parse_args():
         type=str,
         default="info",
         choices=["critical", "error", "warning", "info", "debug"],
-        help="Log level (default: info)"
+        help="Log level (default: info)",
     )
 
     return parser.parse_args()
 
 
-def main():
+def main() -> None:
     """Main entry point for REST API server."""
     args = parse_args()
 
@@ -119,8 +111,7 @@ def main():
         if args.workers > 1:
             if args.reload:
                 logger.warning(
-                    "⚠️  Cannot use --reload with multiple workers. "
-                    "Using single worker."
+                    "⚠️  Cannot use --reload with multiple workers. " "Using single worker."
                 )
                 uvicorn_config["workers"] = 1
             else:

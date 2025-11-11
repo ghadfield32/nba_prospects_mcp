@@ -18,8 +18,8 @@ Usage:
     # Create agent with tools
     llm = OpenAI(model="gpt-4")
     agent = ReActAgent.from_tools(
-        tools=tools,
-        llm=llm,
+        tools=tools
+        llm=llm
         verbose=True
     )
 
@@ -27,10 +27,13 @@ Usage:
     response = agent.chat("Show me Duke's schedule this season")
 """
 
-from typing import List, Optional, Dict, Any
+from __future__ import annotations
+
+from typing import Any
 
 try:
     from llama_index.core.tools import FunctionTool
+
     LLAMAINDEX_AVAILABLE = True
 except ImportError:
     LLAMAINDEX_AVAILABLE = False
@@ -38,20 +41,20 @@ except ImportError:
 
 # Import MCP tools
 from cbb_data.servers.mcp.tools import (
-    tool_get_schedule,
     tool_get_player_game_stats,
     tool_get_player_season_stats,
-    tool_get_team_season_stats,
     tool_get_recent_games,
-    tool_list_datasets
+    tool_get_schedule,
+    tool_get_team_season_stats,
+    tool_list_datasets,
 )
-
 
 # ============================================================================
 # Helper Functions
 # ============================================================================
 
-def _format_result(result: Dict[str, Any]) -> str:
+
+def _format_result(result: dict[str, Any]) -> str:
     """Format result for LLM consumption."""
     data = result.get("data")
 
@@ -91,14 +94,15 @@ def _format_result(result: Dict[str, Any]) -> str:
 # LlamaIndex Tool Wrappers
 # ============================================================================
 
+
 def llamaindex_get_schedule(
     league: str,
-    season: Optional[str] = None,
-    team: Optional[List[str]] = None,
-    date_from: Optional[str] = None,
-    date_to: Optional[str] = None,
+    season: str | None = None,
+    team: list[str] | None = None,
+    date_from: str | None = None,
+    date_to: str | None = None,
     limit: int = 100,
-    compact: bool = True
+    compact: bool = True,
 ) -> str:
     """
     Get game schedules and results with natural language support.
@@ -129,11 +133,11 @@ def llamaindex_get_schedule(
 
 def llamaindex_get_player_game_stats(
     league: str,
-    season: Optional[str] = None,
-    team: Optional[List[str]] = None,
-    player: Optional[List[str]] = None,
+    season: str | None = None,
+    team: list[str] | None = None,
+    player: list[str] | None = None,
     limit: int = 100,
-    compact: bool = True
+    compact: bool = True,
 ) -> str:
     """
     Get per-player per-game box score statistics.
@@ -164,11 +168,11 @@ def llamaindex_get_player_game_stats(
 def llamaindex_get_player_season_stats(
     league: str,
     season: str,
-    team: Optional[List[str]] = None,
-    player: Optional[List[str]] = None,
+    team: list[str] | None = None,
+    player: list[str] | None = None,
     per_mode: str = "PerGame",
     limit: int = 100,
-    compact: bool = True
+    compact: bool = True,
 ) -> str:
     """
     Get per-player season aggregate statistics.
@@ -200,9 +204,9 @@ def llamaindex_get_player_season_stats(
 def llamaindex_get_team_season_stats(
     league: str,
     season: str,
-    team: Optional[List[str]] = None,
+    team: list[str] | None = None,
     limit: int = 100,
-    compact: bool = True
+    compact: bool = True,
 ) -> str:
     """
     Get per-team season aggregate statistics and standings.
@@ -230,10 +234,7 @@ def llamaindex_get_team_season_stats(
 
 
 def llamaindex_get_recent_games(
-    league: str,
-    days: str = "2",
-    teams: Optional[List[str]] = None,
-    compact: bool = True
+    league: str, days: str = "2", teams: list[str] | None = None, compact: bool = True
 ) -> str:
     """
     Get recent games with natural language day support.
@@ -282,7 +283,8 @@ def llamaindex_list_datasets() -> str:
 # Main Function
 # ============================================================================
 
-def get_llamaindex_tools() -> List:
+
+def get_llamaindex_tools() -> list:
     """
     Get all LlamaIndex basketball data tools.
 
@@ -303,8 +305,8 @@ def get_llamaindex_tools() -> List:
         >>>
         >>> llm = OpenAI(model="gpt-4")
         >>> agent = ReActAgent.from_tools(
-        ...     tools=tools,
-        ...     llm=llm,
+        ...     tools=tools
+        ...     llm=llm
         ...     verbose=True
         ... )
         >>>
@@ -320,33 +322,33 @@ def get_llamaindex_tools() -> List:
         FunctionTool.from_defaults(
             fn=llamaindex_get_schedule,
             name="get_schedule",
-            description="Get game schedules and results. Accepts natural language for seasons ('this season') and dates ('yesterday', 'last week')"
+            description="Get game schedules and results. Accepts natural language for seasons ('this season') and dates ('yesterday', 'last week')",
         ),
         FunctionTool.from_defaults(
             fn=llamaindex_get_player_game_stats,
             name="get_player_game_stats",
-            description="Get per-player per-game box score statistics including points, rebounds, assists. Accepts natural language seasons"
+            description="Get per-player per-game box score statistics including points, rebounds, assists. Accepts natural language seasons",
         ),
         FunctionTool.from_defaults(
             fn=llamaindex_get_player_season_stats,
             name="get_player_season_stats",
-            description="Get per-player season aggregate statistics. Use per_mode='PerGame' for fair comparisons. Accepts natural language seasons"
+            description="Get per-player season aggregate statistics. Use per_mode='PerGame' for fair comparisons. Accepts natural language seasons",
         ),
         FunctionTool.from_defaults(
             fn=llamaindex_get_team_season_stats,
             name="get_team_season_stats",
-            description="Get per-team season aggregate statistics and standings. Accepts natural language seasons"
+            description="Get per-team season aggregate statistics and standings. Accepts natural language seasons",
         ),
         FunctionTool.from_defaults(
             fn=llamaindex_get_recent_games,
             name="get_recent_games",
-            description="Get recent games. Accepts natural language for days ('today', 'last week', 'last 5 days')"
+            description="Get recent games. Accepts natural language for days ('today', 'last week', 'last 5 days')",
         ),
         FunctionTool.from_defaults(
             fn=llamaindex_list_datasets,
             name="list_datasets",
-            description="List all available datasets with their metadata, supported filters, and leagues"
-        )
+            description="List all available datasets with their metadata, supported filters, and leagues",
+        ),
     ]
 
 

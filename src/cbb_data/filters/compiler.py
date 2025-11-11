@@ -11,20 +11,23 @@ This separation allows us to:
 """
 
 from __future__ import annotations
-from typing import Dict, Any, Optional, Callable
+
+from collections.abc import Callable
+from typing import Any
+
 from .spec import FilterSpec
 
 # Type alias for entity resolver function
 # Takes (name, entity_type, league) and returns ID or None
-ResolverFn = Callable[[str, str, Optional[str]], Optional[int]]
+ResolverFn = Callable[[str, str, str | None], int | None]
 
 
 def _resolve_names_to_ids(
-    names: Optional[list[str]],
+    names: list[str] | None,
     entity_type: str,
-    league: Optional[str],
-    resolver: Optional[ResolverFn],
-) -> Optional[list[int]]:
+    league: str | None,
+    resolver: ResolverFn | None,
+) -> list[int] | None:
     """Resolve entity names to IDs using the provided resolver
 
     Args:
@@ -58,8 +61,8 @@ def _resolve_names_to_ids(
 def compile_params(
     dataset_id: str,
     f: FilterSpec,
-    name_resolver: Optional[ResolverFn] = None,
-) -> Dict[str, Any]:
+    name_resolver: ResolverFn | None = None,
+) -> dict[str, Any]:
     """Convert FilterSpec to endpoint params + post-mask dict
 
     This function is the core translation layer between our unified FilterSpec
@@ -90,18 +93,14 @@ def compile_params(
             "meta": {"league": "NCAA-MBB", "season": "2024-25"}
         }
     """
-    params: Dict[str, Any] = {}
-    post_mask: Dict[str, Any] = {}
-    meta: Dict[str, Any] = {}
+    params: dict[str, Any] = {}
+    post_mask: dict[str, Any] = {}
+    meta: dict[str, Any] = {}
 
     # Resolve names -> IDs (if resolver provided)
     team_ids = f.team_ids or _resolve_names_to_ids(f.team, "team", f.league, name_resolver)
-    opp_ids = f.opponent_ids or _resolve_names_to_ids(
-        f.opponent, "team", f.league, name_resolver
-    )
-    player_ids = f.player_ids or _resolve_names_to_ids(
-        f.player, "player", f.league, name_resolver
-    )
+    opp_ids = f.opponent_ids or _resolve_names_to_ids(f.opponent, "team", f.league, name_resolver)
+    player_ids = f.player_ids or _resolve_names_to_ids(f.player, "player", f.league, name_resolver)
 
     # Store league/season in meta for logging/caching
     if f.league:
@@ -178,7 +177,7 @@ def compile_params(
     return {"params": params, "post_mask": post_mask, "meta": meta}
 
 
-def apply_post_mask(df, post_mask: Dict[str, Any]):
+def apply_post_mask(df: Any, post_mask: dict[str, Any]) -> Any:
     """Apply post-processing filters to a DataFrame
 
     This function is used by fetchers to filter data after retrieval.

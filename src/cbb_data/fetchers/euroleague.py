@@ -13,21 +13,23 @@ Documentation: https://github.com/giasemidis/euroleague_api
 """
 
 from __future__ import annotations
-import pandas as pd
-from typing import Optional, List, Dict, Any
+
 import logging
 
-from .base import cached_dataframe, retry_on_error
+import pandas as pd
+
 from ..utils.rate_limiter import get_source_limiter
+from .base import cached_dataframe, retry_on_error
 
 logger = logging.getLogger(__name__)
 
 # Try to import euroleague-api
 try:
-    from euroleague_api.game_metadata import GameMetadata
     from euroleague_api.boxscore_data import BoxScoreData
+    from euroleague_api.game_metadata import GameMetadata
     from euroleague_api.play_by_play_data import PlayByPlay
     from euroleague_api.shot_data import ShotData
+
     EUROLEAGUE_API_AVAILABLE = True
 except ImportError:
     EUROLEAGUE_API_AVAILABLE = False
@@ -37,12 +39,11 @@ except ImportError:
 rate_limiter = get_source_limiter()
 
 
-def _check_api_available():
+def _check_api_available() -> None:
     """Check if EuroLeague API is available"""
     if not EUROLEAGUE_API_AVAILABLE:
         raise ImportError(
-            "euroleague-api not installed. "
-            "Install with: uv pip install euroleague-api"
+            "euroleague-api not installed. " "Install with: uv pip install euroleague-api"
         )
 
 
@@ -50,9 +51,9 @@ def _check_api_available():
 @cached_dataframe
 def fetch_euroleague_games(
     season: int,
-    phase: Optional[str] = "RS",  # RS = Regular Season, PO = Playoffs
+    phase: str | None = "RS",  # RS = Regular Season, PO = Playoffs
     round_start: int = 1,
-    round_end: Optional[int] = None
+    round_end: int | None = None,
 ) -> pd.DataFrame:
     """Fetch EuroLeague game schedule
 
@@ -97,7 +98,7 @@ def fetch_euroleague_games(
             "RS": "REGULAR SEASON",
             "PO": "PLAYOFFS",
             "Regular Season": "REGULAR SEASON",
-            "Playoffs": "PLAYOFFS"
+            "Playoffs": "PLAYOFFS",
         }
         phase_name = phase_map.get(phase, phase)
         games_df = games_df[games_df["Phase"].str.upper().str.contains(phase_name, na=False)]
@@ -106,33 +107,40 @@ def fetch_euroleague_games(
     if round_start or round_end:
         if round_end is None:
             round_end = 34 if phase == "RS" else 5  # Typical max rounds
-        games_df = games_df[
-            (games_df["Round"] >= round_start) &
-            (games_df["Round"] <= round_end)
-        ]
+        games_df = games_df[(games_df["Round"] >= round_start) & (games_df["Round"] <= round_end)]
 
     # Rename columns to match our schema
-    df = games_df.rename(columns={
-        "Gamecode": "GAME_CODE",
-        "Season": "SEASON",
-        "Phase": "PHASE",
-        "Round": "ROUND",
-        "Date": "GAME_DATE",
-        "TeamA": "HOME_TEAM",
-        "TeamB": "AWAY_TEAM",
-        "ScoreA": "HOME_SCORE",
-        "ScoreB": "AWAY_SCORE",
-        "Stadium": "VENUE",
-    })
+    df = games_df.rename(
+        columns={
+            "Gamecode": "GAME_CODE",
+            "Season": "SEASON",
+            "Phase": "PHASE",
+            "Round": "ROUND",
+            "Date": "GAME_DATE",
+            "TeamA": "HOME_TEAM",
+            "TeamB": "AWAY_TEAM",
+            "ScoreA": "HOME_SCORE",
+            "ScoreB": "AWAY_SCORE",
+            "Stadium": "VENUE",
+        }
+    )
 
     # Add league identifier
     df["LEAGUE"] = "EuroLeague"
 
     # Select only the columns we need
     columns_to_keep = [
-        "GAME_CODE", "SEASON", "PHASE", "ROUND", "GAME_DATE",
-        "HOME_TEAM", "AWAY_TEAM", "HOME_SCORE", "AWAY_SCORE",
-        "VENUE", "LEAGUE"
+        "GAME_CODE",
+        "SEASON",
+        "PHASE",
+        "ROUND",
+        "GAME_DATE",
+        "HOME_TEAM",
+        "AWAY_TEAM",
+        "HOME_SCORE",
+        "AWAY_SCORE",
+        "VENUE",
+        "LEAGUE",
     ]
     df = df[[col for col in columns_to_keep if col in df.columns]]
 
@@ -233,7 +241,9 @@ def fetch_euroleague_box_score(season: int, game_code: int) -> pd.DataFrame:
         if "FG2M" in df.columns and "FG3M" in df.columns:
             df["FGM"] = df["FG2M"].fillna(0) + df["FG3M"].fillna(0)
             df["FGA"] = df["FG2A"].fillna(0) + df["FG3A"].fillna(0)
-            df["FG_PCT"] = (df["FGM"] / df["FGA"]).replace([float('inf'), -float('inf')], 0).fillna(0)
+            df["FG_PCT"] = (
+                (df["FGM"] / df["FGA"]).replace([float("inf"), -float("inf")], 0).fillna(0)
+            )
 
         # Ensure GAME_CODE and SEASON are present
         if "GAME_CODE" not in df.columns:
@@ -396,7 +406,7 @@ def fetch_euroleague_shot_data(season: int, game_code: int) -> pd.DataFrame:
     return df
 
 
-def fetch_euroleague_full_season(season: str, phase: str = "RS") -> Dict[str, pd.DataFrame]:
+def fetch_euroleague_full_season(season: str, phase: str = "RS") -> dict[str, pd.DataFrame]:
     """Fetch all data for a EuroLeague season
 
     Args:
@@ -443,7 +453,9 @@ def fetch_euroleague_full_season(season: str, phase: str = "RS") -> Dict[str, pd
             logger.warning(f"Failed to fetch data for game {game_code}: {e}")
             continue
 
-    result["box_scores"] = pd.concat(box_scores, ignore_index=True) if box_scores else pd.DataFrame()
+    result["box_scores"] = (
+        pd.concat(box_scores, ignore_index=True) if box_scores else pd.DataFrame()
+    )
     result["play_by_play"] = pd.concat(pbp_data, ignore_index=True) if pbp_data else pd.DataFrame()
     result["shots"] = pd.concat(shot_data, ignore_index=True) if shot_data else pd.DataFrame()
 

@@ -5,9 +5,9 @@ These models provide type safety and validation for LLM tool calls,
 ensuring parameters are valid before execution.
 """
 
-from typing import List, Optional, Literal
-from pydantic import BaseModel, Field, field_validator
+from typing import Any, Literal
 
+from pydantic import BaseModel, Field, field_validator
 
 # Type aliases for common enums
 LeagueType = Literal["NCAA-MBB", "NCAA-WBB", "EuroLeague"]
@@ -19,57 +19,51 @@ class BaseToolArgs(BaseModel):
     """Base model with common parameters."""
 
     league: LeagueType = Field(
-        ...,
-        description="League identifier: NCAA-MBB, NCAA-WBB, or EuroLeague"
+        ..., description="League identifier: NCAA-MBB, NCAA-WBB, or EuroLeague"
     )
 
     compact: bool = Field(
-        default=False,
-        description="Return arrays instead of markdown (saves ~70% tokens)"
+        default=False, description="Return arrays instead of markdown (saves ~70% tokens)"
     )
 
-    limit: int = Field(
-        default=100,
-        ge=1,
-        le=10000,
-        description="Maximum rows to return (1-10000)"
-    )
+    limit: int = Field(default=100, ge=1, le=10000, description="Maximum rows to return (1-10000)")
 
 
 class GetScheduleArgs(BaseToolArgs):
     """Parameters for get_schedule tool."""
 
-    season: Optional[str] = Field(
+    season: str | None = Field(
         None,
-        description="Season year (e.g., '2025') OR natural language ('this season', 'last season', '2024-25')"
+        description="Season year (e.g., '2025') OR natural language ('this season', 'last season', '2024-25')",
     )
 
-    team: Optional[List[str]] = Field(
+    team: list[str] | None = Field(None, description="List of team names to filter")
+
+    date_from: str | None = Field(
         None,
-        description="List of team names to filter"
+        description="Start date (YYYY-MM-DD) OR natural language ('yesterday', 'last week', '3 days ago')",
     )
 
-    date_from: Optional[str] = Field(
-        None,
-        description="Start date (YYYY-MM-DD) OR natural language ('yesterday', 'last week', '3 days ago')"
-    )
+    date_to: str | None = Field(None, description="End date (YYYY-MM-DD) OR natural language")
 
-    date_to: Optional[str] = Field(
-        None,
-        description="End date (YYYY-MM-DD) OR natural language"
-    )
-
-    @field_validator('season')
+    @field_validator("season")
     @classmethod
-    def validate_season(cls, v: Optional[str]) -> Optional[str]:
+    def validate_season(cls, v: str | None) -> str | None:
         """Validate season format if not natural language."""
         if v is None:
             return v
 
         # Allow natural language
-        natural_language_seasons = ["this season", "last season", "current season",
-                                     "previous season", "next season", "this year",
-                                     "last year", "next year"]
+        natural_language_seasons = [
+            "this season",
+            "last season",
+            "current season",
+            "previous season",
+            "next season",
+            "this year",
+            "last year",
+            "next year",
+        ]
         if v.lower() in natural_language_seasons:
             return v
 
@@ -81,77 +75,56 @@ class GetScheduleArgs(BaseToolArgs):
         if "-" in v and len(v) == 7:
             return v
 
-        raise ValueError(f"Season must be YYYY format (e.g., '2025'), YYYY-YY format (e.g., '2024-25'), or natural language (e.g., 'this season')")
+        raise ValueError(
+            "Season must be YYYY format (e.g., '2025'), YYYY-YY format (e.g., '2024-25'), or natural language (e.g., 'this season')"
+        )
 
 
 class GetPlayerGameStatsArgs(BaseToolArgs):
     """Parameters for get_player_game_stats tool."""
 
-    season: Optional[str] = Field(
+    season: str | None = Field(
         None,
-        description="Season year OR natural language ('this season', 'last season', '2024-25')"
+        description="Season year OR natural language ('this season', 'last season', '2024-25')",
     )
 
-    team: Optional[List[str]] = Field(
-        None,
-        description="List of team names to filter"
-    )
+    team: list[str] | None = Field(None, description="List of team names to filter")
 
-    player: Optional[List[str]] = Field(
-        None,
-        description="List of player names to filter"
-    )
+    player: list[str] | None = Field(None, description="List of player names to filter")
 
-    game_ids: Optional[List[str]] = Field(
-        None,
-        description="List of specific game IDs"
-    )
+    game_ids: list[str] | None = Field(None, description="List of specific game IDs")
 
-    @field_validator('season')
+    @field_validator("season")
     @classmethod
-    def validate_season(cls, v: Optional[str]) -> Optional[str]:
+    def validate_season(cls, v: str | None) -> str | None:
         """Validate season format."""
-        return GetScheduleArgs.validate_season(v)
+        return GetScheduleArgs.validate_season(v)  # type: ignore[no-any-return]
 
 
 class GetTeamGameStatsArgs(BaseToolArgs):
     """Parameters for get_team_game_stats tool."""
 
-    season: Optional[str] = Field(
-        None,
-        description="Season year OR natural language"
-    )
+    season: str | None = Field(None, description="Season year OR natural language")
 
-    team: Optional[List[str]] = Field(
-        None,
-        description="List of team names to filter"
-    )
+    team: list[str] | None = Field(None, description="List of team names to filter")
 
-    @field_validator('season')
+    @field_validator("season")
     @classmethod
-    def validate_season(cls, v: Optional[str]) -> Optional[str]:
+    def validate_season(cls, v: str | None) -> str | None:
         """Validate season format."""
-        return GetScheduleArgs.validate_season(v)
+        return GetScheduleArgs.validate_season(v)  # type: ignore[no-any-return]
 
 
 class GetPlayByPlayArgs(BaseModel):
     """Parameters for get_play_by_play tool."""
 
-    league: LeagueType = Field(
-        ...,
-        description="League identifier"
+    league: LeagueType = Field(..., description="League identifier")
+
+    game_ids: list[str] = Field(
+        ..., min_length=1, description="List of game IDs (required, at least one)"
     )
 
-    game_ids: List[str] = Field(
-        ...,
-        min_length=1,
-        description="List of game IDs (required, at least one)"
-    )
-
-    compact: bool = Field(
-        default=False,
-        description="Return arrays instead of markdown"
-    )
+    compact: bool = Field(default=False, description="Return arrays instead of markdown")
 
 
 class GetShotChartArgs(BaseModel):
@@ -159,24 +132,14 @@ class GetShotChartArgs(BaseModel):
 
     league: Literal["NCAA-MBB", "EuroLeague"] = Field(
         ...,
-        description="League identifier (shot charts only available for NCAA-MBB and EuroLeague)"
+        description="League identifier (shot charts only available for NCAA-MBB and EuroLeague)",
     )
 
-    game_ids: List[str] = Field(
-        ...,
-        min_length=1,
-        description="List of game IDs (required)"
-    )
+    game_ids: list[str] = Field(..., min_length=1, description="List of game IDs (required)")
 
-    player: Optional[List[str]] = Field(
-        None,
-        description="List of player names to filter"
-    )
+    player: list[str] | None = Field(None, description="List of player names to filter")
 
-    compact: bool = Field(
-        default=False,
-        description="Return arrays instead of markdown"
-    )
+    compact: bool = Field(default=False, description="Return arrays instead of markdown")
 
 
 class GetPlayerSeasonStatsArgs(BaseToolArgs):
@@ -184,106 +147,84 @@ class GetPlayerSeasonStatsArgs(BaseToolArgs):
 
     season: str = Field(
         ...,
-        description="Season year OR natural language ('this season', 'last season', '2024-25') - required"
+        description="Season year OR natural language ('this season', 'last season', '2024-25') - required",
     )
 
-    team: Optional[List[str]] = Field(
-        None,
-        description="List of team names to filter"
-    )
+    team: list[str] | None = Field(None, description="List of team names to filter")
 
-    player: Optional[List[str]] = Field(
-        None,
-        description="List of player names to filter"
-    )
+    player: list[str] | None = Field(None, description="List of player names to filter")
 
     per_mode: PerModeType = Field(
         default="Totals",
-        description="Aggregation mode: 'Totals' (cumulative), 'PerGame' (averages), 'Per40' (per 40 minutes)"
+        description="Aggregation mode: 'Totals' (cumulative), 'PerGame' (averages), 'Per40' (per 40 minutes)",
     )
 
-    @field_validator('season')
+    @field_validator("season")
     @classmethod
-    def validate_season(cls, v: str) -> str:
+    def validate_season(cls, v: str) -> str | None:
         """Validate season format."""
-        return GetScheduleArgs.validate_season(v)
+        return GetScheduleArgs.validate_season(v)  # type: ignore[no-any-return]
 
 
 class GetTeamSeasonStatsArgs(BaseToolArgs):
     """Parameters for get_team_season_stats tool."""
 
-    season: str = Field(
-        ...,
-        description="Season year OR natural language - required"
+    season: str = Field(..., description="Season year OR natural language - required")
+
+    team: list[str] | None = Field(None, description="List of team names to filter")
+
+    division: DivisionType | None = Field(
+        None, description="Division filter for NCAA: D1, D2, D3, or all"
     )
 
-    team: Optional[List[str]] = Field(
-        None,
-        description="List of team names to filter"
-    )
-
-    division: Optional[DivisionType] = Field(
-        None,
-        description="Division filter for NCAA: D1, D2, D3, or all"
-    )
-
-    @field_validator('season')
+    @field_validator("season")
     @classmethod
-    def validate_season(cls, v: str) -> str:
+    def validate_season(cls, v: str) -> str | None:
         """Validate season format."""
-        return GetScheduleArgs.validate_season(v)
+        return GetScheduleArgs.validate_season(v)  # type: ignore[no-any-return]
 
 
 class GetPlayerTeamSeasonArgs(BaseToolArgs):
     """Parameters for get_player_team_season tool."""
 
-    season: str = Field(
-        ...,
-        description="Season year OR natural language - required"
-    )
+    season: str = Field(..., description="Season year OR natural language - required")
 
-    player: Optional[List[str]] = Field(
-        None,
-        description="List of player names to filter"
-    )
+    player: list[str] | None = Field(None, description="List of player names to filter")
 
-    @field_validator('season')
+    @field_validator("season")
     @classmethod
-    def validate_season(cls, v: str) -> str:
+    def validate_season(cls, v: str) -> str | None:
         """Validate season format."""
-        return GetScheduleArgs.validate_season(v)
+        return GetScheduleArgs.validate_season(v)  # type: ignore[no-any-return]
 
 
 class GetRecentGamesArgs(BaseModel):
     """Parameters for get_recent_games tool."""
 
-    league: LeagueType = Field(
-        ...,
-        description="League identifier"
-    )
+    league: LeagueType = Field(..., description="League identifier")
 
     days: str = Field(
         default="2",
-        description="Number of days OR natural language ('today', 'last week', 'last 5 days')"
+        description="Number of days OR natural language ('today', 'last week', 'last 5 days')",
     )
 
-    teams: Optional[List[str]] = Field(
-        None,
-        description="List of team names to filter"
-    )
+    teams: list[str] | None = Field(None, description="List of team names to filter")
 
-    compact: bool = Field(
-        default=False,
-        description="Return arrays instead of markdown"
-    )
+    compact: bool = Field(default=False, description="Return arrays instead of markdown")
 
-    @field_validator('days')
+    @field_validator("days")
     @classmethod
     def validate_days(cls, v: str) -> str:
         """Validate days parameter."""
         # Allow natural language
-        natural_language_days = ["today", "yesterday", "last week", "last month",
-                                  "this week", "this month"]
+        natural_language_days = [
+            "today",
+            "yesterday",
+            "last week",
+            "last month",
+            "this week",
+            "this month",
+        ]
         if v.lower() in natural_language_days:
             return v
 
@@ -298,7 +239,9 @@ class GetRecentGamesArgs(BaseModel):
                 return v
             raise ValueError("Days must be between 1 and 365")
 
-        raise ValueError(f"Days must be a number (1-365) or natural language like 'today', 'last week', 'last 5 days'")
+        raise ValueError(
+            "Days must be a number (1-365) or natural language like 'today', 'last week', 'last 5 days'"
+        )
 
 
 # Model registry for easy lookup
@@ -315,7 +258,7 @@ TOOL_MODELS = {
 }
 
 
-def validate_tool_args(tool_name: str, args: dict) -> dict:
+def validate_tool_args(tool_name: str, args: dict[str, Any]) -> dict[str, Any]:
     """
     Validate tool arguments using Pydantic models.
 
@@ -345,9 +288,9 @@ def validate_tool_args(tool_name: str, args: dict) -> dict:
     try:
         # Validate and convert to dict
         validated = model_class(**args)
-        return validated.model_dump(exclude_none=True)
+        return validated.model_dump(exclude_none=True)  # type: ignore[no-any-return, attr-defined]
     except Exception as e:
-        raise ValueError(f"Validation failed for {tool_name}: {str(e)}")
+        raise ValueError(f"Validation failed for {tool_name}: {str(e)}") from e
 
 
 # Example usage for documentation
@@ -357,11 +300,10 @@ if __name__ == "__main__":
     # Example 1: Valid schedule query
     print("Example 1: Valid schedule query with natural language")
     try:
-        result = validate_tool_args("get_schedule", {
-            "league": "NCAA-MBB",
-            "season": "this season",
-            "date_from": "yesterday"
-        })
+        result = validate_tool_args(
+            "get_schedule",
+            {"league": "NCAA-MBB", "season": "this season", "date_from": "yesterday"},
+        )
         print(f"[PASS] Valid: {result}\n")
     except ValueError as e:
         print(f"[FAIL] Invalid: {e}\n")
@@ -369,10 +311,13 @@ if __name__ == "__main__":
     # Example 2: Invalid league
     print("Example 2: Invalid league")
     try:
-        result = validate_tool_args("get_schedule", {
-            "league": "NBA",  # Invalid
-            "season": "2025"
-        })
+        result = validate_tool_args(
+            "get_schedule",
+            {
+                "league": "NBA",  # Invalid
+                "season": "2025",
+            },
+        )
         print(f"[PASS] Valid: {result}\n")
     except ValueError as e:
         print(f"[FAIL] Invalid: {e}\n")
@@ -380,10 +325,7 @@ if __name__ == "__main__":
     # Example 3: Valid recent games with natural language
     print("Example 3: Valid recent games")
     try:
-        result = validate_tool_args("get_recent_games", {
-            "league": "NCAA-MBB",
-            "days": "last week"
-        })
+        result = validate_tool_args("get_recent_games", {"league": "NCAA-MBB", "days": "last week"})
         print(f"[PASS] Valid: {result}\n")
     except ValueError as e:
         print(f"[FAIL] Invalid: {e}\n")
@@ -391,10 +333,13 @@ if __name__ == "__main__":
     # Example 4: Invalid limit
     print("Example 4: Invalid limit (too high)")
     try:
-        result = validate_tool_args("get_schedule", {
-            "league": "NCAA-MBB",
-            "limit": 50000  # Too high
-        })
+        result = validate_tool_args(
+            "get_schedule",
+            {
+                "league": "NCAA-MBB",
+                "limit": 50000,  # Too high
+            },
+        )
         print(f"[PASS] Valid: {result}\n")
     except ValueError as e:
         print(f"[FAIL] Invalid: {e}\n")

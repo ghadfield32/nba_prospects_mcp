@@ -16,18 +16,14 @@ PROMPTS = [
             {
                 "name": "league",
                 "description": "League identifier (NCAA-MBB, NCAA-WBB, EuroLeague)",
-                "required": True
+                "required": True,
             },
-            {
-                "name": "season",
-                "description": "Season year (e.g., '2025')",
-                "required": True
-            },
+            {"name": "season", "description": "Season year (e.g., '2025')", "required": True},
             {
                 "name": "limit",
                 "description": "Number of top scorers to return (default: 20)",
-                "required": False
-            }
+                "required": False,
+            },
         ],
         "template": """Find the top {limit} scorers in {league} for the {season} season.
 
@@ -44,7 +40,7 @@ Sort the results by points per game (PTS or PPG column) in descending order and 
 - Games played
 - Field goal percentage
 
-Include a brief analysis of the scoring leaders and any notable trends."""
+Include a brief analysis of the scoring leaders and any notable trends.""",
     },
     {
         "name": "team-schedule",
@@ -53,18 +49,10 @@ Include a brief analysis of the scoring leaders and any notable trends."""
             {
                 "name": "league",
                 "description": "League identifier (NCAA-MBB, NCAA-WBB, EuroLeague)",
-                "required": True
+                "required": True,
             },
-            {
-                "name": "team",
-                "description": "Team name",
-                "required": True
-            },
-            {
-                "name": "season",
-                "description": "Season year (optional)",
-                "required": False
-            }
+            {"name": "team", "description": "Team name", "required": True},
+            {"name": "season", "description": "Season year (optional)", "required": False},
         ],
         "template": """Get the schedule for {team} in {league}{season_text}.
 
@@ -80,7 +68,7 @@ Present the results showing:
 - Result (if game completed)
 - Score (if game completed)
 
-Organize by chronological order and highlight upcoming games vs completed games."""
+Organize by chronological order and highlight upcoming games vs completed games.""",
     },
     {
         "name": "recent-games",
@@ -89,13 +77,13 @@ Organize by chronological order and highlight upcoming games vs completed games.
             {
                 "name": "league",
                 "description": "League identifier (NCAA-MBB, NCAA-WBB, EuroLeague)",
-                "required": True
+                "required": True,
             },
             {
                 "name": "days",
                 "description": "Number of days to look back (default: 2)",
-                "required": False
-            }
+                "required": False,
+            },
         ],
         "template": """Get recent games for {league} over the last {days} days.
 
@@ -109,7 +97,7 @@ Present the results grouped by date showing:
 - Final score
 - Notable performances (if available)
 
-Highlight any upsets or particularly close games."""
+Highlight any upsets or particularly close games.""",
     },
     {
         "name": "player-game-log",
@@ -118,23 +106,15 @@ Highlight any upsets or particularly close games."""
             {
                 "name": "league",
                 "description": "League identifier (NCAA-MBB, NCAA-WBB, EuroLeague)",
-                "required": True
+                "required": True,
             },
-            {
-                "name": "player",
-                "description": "Player name",
-                "required": True
-            },
-            {
-                "name": "season",
-                "description": "Season year (optional)",
-                "required": False
-            },
+            {"name": "player", "description": "Player name", "required": True},
+            {"name": "season", "description": "Season year (optional)", "required": False},
             {
                 "name": "limit",
                 "description": "Number of games to return (default: 10)",
-                "required": False
-            }
+                "required": False,
+            },
         ],
         "template": """Get the game log for {player} in {league}{season_text}.
 
@@ -153,7 +133,7 @@ Present the results in chronological order showing:
 - Assists
 - Shooting percentages
 
-Include a brief statistical summary and identify their best performances."""
+Include a brief statistical summary and identify their best performances.""",
     },
     {
         "name": "team-standings",
@@ -162,18 +142,14 @@ Include a brief statistical summary and identify their best performances."""
             {
                 "name": "league",
                 "description": "League identifier (NCAA-MBB, NCAA-WBB, EuroLeague)",
-                "required": True
+                "required": True,
             },
-            {
-                "name": "season",
-                "description": "Season year (e.g., '2025')",
-                "required": True
-            },
+            {"name": "season", "description": "Season year (e.g., '2025')", "required": True},
             {
                 "name": "division",
                 "description": "Division filter for NCAA (D1, D2, D3) - optional",
-                "required": False
-            }
+                "required": False,
+            },
         ],
         "template": """Get team standings for {league}{division_text} in the {season} season.
 
@@ -189,7 +165,7 @@ Present the results sorted by win percentage showing:
 - Win percentage
 - Points per game (if available)
 
-Identify the top teams and any notable trends in the standings."""
+Identify the top teams and any notable trends in the standings.""",
     },
     {
         "name": "player-comparison",
@@ -198,18 +174,14 @@ Identify the top teams and any notable trends in the standings."""
             {
                 "name": "league",
                 "description": "League identifier (NCAA-MBB, NCAA-WBB, EuroLeague)",
-                "required": True
+                "required": True,
             },
             {
                 "name": "players",
                 "description": "Comma-separated list of player names",
-                "required": True
+                "required": True,
             },
-            {
-                "name": "season",
-                "description": "Season year (e.g., '2025')",
-                "required": True
-            }
+            {"name": "season", "description": "Season year (e.g., '2025')", "required": True},
         ],
         "template": """Compare the following players in {league} for the {season} season: {players}
 
@@ -228,7 +200,7 @@ Create a comparison table showing:
 - Field goal percentage
 - Games played
 
-Provide analysis comparing their strengths, weaknesses, and overall impact."""
+Provide analysis comparing their strengths, weaknesses, and overall impact.""",
     },
     {
         "name": "head-to-head",
@@ -237,23 +209,11 @@ Provide analysis comparing their strengths, weaknesses, and overall impact."""
             {
                 "name": "league",
                 "description": "League identifier (NCAA-MBB, NCAA-WBB, EuroLeague)",
-                "required": True
+                "required": True,
             },
-            {
-                "name": "team1",
-                "description": "First team name",
-                "required": True
-            },
-            {
-                "name": "team2",
-                "description": "Second team name",
-                "required": True
-            },
-            {
-                "name": "season",
-                "description": "Season year (optional)",
-                "required": False
-            }
+            {"name": "team1", "description": "First team name", "required": True},
+            {"name": "team2", "description": "Second team name", "required": True},
+            {"name": "season", "description": "Season year (optional)", "required": False},
         ],
         "template": """Get the head-to-head matchup history between {team1} and {team2} in {league}{season_text}.
 
@@ -270,7 +230,7 @@ Present the results showing:
 - Final score
 - Margin of victory
 
-Summarize the head-to-head record and identify any patterns or trends."""
+Summarize the head-to-head record and identify any patterns or trends.""",
     },
     {
         "name": "breakout-players",
@@ -279,18 +239,18 @@ Summarize the head-to-head record and identify any patterns or trends."""
             {
                 "name": "league",
                 "description": "League identifier (NCAA-MBB, NCAA-WBB, EuroLeague)",
-                "required": True
+                "required": True,
             },
             {
                 "name": "current_season",
                 "description": "Current season year (e.g., '2025')",
-                "required": True
+                "required": True,
             },
             {
                 "name": "team",
                 "description": "Specific team to analyze (optional)",
-                "required": False
-            }
+                "required": False,
+            },
         ],
         "template": """Identify breakout players in {league} for the {current_season} season{team_text}.
 
@@ -307,7 +267,7 @@ Analyze players showing significant improvement by looking for:
 - Well-rounded contributions (points, rebounds, assists)
 - Players with potential draft/transfer portal interest
 
-Present the top 10 breakout candidates with their key statistics and explain what makes them stand out."""
+Present the top 10 breakout candidates with their key statistics and explain what makes them stand out.""",
     },
     {
         "name": "todays-games",
@@ -316,7 +276,7 @@ Present the top 10 breakout candidates with their key statistics and explain wha
             {
                 "name": "league",
                 "description": "League identifier (NCAA-MBB, NCAA-WBB, EuroLeague)",
-                "required": True
+                "required": True,
             }
         ],
         "template": """Get today's games and recent results for {league}.
@@ -334,7 +294,7 @@ Present the results in two sections:
    - Matchup and scheduled time
    - Team records/standings if available
 
-Highlight any notable matchups or surprising results."""
+Highlight any notable matchups or surprising results.""",
     },
     {
         "name": "conference-leaders",
@@ -343,18 +303,10 @@ Highlight any notable matchups or surprising results."""
             {
                 "name": "league",
                 "description": "League identifier (must be NCAA-MBB or NCAA-WBB)",
-                "required": True
+                "required": True,
             },
-            {
-                "name": "season",
-                "description": "Season year (e.g., '2025')",
-                "required": True
-            },
-            {
-                "name": "division",
-                "description": "Division (D1, D2, or D3)",
-                "required": False
-            }
+            {"name": "season", "description": "Season year (e.g., '2025')", "required": True},
+            {"name": "division", "description": "Division (D1, D2, or D3)", "required": False},
         ],
         "template": """Get statistical leaders for {league} {division_text}in the {season} season.
 
@@ -371,6 +323,6 @@ Identify leaders in multiple categories:
 - **Assists Leaders**: Top 5 in APG
 - **Shooting Efficiency**: Top 5 in FG%
 
-Present each category in a separate table and identify any players who appear in multiple categories."""
-    }
+Present each category in a separate table and identify any players who appear in multiple categories.""",
+    },
 ]

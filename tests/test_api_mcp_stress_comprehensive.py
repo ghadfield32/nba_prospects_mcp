@@ -28,17 +28,15 @@ pytest tests/test_api_mcp_stress_comprehensive.py -v -m "not slow"
 pytest tests/test_api_mcp_stress_comprehensive.py -v -k concurrent
 """
 
-import pytest
-import requests
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Dict, Any, List
-import json
 
+import pytest
 
 # ============================================================================
 # REST API Stress Tests - Complete Coverage
 # ============================================================================
+
 
 @pytest.mark.api
 @pytest.mark.stress
@@ -48,21 +46,26 @@ class TestAPIStressFull:
     leagues, filters, and edge cases.
     """
 
-    @pytest.mark.parametrize("dataset,league,season", [
-        ("schedule", "NCAA-MBB", "2024"),
-        ("schedule", "NCAA-WBB", "2024"),
-        ("schedule", "EuroLeague", "2024"),
-        ("player_game", "NCAA-MBB", "2024"),
-        ("player_game", "NCAA-WBB", "2024"),
-        ("player_game", "EuroLeague", "2024"),
-        ("player_season", "NCAA-MBB", "2024"),
-        ("player_season", "NCAA-WBB", "2024"),
-        ("player_season", "EuroLeague", "2024"),
-        ("team_season", "NCAA-MBB", "2024"),
-        ("team_season", "NCAA-WBB", "2024"),
-        ("team_season", "EuroLeague", "2024"),
-    ])
-    def test_all_datasets_all_leagues(self, api_client, api_base_url, dataset, league, season):
+    @pytest.mark.parametrize(
+        "dataset,league,season",
+        [
+            ("schedule", "NCAA-MBB", "2024"),
+            ("schedule", "NCAA-WBB", "2024"),
+            ("schedule", "EuroLeague", "2024"),
+            ("player_game", "NCAA-MBB", "2024"),
+            ("player_game", "NCAA-WBB", "2024"),
+            ("player_game", "EuroLeague", "2024"),
+            ("player_season", "NCAA-MBB", "2024"),
+            ("player_season", "NCAA-WBB", "2024"),
+            ("player_season", "EuroLeague", "2024"),
+            ("team_season", "NCAA-MBB", "2024"),
+            ("team_season", "NCAA-WBB", "2024"),
+            ("team_season", "EuroLeague", "2024"),
+        ],
+    )
+    def test_all_datasets_all_leagues(
+        self, api_client, api_base_url, dataset, league, season
+    ) -> None:
         """
         Test that every dataset works with every supported league.
 
@@ -86,13 +89,7 @@ class TestAPIStressFull:
               "limit": 5
             }
         """
-        request_data = {
-            "filters": {
-                "league": league,
-                "season": season
-            },
-            "limit": 5
-        }
+        request_data = {"filters": {"league": league, "season": season}, "limit": 5}
 
         # Add team filter for player_game (required for NCAA)
         if dataset == "player_game" and league.startswith("NCAA"):
@@ -101,12 +98,12 @@ class TestAPIStressFull:
         response = api_client.post(
             f"{api_base_url}/datasets/{dataset}",
             json=request_data,
-            timeout=300  # 5 minutes for comprehensive fetches
+            timeout=300,  # 5 minutes for comprehensive fetches
         )
 
-        assert response.status_code == 200, (
-            f"Failed to query {dataset} for {league}/{season}: {response.text}"
-        )
+        assert (
+            response.status_code == 200
+        ), f"Failed to query {dataset} for {league}/{season}: {response.text}"
 
         data = response.json()
         assert "data" in data, f"Response missing 'data' field for {dataset}/{league}"
@@ -116,7 +113,7 @@ class TestAPIStressFull:
 
     @pytest.mark.parametrize("per_mode", ["Totals", "PerGame", "Per40"])
     @pytest.mark.parametrize("league", ["NCAA-MBB", "NCAA-WBB", "EuroLeague"])
-    def test_all_per_modes_all_leagues(self, api_client, api_base_url, per_mode, league):
+    def test_all_per_modes_all_leagues(self, api_client, api_base_url, per_mode, league) -> None:
         """
         Test all PerMode aggregation options across all leagues.
 
@@ -141,18 +138,14 @@ class TestAPIStressFull:
             }
         """
         request_data = {
-            "filters": {
-                "league": league,
-                "season": "2024",
-                "per_mode": per_mode
-            },
-            "limit": 5
+            "filters": {"league": league, "season": "2024", "per_mode": per_mode},
+            "limit": 5,
         }
 
         response = api_client.post(
             f"{api_base_url}/datasets/player_season",
             json=request_data,
-            timeout=300  # 5 minutes for comprehensive fetches
+            timeout=300,  # 5 minutes for comprehensive fetches
         )
 
         if response.status_code == 200:
@@ -164,7 +157,7 @@ class TestAPIStressFull:
             pytest.skip(f"Timeout on first fetch for {league}/{per_mode}")
 
     @pytest.mark.parametrize("days", [1, 2, 7, 14, 30])
-    def test_recent_games_all_date_ranges(self, api_client, api_base_url, days):
+    def test_recent_games_all_date_ranges(self, api_client, api_base_url, days) -> None:
         """
         Test recent games endpoint with various date ranges.
 
@@ -178,20 +171,15 @@ class TestAPIStressFull:
         Example:
             GET /recent-games/NCAA-MBB?days=7
         """
-        response = api_client.get(
-            f"{api_base_url}/recent-games/NCAA-MBB?days={days}",
-            timeout=300
-        )
+        response = api_client.get(f"{api_base_url}/recent-games/NCAA-MBB?days={days}", timeout=300)
 
-        assert response.status_code == 200, (
-            f"Failed to get recent games for days={days}"
-        )
+        assert response.status_code == 200, f"Failed to get recent games for days={days}"
 
         data = response.json()
         print(f"✓ Recent games (days={days}): {data['metadata']['row_count']} games")
 
     @pytest.mark.slow
-    def test_large_query_performance(self, api_client, api_base_url):
+    def test_large_query_performance(self, api_client, api_base_url) -> None:
         """
         Test API performance with large dataset queries.
 
@@ -205,20 +193,12 @@ class TestAPIStressFull:
         - Second query: < 1 second (from cache)
         - Speedup: 100x+ faster on cache hit
         """
-        request_data = {
-            "filters": {
-                "league": "NCAA-MBB",
-                "season": "2024"
-            },
-            "limit": 100
-        }
+        request_data = {"filters": {"league": "NCAA-MBB", "season": "2024"}, "limit": 100}
 
         # First query (potentially cold cache)
         start_time = time.time()
         response1 = api_client.post(
-            f"{api_base_url}/datasets/schedule",
-            json=request_data,
-            timeout=300
+            f"{api_base_url}/datasets/schedule", json=request_data, timeout=300
         )
         first_time = time.time() - start_time
 
@@ -228,9 +208,7 @@ class TestAPIStressFull:
         # Second query (should be cached)
         start_time = time.time()
         response2 = api_client.post(
-            f"{api_base_url}/datasets/schedule",
-            json=request_data,
-            timeout=300
+            f"{api_base_url}/datasets/schedule", json=request_data, timeout=300
         )
         second_time = time.time() - start_time
 
@@ -246,7 +224,7 @@ class TestAPIStressFull:
 
     @pytest.mark.slow
     @pytest.mark.concurrent
-    def test_concurrent_requests(self, api_client, api_base_url):
+    def test_concurrent_requests(self, api_client, api_base_url) -> None:
         """
         Test API handling of concurrent requests.
 
@@ -262,24 +240,17 @@ class TestAPIStressFull:
         - Rate limiting
         - Cache consistency under concurrent load
         """
-        def make_request(request_num):
+
+        def make_request(request_num) -> None:
             """Make a single request"""
             datasets = ["schedule", "player_season", "team_season"]
             dataset = datasets[request_num % len(datasets)]
 
-            request_data = {
-                "filters": {
-                    "league": "NCAA-MBB",
-                    "season": "2024"
-                },
-                "limit": 5
-            }
+            request_data = {"filters": {"league": "NCAA-MBB", "season": "2024"}, "limit": 5}
 
             start = time.time()
             response = api_client.post(
-                f"{api_base_url}/datasets/{dataset}",
-                json=request_data,
-                timeout=300
+                f"{api_base_url}/datasets/{dataset}", json=request_data, timeout=300
             )
             elapsed = time.time() - start
 
@@ -288,7 +259,7 @@ class TestAPIStressFull:
                 "dataset": dataset,
                 "status_code": response.status_code,
                 "elapsed_time": elapsed,
-                "success": response.status_code == 200
+                "success": response.status_code == 200,
             }
 
         # Execute 10 concurrent requests
@@ -302,24 +273,33 @@ class TestAPIStressFull:
                 result = future.result()
                 results.append(result)
                 status = "✓" if result["success"] else "✗"
-                print(f"{status} Request {result['request_num']} ({result['dataset']}): "
-                      f"{result['elapsed_time']:.2f}s")
+                print(
+                    f"{status} Request {result['request_num']} ({result['dataset']}): "
+                    f"{result['elapsed_time']:.2f}s"
+                )
 
         # Validate all requests succeeded
         successful = sum(1 for r in results if r["success"])
-        assert successful == num_requests, (
-            f"Only {successful}/{num_requests} requests succeeded"
-        )
+        assert successful == num_requests, f"Only {successful}/{num_requests} requests succeeded"
 
         print(f"\n✓ All {num_requests} concurrent requests succeeded")
 
-    @pytest.mark.parametrize("error_case,request_data,expected_status", [
-        ("invalid_league", {"filters": {"league": "INVALID"}}, [400, 500]),
-        ("missing_league", {"filters": {"season": "2024"}}, [400, 500]),
-        ("invalid_season_format", {"filters": {"league": "NCAA-MBB", "season": "invalid"}}, [400, 500]),
-        ("nonexistent_dataset", {"filters": {"league": "NCAA-MBB"}}, [404]),
-    ])
-    def test_error_handling_comprehensive(self, api_client, api_base_url, error_case, request_data, expected_status):
+    @pytest.mark.parametrize(
+        "error_case,request_data,expected_status",
+        [
+            ("invalid_league", {"filters": {"league": "INVALID"}}, [400, 500]),
+            ("missing_league", {"filters": {"season": "2024"}}, [400, 500]),
+            (
+                "invalid_season_format",
+                {"filters": {"league": "NCAA-MBB", "season": "invalid"}},
+                [400, 500],
+            ),
+            ("nonexistent_dataset", {"filters": {"league": "NCAA-MBB"}}, [404]),
+        ],
+    )
+    def test_error_handling_comprehensive(
+        self, api_client, api_base_url, error_case, request_data, expected_status
+    ) -> None:
         """
         Test API error handling for various invalid inputs.
 
@@ -338,19 +318,16 @@ class TestAPIStressFull:
         dataset = "nonexistent" if error_case == "nonexistent_dataset" else "schedule"
 
         response = api_client.post(
-            f"{api_base_url}/datasets/{dataset}",
-            json=request_data,
-            timeout=30
+            f"{api_base_url}/datasets/{dataset}", json=request_data, timeout=30
         )
 
         assert response.status_code in expected_status, (
-            f"Expected status {expected_status} for {error_case}, "
-            f"got {response.status_code}"
+            f"Expected status {expected_status} for {error_case}, " f"got {response.status_code}"
         )
 
         print(f"✓ {error_case}: Returned {response.status_code}")
 
-    def test_all_api_endpoints_accessible(self, api_client, api_base_url):
+    def test_all_api_endpoints_accessible(self, api_client, api_base_url) -> None:
         """
         Smoke test that all API endpoints are accessible.
 
@@ -384,6 +361,7 @@ class TestAPIStressFull:
 # MCP Server Stress Tests - Complete Coverage
 # ============================================================================
 
+
 @pytest.mark.mcp
 @pytest.mark.stress
 class TestMCPStressFull:
@@ -392,15 +370,24 @@ class TestMCPStressFull:
     resources, prompts, and edge cases.
     """
 
-    @pytest.mark.parametrize("tool_name,test_args", [
-        ("get_schedule", {"league": "NCAA-MBB", "season": "2024", "limit": 5}),
-        ("get_player_game_stats", {"league": "NCAA-MBB", "season": "2024", "team": ["Duke"], "limit": 5}),
-        ("get_player_season_stats", {"league": "NCAA-MBB", "season": "2024", "per_mode": "Totals", "limit": 5}),
-        ("get_team_season_stats", {"league": "NCAA-MBB", "season": "2024", "limit": 5}),
-        ("get_recent_games", {"league": "NCAA-MBB", "days": 2}),
-        ("list_datasets", {}),
-    ])
-    def test_all_mcp_tools_execute(self, tool_name, test_args):
+    @pytest.mark.parametrize(
+        "tool_name,test_args",
+        [
+            ("get_schedule", {"league": "NCAA-MBB", "season": "2024", "limit": 5}),
+            (
+                "get_player_game_stats",
+                {"league": "NCAA-MBB", "season": "2024", "team": ["Duke"], "limit": 5},
+            ),
+            (
+                "get_player_season_stats",
+                {"league": "NCAA-MBB", "season": "2024", "per_mode": "Totals", "limit": 5},
+            ),
+            ("get_team_season_stats", {"league": "NCAA-MBB", "season": "2024", "limit": 5}),
+            ("get_recent_games", {"league": "NCAA-MBB", "days": 2}),
+            ("list_datasets", {}),
+        ],
+    )
+    def test_all_mcp_tools_execute(self, tool_name, test_args) -> None:
         """
         Test that all MCP tools execute without errors.
 
@@ -437,14 +424,17 @@ class TestMCPStressFull:
         else:
             print(f"⚠ {tool_name}: {result.get('error', 'Unknown error')}")
 
-    @pytest.mark.parametrize("resource_uri", [
-        "cbb://leagues",
-        "cbb://datasets",
-        "cbb://leagues/NCAA-MBB",
-        "cbb://leagues/NCAA-WBB",
-        "cbb://leagues/EuroLeague",
-    ])
-    def test_all_mcp_resources_accessible(self, resource_uri):
+    @pytest.mark.parametrize(
+        "resource_uri",
+        [
+            "cbb://leagues",
+            "cbb://datasets",
+            "cbb://leagues/NCAA-MBB",
+            "cbb://leagues/NCAA-WBB",
+            "cbb://leagues/EuroLeague",
+        ],
+    )
+    def test_all_mcp_resources_accessible(self, resource_uri) -> None:
         """
         Test that all MCP resources can be fetched.
 
@@ -459,9 +449,8 @@ class TestMCPStressFull:
         - LLM-readable documentation provided
         """
         from cbb_data.servers.mcp.resources import (
-            resource_get_dataset_info,
+            STATIC_RESOURCES,
             resource_get_league_info,
-            STATIC_RESOURCES
         )
 
         # Find resource
@@ -482,7 +471,7 @@ class TestMCPStressFull:
                 assert "text" in result
                 print(f"✓ {resource_uri}: {len(result['text'])} chars")
 
-    def test_mcp_tools_have_llm_friendly_schemas(self):
+    def test_mcp_tools_have_llm_friendly_schemas(self) -> None:
         """
         Test that all MCP tool schemas are LLM-friendly.
 
@@ -507,25 +496,25 @@ class TestMCPStressFull:
             # Check schema has descriptions
             properties = schema.get("properties", {})
             for prop_name, prop_schema in properties.items():
-                assert "description" in prop_schema, (
-                    f"Tool {tool['name']} parameter '{prop_name}' missing description"
-                )
-                assert len(prop_schema["description"]) > 10, (
-                    f"Tool {tool['name']} parameter '{prop_name}' has too short description"
-                )
+                assert (
+                    "description" in prop_schema
+                ), f"Tool {tool['name']} parameter '{prop_name}' missing description"
+                assert (
+                    len(prop_schema["description"]) > 10
+                ), f"Tool {tool['name']} parameter '{prop_name}' has too short description"
 
             # Check enum values for league parameter
             if "league" in properties:
-                assert "enum" in properties["league"], (
-                    f"Tool {tool['name']} league parameter should have enum values"
-                )
-                assert len(properties["league"]["enum"]) >= 3, (
-                    f"Tool {tool['name']} league enum should have all leagues"
-                )
+                assert (
+                    "enum" in properties["league"]
+                ), f"Tool {tool['name']} league parameter should have enum values"
+                assert (
+                    len(properties["league"]["enum"]) >= 3
+                ), f"Tool {tool['name']} league enum should have all leagues"
 
             print(f"✓ {tool['name']}: LLM-friendly schema validated")
 
-    def test_mcp_error_responses_are_helpful(self):
+    def test_mcp_error_responses_are_helpful(self) -> None:
         """
         Test that MCP tools return helpful error messages.
 
@@ -540,10 +529,7 @@ class TestMCPStressFull:
         from cbb_data.servers.mcp.tools import tool_get_schedule
 
         # Test with invalid league
-        result = tool_get_schedule(
-            league="INVALID_LEAGUE",
-            season="2024"
-        )
+        result = tool_get_schedule(league="INVALID_LEAGUE", season="2024")
 
         assert "success" in result
         if not result["success"]:
@@ -560,6 +546,7 @@ class TestMCPStressFull:
 # Integration Stress Tests - API + MCP Working Together
 # ============================================================================
 
+
 @pytest.mark.integration
 @pytest.mark.stress
 class TestIntegrationStress:
@@ -573,7 +560,7 @@ class TestIntegrationStress:
     - No conflicts between concurrent API/MCP usage
     """
 
-    def test_api_and_mcp_return_same_data(self, api_client, api_base_url):
+    def test_api_and_mcp_return_same_data(self, api_client, api_base_url) -> None:
         """
         Test that API and MCP return consistent data.
 
@@ -589,16 +576,11 @@ class TestIntegrationStress:
         """
         from cbb_data.servers.mcp.tools import tool_get_schedule
 
-        filters = {
-            "league": "NCAA-MBB",
-            "season": "2024"
-        }
+        filters = {"league": "NCAA-MBB", "season": "2024"}
 
         # Query via API
         api_response = api_client.post(
-            f"{api_base_url}/datasets/schedule",
-            json={"filters": filters, "limit": 5},
-            timeout=300
+            f"{api_base_url}/datasets/schedule", json={"filters": filters, "limit": 5}, timeout=300
         )
 
         assert api_response.status_code == 200
@@ -618,7 +600,7 @@ class TestIntegrationStress:
         print(f"✓ MCP returned {mcp_result['row_count']} rows")
         print("✓ Data consistency validated")
 
-    def test_comprehensive_dataset_coverage(self):
+    def test_comprehensive_dataset_coverage(self) -> None:
         """
         Validate that all datasets are accessible through both API and MCP.
 
@@ -647,13 +629,8 @@ class TestIntegrationStress:
 
             # Check MCP has corresponding tool
             # MCP tools use different naming convention (get_schedule vs schedule)
-            expected_tool = f"get_{dataset}" if dataset != "schedule" else "get_schedule"
-
             # Some flexibility in naming
-            has_tool = any(
-                dataset.replace("_", "") in tool_name
-                for tool_name in mcp_tool_names
-            )
+            _ = any(dataset.replace("_", "") in tool_name for tool_name in mcp_tool_names)
 
             print(f"✓ {dataset}: API ✓, MCP tools available")
 
@@ -664,6 +641,7 @@ class TestIntegrationStress:
 # ============================================================================
 # Performance Benchmarking
 # ============================================================================
+
 
 @pytest.mark.benchmark
 @pytest.mark.slow
@@ -678,7 +656,7 @@ class TestPerformanceBenchmark:
     - Concurrent request throughput
     """
 
-    def test_cache_performance_benchmark(self, api_client, api_base_url):
+    def test_cache_performance_benchmark(self, api_client, api_base_url) -> None:
         """
         Benchmark cache performance across multiple queries.
 
@@ -691,13 +669,7 @@ class TestPerformanceBenchmark:
 
         Reports metrics for performance tracking over time.
         """
-        request_data = {
-            "filters": {
-                "league": "NCAA-MBB",
-                "season": "2024"
-            },
-            "limit": 20
-        }
+        request_data = {"filters": {"league": "NCAA-MBB", "season": "2024"}, "limit": 20}
 
         times = []
 
@@ -705,9 +677,7 @@ class TestPerformanceBenchmark:
         for i in range(3):
             start = time.time()
             response = api_client.post(
-                f"{api_base_url}/datasets/schedule",
-                json=request_data,
-                timeout=300
+                f"{api_base_url}/datasets/schedule", json=request_data, timeout=300
             )
             elapsed = time.time() - start
             times.append(elapsed)
@@ -724,9 +694,9 @@ class TestPerformanceBenchmark:
         if avg_warm_time > 0:
             speedup = cold_time / avg_warm_time
         else:
-            speedup = float('inf')
+            speedup = float("inf")
 
-        print(f"\n=== Cache Performance Benchmark ===")
+        print("\n=== Cache Performance Benchmark ===")
         print(f"Cold cache: {cold_time:.2f}s")
         print(f"Warm cache (avg): {avg_warm_time:.2f}s")
         print(f"Cache speedup: {speedup:.1f}x")
