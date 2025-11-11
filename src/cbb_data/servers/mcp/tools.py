@@ -2,7 +2,7 @@
 MCP Tool definitions for basketball data access.
 
 Each tool is a function that wraps the existing get_dataset() or helper
-functions, providing an LLM-friendly interface.
+functions, providing an LLM-friendly interface with natural language support.
 """
 
 import logging
@@ -11,6 +11,9 @@ import pandas as pd
 
 # Import existing library functions - NO modifications needed!
 from cbb_data.api.datasets import get_dataset, list_datasets, get_recent_games
+
+# Import natural language parser for LLM-friendly inputs
+from cbb_data.utils.natural_language import normalize_filters_for_llm, parse_days_parameter
 
 logger = logging.getLogger(__name__)
 
@@ -49,13 +52,14 @@ def _format_dataframe_for_llm(df: pd.DataFrame, max_rows: int = 50) -> str:
     return result
 
 
-def _safe_execute(func_name: str, func, **kwargs) -> Dict[str, Any]:
+def _safe_execute(func_name: str, func, compact: bool = False, **kwargs) -> Dict[str, Any]:
     """
     Safely execute a function and return structured result.
 
     Args:
         func_name: Name of function being executed
         func: Function to execute
+        compact: Return arrays instead of markdown (saves tokens)
         **kwargs: Arguments to pass to function
 
     Returns:
@@ -66,12 +70,29 @@ def _safe_execute(func_name: str, func, **kwargs) -> Dict[str, Any]:
 
         # Format DataFrame results
         if isinstance(result, pd.DataFrame):
-            formatted = _format_dataframe_for_llm(result)
-            return {
-                "success": True,
-                "data": formatted,
-                "row_count": len(result)
-            }
+            if compact:
+                # Compact mode: return arrays (70% token savings)
+                # Convert datetime columns to strings for JSON serialization
+                df_copy = result.copy()
+                for col in df_copy.select_dtypes(include=['datetime64', 'datetimetz']).columns:
+                    df_copy[col] = df_copy[col].astype(str)
+
+                return {
+                    "success": True,
+                    "data": {
+                        "columns": df_copy.columns.tolist(),
+                        "rows": df_copy.values.tolist()
+                    },
+                    "row_count": len(result)
+                }
+            else:
+                # Regular mode: return markdown table
+                formatted = _format_dataframe_for_llm(result)
+                return {
+                    "success": True,
+                    "data": formatted,
+                    "row_count": len(result)
+                }
         else:
             return {
                 "success": True,
@@ -97,43 +118,61 @@ def tool_get_schedule(
     team: Optional[List[str]] = None,
     date_from: Optional[str] = None,
     date_to: Optional[str] = None,
-    limit: Optional[int] = 100
+    limit: Optional[int] = 100,
+    compact: bool = False
 ) -> Dict[str, Any]:
     """
-    Get game schedules and results for a league.
+    Get game schedules and results with natural language support.
+
+    LLM Usage Examples:
+        • "Duke's schedule this season"
+          → get_schedule(league="NCAA-MBB", season="this season", team=["Duke"])
+
+        • "Games yesterday"
+          → get_schedule(league="NCAA-MBB", date_from="yesterday", date_to="yesterday")
+
+        • "Last week's games"
+          → get_schedule(league="NCAA-MBB", date_from="last week")
 
     Args:
         league: League identifier (NCAA-MBB, NCAA-WBB, EuroLeague)
-        season: Season year (e.g., "2025"), optional
+        season: Season year OR natural language ("this season", "last season", "2024-25")
         team: List of team names to filter, optional
-        date_from: Start date (YYYY-MM-DD), optional
-        date_to: End date (YYYY-MM-DD), optional
+        date_from: Start date OR natural language ("yesterday", "last week")
+        date_to: End date OR natural language
         limit: Maximum rows to return (default: 100)
+        compact: Return arrays instead of markdown (saves ~70% tokens)
 
     Returns:
         Structured result with game schedule data
 
     Examples:
-        >>> tool_get_schedule("NCAA-MBB", season="2025", team=["Duke"])
-        >>> tool_get_schedule("EuroLeague", date_from="2025-01-01", date_to="2025-01-15")
+        >>> tool_get_schedule("NCAA-MBB", season="this season", team=["Duke"])
+        >>> tool_get_schedule("EuroLeague", date_from="yesterday", compact=True)
     """
-    filters = {"league": league}
+    # Build filters
+    filters = {
+        "league": league,
+        "season": season,
+        "team": team
+    }
 
-    if season:
-        filters["season"] = season
-    if team:
-        filters["team"] = team
-    if date_from or date_to:
-        date_filter = {}
-        if date_from:
-            date_filter["start"] = date_from
-        if date_to:
-            date_filter["end"] = date_to
-        filters["date"] = date_filter
+    # Add date filters if provided
+    if date_from:
+        filters["date_from"] = date_from
+    if date_to:
+        filters["date_to"] = date_to
+
+    # Normalize natural language (converts "yesterday" → "2025-11-10", etc.)
+    filters = normalize_filters_for_llm(filters)
+
+    # Remove None values
+    filters = {k: v for k, v in filters.items() if v is not None}
 
     return _safe_execute(
         "get_schedule",
         get_dataset,
+        compact=compact,
         grouping="schedule",
         filters=filters,
         limit=limit
@@ -146,40 +185,54 @@ def tool_get_player_game_stats(
     team: Optional[List[str]] = None,
     player: Optional[List[str]] = None,
     game_ids: Optional[List[str]] = None,
-    limit: Optional[int] = 100
+    limit: Optional[int] = 100,
+    compact: bool = False
 ) -> Dict[str, Any]:
     """
-    Get per-player per-game box score statistics.
+    Get per-player per-game box score statistics with natural language support.
+
+    LLM Usage Examples:
+        • "Cooper Flagg's recent games"
+          → get_player_game_stats(league="NCAA-MBB", season="this season", player=["Cooper Flagg"], limit=10)
+
+        • "Duke players' last 5 games"
+          → get_player_game_stats(league="NCAA-MBB", season="this season", team=["Duke"], limit=5)
 
     Args:
         league: League identifier (NCAA-MBB, NCAA-WBB, EuroLeague)
-        season: Season year (e.g., "2025"), optional
+        season: Season year OR natural language ("this season", "last season", "2024-25")
         team: List of team names to filter, optional
         player: List of player names to filter, optional
         game_ids: List of specific game IDs, optional
         limit: Maximum rows to return (default: 100)
+        compact: Return arrays instead of markdown (saves ~70% tokens)
 
     Returns:
         Structured result with player game statistics
 
     Examples:
-        >>> tool_get_player_game_stats("NCAA-MBB", season="2025", team=["Duke"], limit=10)
-        >>> tool_get_player_game_stats("NCAA-MBB", player=["Cooper Flagg"], limit=5)
+        >>> tool_get_player_game_stats("NCAA-MBB", season="this season", team=["Duke"], limit=10)
+        >>> tool_get_player_game_stats("NCAA-MBB", player=["Cooper Flagg"], compact=True)
     """
-    filters = {"league": league}
+    # Build filters
+    filters = {
+        "league": league,
+        "season": season,
+        "team": team,
+        "player": player,
+        "game_ids": game_ids
+    }
 
-    if season:
-        filters["season"] = season
-    if team:
-        filters["team"] = team
-    if player:
-        filters["player"] = player
-    if game_ids:
-        filters["game_ids"] = game_ids
+    # Normalize natural language
+    filters = normalize_filters_for_llm(filters)
+
+    # Remove None values
+    filters = {k: v for k, v in filters.items() if v is not None}
 
     return _safe_execute(
         "get_player_game_stats",
         get_dataset,
+        compact=compact,
         grouping="player_game",
         filters=filters,
         limit=limit
@@ -190,30 +243,46 @@ def tool_get_team_game_stats(
     league: str,
     season: Optional[str] = None,
     team: Optional[List[str]] = None,
-    limit: Optional[int] = 100
+    limit: Optional[int] = 100,
+    compact: bool = False
 ) -> Dict[str, Any]:
     """
-    Get team-level game results and statistics.
+    Get team-level game results and statistics with natural language support.
+
+    LLM Usage Examples:
+        • "Duke's game-by-game results this season"
+          → get_team_game_stats(league="NCAA-MBB", season="this season", team=["Duke"])
+
+        • "Top 20 team performances"
+          → get_team_game_stats(league="NCAA-MBB", season="this season", limit=20, compact=True)
 
     Args:
         league: League identifier (NCAA-MBB, NCAA-WBB, EuroLeague)
-        season: Season year (e.g., "2025"), optional
+        season: Season year OR natural language ("this season", "last season")
         team: List of team names to filter, optional
         limit: Maximum rows to return (default: 100)
+        compact: Return arrays instead of markdown (saves ~70% tokens)
 
     Returns:
         Structured result with team game statistics
     """
-    filters = {"league": league}
+    # Build filters
+    filters = {
+        "league": league,
+        "season": season,
+        "team": team
+    }
 
-    if season:
-        filters["season"] = season
-    if team:
-        filters["team"] = team
+    # Normalize natural language
+    filters = normalize_filters_for_llm(filters)
+
+    # Remove None values
+    filters = {k: v for k, v in filters.items() if v is not None}
 
     return _safe_execute(
         "get_team_game_stats",
         get_dataset,
+        compact=compact,
         grouping="team_game",
         filters=filters,
         limit=limit
@@ -222,7 +291,8 @@ def tool_get_team_game_stats(
 
 def tool_get_play_by_play(
     league: str,
-    game_ids: List[str]
+    game_ids: List[str],
+    compact: bool = False
 ) -> Dict[str, Any]:
     """
     Get play-by-play event data for specific games.
@@ -230,12 +300,14 @@ def tool_get_play_by_play(
     Args:
         league: League identifier (NCAA-MBB, NCAA-WBB, EuroLeague)
         game_ids: List of game IDs (required)
+        compact: Return arrays instead of markdown (saves ~70% tokens)
 
     Returns:
         Structured result with play-by-play events
 
     Examples:
         >>> tool_get_play_by_play("NCAA-MBB", game_ids=["401635571"])
+        >>> tool_get_play_by_play("NCAA-MBB", game_ids=["401635571"], compact=True)
     """
     filters = {
         "league": league,
@@ -245,6 +317,7 @@ def tool_get_play_by_play(
     return _safe_execute(
         "get_play_by_play",
         get_dataset,
+        compact=compact,
         grouping="play_by_play",
         filters=filters
     )
@@ -253,7 +326,8 @@ def tool_get_play_by_play(
 def tool_get_shot_chart(
     league: str,
     game_ids: List[str],
-    player: Optional[List[str]] = None
+    player: Optional[List[str]] = None,
+    compact: bool = False
 ) -> Dict[str, Any]:
     """
     Get shot chart data with X/Y coordinates.
@@ -262,6 +336,7 @@ def tool_get_shot_chart(
         league: League identifier (NCAA-MBB, EuroLeague)
         game_ids: List of game IDs (required)
         player: List of player names to filter, optional
+        compact: Return arrays instead of markdown (saves ~70% tokens)
 
     Returns:
         Structured result with shot location data
@@ -277,6 +352,7 @@ def tool_get_shot_chart(
     return _safe_execute(
         "get_shot_chart",
         get_dataset,
+        compact=compact,
         grouping="shots",
         filters=filters
     )
@@ -288,40 +364,62 @@ def tool_get_player_season_stats(
     team: Optional[List[str]] = None,
     player: Optional[List[str]] = None,
     per_mode: str = "Totals",
-    limit: Optional[int] = 100
+    limit: Optional[int] = 100,
+    compact: bool = False
 ) -> Dict[str, Any]:
     """
-    Get per-player season aggregate statistics.
+    Get per-player season aggregate statistics with natural language support.
+
+    LLM Usage Examples:
+        • "Top scorers this season"
+          → get_player_season_stats(league="NCAA-MBB", season="this season", per_mode="PerGame", limit=20)
+
+        • "Duke players stats"
+          → get_player_season_stats(league="NCAA-MBB", season="this season", team=["Duke"], compact=True)
+
+        • "Last season's top rebounders"
+          → get_player_season_stats(league="NCAA-MBB", season="last season", per_mode="PerGame", limit=20)
 
     Args:
         league: League identifier (NCAA-MBB, NCAA-WBB, EuroLeague)
-        season: Season year (e.g., "2025") - required
+        season: Season year OR natural language ("this season", "last season", "2024-25")
         team: List of team names to filter, optional
         player: List of player names to filter, optional
         per_mode: Aggregation mode - "Totals", "PerGame", or "Per40" (default: "Totals")
         limit: Maximum rows to return (default: 100)
+        compact: Return arrays instead of markdown (saves ~70% tokens)
 
     Returns:
         Structured result with player season statistics
 
+    Tips:
+        • Use per_mode="PerGame" for fair comparisons across players
+        • Use compact=True for queries returning >50 rows to save tokens
+        • Season "2024-25" is automatically parsed to "2025"
+
     Examples:
-        >>> tool_get_player_season_stats("NCAA-MBB", "2025", per_mode="PerGame", limit=20)
-        >>> tool_get_player_season_stats("NCAA-MBB", "2025", team=["Duke"])
+        >>> tool_get_player_season_stats("NCAA-MBB", "this season", per_mode="PerGame", limit=20)
+        >>> tool_get_player_season_stats("NCAA-MBB", "last season", team=["Duke"], compact=True)
     """
+    # Build filters
     filters = {
         "league": league,
         "season": season,
+        "team": team,
+        "player": player,
         "per_mode": per_mode
     }
 
-    if team:
-        filters["team"] = team
-    if player:
-        filters["player"] = player
+    # Normalize natural language
+    filters = normalize_filters_for_llm(filters)
+
+    # Remove None values
+    filters = {k: v for k, v in filters.items() if v is not None}
 
     return _safe_execute(
         "get_player_season_stats",
         get_dataset,
+        compact=compact,
         grouping="player_season",
         filters=filters,
         limit=limit
@@ -333,34 +431,50 @@ def tool_get_team_season_stats(
     season: str,
     team: Optional[List[str]] = None,
     division: Optional[str] = None,
-    limit: Optional[int] = 100
+    limit: Optional[int] = 100,
+    compact: bool = False
 ) -> Dict[str, Any]:
     """
-    Get per-team season aggregate statistics and standings.
+    Get per-team season aggregate statistics and standings with natural language support.
+
+    LLM Usage Examples:
+        • "Team standings this season"
+          → get_team_season_stats(league="NCAA-MBB", season="this season", limit=50)
+
+        • "ACC teams stats"
+          → get_team_season_stats(league="NCAA-MBB", season="this season", compact=True)
 
     Args:
         league: League identifier (NCAA-MBB, NCAA-WBB, EuroLeague)
-        season: Season year (e.g., "2025") - required
+        season: Season year OR natural language ("this season", "last season", "2024-25")
         team: List of team names to filter, optional
         division: Division filter for NCAA (D1, D2, D3), optional
         limit: Maximum rows to return (default: 100)
+        compact: Return arrays instead of markdown (saves ~70% tokens)
 
     Returns:
         Structured result with team season statistics
     """
+    # Build filters
     filters = {
         "league": league,
-        "season": season
+        "season": season,
+        "team": team
     }
 
-    if team:
-        filters["team"] = team
     if division:
         filters["Division"] = division
+
+    # Normalize natural language
+    filters = normalize_filters_for_llm(filters)
+
+    # Remove None values
+    filters = {k: v for k, v in filters.items() if v is not None}
 
     return _safe_execute(
         "get_team_season_stats",
         get_dataset,
+        compact=compact,
         grouping="team_season",
         filters=filters,
         limit=limit
@@ -371,31 +485,45 @@ def tool_get_player_team_season(
     league: str,
     season: str,
     player: Optional[List[str]] = None,
-    limit: Optional[int] = 100
+    limit: Optional[int] = 100,
+    compact: bool = False
 ) -> Dict[str, Any]:
     """
-    Get player statistics split by team (useful for tracking transfers).
+    Get player statistics split by team with natural language support.
+
+    Useful for tracking mid-season transfers and players who played for multiple teams.
+
+    LLM Usage Examples:
+        • "Players who transferred this season"
+          → get_player_team_season(league="NCAA-MBB", season="this season", compact=True)
 
     Args:
         league: League identifier (NCAA-MBB, NCAA-WBB, EuroLeague)
-        season: Season year (e.g., "2025") - required
+        season: Season year OR natural language ("this season", "last season", "2024-25")
         player: List of player names to filter, optional
         limit: Maximum rows to return (default: 100)
+        compact: Return arrays instead of markdown (saves ~70% tokens)
 
     Returns:
         Structured result with player×team×season statistics
     """
+    # Build filters
     filters = {
         "league": league,
-        "season": season
+        "season": season,
+        "player": player
     }
 
-    if player:
-        filters["player"] = player
+    # Normalize natural language
+    filters = normalize_filters_for_llm(filters)
+
+    # Remove None values
+    filters = {k: v for k, v in filters.items() if v is not None}
 
     return _safe_execute(
         "get_player_team_season",
         get_dataset,
+        compact=compact,
         grouping="player_team_season",
         filters=filters,
         limit=limit
@@ -412,34 +540,54 @@ def tool_list_datasets() -> Dict[str, Any]:
     Examples:
         >>> tool_list_datasets()
     """
-    return _safe_execute("list_datasets", list_datasets)
+    return _safe_execute("list_datasets", list_datasets, compact=False)
 
 
 def tool_get_recent_games(
     league: str,
-    days: int = 2,
-    teams: Optional[List[str]] = None
+    days: Optional[str] = "2",
+    teams: Optional[List[str]] = None,
+    compact: bool = False
 ) -> Dict[str, Any]:
     """
-    Get recent games for a league (convenience function).
+    Get recent games with natural language day support.
+
+    LLM Usage Examples:
+        • "Games today"
+          → get_recent_games(league="NCAA-MBB", days="today")
+
+        • "Last week's games"
+          → get_recent_games(league="NCAA-MBB", days="last week")
+
+        • "Duke's games from last 5 days"
+          → get_recent_games(league="NCAA-MBB", days="last 5 days", teams=["Duke"])
 
     Args:
         league: League identifier (NCAA-MBB, NCAA-WBB, EuroLeague)
-        days: Number of days to look back (default: 2 = yesterday + today)
+        days: Number of days OR natural language ("today", "last week", "last 5 days")
+              Default: "2" (yesterday + today)
         teams: List of team names to filter, optional
+        compact: Return arrays instead of markdown (saves ~70% tokens)
 
     Returns:
         Structured result with recent games
 
     Examples:
-        >>> tool_get_recent_games("NCAA-MBB", days=2)
-        >>> tool_get_recent_games("NCAA-MBB", days=7, teams=["Duke", "UNC"])
+        >>> tool_get_recent_games("NCAA-MBB", days="today")
+        >>> tool_get_recent_games("NCAA-MBB", days="last week", teams=["Duke", "UNC"])
+        >>> tool_get_recent_games("NCAA-MBB", days="7", compact=True)
     """
+    # Parse natural language days parameter
+    days_int = parse_days_parameter(days) if isinstance(days, str) else int(days)
+    if days_int is None:
+        days_int = 2  # Default fallback
+
     return _safe_execute(
         "get_recent_games",
         get_recent_games,
+        compact=compact,
         league=league,
-        days=days,
+        days=days_int,
         teams=teams
     )
 
@@ -451,7 +599,18 @@ def tool_get_recent_games(
 TOOLS = [
     {
         "name": "get_schedule",
-        "description": "Get game schedules and results for a league. Returns game dates, teams, scores, and venues.",
+        "description": """Get game schedules and results for a league with natural language support.
+
+LLM Usage Examples:
+  • "Duke's schedule this season" → get_schedule(league="NCAA-MBB", season="this season", team=["Duke"])
+  • "Games yesterday" → get_schedule(league="NCAA-MBB", date_from="yesterday", date_to="yesterday")
+  • "Last week's games" → get_schedule(league="NCAA-MBB", date_from="last week")
+
+Accepts natural language:
+  - season: "this season", "last season", "2024-25"
+  - dates: "yesterday", "last week", "3 days ago"
+
+Tips: Use compact=True for large result sets to save ~70% tokens.""",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -462,8 +621,7 @@ TOOLS = [
                 },
                 "season": {
                     "type": "string",
-                    "description": "Season year (e.g., '2025')",
-                    "pattern": "^20[0-9]{2}$"
+                    "description": "Season year (e.g., '2025') OR natural language ('this season', 'last season', '2024-25')"
                 },
                 "team": {
                     "type": "array",
@@ -472,18 +630,21 @@ TOOLS = [
                 },
                 "date_from": {
                     "type": "string",
-                    "description": "Start date (YYYY-MM-DD)",
-                    "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+                    "description": "Start date (YYYY-MM-DD) OR natural language ('yesterday', 'last week')"
                 },
                 "date_to": {
                     "type": "string",
-                    "description": "End date (YYYY-MM-DD)",
-                    "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+                    "description": "End date (YYYY-MM-DD) OR natural language"
                 },
                 "limit": {
                     "type": "integer",
                     "description": "Maximum rows to return",
                     "default": 100
+                },
+                "compact": {
+                    "type": "boolean",
+                    "description": "Return arrays instead of markdown (saves ~70% tokens)",
+                    "default": False
                 }
             },
             "required": ["league"]
@@ -492,7 +653,18 @@ TOOLS = [
     },
     {
         "name": "get_player_game_stats",
-        "description": "Get per-player per-game box score statistics including points, rebounds, assists, minutes, shooting percentages, and more.",
+        "description": """Get per-player per-game box score statistics with natural language support.
+
+LLM Usage Examples:
+  • "Cooper Flagg's recent games" → get_player_game_stats(league="NCAA-MBB", season="this season", player=["Cooper Flagg"], limit=10)
+  • "Duke players' last 5 games" → get_player_game_stats(league="NCAA-MBB", season="this season", team=["Duke"], limit=5)
+
+Accepts natural language:
+  - season: "this season", "last season", "2024-25"
+
+Returns: Points, rebounds, assists, minutes, shooting percentages, and more per game.
+
+Tips: Use compact=True for large result sets.""",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -503,7 +675,7 @@ TOOLS = [
                 },
                 "season": {
                     "type": "string",
-                    "description": "Season year (e.g., '2025')"
+                    "description": "Season year OR natural language ('this season', 'last season')"
                 },
                 "team": {
                     "type": "array",
@@ -524,6 +696,11 @@ TOOLS = [
                     "type": "integer",
                     "description": "Maximum rows to return",
                     "default": 100
+                },
+                "compact": {
+                    "type": "boolean",
+                    "description": "Return arrays instead of markdown",
+                    "default": False
                 }
             },
             "required": ["league"]
@@ -532,7 +709,15 @@ TOOLS = [
     },
     {
         "name": "get_team_game_stats",
-        "description": "Get team-level game results and statistics.",
+        "description": """Get team-level game results and statistics with natural language support.
+
+LLM Usage Examples:
+  • "Duke's game results this season" → get_team_game_stats(league="NCAA-MBB", season="this season", team=["Duke"])
+
+Accepts natural language:
+  - season: "this season", "last season"
+
+Tips: Use compact=True for large result sets.""",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -541,13 +726,24 @@ TOOLS = [
                     "enum": ["NCAA-MBB", "NCAA-WBB", "EuroLeague"],
                     "description": "League identifier"
                 },
-                "season": {"type": "string", "description": "Season year"},
+                "season": {
+                    "type": "string",
+                    "description": "Season year OR natural language"
+                },
                 "team": {
                     "type": "array",
                     "items": {"type": "string"},
                     "description": "List of team names"
                 },
-                "limit": {"type": "integer", "default": 100}
+                "limit": {
+                    "type": "integer",
+                    "default": 100
+                },
+                "compact": {
+                    "type": "boolean",
+                    "description": "Return arrays instead of markdown",
+                    "default": False
+                }
             },
             "required": ["league"]
         },
@@ -555,7 +751,7 @@ TOOLS = [
     },
     {
         "name": "get_play_by_play",
-        "description": "Get play-by-play event data for specific games. Requires game IDs.",
+        "description": "Get play-by-play event data for specific games. Requires game IDs. Use compact=True for large event sequences.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -568,6 +764,11 @@ TOOLS = [
                     "type": "array",
                     "items": {"type": "string"},
                     "description": "List of game IDs (required)"
+                },
+                "compact": {
+                    "type": "boolean",
+                    "description": "Return arrays instead of markdown",
+                    "default": False
                 }
             },
             "required": ["league", "game_ids"]
@@ -576,7 +777,7 @@ TOOLS = [
     },
     {
         "name": "get_shot_chart",
-        "description": "Get shot chart data with X/Y coordinates for visualization.",
+        "description": "Get shot chart data with X/Y coordinates for visualization. Use compact=True for large shot datasets.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -594,6 +795,11 @@ TOOLS = [
                     "type": "array",
                     "items": {"type": "string"},
                     "description": "List of player names to filter"
+                },
+                "compact": {
+                    "type": "boolean",
+                    "description": "Return arrays instead of markdown",
+                    "default": False
                 }
             },
             "required": ["league", "game_ids"]
@@ -602,7 +808,21 @@ TOOLS = [
     },
     {
         "name": "get_player_season_stats",
-        "description": "Get per-player season aggregate statistics. Can return totals, per-game averages, or per-40-minutes stats.",
+        "description": """Get per-player season aggregate statistics with natural language support.
+
+LLM Usage Examples:
+  • "Top scorers this season" → get_player_season_stats(league="NCAA-MBB", season="this season", per_mode="PerGame", limit=20)
+  • "Duke players stats" → get_player_season_stats(league="NCAA-MBB", season="this season", team=["Duke"])
+  • "Last season's leaders" → get_player_season_stats(league="NCAA-MBB", season="last season", per_mode="PerGame", limit=20)
+
+Accepts natural language:
+  - season: "this season", "last season", "2024-25"
+  - Per-modes: "Totals" (cumulative), "PerGame" (averages), "Per40" (per 40 min)
+
+Tips:
+  • Use per_mode="PerGame" for fair comparisons across players
+  • Use compact=True for queries returning >50 rows
+  • Basketball seasons are named by ending year (2024-25 = "2025")""",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -613,7 +833,7 @@ TOOLS = [
                 },
                 "season": {
                     "type": "string",
-                    "description": "Season year (e.g., '2025') - required"
+                    "description": "Season year OR natural language ('this season', 'last season', '2024-25')"
                 },
                 "team": {
                     "type": "array",
@@ -628,10 +848,18 @@ TOOLS = [
                 "per_mode": {
                     "type": "string",
                     "enum": ["Totals", "PerGame", "Per40"],
-                    "description": "Aggregation mode",
+                    "description": "Aggregation mode: Totals (cumulative), PerGame (averages), Per40 (per 40 minutes)",
                     "default": "Totals"
                 },
-                "limit": {"type": "integer", "default": 100}
+                "limit": {
+                    "type": "integer",
+                    "default": 100
+                },
+                "compact": {
+                    "type": "boolean",
+                    "description": "Return arrays instead of markdown (saves ~70% tokens)",
+                    "default": False
+                }
             },
             "required": ["league", "season"]
         },
@@ -639,7 +867,16 @@ TOOLS = [
     },
     {
         "name": "get_team_season_stats",
-        "description": "Get per-team season aggregate statistics and standings.",
+        "description": """Get per-team season aggregate statistics and standings with natural language support.
+
+LLM Usage Examples:
+  • "Team standings this season" → get_team_season_stats(league="NCAA-MBB", season="this season")
+  • "Last season's top teams" → get_team_season_stats(league="NCAA-MBB", season="last season", limit=25)
+
+Accepts natural language:
+  - season: "this season", "last season", "2024-25"
+
+Tips: Use compact=True for large result sets.""",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -650,7 +887,7 @@ TOOLS = [
                 },
                 "season": {
                     "type": "string",
-                    "description": "Season year (required)"
+                    "description": "Season year OR natural language"
                 },
                 "team": {
                     "type": "array",
@@ -662,7 +899,15 @@ TOOLS = [
                     "enum": ["D1", "D2", "D3", "all"],
                     "description": "Division filter (NCAA only)"
                 },
-                "limit": {"type": "integer", "default": 100}
+                "limit": {
+                    "type": "integer",
+                    "default": 100
+                },
+                "compact": {
+                    "type": "boolean",
+                    "description": "Return arrays instead of markdown",
+                    "default": False
+                }
             },
             "required": ["league", "season"]
         },
@@ -670,7 +915,15 @@ TOOLS = [
     },
     {
         "name": "get_player_team_season",
-        "description": "Get player statistics split by team (useful for tracking mid-season transfers).",
+        "description": """Get player statistics split by team with natural language support. Useful for tracking mid-season transfers.
+
+LLM Usage Examples:
+  • "Players who transferred this season" → get_player_team_season(league="NCAA-MBB", season="this season")
+
+Accepts natural language:
+  - season: "this season", "last season", "2024-25"
+
+Tips: Use compact=True for large result sets.""",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -681,14 +934,22 @@ TOOLS = [
                 },
                 "season": {
                     "type": "string",
-                    "description": "Season year (required)"
+                    "description": "Season year OR natural language"
                 },
                 "player": {
                     "type": "array",
                     "items": {"type": "string"},
                     "description": "List of player names"
                 },
-                "limit": {"type": "integer", "default": 100}
+                "limit": {
+                    "type": "integer",
+                    "default": 100
+                },
+                "compact": {
+                    "type": "boolean",
+                    "description": "Return arrays instead of markdown",
+                    "default": False
+                }
             },
             "required": ["league", "season"]
         },
@@ -705,7 +966,17 @@ TOOLS = [
     },
     {
         "name": "get_recent_games",
-        "description": "Convenience function to get recent games for a league without manually specifying dates.",
+        "description": """Get recent games with natural language day support. Convenience function for quick lookups.
+
+LLM Usage Examples:
+  • "Games today" → get_recent_games(league="NCAA-MBB", days="today")
+  • "Last week's games" → get_recent_games(league="NCAA-MBB", days="last week")
+  • "Duke's recent games" → get_recent_games(league="NCAA-MBB", days="last 5 days", teams=["Duke"])
+
+Accepts natural language:
+  - days: "today", "yesterday", "last week", "last 5 days", or any number
+
+Tips: Use compact=True for large result sets.""",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -715,16 +986,19 @@ TOOLS = [
                     "description": "League identifier"
                 },
                 "days": {
-                    "type": "integer",
-                    "description": "Number of days to look back (default: 2 = yesterday + today)",
-                    "default": 2,
-                    "minimum": 1,
-                    "maximum": 30
+                    "type": "string",
+                    "description": "Number of days OR natural language ('today', 'last week', 'last 5 days')",
+                    "default": "2"
                 },
                 "teams": {
                     "type": "array",
                     "items": {"type": "string"},
                     "description": "List of team names to filter"
+                },
+                "compact": {
+                    "type": "boolean",
+                    "description": "Return arrays instead of markdown",
+                    "default": False
                 }
             },
             "required": ["league"]

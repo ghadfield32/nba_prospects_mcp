@@ -40,9 +40,9 @@ class DatasetRequest(BaseModel):
         ge=0
     )
 
-    output_format: Literal["json", "csv", "parquet", "records"] = Field(
+    output_format: Literal["json", "csv", "parquet", "records", "ndjson"] = Field(
         default="json",
-        description="Output format: 'json' (array of arrays), 'csv' (comma-separated), 'parquet' (compressed binary), 'records' (array of objects)"
+        description="Output format: 'json' (array of arrays), 'csv' (comma-separated), 'parquet' (compressed binary), 'records' (array of objects), 'ndjson' (streaming newline-delimited JSON)"
     )
 
     include_metadata: bool = Field(

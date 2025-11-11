@@ -12,7 +12,9 @@ from typing import Any, Dict, List
 from datetime import datetime
 
 from fastapi import APIRouter, HTTPException, Path, Query, status
+from fastapi.responses import StreamingResponse
 import pandas as pd
+import json
 
 # Import existing library functions - NO modifications needed!
 from cbb_data.api.datasets import get_dataset, list_datasets, get_recent_games
@@ -39,6 +41,33 @@ router = APIRouter()
 # Helper Functions
 # ============================================================================
 
+def _generate_ndjson_stream(df: pd.DataFrame):
+    """
+    Generate NDJSON (newline-delimited JSON) stream for DataFrame.
+
+    Each row is serialized as a JSON object on its own line.
+    This allows LLMs to process results incrementally without loading
+    entire response into memory.
+
+    Args:
+        df: Pandas DataFrame to stream
+
+    Yields:
+        JSON lines (one per row)
+
+    Example output:
+        {"name": "John", "pts": 24}
+        {"name": "Mary", "pts": 22}
+        ...
+    """
+    if df is None or df.empty:
+        return
+
+    # Convert to records (list of dicts) for efficient streaming
+    for record in df.to_dict(orient="records"):
+        yield json.dumps(record) + "\n"
+
+
 def _dataframe_to_response_data(
     df: pd.DataFrame,
     output_format: str
@@ -48,18 +77,19 @@ def _dataframe_to_response_data(
 
     Args:
         df: Pandas DataFrame to convert
-        output_format: Output format ('json', 'csv', 'parquet', 'records')
+        output_format: Output format ('json', 'csv', 'parquet', 'records', 'ndjson')
 
     Returns:
         Tuple of (data, columns) where:
         - data: Response data in requested format (List, str, or bytes)
-        - columns: Column names (None for self-describing formats like csv/parquet)
+        - columns: Column names (None for self-describing formats like csv/parquet/ndjson)
 
     Supported formats:
         - json: Array of arrays (most compact for JSON)
         - csv: Comma-separated string (easy export)
         - parquet: Compressed binary (5-10x smaller, base64-encoded)
         - records: Array of objects (most readable)
+        - ndjson: Newline-delimited JSON (streaming, one object per line)
     """
     if df is None or df.empty:
         return [], []
@@ -91,6 +121,11 @@ def _dataframe_to_response_data(
             raise ValueError(f"Parquet serialization failed: {str(e)}. Ensure pyarrow is installed.")
     elif output_format == "records":
         # Array of objects (most readable)
+        data = df.to_dict(orient="records")
+        columns = None  # Each record has keys
+    elif output_format == "ndjson":
+        # NDJSON format (newline-delimited JSON, one object per line)
+        # This is handled specially in the route handlers for streaming
         data = df.to_dict(orient="records")
         columns = None  # Each record has keys
     else:
@@ -183,10 +218,9 @@ async def list_all_datasets() -> DatasetsListResponse:
 
 @router.post(
     "/datasets/{dataset_id}",
-    response_model=DatasetResponse,
     tags=["Datasets"],
     summary="Query a dataset",
-    description="Fetch data from a specific dataset with filters"
+    description="Fetch data from a specific dataset with filters. Supports streaming with output_format=ndjson"
 )
 async def query_dataset(
     dataset_id: str = Path(
@@ -195,7 +229,7 @@ async def query_dataset(
         examples=["player_game", "schedule", "play_by_play"]
     ),
     request: DatasetRequest = DatasetRequest()
-) -> DatasetResponse:
+):
     """
     Query a dataset with filters.
 
@@ -238,7 +272,24 @@ async def query_dataset(
         if request.offset and request.offset > 0:
             df = df.iloc[request.offset:]
 
-        # Convert DataFrame to response format
+        # Check if NDJSON streaming is requested
+        if request.output_format == "ndjson":
+            # Return streaming response for NDJSON
+            logger.info(
+                f"Dataset query (streaming): {dataset_id}, "
+                f"{len(df) if df is not None else 0} rows"
+            )
+            return StreamingResponse(
+                _generate_ndjson_stream(df),
+                media_type="application/x-ndjson",
+                headers={
+                    "X-Dataset-ID": dataset_id,
+                    "X-Row-Count": str(len(df) if df is not None else 0),
+                    "X-Execution-Time-MS": f"{(time.time() - start_time) * 1000:.2f}"
+                }
+            )
+
+        # Convert DataFrame to response format (non-streaming)
         data, columns = _dataframe_to_response_data(df, request.output_format)
 
         # Calculate execution time
@@ -331,8 +382,8 @@ async def get_recent_games_endpoint(
     ),
     output_format: str = Query(
         default="json",
-        description="Output format (json, csv, parquet, records)",
-        pattern="^(json|csv|parquet|records)$"
+        description="Output format (json, csv, parquet, records, ndjson)",
+        pattern="^(json|csv|parquet|records|ndjson)$"
     )
 ) -> DatasetResponse:
     """
@@ -479,4 +530,281 @@ async def get_dataset_info(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get dataset info: {str(e)}"
+        )
+
+
+# ============================================================================
+# Schema Endpoints (Self-Documentation)
+# ============================================================================
+
+@router.get(
+    "/schema/datasets",
+    tags=["Schema"],
+    summary="Get dataset schemas",
+    description="Self-documenting endpoint that returns all available datasets with their metadata"
+)
+async def get_datasets_schema() -> Dict[str, Any]:
+    """
+    Get comprehensive schema for all datasets.
+
+    Returns all available datasets with metadata including:
+    - Dataset IDs and descriptions
+    - Supported filters and leagues
+    - Sample columns
+    - Data sources
+
+    This endpoint allows LLMs to auto-discover API capabilities without reading docs.
+
+    Returns:
+        Dictionary with dataset schemas
+
+    Examples:
+        GET /schema/datasets
+    """
+    try:
+        datasets_raw = list_datasets()
+
+        # Convert to comprehensive schema format
+        schemas = {}
+        for ds in datasets_raw:
+            schemas[ds["id"]] = {
+                "id": ds["id"],
+                "name": ds.get("id", "").replace("_", " ").title(),
+                "description": ds.get("description", ""),
+                "keys": ds.get("keys", []),
+                "supported_filters": ds.get("supports", []),
+                "supported_leagues": ds.get("leagues", []),
+                "data_sources": ds.get("sources", []),
+                "sample_columns": ds.get("sample_columns", []),
+                "endpoint": f"/datasets/{ds['id']}"
+            }
+
+        return {
+            "schemas": schemas,
+            "count": len(schemas),
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+    except Exception as e:
+        logger.error(f"Error generating dataset schemas: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate schemas: {str(e)}"
+        )
+
+
+@router.get(
+    "/schema/filters",
+    tags=["Schema"],
+    summary="Get available filters",
+    description="Returns all available filter options for querying datasets"
+)
+async def get_filters_schema() -> Dict[str, Any]:
+    """
+    Get comprehensive schema for all available filters.
+
+    Returns filter options including:
+    - Filter names and types
+    - Accepted values/formats
+    - Natural language support
+    - Examples
+
+    This helps LLMs understand what filters are available and how to use them.
+
+    Returns:
+        Dictionary with filter schemas
+
+    Examples:
+        GET /schema/filters
+    """
+    try:
+        # Define all available filters with their schemas
+        filters_schema = {
+            "league": {
+                "type": "string",
+                "enum": ["NCAA-MBB", "NCAA-WBB", "EuroLeague"],
+                "required": True,
+                "description": "League identifier",
+                "examples": ["NCAA-MBB", "NCAA-WBB", "EuroLeague"]
+            },
+            "season": {
+                "type": "string",
+                "format": "YYYY or natural language",
+                "natural_language": True,
+                "accepted_values": [
+                    "YYYY format (e.g., '2025')",
+                    "YYYY-YY format (e.g., '2024-25')",
+                    "Natural language: 'this season', 'last season', 'current season'"
+                ],
+                "description": "Season year. Basketball seasons named by ending year (2024-25 = '2025')",
+                "examples": ["2025", "2024-25", "this season", "last season"]
+            },
+            "team": {
+                "type": "array[string]",
+                "description": "List of team names to filter",
+                "examples": [["Duke"], ["Duke", "UNC"], ["Michigan State"]]
+            },
+            "player": {
+                "type": "array[string]",
+                "description": "List of player names to filter",
+                "examples": [["Cooper Flagg"], ["Caitlin Clark"], ["John Doe"]]
+            },
+            "date": {
+                "type": "string or object",
+                "format": "YYYY-MM-DD or natural language",
+                "natural_language": True,
+                "accepted_values": [
+                    "YYYY-MM-DD format (e.g., '2025-01-15')",
+                    "Natural language: 'today', 'yesterday', '3 days ago'",
+                    "Date range object: {start: 'YYYY-MM-DD', end: 'YYYY-MM-DD'}"
+                ],
+                "description": "Single date or date range",
+                "examples": ["2025-01-15", "yesterday", {"start": "2025-01-01", "end": "2025-01-31"}]
+            },
+            "date_from": {
+                "type": "string",
+                "format": "YYYY-MM-DD or natural language",
+                "natural_language": True,
+                "accepted_values": [
+                    "YYYY-MM-DD format",
+                    "Natural language: 'yesterday', 'last week', '3 days ago'"
+                ],
+                "description": "Start date for date range filtering",
+                "examples": ["2025-01-01", "yesterday", "last week"]
+            },
+            "date_to": {
+                "type": "string",
+                "format": "YYYY-MM-DD or natural language",
+                "natural_language": True,
+                "description": "End date for date range filtering",
+                "examples": ["2025-01-31", "today"]
+            },
+            "game_ids": {
+                "type": "array[string]",
+                "required_for": ["play_by_play", "shots"],
+                "description": "List of game IDs",
+                "examples": [["401635571"], ["401635571", "401635572"]]
+            },
+            "per_mode": {
+                "type": "string",
+                "enum": ["Totals", "PerGame", "Per40"],
+                "default": "Totals",
+                "description": "Aggregation mode for season stats",
+                "examples": ["Totals", "PerGame", "Per40"],
+                "recommendations": {
+                    "Totals": "Cumulative stats (raw numbers)",
+                    "PerGame": "Per-game averages (best for comparisons)",
+                    "Per40": "Per 40 minutes (normalizes playing time)"
+                }
+            },
+            "Division": {
+                "type": "string",
+                "enum": ["D1", "D2", "D3", "all"],
+                "description": "NCAA division filter",
+                "examples": ["D1", "D2", "D3", "all"]
+            },
+            "limit": {
+                "type": "integer",
+                "default": 100,
+                "min": 1,
+                "max": 10000,
+                "description": "Maximum number of rows to return",
+                "examples": [10, 100, 1000]
+            },
+            "compact": {
+                "type": "boolean",
+                "default": False,
+                "description": "Return arrays instead of markdown (saves ~70% tokens)",
+                "examples": [True, False],
+                "recommendation": "Use compact=True for queries returning >50 rows"
+            }
+        }
+
+        return {
+            "filters": filters_schema,
+            "count": len(filters_schema),
+            "natural_language_support": {
+                "dates": ["yesterday", "today", "last week", "3 days ago", "last month"],
+                "seasons": ["this season", "last season", "current season", "2024-25"],
+                "days": ["today", "yesterday", "last week", "last 5 days", "last month"]
+            },
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+    except Exception as e:
+        logger.error(f"Error generating filters schema: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate filters schema: {str(e)}"
+        )
+
+
+@router.get(
+    "/schema/tools",
+    tags=["Schema"],
+    summary="Get MCP tool schemas",
+    description="Returns schemas for all MCP tools available via the MCP server"
+)
+async def get_tools_schema() -> Dict[str, Any]:
+    """
+    Get comprehensive schema for all MCP tools.
+
+    Returns tool schemas including:
+    - Tool names and descriptions
+    - Input parameters and types
+    - Natural language support
+    - Usage examples
+    - LLM integration tips
+
+    This allows LLMs to auto-discover MCP tool capabilities.
+
+    Returns:
+        Dictionary with MCP tool schemas
+
+    Examples:
+        GET /schema/tools
+    """
+    try:
+        # Import MCP tools registry
+        from cbb_data.servers.mcp.tools import TOOLS
+
+        # Convert TOOLS registry to schema format
+        tools_schema = {}
+        for tool in TOOLS:
+            tools_schema[tool["name"]] = {
+                "name": tool["name"],
+                "description": tool["description"],
+                "inputSchema": tool["inputSchema"],
+                "natural_language_support": {
+                    "season": tool["inputSchema"]["properties"].get("season", {}).get("description", "").find("natural language") != -1,
+                    "dates": tool["inputSchema"]["properties"].get("date_from", {}).get("description", "").find("natural language") != -1,
+                    "days": tool["inputSchema"]["properties"].get("days", {}).get("description", "").find("natural language") != -1
+                },
+                "compact_mode": "compact" in tool["inputSchema"]["properties"],
+                "required_params": tool["inputSchema"].get("required", [])
+            }
+
+        return {
+            "tools": tools_schema,
+            "count": len(tools_schema),
+            "features": {
+                "natural_language": True,
+                "compact_mode": True,
+                "type_validation": True,
+                "token_efficiency": "~70% savings with compact=True"
+            },
+            "usage_tips": {
+                "dates": "Use natural language like 'yesterday', 'last week' instead of calculating dates",
+                "seasons": "Use 'this season', 'last season' instead of figuring out current year",
+                "compact": "Always use compact=True for queries returning >50 rows to save tokens",
+                "per_mode": "Use per_mode='PerGame' for fair player comparisons"
+            },
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+    except Exception as e:
+        logger.error(f"Error generating tools schema: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate tools schema: {str(e)}"
         )
