@@ -421,3 +421,15 @@ def pytest_configure(config):
         "markers",
         "smoke: mark test as smoke test (quick validation)"
     )
+    config.addinivalue_line(
+        "markers",
+        "stress: mark test as stress test (comprehensive coverage)"
+    )
+    config.addinivalue_line(
+        "markers",
+        "benchmark: mark test as performance benchmark"
+    )
+    config.addinivalue_line(
+        "markers",
+        "concurrent: mark test as concurrent request test"
+    )

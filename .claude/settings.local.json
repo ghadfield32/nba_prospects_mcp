@@ -48,7 +48,10 @@
       "Bash(timeout 180 .venv/Scripts/python:*)",
       "Bash(timeout 5 .venv/Scripts/python:*)",
       "Bash(dir /b \"c:\\docker_projects\\nba_prospects_mcp\\src\\cbb_data\\api\")",
-      "Bash(dir /b \"c:\\docker_projects\\nba_prospects_mcp\\src\\cbb_data\\api\\rest_api\")"
+      "Bash(dir /b \"c:\\docker_projects\\nba_prospects_mcp\\src\\cbb_data\\api\\rest_api\")",
+      "Bash(nul)",
+      "Bash(dir /s /b c:docker_projectsnba_prospects_mcpsrc*.py)",
+      "Bash(.venvScriptspython -m pytest tests/test_api_mcp_stress_comprehensive.py::TestMCPStressFull::test_all_mcp_tools_execute -v --tb=short)"
     ],
     "deny": [],
     "ask": []
