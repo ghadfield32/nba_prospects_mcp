@@ -1,6 +1,6 @@
 # College & International Basketball Data Library
 
-**Production-Ready Basketball Data Integration for NCAA Men's, NCAA Women's, and EuroLeague**
+**Production-Ready Basketball Data Integration for NCAA, EuroLeague, EuroCup, and G League**
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -60,13 +60,70 @@ curl -X POST http://localhost:8000/datasets/player_game \
 # Claude uses get_player_game_stats tool automatically
 ```
 
-### Supported Leagues
+### Supported Leagues & Scope
 
-| League | Historical Data | Coverage | Status |
-|--------|----------------|----------|--------|
-| **NCAA Men's Basketball** (NCAA-MBB) | 2002-present | Full stats, play-by-play, shots | ✅ Production |
-| **NCAA Women's Basketball** (NCAA-WBB) | 2005-present | Full stats, play-by-play | ✅ Production |
-| **EuroLeague** | 2001-present | Full stats, play-by-play, shots | ✅ Production |
+**Default Scope (pre_only=True)**: 11 leagues accessible (6 college + 5 prepro)
+**Full Scope (pre_only=False)**: 12 leagues accessible (adds WNBA)
+
+This library focuses on **pre-NBA/WNBA prospects** and includes:
+- **College Basketball**: NCAA, NJCAA, NAIA, U-SPORTS, CCAA
+- **Pre-Professional/Development**: OTE, EuroLeague, EuroCup, G-League, CEBL (international/development leagues where NBA prospects play)
+- **Professional** (excluded by default): WNBA only
+
+#### League × Dataset Availability Matrix
+
+| League | Level | schedule | player_game | team_game | pbp | shots | player_season | team_season |
+|--------|-------|----------|-------------|-----------|-----|-------|---------------|-------------|
+| **NCAA-MBB** | COLLEGE | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
+| **NCAA-WBB** | COLLEGE | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
+| **NJCAA** | COLLEGE | Yes | Yes | Yes | No | No | Yes | Yes |
+| **NAIA** | COLLEGE | Yes | Yes | Yes | No | No | Yes | Yes |
+| **U-SPORTS** | COLLEGE | Yes | Yes | Yes | Limited | No | Yes | Yes |
+| **CCAA** | COLLEGE | Yes | Yes | Yes | Limited | No | Yes | Yes |
+| **EuroLeague** | PREPRO | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
+| **EuroCup** | PREPRO | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
+| **G-League** | PREPRO | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
+| **CEBL** | PREPRO | Yes | Yes | Yes | No | No | Yes | Yes |
+| **OTE** | PREPRO | Yes | Yes | Yes | Yes | Limited | Yes | Yes |
+| **WNBA** | PRO | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
+
+**Legend**:
+- **Yes**: Full support with comprehensive data
+- **Limited**: Partial support or limited data availability
+- **No**: Not available for this league
+
+#### Historical Coverage & Recency
+
+| League | Historical Data | Recency | Data Source |
+|--------|----------------|---------|-------------|
+| **NCAA-MBB** | 2002-present | Real-time (15-min delay) | ESPN API + CBBpy |
+| **NCAA-WBB** | 2005-present | Real-time (15-min delay) | ESPN API + CBBpy |
+| **EuroLeague** | 2001-present | Real-time | Official EuroLeague API |
+| **EuroCup** | 2001-present | Real-time | Official EuroLeague API |
+| **G-League** | 2001-present | Real-time (15-min delay) | NBA Stats API |
+| **CEBL** | 2019-present | Post-game | ceblpy (FIBA LiveStats) |
+| **OTE** | 2021-present | Post-game | HTML Scraping |
+| **WNBA** | 1997-present | Real-time (15-min delay) | NBA Stats API |
+| **NJCAA** | Current season | Daily updates | PrestoSports Scraping |
+| **NAIA** | Current season | Daily updates | PrestoSports Scraping |
+| **U-SPORTS** | Current season | Post-game | TBD (Fetcher in development) |
+| **CCAA** | Current season | Post-game | TBD (Fetcher in development) |
+
+#### Integration Status
+
+**Fully Integrated (12 leagues)**: All leagues accessible via Python API, REST API, and MCP Server
+- Access via: `get_dataset()`, REST API `/datasets/*`, MCP tools
+- Default scope (pre_only=True): 11 leagues (excludes WNBA)
+- Full scope (pre_only=False): All 12 leagues
+
+**Scope Control**:
+```python
+# Default: Pre-NBA/WNBA prospects only (11 leagues)
+df = get_dataset("schedule", filters={"league": "NCAA-MBB", "season": "2025"})
+
+# Include WNBA (12 leagues)
+df = get_dataset("schedule", filters={"league": "WNBA", "season": "2024", "pre_only": False})
+```
 
 ---
 
@@ -1048,7 +1105,22 @@ All datasets use the same `get_dataset()` function with different `grouping` par
 | `team_game` | Per-team per-game results | All | TEAM_NAME, GAME_DATE, OPPONENT, SCORE, HOME_AWAY |
 | `team_season` | Per-team season standings | All | TEAM_NAME, SEASON, GP, W, L, WIN_PCT, PTS |
 | `pbp` | Play-by-play events | All | GAME_ID, PERIOD, CLOCK, PLAY_TYPE, TEXT, SCORE |
-| `shots` | Shot chart with X/Y coords | NCAA-MBB, EuroLeague | GAME_ID, LOC_X, LOC_Y, PLAYER_NAME, SHOT_MADE |
+| `shots` | Shot chart with X/Y coords | NCAA-MBB, EuroLeague, EuroCup, G-League | GAME_ID, LOC_X, LOC_Y, PLAYER_NAME, SHOT_MADE |
+
+### Data Granularities by League
+
+**Note**: See "League × Dataset Availability Matrix" above for comprehensive coverage details.
+
+#### Full Dataset Coverage (7 datasets)
+- **NCAA-MBB, NCAA-WBB**: All datasets (shots via direct API for MBB, PBP extraction for WBB)
+- **EuroLeague, EuroCup, G-League**: All datasets with full shot chart support (X/Y coordinates)
+- **WNBA**: All datasets with full shot chart support
+
+#### Partial Dataset Coverage
+- **NJCAA, NAIA**: schedule, player_game, team_game, player_season, team_season (no pbp/shots)
+- **CEBL**: schedule, player_game, team_game, player_season, team_season (no pbp/shots yet)
+- **OTE**: schedule, player_game, team_game, pbp, player_season, team_season (limited shots)
+- **U-SPORTS, CCAA**: schedule, player_game, team_game, player_season, team_season (limited pbp, no shots)
 
 ### Dataset Details
 
@@ -1070,9 +1142,10 @@ Each dataset supports different filters. See [Filter Reference](#-filter-referen
 
 | Filter | Type | Description | Example | Required For |
 |--------|------|-------------|---------|--------------|
-| `league` | str | League identifier | `"NCAA-MBB"`, `"NCAA-WBB"`, `"EuroLeague"` | All datasets |
-| `season` | str | Season year (YYYY format) | `"2025"`, `"2024"` | Most datasets |
-| `game_ids` | list | Specific game IDs | `["401587082"]` | `pbp`, `shots` |
+| `league` | str | League identifier | `"NCAA-MBB"`, `"NCAA-WBB"`, `"EuroLeague"`, `"EuroCup"`, `"G-League"`, `"CEBL"`, `"OTE"`, `"NJCAA"`, `"NAIA"`, `"U-SPORTS"`, `"CCAA"`, `"WNBA"` | All datasets |
+| `season` | str | Season year | `"2025"` (NCAA), `"E2024"` (EuroLeague), `"U2024"` (EuroCup), `"2024-25"` (G-League), `"2024"` (CEBL/WNBA) | Most datasets |
+| `game_ids` | list | Specific game IDs | `["401587082"]` (NCAA), `[1, 2, 3]` (EuroLeague/EuroCup), `["0022400001"]` (G-League/WNBA) | `pbp`, `shots` |
+| `pre_only` | bool | Scope filter | `True` (exclude WNBA), `False` (include WNBA) | Optional (default: True) |
 
 ### Common Filters
 

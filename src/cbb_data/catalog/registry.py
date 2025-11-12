@@ -57,6 +57,7 @@ class DatasetRegistry:
         leagues: list[str] | None = None,
         sample_columns: list[str] | None = None,
         requires_game_id: bool = False,
+        levels: list[str] | None = None,
     ) -> None:
         """Register a dataset in the catalog
 
@@ -71,6 +72,7 @@ class DatasetRegistry:
             leagues: List of supported leagues
             sample_columns: Sample column names
             requires_game_id: Whether game_id filter is required
+            levels: Competition levels included (e.g., ["college", "prepro"]). Empty = all levels.
         """
         cls._items[id] = {
             "id": id,
@@ -83,6 +85,7 @@ class DatasetRegistry:
             "leagues": leagues or [],
             "sample_columns": sample_columns or [],
             "requires_game_id": requires_game_id,
+            "levels": levels or [],
         }
 
     @classmethod
@@ -125,6 +128,7 @@ class DatasetRegistry:
                 leagues=v["leagues"],
                 sample_columns=v["sample_columns"],
                 requires_game_id=v["requires_game_id"],
+                levels=v["levels"],
             )
             for v in cls._items.values()
         ]
@@ -157,3 +161,15 @@ class DatasetRegistry:
             List of DatasetInfo for datasets from this source
         """
         return [info for info in cls.list_infos() if source in info.sources]
+
+    @classmethod
+    def filter_by_level(cls, level: str) -> list[DatasetInfo]:
+        """Get datasets that include a specific competition level
+
+        Args:
+            level: Level identifier (e.g., "college", "prepro", "pro")
+
+        Returns:
+            List of DatasetInfo for datasets supporting this level
+        """
+        return [info for info in cls.list_infos() if not info.levels or level in info.levels]

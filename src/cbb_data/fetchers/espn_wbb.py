@@ -71,10 +71,15 @@ def fetch_espn_wbb_scoreboard(
 ) -> pd.DataFrame:
     """Fetch ESPN WBB scoreboard/schedule
 
+    Note: ESPN API only covers NCAA Division I basketball. Division II/III data
+    requires alternative sources (e.g., PrestoSports, NCAA Stats website).
+
     Args:
         date: Date in YYYYMMDD format
         season: Season year
-        groups: Conference group ID (50 = Division I)
+        groups: Conference group filter (default: "50")
+            "50" = All Division I teams (default)
+            Note: ESPN API does not provide Division II/III data
 
     Returns:
         DataFrame with game schedule/results (same schema as MBB)
@@ -161,8 +166,13 @@ def fetch_espn_wbb_scoreboard(
 def fetch_espn_wbb_teams(groups: str = "50") -> pd.DataFrame:
     """Fetch all ESPN WBB teams
 
+    Note: ESPN API only covers NCAA Division I teams (~361 teams).
+    Division II/III data requires alternative sources.
+
     Args:
-        groups: Conference group ID (50 = Division I)
+        groups: Conference group filter (default: "50")
+            "50" = All Division I teams (default)
+            Note: Parameter has minimal effect - ESPN only provides DI data
 
     Returns:
         DataFrame with team information
@@ -343,11 +353,14 @@ def fetch_wbb_schedule_range(
 ) -> pd.DataFrame:
     """Fetch ESPN WBB schedule for a date range
 
+    Note: ESPN API only covers NCAA Division I games.
+
     Args:
         date_from: Start date
         date_to: End date
         season: Optional season year
-        groups: Conference group ID
+        groups: Conference group filter (default: "50")
+            "50" = All Division I games (default)
 
     Returns:
         DataFrame with all games in range

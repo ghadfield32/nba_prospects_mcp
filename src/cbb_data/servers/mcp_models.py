@@ -10,7 +10,20 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field, field_validator
 
 # Type aliases for common enums
-LeagueType = Literal["NCAA-MBB", "NCAA-WBB", "EuroLeague"]
+LeagueType = Literal[
+    "NCAA-MBB",
+    "NCAA-WBB",
+    "EuroLeague",
+    "EuroCup",
+    "G-League",
+    "WNBA",
+    "CEBL",
+    "OTE",
+    "NJCAA",
+    "NAIA",
+    "U-SPORTS",
+    "CCAA",
+]
 PerModeType = Literal["Totals", "PerGame", "Per40"]
 DivisionType = Literal["D1", "D2", "D3", "all"]
 
@@ -19,7 +32,8 @@ class BaseToolArgs(BaseModel):
     """Base model with common parameters."""
 
     league: LeagueType = Field(
-        ..., description="League identifier: NCAA-MBB, NCAA-WBB, or EuroLeague"
+        ...,
+        description="League identifier: NCAA-MBB, NCAA-WBB, EuroLeague, EuroCup, G-League, WNBA, CEBL, OTE, NJCAA, NAIA, U-SPORTS, CCAA",
     )
 
     compact: bool = Field(
@@ -27,6 +41,11 @@ class BaseToolArgs(BaseModel):
     )
 
     limit: int = Field(default=100, ge=1, le=10000, description="Maximum rows to return (1-10000)")
+
+    pre_only: bool = Field(
+        default=True,
+        description="If True, restrict to pre-NBA/WNBA leagues only (college, prepro). Set to False to include pro leagues (EuroLeague, G-League, WNBA, etc.)",
+    )
 
 
 class GetScheduleArgs(BaseToolArgs):

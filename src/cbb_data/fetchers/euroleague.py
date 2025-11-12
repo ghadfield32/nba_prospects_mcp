@@ -1,13 +1,26 @@
-"""EuroLeague Fetcher
+"""EuroLeague & EuroCup Fetcher
 
 Official EuroLeague API client wrapper.
 Uses the euroleague-api Python package for clean, documented access.
+
+Supports:
+- EuroLeague (competition='E')
+- EuroCup (competition='U')
 
 Key Features:
 - Free, official API
 - Comprehensive data (games, box scores, play-by-play, shots)
 - Historical data back to 2000-01 season
 - Rate limit: 2 req/sec (conservative)
+
+Data Granularities:
+- schedule: ✅ Full (all games with scores, dates, venues)
+- player_game: ✅ Full (complete box scores with all stats)
+- team_game: ✅ Full (team box scores and game results)
+- pbp: ✅ Full (play-by-play with timestamps, scores, players)
+- shots: ✅ Full (X/Y coordinates, shot types, made/missed)
+- player_season: ✅ Aggregated (from player_game data)
+- team_season: ✅ Aggregated (from team_game data)
 
 Documentation: https://github.com/giasemidis/euroleague_api
 """
@@ -54,16 +67,18 @@ def fetch_euroleague_games(
     phase: str | None = "RS",  # RS = Regular Season, PO = Playoffs
     round_start: int = 1,
     round_end: int | None = None,
+    competition: str = "E",  # E = EuroLeague, U = EuroCup
 ) -> pd.DataFrame:
-    """Fetch EuroLeague game schedule
+    """Fetch EuroLeague/EuroCup game schedule
 
-    Note: EuroLeague API always fetches full season data. Use caching + limit at API layer.
+    Note: API always fetches full season data. Use caching + limit at API layer.
 
     Args:
         season: Season year as integer (e.g., 2024 for 2024-25 season)
         phase: Competition phase ("RS" or "PO")
         round_start: Starting round number
         round_end: Ending round number (None = all remaining rounds)
+        competition: Competition code ("E" for EuroLeague, "U" for EuroCup)
 
     Returns:
         DataFrame with game schedule
@@ -79,17 +94,21 @@ def fetch_euroleague_games(
         - HOME_SCORE: Home team score
         - AWAY_SCORE: Away team score
         - VENUE: Arena name
+        - LEAGUE: League identifier (EuroLeague or EuroCup)
     """
     _check_api_available()
 
     rate_limiter.acquire("euroleague")
 
-    logger.info(f"Fetching EuroLeague games: {season}, {phase}, rounds {round_start}-{round_end}")
+    league_name = "EuroLeague" if competition == "E" else "EuroCup"
+    logger.info(
+        f"Fetching {league_name} games: {season}, {phase}, rounds {round_start}-{round_end}"
+    )
 
-    metadata = GameMetadata()
+    metadata = GameMetadata(competition=competition)
 
     # Fetch all games for the season
-    # Note: EuroLeague API does not support partial fetches - always returns full season
+    # Note: API does not support partial fetches - always returns full season
     games_df = metadata.get_game_metadata_single_season(season)
 
     # Filter by phase if specified
@@ -126,7 +145,7 @@ def fetch_euroleague_games(
     )
 
     # Add league identifier
-    df["LEAGUE"] = "EuroLeague"
+    df["LEAGUE"] = league_name
 
     # Select only the columns we need
     columns_to_keep = [
@@ -158,12 +177,13 @@ def fetch_euroleague_games(
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
 @cached_dataframe
-def fetch_euroleague_box_score(season: int, game_code: int) -> pd.DataFrame:
-    """Fetch EuroLeague box score for a game
+def fetch_euroleague_box_score(season: int, game_code: int, competition: str = "E") -> pd.DataFrame:
+    """Fetch EuroLeague/EuroCup box score for a game
 
     Args:
         season: Season year as integer (e.g., 2024)
         game_code: Game code as integer (e.g., 1 for first game)
+        competition: Competition code ("E" for EuroLeague, "U" for EuroCup)
 
     Returns:
         DataFrame with player box scores
@@ -196,14 +216,15 @@ def fetch_euroleague_box_score(season: int, game_code: int) -> pd.DataFrame:
 
     rate_limiter.acquire("euroleague")
 
-    logger.info(f"Fetching EuroLeague box score: {season}, {game_code}")
+    league_name = "EuroLeague" if competition == "E" else "EuroCup"
+    logger.info(f"Fetching {league_name} box score: {season}, {game_code}")
 
-    boxscore = BoxScoreData()
+    boxscore = BoxScoreData(competition=competition)
     df = boxscore.get_player_boxscore_stats_data(season, game_code)
 
     # Add league identifier
     if not df.empty:
-        df["LEAGUE"] = "EuroLeague"
+        df["LEAGUE"] = league_name
 
         # Rename columns to match our schema
         column_mapping = {
@@ -257,12 +278,15 @@ def fetch_euroleague_box_score(season: int, game_code: int) -> pd.DataFrame:
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
 @cached_dataframe
-def fetch_euroleague_play_by_play(season: int, game_code: int) -> pd.DataFrame:
-    """Fetch EuroLeague play-by-play data
+def fetch_euroleague_play_by_play(
+    season: int, game_code: int, competition: str = "E"
+) -> pd.DataFrame:
+    """Fetch EuroLeague/EuroCup play-by-play data
 
     Args:
         season: Season year as integer (e.g., 2024)
         game_code: Game code as integer (e.g., 1)
+        competition: Competition code ("E" for EuroLeague, "U" for EuroCup)
 
     Returns:
         DataFrame with play-by-play events
@@ -286,14 +310,15 @@ def fetch_euroleague_play_by_play(season: int, game_code: int) -> pd.DataFrame:
 
     rate_limiter.acquire("euroleague")
 
-    logger.info(f"Fetching EuroLeague play-by-play: {season}, {game_code}")
+    league_name = "EuroLeague" if competition == "E" else "EuroCup"
+    logger.info(f"Fetching {league_name} play-by-play: {season}, {game_code}")
 
-    pbp = PlayByPlay()
+    pbp = PlayByPlay(competition=competition)
     df = pbp.get_game_play_by_play_data(season, game_code)
 
     # Add league identifier
     if not df.empty:
-        df["LEAGUE"] = "EuroLeague"
+        df["LEAGUE"] = league_name
 
         # Rename columns
         column_mapping = {
@@ -330,12 +355,13 @@ def fetch_euroleague_play_by_play(season: int, game_code: int) -> pd.DataFrame:
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
 @cached_dataframe
-def fetch_euroleague_shot_data(season: int, game_code: int) -> pd.DataFrame:
-    """Fetch EuroLeague shot chart data
+def fetch_euroleague_shot_data(season: int, game_code: int, competition: str = "E") -> pd.DataFrame:
+    """Fetch EuroLeague/EuroCup shot chart data
 
     Args:
         season: Season year as integer (e.g., 2024)
         game_code: Game code as integer (e.g., 1)
+        competition: Competition code ("E" for EuroLeague, "U" for EuroCup)
 
     Returns:
         DataFrame with shot locations and results
@@ -362,14 +388,15 @@ def fetch_euroleague_shot_data(season: int, game_code: int) -> pd.DataFrame:
 
     rate_limiter.acquire("euroleague")
 
-    logger.info(f"Fetching EuroLeague shot data: {season}, {game_code}")
+    league_name = "EuroLeague" if competition == "E" else "EuroCup"
+    logger.info(f"Fetching {league_name} shot data: {season}, {game_code}")
 
-    shots = ShotData()
+    shots = ShotData(competition=competition)
     df = shots.get_game_shot_data(season, game_code)
 
     # Add league identifier
     if not df.empty:
-        df["LEAGUE"] = "EuroLeague"
+        df["LEAGUE"] = league_name
 
         # Rename columns
         column_mapping = {

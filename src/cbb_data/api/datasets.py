@@ -20,14 +20,27 @@ from typing import Any
 import pandas as pd
 
 from .. import fetchers
+from ..catalog.levels import (
+    filter_leagues_by_level,
+    get_excluded_leagues_message,
+    is_pre_nba_league,
+)
 from ..catalog.registry import DatasetRegistry
 from ..compose.enrichers import (
     add_league_context,
     coerce_common_columns,
 )
 from ..fetchers import (
+    bcl,  # Basketball Champions League
     cbbpy_mbb,  # CBBpy integration for NCAA Men's box scores
     cbbpy_wbb,  # CBBpy integration for NCAA Women's box scores
+    cebl,  # Canadian Elite Basketball League
+    domestic_euro,  # European domestic leagues (ACB, LNB, BBL, BSL, LBA)
+    gleague,  # G League integration
+    nbl,  # NBL Australia
+    ote,  # Overtime Elite
+    prestosports,  # PrestoSports platform (NJCAA, NAIA)
+    usports,  # U SPORTS (Canada)
 )
 from ..filters.compiler import apply_post_mask, compile_params
 from ..filters.spec import FilterSpec
@@ -101,9 +114,76 @@ def get_current_season(league: str) -> str:
         else:  # Jan-Sep
             return f"E{year - 1}"
 
+    elif league == "EuroCup":
+        # EuroCup season: Oct-May (same as EuroLeague)
+        # Oct-Dec → current year
+        # Jan-Sep → previous year
+        if month >= 10:  # Oct-Dec
+            return f"U{year}"
+        else:  # Jan-Sep
+            return f"U{year - 1}"
+
+    elif league == "G-League":
+        # G League season: Nov-April (same as NBA)
+        # Nov-Dec → current year (e.g., Nov 2024 = "2024-25" season)
+        # Jan-Oct → previous year (e.g., Mar 2024 = "2023-24" season)
+        if month >= 11:  # Nov-Dec
+            return f"{year}-{str(year + 1)[-2:]}"  # e.g., "2024-25"
+        else:  # Jan-Oct
+            return f"{year - 1}-{str(year)[-2:]}"  # e.g., "2023-24"
+
     elif league == "WNBA":
         # WNBA season: May-October (single calendar year)
         return str(year)
+
+    elif league in ["BCL", "NBL"]:
+        # BCL and NBL: Oct-May season (similar to EuroLeague)
+        # Oct-Dec → current year
+        # Jan-Sep → previous year
+        if month >= 10:  # Oct-Dec
+            return f"{year}-{str(year + 1)[-2:]}"  # e.g., "2024-25"
+        else:  # Jan-Sep
+            return f"{year - 1}-{str(year)[-2:]}"  # e.g., "2023-24"
+
+    elif league in ["ACB", "LNB", "BBL", "BSL", "LBA"]:
+        # European domestic leagues: Oct-May season
+        # Oct-Dec → current year
+        # Jan-Sep → previous year
+        if month >= 10:  # Oct-Dec
+            return f"{year}-{str(year + 1)[-2:]}"  # e.g., "2024-25"
+        else:  # Jan-Sep
+            return f"{year - 1}-{str(year)[-2:]}"  # e.g., "2023-24"
+
+    elif league in ["NJCAA", "NAIA"]:
+        # NJCAA and NAIA: Nov-April (similar to NCAA)
+        # Nov-Dec → current year
+        # Jan-Oct → previous year
+        if month >= 11:  # Nov-Dec
+            return f"{year}-{str(year + 1)[-2:]}"  # e.g., "2024-25"
+        else:  # Jan-Oct
+            return f"{year - 1}-{str(year)[-2:]}"  # e.g., "2023-24"
+
+    elif league == "CEBL":
+        # CEBL: May-August (summer season, single calendar year)
+        return str(year)
+
+    elif league == "U-SPORTS":
+        # U SPORTS: Nov-March (Canadian university season)
+        # Nov-Dec → current year
+        # Jan-Oct → previous year
+        if month >= 11:  # Nov-Dec
+            return f"{year}-{str(year + 1)[-2:]}"  # e.g., "2024-25"
+        else:  # Jan-Oct
+            return f"{year - 1}-{str(year)[-2:]}"  # e.g., "2023-24"
+
+    elif league == "OTE":
+        # Overtime Elite: Oct-March season
+        # Oct-Dec → current year
+        # Jan-Sep → previous year
+        if month >= 10:  # Oct-Dec
+            return f"{year}-{str(year + 1)[-2:]}"  # e.g., "2024-25"
+        else:  # Jan-Sep
+            return f"{year - 1}-{str(year)[-2:]}"  # e.g., "2023-24"
 
     else:
         # Default: return current year
@@ -117,6 +197,7 @@ def get_recent_games(
     teams: list[str] | None = None,
     Division: str | None = None,
     force_fresh: bool = False,
+    pre_only: bool = True,
 ) -> pd.DataFrame:
     """Fetch games from recent days (includes yesterday + today by default)
 
@@ -129,6 +210,7 @@ def get_recent_games(
         teams: Optional list of team names to filter
         Division: Optional division filter ("D1", "D2", "D3", "all") - NCAA only
         force_fresh: If True, bypass cache and fetch fresh data
+        pre_only: If True, restrict to pre-NBA/WNBA leagues (default: True)
 
     Returns:
         DataFrame with games from the specified date range
@@ -176,8 +258,8 @@ def get_recent_games(
         f"({days} days)"
     )
 
-    # Use get_dataset with force_fresh parameter
-    return get_dataset("schedule", filters, force_fresh=force_fresh)
+    # Use get_dataset with force_fresh and pre_only parameters
+    return get_dataset("schedule", filters, force_fresh=force_fresh, pre_only=pre_only)
 
 
 def _create_default_name_resolver() -> Callable[[str, str, str | None], int | None]:
@@ -660,19 +742,115 @@ def _fetch_schedule(compiled: dict[str, Any]) -> pd.DataFrame:
             league="EuroLeague",
             season=str(season),
             fetcher_func=lambda: fetchers.euroleague.fetch_euroleague_games(
-                season=season, phase=phase
+                season=season, phase=phase, competition="E"
             ),
             force_refresh=params.get("ForceRefresh", False),
         )
+
+    elif league == "EuroCup":
+        # EuroCup (uses same API as EuroLeague)
+        # Note: EuroCup API always fetches full season, relies on caching + limit at API layer
+        season_str = params.get("Season", "U2024")
+        season = _parse_euroleague_season(season_str)
+        phase = "PO" if params.get("SeasonType") == "Playoffs" else "RS"
+
+        # Wrap with DuckDB caching for 1000-4000x speedup on cache hits
+        df = fetch_with_duckdb_cache(
+            dataset="schedule",
+            league="EuroCup",
+            season=str(season),
+            fetcher_func=lambda: fetchers.euroleague.fetch_euroleague_games(
+                season=season, phase=phase, competition="U"
+            ),
+            force_refresh=params.get("ForceRefresh", False),
+        )
+
+    elif league == "G-League":
+        # NBA G League
+        season_str = params.get("Season", "2024-25")
+        season_type = params.get("SeasonType", "Regular Season")
+
+        # Extract date range if provided
+        date_from = params.get("DateFrom")
+        date_to = params.get("DateTo")
+
+        # Wrap with DuckDB caching for fast subsequent fetches
+        df = fetch_with_duckdb_cache(
+            dataset="schedule",
+            league="G-League",
+            season=season_str,
+            fetcher_func=lambda: gleague.fetch_gleague_schedule(
+                season=season_str,
+                season_type=season_type,
+                date_from=date_from,
+                date_to=date_to,
+            ),
+            force_refresh=params.get("ForceRefresh", False),
+        )
+
+    elif league == "BCL":
+        # Basketball Champions League
+        season_str = params.get("Season", "2024-25")
+        season_type = params.get("SeasonType", "Regular Season")
+        # Convert season string to int (e.g., "2024-25" -> 2024)
+        season_year = int(season_str.split("-")[0])
+        # Map season_type to phase code
+        phase = "RS" if season_type == "Regular Season" else "PO"
+
+        df = bcl.fetch_bcl_schedule(season=season_year, phase=phase)
+
+    elif league == "NBL":
+        # NBL Australia
+        season_str = params.get("Season", "2024-25")
+        season_type = params.get("SeasonType", "Regular Season")
+
+        df = nbl.fetch_nbl_schedule(season=season_str, season_type=season_type)
+
+    elif league in ["ACB", "LNB", "BBL", "BSL", "LBA"]:
+        # European domestic leagues
+        season_str = params.get("Season", "2024-25")
+        season_type = params.get("SeasonType", "Regular Season")
+
+        df = domestic_euro.fetch_domestic_euro_schedule(
+            league=league, season=season_str, season_type=season_type
+        )
+
+    elif league in ["NJCAA", "NAIA"]:
+        # PrestoSports leagues
+        season_str = params.get("Season", "2024-25")
+        division = params.get("Division")  # For NJCAA: "div1", "div2", "div3"
+
+        df = prestosports.fetch_prestosports_schedule(
+            league=league, season=season_str, division=division
+        )
+
+    elif league == "CEBL":
+        # Canadian Elite Basketball League
+        season_str = params.get("Season", str(datetime.now().year))
+
+        df = cebl.fetch_cebl_schedule(season=season_str)
+
+    elif league == "U-SPORTS":
+        # U SPORTS (Canada)
+        season_str = params.get("Season", "2024-25")
+        conference = params.get("Conference")  # OUA, Canada West, AUS, RSEQ
+
+        df = usports.fetch_usports_schedule(season=season_str, conference=conference)
+
+    elif league == "OTE":
+        # Overtime Elite
+        season_str = params.get("Season", "2024-25")
+
+        df = ote.fetch_ote_schedule(season=season_str)
 
     else:
         raise ValueError(f"Unsupported league for schedule: {league}")
 
     # Normalize column names for consistency across sources
-    # ESPN uses HOME_TEAM_NAME, EuroLeague uses HOME_TEAM
+    # ESPN uses HOME_TEAM_NAME, EuroLeague/EuroCup use HOME_TEAM
     if league in ["NCAA-MBB", "NCAA-WBB"]:
         df = coerce_common_columns(df, source="espn")
-    # EuroLeague already uses standard column names, no normalization needed
+    # EuroLeague/EuroCup already use standard column names, no normalization needed
 
     # Apply post-mask filters
     df = apply_post_mask(df, post_mask)
@@ -683,7 +861,7 @@ def _fetch_schedule(compiled: dict[str, Any]) -> pd.DataFrame:
 def _fetch_player_game(compiled: dict[str, Any]) -> pd.DataFrame:
     """Fetch player/game data (box scores)
 
-    Supports: ESPN MBB, ESPN WBB, EuroLeague
+    Supports: ESPN MBB, ESPN WBB, EuroLeague, EuroCup, G-League
     """
     params = compiled["params"]
     post_mask = compiled["post_mask"]
@@ -780,7 +958,7 @@ def _fetch_player_game(compiled: dict[str, Any]) -> pd.DataFrame:
         phase = "PO" if params.get("SeasonType") == "Playoffs" else "RS"
 
         # Get games first
-        games = fetchers.euroleague.fetch_euroleague_games(season, phase)
+        games = fetchers.euroleague.fetch_euroleague_games(season, phase, competition="E")
 
         # Parallel fetching to avoid timeout on large seasons (330 games)
         from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -791,7 +969,9 @@ def _fetch_player_game(compiled: dict[str, Any]) -> pd.DataFrame:
             """Fetch box score for a single game"""
             game_code = int(game_info["GAME_CODE"])
             try:
-                return fetchers.euroleague.fetch_euroleague_box_score(season, game_code)
+                return fetchers.euroleague.fetch_euroleague_box_score(
+                    season, game_code, competition="E"
+                )
             except Exception as e:
                 logger.warning(f"Failed to fetch EuroLeague game {game_code}: {e}")
                 return None
@@ -821,6 +1001,199 @@ def _fetch_player_game(compiled: dict[str, Any]) -> pd.DataFrame:
         # FIX: Normalize GAME_CODE to string to prevent type mismatch with post_mask filters
         if "GAME_CODE" in df.columns:
             df["GAME_CODE"] = df["GAME_CODE"].astype(str)
+
+    elif league == "EuroCup":
+        # EuroCup box scores (same API as EuroLeague)
+        season_str = params.get("Season", "U2024")
+        season = _parse_euroleague_season(season_str)
+        phase = "PO" if params.get("SeasonType") == "Playoffs" else "RS"
+
+        # Get games first
+        games = fetchers.euroleague.fetch_euroleague_games(season, phase, competition="U")
+
+        # Parallel fetching to avoid timeout on large seasons
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        from tqdm import tqdm
+
+        def fetch_single_game_eurocup(game_info: dict[str, Any]) -> pd.DataFrame | None:
+            """Fetch box score for a single EuroCup game"""
+            game_code = int(game_info["GAME_CODE"])
+            try:
+                return fetchers.euroleague.fetch_euroleague_box_score(
+                    season, game_code, competition="U"
+                )
+            except Exception as e:
+                logger.warning(f"Failed to fetch EuroCup game {game_code}: {e}")
+                return None
+
+        frames = []
+        # Use 5 workers to parallelize while respecting rate limits
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            # Submit all tasks
+            futures = {
+                executor.submit(fetch_single_game_eurocup, game.to_dict()): game["GAME_CODE"]
+                for _, game in games.iterrows()
+            }
+
+            # Collect results with progress bar
+            for future in tqdm(
+                as_completed(futures),
+                total=len(futures),
+                desc=f"Fetching EuroCup {season}",
+                unit="game",
+            ):
+                result = future.result()
+                if result is not None and not result.empty:
+                    frames.append(result)
+
+        df = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
+
+        # FIX: Normalize GAME_CODE to string to prevent type mismatch with post_mask filters
+        if "GAME_CODE" in df.columns:
+            df["GAME_CODE"] = df["GAME_CODE"].astype(str)
+
+    elif league == "G-League":
+        # NBA G League box scores
+        # G League requires game_ids (similar to NCAA pattern)
+        if not post_mask.get("GAME_ID"):
+            raise ValueError("player_game requires game_ids filter for G-League")
+
+        frames = []
+        game_id_list = post_mask["GAME_ID"]
+
+        logger.info(f"Fetching G League box scores for {len(game_id_list)} games")
+
+        # Fetch box scores for each game
+        for game_id in game_id_list:
+            try:
+                box_score = gleague.fetch_gleague_box_score(game_id)
+                if not box_score.empty:
+                    frames.append(box_score)
+            except Exception as e:
+                logger.warning(f"Failed to fetch G League game {game_id}: {e}")
+
+        df = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
+
+        # FIX: Normalize GAME_ID to string to prevent type mismatch with post_mask filters
+        if "GAME_ID" in df.columns:
+            df["GAME_ID"] = df["GAME_ID"].astype(str)
+
+    elif league == "BCL":
+        # Basketball Champions League
+        if not post_mask.get("GAME_ID"):
+            raise ValueError("player_game requires game_ids filter for BCL")
+
+        # Extract season from params (convert "2024-25" to 2024)
+        season_str = params.get("Season", "2024-25")
+        season_year = int(season_str.split("-")[0])
+
+        frames = []
+        for game_id in post_mask["GAME_ID"]:
+            try:
+                box_score = bcl.fetch_bcl_box_score(season=season_year, game_code=int(game_id))
+                if not box_score.empty:
+                    frames.append(box_score)
+            except Exception as e:
+                logger.warning(f"Failed to fetch BCL game {game_id}: {e}")
+
+        df = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
+
+    elif league == "NBL":
+        # NBL Australia
+        if not post_mask.get("GAME_ID"):
+            raise ValueError("player_game requires game_ids filter for NBL")
+
+        frames = []
+        for game_id in post_mask["GAME_ID"]:
+            try:
+                box_score = nbl.fetch_nbl_box_score(game_id)
+                if not box_score.empty:
+                    frames.append(box_score)
+            except Exception as e:
+                logger.warning(f"Failed to fetch NBL game {game_id}: {e}")
+
+        df = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
+
+    elif league in ["ACB", "LNB", "BBL", "BSL", "LBA"]:
+        # European domestic leagues
+        if not post_mask.get("GAME_ID"):
+            raise ValueError(f"player_game requires game_ids filter for {league}")
+
+        frames = []
+        for game_id in post_mask["GAME_ID"]:
+            try:
+                box_score = domestic_euro.fetch_domestic_euro_box_score(league, game_id)
+                if not box_score.empty:
+                    frames.append(box_score)
+            except Exception as e:
+                logger.warning(f"Failed to fetch {league} game {game_id}: {e}")
+
+        df = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
+
+    elif league in ["NJCAA", "NAIA"]:
+        # PrestoSports leagues
+        if not post_mask.get("GAME_ID"):
+            raise ValueError(f"player_game requires game_ids filter for {league}")
+
+        frames = []
+        for game_id in post_mask["GAME_ID"]:
+            try:
+                box_score = prestosports.fetch_prestosports_box_score(league, game_id)
+                if not box_score.empty:
+                    frames.append(box_score)
+            except Exception as e:
+                logger.warning(f"Failed to fetch {league} game {game_id}: {e}")
+
+        df = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
+
+    elif league == "CEBL":
+        # Canadian Elite Basketball League
+        if not post_mask.get("GAME_ID"):
+            raise ValueError("player_game requires game_ids filter for CEBL")
+
+        frames = []
+        for game_id in post_mask["GAME_ID"]:
+            try:
+                box_score = cebl.fetch_cebl_box_score(game_id)
+                if not box_score.empty:
+                    frames.append(box_score)
+            except Exception as e:
+                logger.warning(f"Failed to fetch CEBL game {game_id}: {e}")
+
+        df = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
+
+    elif league == "U-SPORTS":
+        # U SPORTS (Canada)
+        if not post_mask.get("GAME_ID"):
+            raise ValueError("player_game requires game_ids filter for U-SPORTS")
+
+        frames = []
+        for game_id in post_mask["GAME_ID"]:
+            try:
+                box_score = usports.fetch_usports_box_score(game_id)
+                if not box_score.empty:
+                    frames.append(box_score)
+            except Exception as e:
+                logger.warning(f"Failed to fetch U-SPORTS game {game_id}: {e}")
+
+        df = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
+
+    elif league == "OTE":
+        # Overtime Elite
+        if not post_mask.get("GAME_ID"):
+            raise ValueError("player_game requires game_ids filter for OTE")
+
+        frames = []
+        for game_id in post_mask["GAME_ID"]:
+            try:
+                box_score = ote.fetch_ote_box_score(game_id)
+                if not box_score.empty:
+                    frames.append(box_score)
+            except Exception as e:
+                logger.warning(f"Failed to fetch OTE game {game_id}: {e}")
+
+        df = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
 
     else:
         raise ValueError(f"Unsupported league for player_game: {league}")
@@ -856,6 +1229,8 @@ def _fetch_team_game(compiled: dict[str, Any]) -> pd.DataFrame:
 def _fetch_play_by_play(compiled: dict[str, Any]) -> pd.DataFrame:
     """Fetch play-by-play data
 
+    Supports: NCAA-MBB, NCAA-WBB, EuroLeague, EuroCup, G-League
+
     Requires game_ids filter.
     """
     params = compiled["params"]
@@ -866,6 +1241,10 @@ def _fetch_play_by_play(compiled: dict[str, Any]) -> pd.DataFrame:
 
     if not post_mask.get("GAME_ID"):
         raise ValueError("play_by_play requires game_ids filter")
+
+    # Extract season for leagues that need it
+    season_str = params.get("Season", "2024-25")
+    season_year = int(season_str.split("-")[0])
 
     frames = []
 
@@ -883,7 +1262,57 @@ def _fetch_play_by_play(compiled: dict[str, Any]) -> pd.DataFrame:
             elif league == "EuroLeague":
                 season_str = params.get("Season", "E2024")
                 season = _parse_euroleague_season(season_str)
-                pbp = fetchers.euroleague.fetch_euroleague_play_by_play(season, int(game_id))
+                pbp = fetchers.euroleague.fetch_euroleague_play_by_play(
+                    season, int(game_id), competition="E"
+                )
+                frames.append(pbp)
+
+            elif league == "EuroCup":
+                season_str = params.get("Season", "U2024")
+                season = _parse_euroleague_season(season_str)
+                pbp = fetchers.euroleague.fetch_euroleague_play_by_play(
+                    season, int(game_id), competition="U"
+                )
+                frames.append(pbp)
+
+            elif league == "G-League":
+                # G League play-by-play via stats.gleague.nba.com
+                pbp = gleague.fetch_gleague_play_by_play(game_id)
+                frames.append(pbp)
+
+            elif league == "BCL":
+                # BCL play-by-play (mostly unavailable)
+                pbp = bcl.fetch_bcl_play_by_play(season=season_year, game_code=int(game_id))
+                frames.append(pbp)
+
+            elif league == "NBL":
+                # NBL play-by-play (limited availability)
+                pbp = nbl.fetch_nbl_play_by_play(game_id)
+                frames.append(pbp)
+
+            elif league in ["ACB", "LNB", "BBL", "BSL", "LBA"]:
+                # European domestic leagues PBP (mostly unavailable)
+                pbp = domestic_euro.fetch_domestic_euro_play_by_play(league, game_id)
+                frames.append(pbp)
+
+            elif league in ["NJCAA", "NAIA"]:
+                # PrestoSports leagues (PBP unavailable)
+                pbp = prestosports.fetch_prestosports_play_by_play(league, game_id)
+                frames.append(pbp)
+
+            elif league == "CEBL":
+                # CEBL play-by-play (unavailable)
+                pbp = cebl.fetch_cebl_play_by_play(game_id)
+                frames.append(pbp)
+
+            elif league == "U-SPORTS":
+                # U SPORTS play-by-play (likely unavailable)
+                pbp = usports.fetch_usports_play_by_play(game_id)
+                frames.append(pbp)
+
+            elif league == "OTE":
+                # Overtime Elite play-by-play (AVAILABLE - unique!)
+                pbp = ote.fetch_ote_play_by_play(game_id)
                 frames.append(pbp)
 
             else:
@@ -903,7 +1332,7 @@ def _fetch_play_by_play(compiled: dict[str, Any]) -> pd.DataFrame:
 def _fetch_shots(compiled: dict[str, Any]) -> pd.DataFrame:
     """Fetch shot chart data
 
-    Supported leagues: NCAA-MBB (CBBpy), EuroLeague
+    Supported leagues: NCAA-MBB (CBBpy), EuroLeague, EuroCup, G-League
     """
     params = compiled["params"]
     post_mask = compiled["post_mask"]
@@ -913,6 +1342,10 @@ def _fetch_shots(compiled: dict[str, Any]) -> pd.DataFrame:
 
     if not post_mask.get("GAME_ID"):
         raise ValueError("shots requires game_ids filter")
+
+    # Extract season for leagues that need it
+    season_str_generic = params.get("Season", "2024-25")
+    season_year = int(season_str_generic.split("-")[0])
 
     frames = []
 
@@ -927,16 +1360,104 @@ def _fetch_shots(compiled: dict[str, Any]) -> pd.DataFrame:
                 logger.warning(f"Failed to fetch shots for game {game_id}: {e}")
 
     elif league == "EuroLeague":
-        # Existing EuroLeague shot data
+        # EuroLeague shot data
         season_str = params.get("Season", "E2024")
         season = _parse_euroleague_season(season_str)
 
         for game_code in post_mask["GAME_ID"]:
             try:
-                shots = fetchers.euroleague.fetch_euroleague_shot_data(season, int(game_code))
+                shots = fetchers.euroleague.fetch_euroleague_shot_data(
+                    season, int(game_code), competition="E"
+                )
                 frames.append(shots)
             except Exception as e:
                 logger.warning(f"Failed to fetch shots for game {game_code}: {e}")
+
+    elif league == "EuroCup":
+        # EuroCup shot data (same API as EuroLeague)
+        season_str = params.get("Season", "U2024")
+        season = _parse_euroleague_season(season_str)
+
+        for game_code in post_mask["GAME_ID"]:
+            try:
+                shots = fetchers.euroleague.fetch_euroleague_shot_data(
+                    season, int(game_code), competition="U"
+                )
+                frames.append(shots)
+            except Exception as e:
+                logger.warning(f"Failed to fetch shots for game {game_code}: {e}")
+
+    elif league == "G-League":
+        # G League shot chart data via stats.gleague.nba.com
+        for game_id in post_mask["GAME_ID"]:
+            try:
+                shots = gleague.fetch_gleague_shot_chart(game_id)
+                frames.append(shots)
+            except Exception as e:
+                logger.warning(f"Failed to fetch G League shots for game {game_id}: {e}")
+
+    elif league == "BCL":
+        # BCL shots (unavailable - requires FIBA LiveStats)
+        for game_id in post_mask["GAME_ID"]:
+            try:
+                shots = bcl.fetch_bcl_shot_chart(season=season_year, game_code=int(game_id))
+                frames.append(shots)
+            except Exception as e:
+                logger.warning(f"Failed to fetch BCL shots for game {game_id}: {e}")
+
+    elif league == "NBL":
+        # NBL shots (limited availability)
+        for game_id in post_mask["GAME_ID"]:
+            try:
+                shots = nbl.fetch_nbl_shot_chart(game_id)
+                frames.append(shots)
+            except Exception as e:
+                logger.warning(f"Failed to fetch NBL shots for game {game_id}: {e}")
+
+    elif league in ["ACB", "LNB", "BBL", "BSL", "LBA"]:
+        # European domestic leagues shots (mostly unavailable)
+        for game_id in post_mask["GAME_ID"]:
+            try:
+                shots = domestic_euro.fetch_domestic_euro_shot_chart(league, game_id)
+                frames.append(shots)
+            except Exception as e:
+                logger.warning(f"Failed to fetch {league} shots for game {game_id}: {e}")
+
+    elif league in ["NJCAA", "NAIA"]:
+        # PrestoSports leagues (shots unavailable)
+        for game_id in post_mask["GAME_ID"]:
+            try:
+                shots = prestosports.fetch_prestosports_shot_chart(league, game_id)
+                frames.append(shots)
+            except Exception as e:
+                logger.warning(f"Failed to fetch {league} shots for game {game_id}: {e}")
+
+    elif league == "CEBL":
+        # CEBL shots (unavailable)
+        for game_id in post_mask["GAME_ID"]:
+            try:
+                shots = cebl.fetch_cebl_shot_chart(game_id)
+                frames.append(shots)
+            except Exception as e:
+                logger.warning(f"Failed to fetch CEBL shots for game {game_id}: {e}")
+
+    elif league == "U-SPORTS":
+        # U SPORTS shots (unavailable)
+        for game_id in post_mask["GAME_ID"]:
+            try:
+                shots = usports.fetch_usports_shot_chart(game_id)
+                frames.append(shots)
+            except Exception as e:
+                logger.warning(f"Failed to fetch U-SPORTS shots for game {game_id}: {e}")
+
+    elif league == "OTE":
+        # Overtime Elite shots (coordinates unavailable, but shot info in PBP)
+        for game_id in post_mask["GAME_ID"]:
+            try:
+                shots = ote.fetch_ote_shot_chart(game_id)
+                frames.append(shots)
+            except Exception as e:
+                logger.warning(f"Failed to fetch OTE shots for game {game_id}: {e}")
 
     else:
         raise ValueError(f"Shot data not available for league: {league}")
@@ -1276,8 +1797,22 @@ DatasetRegistry.register(
     filters=["season", "season_type", "date", "league", "team", "opponent"],
     fetch=_fetch_schedule,
     description="Game schedules and results",
-    sources=["ESPN", "EuroLeague"],
-    leagues=["NCAA-MBB", "NCAA-WBB", "EuroLeague"],
+    sources=["ESPN", "EuroLeague", "NBA Stats", "WNBA Stats", "CEBL", "OTE", "PrestoSports"],
+    leagues=[
+        "NCAA-MBB",
+        "NCAA-WBB",
+        "EuroLeague",
+        "EuroCup",
+        "G-League",
+        "WNBA",
+        "CEBL",
+        "OTE",
+        "NJCAA",
+        "NAIA",
+        "U-SPORTS",
+        "CCAA",
+    ],
+    levels=["college", "prepro", "pro"],
     sample_columns=[
         "GAME_ID",
         "GAME_DATE",
@@ -1305,8 +1840,22 @@ DatasetRegistry.register(
     ],
     fetch=_fetch_player_game,
     description="Per-player per-game statistics (box scores)",
-    sources=["ESPN", "EuroLeague"],
-    leagues=["NCAA-MBB", "NCAA-WBB", "EuroLeague"],
+    sources=["ESPN", "EuroLeague", "NBA Stats", "WNBA Stats", "CEBL", "OTE", "PrestoSports"],
+    leagues=[
+        "NCAA-MBB",
+        "NCAA-WBB",
+        "EuroLeague",
+        "EuroCup",
+        "G-League",
+        "WNBA",
+        "CEBL",
+        "OTE",
+        "NJCAA",
+        "NAIA",
+        "U-SPORTS",
+        "CCAA",
+    ],
+    levels=["college", "prepro", "pro"],
     sample_columns=[
         "PLAYER_NAME",
         "TEAM_NAME",
@@ -1327,8 +1876,22 @@ DatasetRegistry.register(
     filters=["season", "season_type", "date", "league", "team", "opponent", "home_away"],
     fetch=_fetch_team_game,
     description="Per-team per-game results",
-    sources=["ESPN", "EuroLeague"],
-    leagues=["NCAA-MBB", "NCAA-WBB", "EuroLeague"],
+    sources=["ESPN", "EuroLeague", "NBA Stats", "WNBA Stats", "CEBL", "OTE", "PrestoSports"],
+    leagues=[
+        "NCAA-MBB",
+        "NCAA-WBB",
+        "EuroLeague",
+        "EuroCup",
+        "G-League",
+        "WNBA",
+        "CEBL",
+        "OTE",
+        "NJCAA",
+        "NAIA",
+        "U-SPORTS",
+        "CCAA",
+    ],
+    levels=["college", "prepro", "pro"],
     sample_columns=["TEAM_NAME", "GAME_ID", "GAME_DATE", "OPPONENT", "HOME_AWAY", "SCORE"],
 )
 
@@ -1338,8 +1901,22 @@ DatasetRegistry.register(
     filters=["game_ids", "league", "quarter", "team", "player"],
     fetch=_fetch_play_by_play,
     description="Play-by-play event data",
-    sources=["ESPN", "EuroLeague"],
-    leagues=["NCAA-MBB", "NCAA-WBB", "EuroLeague"],
+    sources=["ESPN", "EuroLeague", "NBA Stats", "WNBA Stats", "CEBL", "OTE", "PrestoSports"],
+    leagues=[
+        "NCAA-MBB",
+        "NCAA-WBB",
+        "EuroLeague",
+        "EuroCup",
+        "G-League",
+        "WNBA",
+        "CEBL",
+        "OTE",
+        "NJCAA",
+        "NAIA",
+        "U-SPORTS",
+        "CCAA",
+    ],
+    levels=["college", "prepro", "pro"],
     sample_columns=["GAME_ID", "PERIOD", "CLOCK", "PLAY_TYPE", "TEXT", "SCORE"],
     requires_game_id=True,
 )
@@ -1349,9 +1926,23 @@ DatasetRegistry.register(
     keys=["GAME_ID", "SHOT_ID"],
     filters=["game_ids", "season", "league", "player", "team", "quarter"],
     fetch=_fetch_shots,
-    description="Shot chart data with X/Y coordinates (NCAA-MBB via CBBpy, EuroLeague)",
-    sources=["CBBpy", "EuroLeague"],
-    leagues=["NCAA-MBB", "EuroLeague"],
+    description="Shot chart data with X/Y coordinates (full data: NCAA-MBB, EuroLeague, EuroCup, G-League, WNBA; limited: others)",
+    sources=["CBBpy", "EuroLeague", "NBA Stats", "WNBA Stats", "CEBL", "OTE", "PrestoSports"],
+    leagues=[
+        "NCAA-MBB",
+        "NCAA-WBB",
+        "EuroLeague",
+        "EuroCup",
+        "G-League",
+        "WNBA",
+        "CEBL",
+        "OTE",
+        "NJCAA",
+        "NAIA",
+        "U-SPORTS",
+        "CCAA",
+    ],
+    levels=["college", "prepro", "pro"],
     sample_columns=["shot_x", "shot_y", "shooter", "LOC_X", "LOC_Y", "PLAYER_NAME", "SHOT_MADE"],
     requires_game_id=True,
 )
@@ -1362,8 +1953,22 @@ DatasetRegistry.register(
     filters=["season", "season_type", "league", "team", "player", "per_mode", "min_minutes"],
     fetch=_fetch_player_season,
     description="Per-player season aggregates (totals/averages)",
-    sources=["ESPN", "EuroLeague"],
-    leagues=["NCAA-MBB", "NCAA-WBB", "EuroLeague"],
+    sources=["ESPN", "EuroLeague", "NBA Stats", "WNBA Stats", "CEBL", "OTE", "PrestoSports"],
+    leagues=[
+        "NCAA-MBB",
+        "NCAA-WBB",
+        "EuroLeague",
+        "EuroCup",
+        "G-League",
+        "WNBA",
+        "CEBL",
+        "OTE",
+        "NJCAA",
+        "NAIA",
+        "U-SPORTS",
+        "CCAA",
+    ],
+    levels=["college", "prepro", "pro"],
     sample_columns=["PLAYER_NAME", "SEASON", "GP", "PTS", "REB", "AST", "MIN", "FG_PCT"],
     requires_game_id=False,
 )
@@ -1374,8 +1979,22 @@ DatasetRegistry.register(
     filters=["season", "season_type", "league", "team", "conference"],
     fetch=_fetch_team_season,
     description="Per-team season aggregates",
-    sources=["ESPN", "EuroLeague"],
-    leagues=["NCAA-MBB", "NCAA-WBB", "EuroLeague"],
+    sources=["ESPN", "EuroLeague", "NBA Stats", "WNBA Stats", "CEBL", "OTE", "PrestoSports"],
+    leagues=[
+        "NCAA-MBB",
+        "NCAA-WBB",
+        "EuroLeague",
+        "EuroCup",
+        "G-League",
+        "WNBA",
+        "CEBL",
+        "OTE",
+        "NJCAA",
+        "NAIA",
+        "U-SPORTS",
+        "CCAA",
+    ],
+    levels=["college", "prepro", "pro"],
     sample_columns=["TEAM_NAME", "SEASON", "GP", "W", "L", "PTS", "OPP_PTS"],
     requires_game_id=False,
 )
@@ -1388,6 +2007,7 @@ DatasetRegistry.register(
     description="Per-player per-team season stats (captures mid-season transfers)",
     sources=["ESPN", "EuroLeague"],
     leagues=["NCAA-MBB", "NCAA-WBB", "EuroLeague"],
+    levels=["college", "pro"],
     sample_columns=["PLAYER_NAME", "TEAM_NAME", "SEASON", "GP", "PTS", "REB", "AST"],
     requires_game_id=False,
 )
@@ -1398,8 +2018,12 @@ DatasetRegistry.register(
 # ==============================================================================
 
 
-def list_datasets() -> list[dict[str, Any]]:
+def list_datasets(pre_only: bool = True) -> list[dict[str, Any]]:
     """List all available datasets with metadata
+
+    Args:
+        pre_only: If True, filter leagues to pre-NBA/WNBA only (default: True).
+                 Set to False to include pro leagues.
 
     Returns:
         List of dataset info dictionaries with:
@@ -1408,9 +2032,10 @@ def list_datasets() -> list[dict[str, Any]]:
             - supports: Supported filter names
             - description: Dataset description
             - sources: Data sources
-            - leagues: Supported leagues
+            - leagues: Supported leagues (filtered by pre_only)
             - sample_columns: Example columns
             - requires_game_id: Whether game_id filter is required
+            - levels: Competition levels included
 
     Example:
         >>> datasets = list_datasets()
@@ -1419,8 +2044,21 @@ def list_datasets() -> list[dict[str, Any]]:
         schedule: Game schedules and results
         player_game: Per-player per-game statistics
         ...
+
+        >>> # Include professional leagues
+        >>> datasets_all = list_datasets(pre_only=False)
     """
-    return [info.model_dump() for info in DatasetRegistry.list_infos()]
+    infos = DatasetRegistry.list_infos()
+
+    # Filter leagues in each dataset based on pre_only
+    result = []
+    for info in infos:
+        info_dict = info.model_dump()
+        if pre_only and info_dict.get("leagues"):
+            info_dict["leagues"] = filter_leagues_by_level(info_dict["leagues"], pre_only=True)
+        result.append(info_dict)
+
+    return result
 
 
 def get_dataset(
@@ -1431,6 +2069,7 @@ def get_dataset(
     as_format: str = "pandas",
     name_resolver: Callable[[str, str, str | None], int | None] | None = None,
     force_fresh: bool = False,
+    pre_only: bool = True,
 ) -> Any:
     """Fetch a dataset with filters
 
@@ -1444,6 +2083,8 @@ def get_dataset(
                       If None, uses default resolver with name normalization.
                       Set to False to disable name resolution entirely.
         force_fresh: If True, bypass cache and fetch fresh data (default: False)
+        pre_only: If True, exclude professional leagues (default: True).
+                 Set to False to include pro leagues (EuroLeague, G-League, WNBA, etc.)
 
     Returns:
         DataFrame (pandas), list of dicts (json), or dict with path (parquet)
@@ -1492,6 +2133,14 @@ def get_dataset(
 
     # Build FilterSpec
     spec = FilterSpec(**filters)
+
+    # SCOPE ENFORCEMENT: Check pre_only filter
+    if pre_only and spec.league and not is_pre_nba_league(spec.league):
+        excluded_msg = get_excluded_leagues_message([spec.league])
+        raise ValueError(
+            f"League '{spec.league}' is not in scope (pre-NBA/WNBA prospects only). "
+            f"{excluded_msg}"
+        )
 
     # Validate filters before compilation
     validation_warnings = validate_filters(

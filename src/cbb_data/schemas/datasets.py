@@ -40,6 +40,11 @@ class DatasetInfo(BaseModel):
         default=False, description="Whether this dataset requires specific game_ids (e.g., PBP)"
     )
 
+    levels: list[str] = Field(
+        default=[],
+        description="Competition levels included (e.g., ['college', 'prepro']). Empty = all levels.",
+    )
+
 
 class DatasetMetrics(BaseModel):
     """Performance metrics for dataset fetches"""

@@ -17,20 +17,33 @@ SeasonType = Literal[
 ]
 PerMode = Literal["Totals", "PerGame", "Per40"]  # Per48 not currently implemented in aggregators
 League = Literal[
+    # NCAA Basketball
     "NCAA-MBB",  # NCAA Men's Basketball (Division I)
     "NCAA-WBB",  # NCAA Women's Basketball (Division I)
     "NCAA-MBB-D2",  # Division II Men
     "NCAA-MBB-D3",  # Division III Men
     "NCAA-WBB-D2",  # Division II Women
     "NCAA-WBB-D3",  # Division III Women
+    # NBA Development
+    "G-League",  # NBA G League
+    # European Professional
     "EuroLeague",  # EuroLeague
     "EuroCup",  # EuroCup
+    "ACB",  # Spanish Liga ACB
+    "LNB",  # French LNB Pro A
+    "BBL",  # German Basketball Bundesliga
+    "BSL",  # Turkish Basketball Super League
+    "LBA",  # Italian Lega Basket Serie A
+    "BCL",  # Basketball Champions League
+    # International
     "NBL",  # Australia NBL
     "FIBA",  # FIBA competitions (World Cup, Olympics, etc.)
-    "ACB",  # Spanish Liga ACB
-    "BBL",  # German Basketball Bundesliga
-    "LNB",  # French LNB Pro A
-    "BSL",  # Turkish Basketball Super League
+    # North American Alternative
+    "OTE",  # Overtime Elite
+    "CEBL",  # Canadian Elite Basketball League
+    "U-SPORTS",  # U SPORTS (Canada)
+    "NJCAA",  # National Junior College Athletic Association
+    "NAIA",  # National Association of Intercollegiate Athletics
 ]
 
 

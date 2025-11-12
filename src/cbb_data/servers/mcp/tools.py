@@ -111,6 +111,7 @@ def tool_get_schedule(
     date_to: str | None = None,
     limit: int | None = 100,
     compact: bool = False,
+    pre_only: bool = True,
 ) -> dict[str, Any]:
     """
     Get game schedules and results with natural language support.
@@ -133,6 +134,7 @@ def tool_get_schedule(
         date_to: End date OR natural language
         limit: Maximum rows to return (default: 100)
         compact: Return arrays instead of markdown (saves ~70% tokens)
+        pre_only: If True, restrict to pre-NBA/WNBA leagues (default: True)
 
     Returns:
         Structured result with game schedule data
@@ -163,6 +165,7 @@ def tool_get_schedule(
         grouping="schedule",
         filters=filters,
         limit=limit,
+        pre_only=pre_only,
     )
 
 
@@ -174,6 +177,7 @@ def tool_get_player_game_stats(
     game_ids: list[str] | None = None,
     limit: int | None = 100,
     compact: bool = False,
+    pre_only: bool = True,
 ) -> dict[str, Any]:
     """
     Get per-player per-game box score statistics with natural language support.
@@ -193,6 +197,7 @@ def tool_get_player_game_stats(
         game_ids: List of specific game IDs, optional
         limit: Maximum rows to return (default: 100)
         compact: Return arrays instead of markdown (saves ~70% tokens)
+        pre_only: If True, restrict to pre-NBA/WNBA leagues (default: True)
 
     Returns:
         Structured result with player game statistics
@@ -223,6 +228,7 @@ def tool_get_player_game_stats(
         grouping="player_game",
         filters=filters,
         limit=limit,
+        pre_only=pre_only,
     )
 
 
@@ -232,6 +238,7 @@ def tool_get_team_game_stats(
     team: list[str] | None = None,
     limit: int | None = 100,
     compact: bool = False,
+    pre_only: bool = True,
 ) -> dict[str, Any]:
     """
     Get team-level game results and statistics with natural language support.
@@ -249,6 +256,7 @@ def tool_get_team_game_stats(
         team: List of team names to filter, optional
         limit: Maximum rows to return (default: 100)
         compact: Return arrays instead of markdown (saves ~70% tokens)
+        pre_only: If True, restrict to pre-NBA/WNBA leagues (default: True)
 
     Returns:
         Structured result with team game statistics
@@ -269,11 +277,12 @@ def tool_get_team_game_stats(
         grouping="team_game",
         filters=filters,
         limit=limit,
+        pre_only=pre_only,
     )
 
 
 def tool_get_play_by_play(
-    league: str, game_ids: list[str], compact: bool = False
+    league: str, game_ids: list[str], compact: bool = False, pre_only: bool = True
 ) -> dict[str, Any]:
     """
     Get play-by-play event data for specific games.
@@ -282,6 +291,7 @@ def tool_get_play_by_play(
         league: League identifier (NCAA-MBB, NCAA-WBB, EuroLeague)
         game_ids: List of game IDs (required)
         compact: Return arrays instead of markdown (saves ~70% tokens)
+        pre_only: If True, restrict to pre-NBA/WNBA leagues (default: True)
 
     Returns:
         Structured result with play-by-play events
@@ -293,12 +303,21 @@ def tool_get_play_by_play(
     filters = {"league": league, "game_ids": game_ids}
 
     return _safe_execute(
-        "get_play_by_play", get_dataset, compact=compact, grouping="play_by_play", filters=filters
+        "get_play_by_play",
+        get_dataset,
+        compact=compact,
+        grouping="pbp",
+        filters=filters,
+        pre_only=pre_only,
     )
 
 
 def tool_get_shot_chart(
-    league: str, game_ids: list[str], player: list[str] | None = None, compact: bool = False
+    league: str,
+    game_ids: list[str],
+    player: list[str] | None = None,
+    compact: bool = False,
+    pre_only: bool = True,
 ) -> dict[str, Any]:
     """
     Get shot chart data with X/Y coordinates.
@@ -308,6 +327,7 @@ def tool_get_shot_chart(
         game_ids: List of game IDs (required)
         player: List of player names to filter, optional
         compact: Return arrays instead of markdown (saves ~70% tokens)
+        pre_only: If True, restrict to pre-NBA/WNBA leagues (default: True)
 
     Returns:
         Structured result with shot location data
@@ -318,7 +338,12 @@ def tool_get_shot_chart(
         filters["player"] = player
 
     return _safe_execute(
-        "get_shot_chart", get_dataset, compact=compact, grouping="shots", filters=filters
+        "get_shot_chart",
+        get_dataset,
+        compact=compact,
+        grouping="shots",
+        filters=filters,
+        pre_only=pre_only,
     )
 
 
@@ -330,6 +355,7 @@ def tool_get_player_season_stats(
     per_mode: str = "Totals",
     limit: int | None = 100,
     compact: bool = False,
+    pre_only: bool = True,
 ) -> dict[str, Any]:
     """
     Get per-player season aggregate statistics with natural language support.
@@ -352,6 +378,7 @@ def tool_get_player_season_stats(
         per_mode: Aggregation mode - "Totals", "PerGame", or "Per40" (default: "Totals")
         limit: Maximum rows to return (default: 100)
         compact: Return arrays instead of markdown (saves ~70% tokens)
+        pre_only: If True, restrict to pre-NBA/WNBA leagues (default: True)
 
     Returns:
         Structured result with player season statistics
@@ -387,6 +414,7 @@ def tool_get_player_season_stats(
         grouping="player_season",
         filters=filters,
         limit=limit,
+        pre_only=pre_only,
     )
 
 
@@ -397,6 +425,7 @@ def tool_get_team_season_stats(
     division: str | None = None,
     limit: int | None = 100,
     compact: bool = False,
+    pre_only: bool = True,
 ) -> dict[str, Any]:
     """
     Get per-team season aggregate statistics and standings with natural language support.
@@ -415,6 +444,7 @@ def tool_get_team_season_stats(
         division: Division filter for NCAA (D1, D2, D3), optional
         limit: Maximum rows to return (default: 100)
         compact: Return arrays instead of markdown (saves ~70% tokens)
+        pre_only: If True, restrict to pre-NBA/WNBA leagues (default: True)
 
     Returns:
         Structured result with team season statistics
@@ -438,6 +468,7 @@ def tool_get_team_season_stats(
         grouping="team_season",
         filters=filters,
         limit=limit,
+        pre_only=pre_only,
     )
 
 
@@ -447,6 +478,7 @@ def tool_get_player_team_season(
     player: list[str] | None = None,
     limit: int | None = 100,
     compact: bool = False,
+    pre_only: bool = True,
 ) -> dict[str, Any]:
     """
     Get player statistics split by team with natural language support.
@@ -463,6 +495,7 @@ def tool_get_player_team_season(
         player: List of player names to filter, optional
         limit: Maximum rows to return (default: 100)
         compact: Return arrays instead of markdown (saves ~70% tokens)
+        pre_only: If True, restrict to pre-NBA/WNBA leagues (default: True)
 
     Returns:
         Structured result with player×team×season statistics
@@ -483,24 +516,33 @@ def tool_get_player_team_season(
         grouping="player_team_season",
         filters=filters,
         limit=limit,
+        pre_only=pre_only,
     )
 
 
-def tool_list_datasets() -> dict[str, Any]:
+def tool_list_datasets(pre_only: bool = True) -> dict[str, Any]:
     """
     List all available datasets with their metadata.
+
+    Args:
+        pre_only: If True, filter leagues to pre-NBA/WNBA only (default: True)
 
     Returns:
         Structured result with list of datasets and their info
 
     Examples:
         >>> tool_list_datasets()
+        >>> tool_list_datasets(pre_only=False)  # Include pro leagues
     """
-    return _safe_execute("list_datasets", list_datasets, compact=False)
+    return _safe_execute("list_datasets", list_datasets, compact=False, pre_only=pre_only)
 
 
 def tool_get_recent_games(
-    league: str, days: str | None = "2", teams: list[str] | None = None, compact: bool = False
+    league: str,
+    days: str | None = "2",
+    teams: list[str] | None = None,
+    compact: bool = False,
+    pre_only: bool = True,
 ) -> dict[str, Any]:
     """
     Get recent games with natural language day support.
@@ -521,6 +563,7 @@ def tool_get_recent_games(
               Default: "2" (yesterday + today)
         teams: List of team names to filter, optional
         compact: Return arrays instead of markdown (saves ~70% tokens)
+        pre_only: If True, restrict to pre-NBA/WNBA leagues (default: True)
 
     Returns:
         Structured result with recent games
@@ -546,6 +589,7 @@ def tool_get_recent_games(
         league=league,
         days=days_int,
         teams=teams,
+        pre_only=pre_only,
     )
 
 

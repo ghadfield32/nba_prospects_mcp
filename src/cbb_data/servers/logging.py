@@ -34,7 +34,7 @@ import json
 import logging
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -72,7 +72,7 @@ def log_event(**kwargs: Any) -> None:
 
     # Add ISO timestamp for human readability
     if "ts" in kwargs:
-        dt = datetime.fromtimestamp(kwargs["ts"], tz=timezone.utc)
+        dt = datetime.fromtimestamp(kwargs["ts"], tz=UTC)
         kwargs["timestamp"] = dt.isoformat()
 
     try:
