@@ -175,6 +175,7 @@ def _register_league_sources() -> None:
         lnb,
         nbl,
         nbl_official,  # NBL Australia via nblR R package
+        nz_nbl_fiba,  # NZ NBL via FIBA LiveStats HTML scraping
     )
 
     # ==========================================================================
@@ -341,6 +342,27 @@ def _register_league_sources() -> None:
         )
     )
 
+    # NZ NBL (New Zealand National Basketball League)
+    register_league_source(
+        LeagueSourceConfig(
+            league="NZ-NBL",
+            player_season_source="nz_nbl_fiba",  # FIBA LiveStats HTML scraping
+            team_season_source="nz_nbl_fiba",
+            schedule_source="nz_nbl_fiba",  # Via pre-built game index
+            box_score_source="nz_nbl_fiba",  # HTML scraping
+            pbp_source="nz_nbl_fiba",  # HTML scraping
+            shots_source="none",  # FIBA HTML doesn't provide x,y coordinates
+            fetch_player_season=None,  # Uses generic aggregation from player_game
+            fetch_team_season=None,  # Uses generic aggregation from team_game
+            # Complete dataset loaders available:
+            # - nz_nbl_fiba.fetch_nz_nbl_schedule() - Via game index
+            # - nz_nbl_fiba.fetch_nz_nbl_player_game() - HTML scraping
+            # - nz_nbl_fiba.fetch_nz_nbl_team_game() - Aggregated from player stats
+            # - nz_nbl_fiba.fetch_nz_nbl_pbp() - HTML scraping
+            notes="FIBA LiveStats HTML scraping (NZN code). Requires pre-built game index (data/nz_nbl_game_index.csv). HTML parsing scaffold in place.",
+        )
+    )
+
     # ==========================================================================
     # Phase 2 Scaffolds (Empty DataFrames) - Phase 3 Will Add Real Data
     # ==========================================================================
@@ -356,12 +378,17 @@ def _register_league_sources() -> None:
             pbp_source="nbl_official_r",  # Since 2015-16
             shots_source="nbl_official_r",  # Shot locations (x,y) since 2015-16!
             fetch_player_season=nbl_official.fetch_nbl_player_season,
-            fetch_team_season=nbl.fetch_nbl_team_season,  # TODO: migrate to nbl_official
-            # Additional methods (not in standard config yet):
-            # - nbl_official.fetch_nbl_schedule (results 1979+)
-            # - nbl_official.fetch_nbl_shots (x,y coordinates 2015+)
+            fetch_team_season=nbl_official.fetch_nbl_team_season,
+            # Complete dataset loaders available:
+            # - nbl_official.fetch_nbl_schedule() - Match results (1979+)
+            # - nbl_official.fetch_nbl_player_season() - Player aggregates (2015-16+)
+            # - nbl_official.fetch_nbl_team_season() - Team aggregates (2015-16+)
+            # - nbl_official.fetch_nbl_player_game() - Player-game box scores (2015-16+)
+            # - nbl_official.fetch_nbl_team_game() - Team-game box scores (2015-16+)
+            # - nbl_official.fetch_nbl_pbp() - Play-by-play events (2015-16+)
+            # - nbl_official.fetch_nbl_shots() - Shot locations with (x,y) coordinates (2015-16+)
             fallback_source="api_basketball",  # API-Basketball as backup
-            notes="Phase 3: nblR R package integration complete. Data: results (1979+), box/pbp/shots (2015-16+). Requires R + nblR package.",
+            notes="nblR R package integration COMPLETE. All datasets: schedule (1979+), player/team season+game, pbp, shots (x,y coordinates 2015-16+). Requires: R + nblR/arrow packages.",
         )
     )
 

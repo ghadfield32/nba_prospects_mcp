@@ -483,6 +483,445 @@ def fetch_nbl_player_season(season: str = "2024", per_mode: str = "Totals") -> p
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
 @cached_dataframe
+def fetch_nbl_team_season(season: str = "2024", per_mode: str = "Totals") -> pd.DataFrame:
+    """Fetch NBL team season statistics from nblR box score data
+
+    This aggregates game-level team stats (from nbl_box_team) into season totals.
+
+    Args:
+        season: Season year as string (e.g., "2024")
+        per_mode: "Totals", "PerGame", or "Per40" (note: teams typically use Totals or PerGame)
+
+    Returns:
+        DataFrame with team season statistics
+
+    Columns:
+        - TEAM: Team name
+        - GP: Games played
+        - MIN: Total minutes
+        - PTS, REB, AST, STL, BLK, TOV, PF
+        - FGM, FGA, FG_PCT
+        - FG3M, FG3A, FG3_PCT
+        - FTM, FTA, FT_PCT
+        - OREB, DREB: Offensive/defensive rebounds (if available)
+        - OFF_RATING, DEF_RATING: Average ratings (if available)
+        - LEAGUE: "NBL"
+        - SEASON: Season string
+
+    Note:
+        Data available since 2015-16 season.
+    """
+    logger.info(f"Fetching NBL team season stats via nblR: {season}, {per_mode}")
+
+    try:
+        # Load team box scores from nblR export
+        df = load_nbl_table("nbl_box_team")
+
+        if df.empty:
+            logger.warning("No NBL team box score data found")
+            return _empty_team_season_df()
+
+        # Filter by season
+        season_slug = f"{season}-{str(int(season) + 1)[-2:]}"
+        df = df[df["season_slug"] == season_slug]
+
+        # Aggregate to season totals (group by team)
+        agg_dict = {
+            "match_id": "count",  # GP (games played)
+            "mins": "sum",
+            "pts": "sum",
+            "rebs": "sum",
+            "asts": "sum",
+            "stls": "sum",
+            "blks": "sum",
+            "tovs": "sum",
+            "fouls": "sum",
+            # Shooting stats (need weighted averages for percentages)
+            "fgm": "sum",
+            "fga": "sum",
+            "three_m": "sum",
+            "three_a": "sum",
+            "ftm": "sum",
+            "fta": "sum",
+        }
+
+        # Add optional columns if they exist
+        if "o_rebs" in df.columns:
+            agg_dict["o_rebs"] = "sum"
+        if "d_rebs" in df.columns:
+            agg_dict["d_rebs"] = "sum"
+        if "off_rating" in df.columns:
+            agg_dict["off_rating"] = "mean"
+        if "def_rating" in df.columns:
+            agg_dict["def_rating"] = "mean"
+
+        # Group by team and aggregate
+        season_df = df.groupby("team_name", as_index=False).agg(agg_dict)
+
+        # Calculate shooting percentages
+        season_df["FG_PCT"] = (season_df["fgm"] / season_df["fga"] * 100).fillna(0)
+        season_df["FG3_PCT"] = (season_df["three_m"] / season_df["three_a"] * 100).fillna(0)
+        season_df["FT_PCT"] = (season_df["ftm"] / season_df["fta"] * 100).fillna(0)
+
+        # Rename columns to standard schema
+        rename_dict = {
+            "team_name": "TEAM",
+            "match_id": "GP",
+            "mins": "MIN",
+            "pts": "PTS",
+            "rebs": "REB",
+            "asts": "AST",
+            "stls": "STL",
+            "blks": "BLK",
+            "tovs": "TOV",
+            "fouls": "PF",
+            "fgm": "FGM",
+            "fga": "FGA",
+            "three_m": "FG3M",
+            "three_a": "FG3A",
+            "ftm": "FTM",
+            "fta": "FTA",
+        }
+        if "o_rebs" in season_df.columns:
+            rename_dict["o_rebs"] = "OREB"
+        if "d_rebs" in season_df.columns:
+            rename_dict["d_rebs"] = "DREB"
+        if "off_rating" in season_df.columns:
+            rename_dict["off_rating"] = "OFF_RATING"
+        if "def_rating" in season_df.columns:
+            rename_dict["def_rating"] = "DEF_RATING"
+
+        season_df = season_df.rename(columns=rename_dict)
+
+        # Apply per_mode calculations
+        if per_mode == "PerGame":
+            stat_cols = [
+                "MIN", "PTS", "REB", "AST", "STL", "BLK", "TOV", "PF",
+                "FGM", "FGA", "FG3M", "FG3A", "FTM", "FTA"
+            ]
+            if "OREB" in season_df.columns:
+                stat_cols.extend(["OREB", "DREB"])
+            for col in stat_cols:
+                if col in season_df.columns:
+                    season_df[col] = season_df[col] / season_df["GP"].replace(0, 1)
+
+        elif per_mode == "Per40":
+            stat_cols = [
+                "PTS", "REB", "AST", "STL", "BLK", "TOV", "PF",
+                "FGM", "FGA", "FG3M", "FG3A", "FTM", "FTA"
+            ]
+            if "OREB" in season_df.columns:
+                stat_cols.extend(["OREB", "DREB"])
+            for col in stat_cols:
+                if col in season_df.columns:
+                    season_df[col] = season_df[col] / (season_df["MIN"].replace(0, 1) / 40.0)
+
+        # Add league metadata
+        season_df["LEAGUE"] = "NBL"
+        season_df["SEASON"] = season
+
+        logger.info(f"Fetched {len(season_df)} NBL teams for {season}")
+        return season_df
+
+    except FileNotFoundError:
+        logger.warning("NBL data not yet exported. Run: Rscript tools/nbl/export_nbl.R")
+        return _empty_team_season_df()
+
+    except Exception as e:
+        logger.error(f"Failed to fetch NBL team season stats: {e}")
+        return _empty_team_season_df()
+
+
+@retry_on_error(max_attempts=3, backoff_seconds=2.0)
+@cached_dataframe
+def fetch_nbl_player_game(season: str = "2024") -> pd.DataFrame:
+    """Fetch NBL player-game box scores from nblR
+
+    Returns one row per (GAME_ID, PLAYER_ID) with game-level statistics.
+
+    Args:
+        season: Season year as string (e.g., "2024" for 2024-25 season)
+
+    Returns:
+        DataFrame with player-game box scores
+
+    Columns:
+        - GAME_ID: Game identifier
+        - PLAYER_ID: Player ID
+        - PLAYER_NAME: Player name
+        - TEAM: Team name
+        - MIN: Minutes played
+        - PTS, REB, AST, STL, BLK, TOV, PF
+        - FGM, FGA, FG_PCT
+        - FG3M, FG3A, FG3_PCT
+        - FTM, FTA, FT_PCT
+        - PLUS_MINUS: Plus/minus rating (if available)
+        - LEAGUE: "NBL"
+        - SEASON: Season string
+
+    Note:
+        Data available since 2015-16 season.
+    """
+    logger.info(f"Fetching NBL player-game box scores via nblR: {season}")
+
+    try:
+        # Load player box scores from nblR export
+        df = load_nbl_table("nbl_box_player")
+
+        if df.empty:
+            logger.warning("No NBL player box score data found")
+            return _empty_player_game_df()
+
+        # Filter by season
+        season_slug = f"{season}-{str(int(season) + 1)[-2:]}"
+        df = df[df["season_slug"] == season_slug]
+
+        # Calculate shooting percentages
+        df["FG_PCT"] = (df["fgm"] / df["fga"] * 100).fillna(0)
+        df["FG3_PCT"] = (df["three_m"] / df["three_a"] * 100).fillna(0)
+        df["FT_PCT"] = (df["ftm"] / df["fta"] * 100).fillna(0)
+
+        # Normalize columns to standard schema
+        df = df.rename(
+            columns={
+                "match_id": "GAME_ID",
+                "player_id": "PLAYER_ID",
+                "player_name": "PLAYER_NAME",
+                "team_name": "TEAM",
+                "mins": "MIN",
+                "pts": "PTS",
+                "rebs": "REB",
+                "asts": "AST",
+                "stls": "STL",
+                "blks": "BLK",
+                "tovs": "TOV",
+                "fouls": "PF",
+                "fgm": "FGM",
+                "fga": "FGA",
+                "three_m": "FG3M",
+                "three_a": "FG3A",
+                "ftm": "FTM",
+                "fta": "FTA",
+                "plus_minus": "PLUS_MINUS",
+            }
+        )
+
+        # Add league metadata
+        df["LEAGUE"] = "NBL"
+        df["SEASON"] = season
+
+        # Select columns in standard order
+        standard_cols = [
+            "GAME_ID", "PLAYER_ID", "PLAYER_NAME", "TEAM", "MIN",
+            "PTS", "REB", "AST", "STL", "BLK", "TOV", "PF",
+            "FGM", "FGA", "FG_PCT", "FG3M", "FG3A", "FG3_PCT",
+            "FTM", "FTA", "FT_PCT", "PLUS_MINUS", "LEAGUE", "SEASON"
+        ]
+        df = df[[col for col in standard_cols if col in df.columns]]
+
+        logger.info(f"Fetched {len(df)} NBL player-game records for {season}")
+        return df
+
+    except FileNotFoundError:
+        logger.warning("NBL data not yet exported. Run: Rscript tools/nbl/export_nbl.R")
+        return _empty_player_game_df()
+
+    except Exception as e:
+        logger.error(f"Failed to fetch NBL player-game data: {e}")
+        return _empty_player_game_df()
+
+
+@retry_on_error(max_attempts=3, backoff_seconds=2.0)
+@cached_dataframe
+def fetch_nbl_team_game(season: str = "2024") -> pd.DataFrame:
+    """Fetch NBL team-game box scores from nblR
+
+    Returns one row per (GAME_ID, TEAM) with team-level statistics.
+
+    Args:
+        season: Season year as string (e.g., "2024" for 2024-25 season)
+
+    Returns:
+        DataFrame with team-game box scores
+
+    Columns:
+        - GAME_ID: Game identifier
+        - TEAM: Team name
+        - MIN: Total team minutes (usually 200 for 5 players × 40 min)
+        - PTS, REB, AST, STL, BLK, TOV, PF
+        - FGM, FGA, FG_PCT
+        - FG3M, FG3A, FG3_PCT
+        - FTM, FTA, FT_PCT
+        - OREB, DREB: Offensive/defensive rebounds (if available)
+        - OFF_RATING, DEF_RATING: Offensive/defensive ratings (if available)
+        - LEAGUE: "NBL"
+        - SEASON: Season string
+
+    Note:
+        Data available since 2015-16 season.
+    """
+    logger.info(f"Fetching NBL team-game box scores via nblR: {season}")
+
+    try:
+        # Load team box scores from nblR export
+        df = load_nbl_table("nbl_box_team")
+
+        if df.empty:
+            logger.warning("No NBL team box score data found")
+            return _empty_team_game_df()
+
+        # Filter by season
+        season_slug = f"{season}-{str(int(season) + 1)[-2:]}"
+        df = df[df["season_slug"] == season_slug]
+
+        # Calculate shooting percentages
+        df["FG_PCT"] = (df["fgm"] / df["fga"] * 100).fillna(0)
+        df["FG3_PCT"] = (df["three_m"] / df["three_a"] * 100).fillna(0)
+        df["FT_PCT"] = (df["ftm"] / df["fta"] * 100).fillna(0)
+
+        # Normalize columns to standard schema
+        df = df.rename(
+            columns={
+                "match_id": "GAME_ID",
+                "team_name": "TEAM",
+                "mins": "MIN",
+                "pts": "PTS",
+                "rebs": "REB",
+                "asts": "AST",
+                "stls": "STL",
+                "blks": "BLK",
+                "tovs": "TOV",
+                "fouls": "PF",
+                "fgm": "FGM",
+                "fga": "FGA",
+                "three_m": "FG3M",
+                "three_a": "FG3A",
+                "ftm": "FTM",
+                "fta": "FTA",
+                "o_rebs": "OREB",
+                "d_rebs": "DREB",
+                "off_rating": "OFF_RATING",
+                "def_rating": "DEF_RATING",
+            }
+        )
+
+        # Add league metadata
+        df["LEAGUE"] = "NBL"
+        df["SEASON"] = season
+
+        # Select columns in standard order
+        standard_cols = [
+            "GAME_ID", "TEAM", "MIN",
+            "PTS", "REB", "AST", "STL", "BLK", "TOV", "PF",
+            "FGM", "FGA", "FG_PCT", "FG3M", "FG3A", "FG3_PCT",
+            "FTM", "FTA", "FT_PCT", "OREB", "DREB",
+            "OFF_RATING", "DEF_RATING", "LEAGUE", "SEASON"
+        ]
+        df = df[[col for col in standard_cols if col in df.columns]]
+
+        logger.info(f"Fetched {len(df)} NBL team-game records for {season}")
+        return df
+
+    except FileNotFoundError:
+        logger.warning("NBL data not yet exported. Run: Rscript tools/nbl/export_nbl.R")
+        return _empty_team_game_df()
+
+    except Exception as e:
+        logger.error(f"Failed to fetch NBL team-game data: {e}")
+        return _empty_team_game_df()
+
+
+@retry_on_error(max_attempts=3, backoff_seconds=2.0)
+@cached_dataframe
+def fetch_nbl_pbp(season: str = "2024", game_id: str | None = None) -> pd.DataFrame:
+    """Fetch NBL play-by-play data from nblR
+
+    Returns event-level play-by-play data for games.
+
+    Args:
+        season: Season year as string (e.g., "2024" for 2024-25 season)
+        game_id: Optional game ID to filter (None = all games in season)
+
+    Returns:
+        DataFrame with play-by-play events
+
+    Columns:
+        - GAME_ID: Game identifier
+        - EVENT_NUM: Event sequence number
+        - PERIOD: Quarter number
+        - CLOCK: Game clock (MM:SS)
+        - TEAM: Team name (if event has team)
+        - PLAYER: Player name (if event has player)
+        - EVENT_TYPE: Type of event (shot, foul, turnover, etc.)
+        - DESCRIPTION: Event description
+        - SCORE_HOME: Home team score after event
+        - SCORE_AWAY: Away team score after event
+        - LEAGUE: "NBL"
+        - SEASON: Season string
+
+    Note:
+        Data available since 2015-16 season.
+    """
+    logger.info(f"Fetching NBL play-by-play via nblR: {season}, game_id={game_id}")
+
+    try:
+        # Load play-by-play from nblR export
+        df = load_nbl_table("nbl_pbp")
+
+        if df.empty:
+            logger.warning("No NBL play-by-play data found")
+            return _empty_pbp_df()
+
+        # Filter by season
+        season_slug = f"{season}-{str(int(season) + 1)[-2:]}"
+        df = df[df["season_slug"] == season_slug]
+
+        # Filter by game if specified
+        if game_id:
+            df = df[df["match_id"] == game_id]
+
+        # Normalize columns to standard schema
+        df = df.rename(
+            columns={
+                "match_id": "GAME_ID",
+                "event_num": "EVENT_NUM",
+                "period": "PERIOD",
+                "clock": "CLOCK",
+                "team_name": "TEAM",
+                "player_name": "PLAYER",
+                "event_type": "EVENT_TYPE",
+                "description": "DESCRIPTION",
+                "score_home": "SCORE_HOME",
+                "score_away": "SCORE_AWAY",
+            }
+        )
+
+        # Add league metadata
+        df["LEAGUE"] = "NBL"
+        df["SEASON"] = season
+
+        # Select columns in standard order
+        standard_cols = [
+            "GAME_ID", "EVENT_NUM", "PERIOD", "CLOCK",
+            "TEAM", "PLAYER", "EVENT_TYPE", "DESCRIPTION",
+            "SCORE_HOME", "SCORE_AWAY", "LEAGUE", "SEASON"
+        ]
+        df = df[[col for col in standard_cols if col in df.columns]]
+
+        logger.info(f"Fetched {len(df)} NBL play-by-play events (season={season}, game={game_id or 'all'})")
+        return df
+
+    except FileNotFoundError:
+        logger.warning("NBL data not yet exported. Run: Rscript tools/nbl/export_nbl.R")
+        return _empty_pbp_df()
+
+    except Exception as e:
+        logger.error(f"Failed to fetch NBL play-by-play: {e}")
+        return _empty_pbp_df()
+
+
+@retry_on_error(max_attempts=3, backoff_seconds=2.0)
+@cached_dataframe
 def fetch_nbl_shots(season: str = "2024", game_id: str | None = None) -> pd.DataFrame:
     """Fetch NBL shot chart data with (x, y) coordinates via nblR
 
@@ -662,6 +1101,124 @@ def _empty_player_season_df() -> pd.DataFrame:
             "FTM",
             "FTA",
             "FT_PCT",
+            "LEAGUE",
+            "SEASON",
+        ]
+    )
+
+
+def _empty_team_season_df() -> pd.DataFrame:
+    """Return empty DataFrame with team season schema"""
+    return pd.DataFrame(
+        columns=[
+            "TEAM",
+            "GP",
+            "MIN",
+            "PTS",
+            "REB",
+            "AST",
+            "STL",
+            "BLK",
+            "TOV",
+            "PF",
+            "FGM",
+            "FGA",
+            "FG_PCT",
+            "FG3M",
+            "FG3A",
+            "FG3_PCT",
+            "FTM",
+            "FTA",
+            "FT_PCT",
+            "OREB",
+            "DREB",
+            "OFF_RATING",
+            "DEF_RATING",
+            "LEAGUE",
+            "SEASON",
+        ]
+    )
+
+
+def _empty_player_game_df() -> pd.DataFrame:
+    """Return empty DataFrame with player-game schema"""
+    return pd.DataFrame(
+        columns=[
+            "GAME_ID",
+            "PLAYER_ID",
+            "PLAYER_NAME",
+            "TEAM",
+            "MIN",
+            "PTS",
+            "REB",
+            "AST",
+            "STL",
+            "BLK",
+            "TOV",
+            "PF",
+            "FGM",
+            "FGA",
+            "FG_PCT",
+            "FG3M",
+            "FG3A",
+            "FG3_PCT",
+            "FTM",
+            "FTA",
+            "FT_PCT",
+            "PLUS_MINUS",
+            "LEAGUE",
+            "SEASON",
+        ]
+    )
+
+
+def _empty_team_game_df() -> pd.DataFrame:
+    """Return empty DataFrame with team-game schema"""
+    return pd.DataFrame(
+        columns=[
+            "GAME_ID",
+            "TEAM",
+            "MIN",
+            "PTS",
+            "REB",
+            "AST",
+            "STL",
+            "BLK",
+            "TOV",
+            "PF",
+            "FGM",
+            "FGA",
+            "FG_PCT",
+            "FG3M",
+            "FG3A",
+            "FG3_PCT",
+            "FTM",
+            "FTA",
+            "FT_PCT",
+            "OREB",
+            "DREB",
+            "OFF_RATING",
+            "DEF_RATING",
+            "LEAGUE",
+            "SEASON",
+        ]
+    )
+
+
+def _empty_pbp_df() -> pd.DataFrame:
+    """Return empty DataFrame with play-by-play schema"""
+    return pd.DataFrame(
+        columns=[
+            "GAME_ID",
+            "EVENT_NUM",
+            "PERIOD",
+            "CLOCK",
+            "TEAM",
+            "PLAYER",
+            "EVENT_TYPE",
+            "DESCRIPTION",
+            "SCORE_HOME",
+            "SCORE_AWAY",
             "LEAGUE",
             "SEASON",
         ]
