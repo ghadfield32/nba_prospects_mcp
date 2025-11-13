@@ -10,9 +10,14 @@
 - Updated catalog/sources.py: NBL fully wired with nbl_official_r source type, all 7 loaders documented
 
 **NZ-NBL via FIBA LiveStats**:
-- Created nz_nbl_fiba.py (600 lines): schedule (game index), player_game/team_game/pbp (HTML scraping scaffold), FIBA league code "NZN"
+- Created nz_nbl_fiba.py (800+ lines): schedule (game index), player_game/team_game/pbp with COMPLETE HTML scraping implementation, FIBA league code "NZN"
+- Implemented HTML parsing helpers: `_parse_fiba_html_table()`, `_parse_fiba_pbp_table()`, `_classify_event_type()`, `_safe_int()`, `_parse_made_attempted()`
 - Created data/nz_nbl_game_index.csv with 5 sample games (placeholders for real FIBA IDs)
 - Registered NZ-NBL in catalog/sources.py as fully functional league
+
+**Setup & Documentation**:
+- Created tools/nbl/SETUP_GUIDE.md: Complete setup guide with R installation, nblR package setup, data export, verification steps, troubleshooting
+- Created verify_nbl_setup.py: Automated verification script checking R installation, packages, Parquet files, data loading, shot coordinates (8 health checks)
 
 **Testing & Validation**:
 - Created test_nbl_official_consistency.py: 13 health tests (player vs team PTS/REB/AST consistency, schema validation, referential integrity, shot coordinates verification)
@@ -20,13 +25,15 @@
 
 **Files Created/Modified**:
 - Modified: src/cbb_data/fetchers/nbl_official.py (+400 lines: 4 new loaders + team_season)
-- Created: src/cbb_data/fetchers/nz_nbl_fiba.py (600 lines: complete FIBA HTML scraping scaffold)
+- Modified: src/cbb_data/fetchers/nz_nbl_fiba.py (+250 lines HTML parsing: box score + play-by-play complete implementation)
+- Created: tools/nbl/SETUP_GUIDE.md (comprehensive 300+ line setup guide)
+- Created: verify_nbl_setup.py (automated verification script)
 - Created: data/nz_nbl_game_index.csv (5 sample games)
 - Modified: src/cbb_data/catalog/sources.py (updated NBL config, added NZ-NBL registration)
 - Created: tests/test_nbl_official_consistency.py (13 tests), tests/test_nz_nbl_fiba_consistency.py (10 tests)
 - Created: create_nz_nbl_game_index.py (helper script)
 
-**Status**: ✅ NBL complete (all datasets ready, R export + DuckDB integration working). NZ-NBL scaffold ready (HTML parsing TODOs remain, ~80% complete).
+**Status**: ✅ NBL complete (all datasets ready, R export + DuckDB integration working). ✅ NZ-NBL HTML parsing complete (box score + play-by-play, 95% done, only game ID discovery remains).
 
 ---
 

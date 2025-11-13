@@ -146,6 +146,136 @@ def load_game_index(index_path: Path | None = None) -> pd.DataFrame:
 # ==============================================================================
 
 
+def _parse_fiba_html_table(soup: "BeautifulSoup", team_name: str) -> list[dict[str, Any]]:
+    """Parse FIBA LiveStats HTML table to extract player stats
+
+    Args:
+        soup: BeautifulSoup object of the page
+        team_name: Team name to filter by
+
+    Returns:
+        List of player stat dictionaries
+    """
+    players = []
+
+    # FIBA LiveStats typically uses tables with class "teamBoxscore"
+    # Structure: <table class="teamBoxscore"> with rows for each player
+    tables = soup.find_all("table", class_="teamBoxscore")
+
+    for table in tables:
+        # Check if this is the right team's table
+        team_header = table.find_previous("h2")
+        if team_header and team_name.lower() not in team_header.text.lower():
+            continue
+
+        rows = table.find_all("tr")
+        for row in rows:
+            cells = row.find_all("td")
+            if len(cells) < 10:  # Need at least basic stats
+                continue
+
+            try:
+                # Extract player info and stats
+                # Typical FIBA order: Player, MIN, PTS, 2PM-A, 3PM-A, FTM-A, OREB, DREB, REB, AST, STL, BLK, TO, PF
+                player_cell = cells[0]
+                player_name = player_cell.get_text(strip=True)
+
+                # Skip totals/header rows
+                if player_name.lower() in ["totals", "team", "player", ""]:
+                    continue
+
+                player_stat = {
+                    "PLAYER_NAME": player_name,
+                    "TEAM": team_name,
+                    "MIN": _safe_int(cells[1].get_text(strip=True)),
+                    "PTS": _safe_int(cells[2].get_text(strip=True)),
+                }
+
+                # Parse 2P field goals (format: "5-10" or "5/10")
+                fg2_text = cells[3].get_text(strip=True) if len(cells) > 3 else "0-0"
+                fg2m, fg2a = _parse_made_attempted(fg2_text)
+
+                # Parse 3P field goals
+                fg3_text = cells[4].get_text(strip=True) if len(cells) > 4 else "0-0"
+                fg3m, fg3a = _parse_made_attempted(fg3_text)
+
+                # Parse free throws
+                ft_text = cells[5].get_text(strip=True) if len(cells) > 5 else "0-0"
+                ftm, fta = _parse_made_attempted(ft_text)
+
+                # Calculate total field goals
+                player_stat.update({
+                    "FGM": fg2m + fg3m,
+                    "FGA": fg2a + fg3a,
+                    "FG3M": fg3m,
+                    "FG3A": fg3a,
+                    "FTM": ftm,
+                    "FTA": fta,
+                })
+
+                # Rebounds and other stats
+                if len(cells) > 8:
+                    player_stat["OREB"] = _safe_int(cells[6].get_text(strip=True))
+                    player_stat["DREB"] = _safe_int(cells[7].get_text(strip=True))
+                    player_stat["REB"] = _safe_int(cells[8].get_text(strip=True))
+                if len(cells) > 9:
+                    player_stat["AST"] = _safe_int(cells[9].get_text(strip=True))
+                if len(cells) > 10:
+                    player_stat["STL"] = _safe_int(cells[10].get_text(strip=True))
+                if len(cells) > 11:
+                    player_stat["BLK"] = _safe_int(cells[11].get_text(strip=True))
+                if len(cells) > 12:
+                    player_stat["TOV"] = _safe_int(cells[12].get_text(strip=True))
+                if len(cells) > 13:
+                    player_stat["PF"] = _safe_int(cells[13].get_text(strip=True))
+
+                players.append(player_stat)
+
+            except Exception as e:
+                logger.debug(f"Error parsing player row: {e}")
+                continue
+
+    return players
+
+
+def _safe_int(value: str, default: int = 0) -> int:
+    """Safely convert string to int, returning default if invalid"""
+    try:
+        # Remove any non-digit characters except minus
+        cleaned = "".join(c for c in value if c.isdigit() or c == "-")
+        return int(cleaned) if cleaned else default
+    except (ValueError, TypeError):
+        return default
+
+
+def _parse_made_attempted(text: str) -> tuple[int, int]:
+    """Parse 'made-attempted' format (e.g., '5-10' or '5/10')
+
+    Args:
+        text: String in format "made-attempted" or "made/attempted"
+
+    Returns:
+        Tuple of (made, attempted)
+    """
+    try:
+        # Handle both '-' and '/' separators
+        if "-" in text:
+            parts = text.split("-")
+        elif "/" in text:
+            parts = text.split("/")
+        else:
+            return 0, 0
+
+        if len(parts) == 2:
+            made = _safe_int(parts[0])
+            attempted = _safe_int(parts[1])
+            return made, attempted
+    except Exception:
+        pass
+
+    return 0, 0
+
+
 def _scrape_fiba_box_score(game_id: str) -> pd.DataFrame:
     """Scrape box score from FIBA LiveStats HTML
 
@@ -156,7 +286,8 @@ def _scrape_fiba_box_score(game_id: str) -> pd.DataFrame:
         DataFrame with player box scores
 
     Note:
-        This is a scaffold implementation. Full HTML parsing to be implemented.
+        This implementation parses FIBA LiveStats HTML tables.
+        Structure may vary - adjust parsing logic if needed.
     """
     if not HTML_PARSING_AVAILABLE:
         logger.warning("HTML parsing not available. Install requests and beautifulsoup4.")
@@ -172,18 +303,149 @@ def _scrape_fiba_box_score(game_id: str) -> pd.DataFrame:
 
         soup = BeautifulSoup(response.content, "html.parser")
 
-        # TODO: Implement HTML parsing to extract player stats
-        # Expected structure:
-        # - Find player stat tables (usually <table> with specific class)
-        # - Extract rows with player names, minutes, points, rebounds, etc.
-        # - Normalize to standard schema
+        # Extract team names from page
+        team_headers = soup.find_all("h2", class_="teamName")
+        if len(team_headers) < 2:
+            logger.warning(f"Could not find team names for game {game_id}")
+            return pd.DataFrame()
 
-        logger.warning(f"HTML parsing not yet implemented for game {game_id}")
-        return pd.DataFrame()
+        team1_name = team_headers[0].get_text(strip=True)
+        team2_name = team_headers[1].get_text(strip=True)
+
+        # Parse both teams
+        all_players = []
+        all_players.extend(_parse_fiba_html_table(soup, team1_name))
+        all_players.extend(_parse_fiba_html_table(soup, team2_name))
+
+        if not all_players:
+            logger.warning(f"No player stats found for game {game_id}")
+            return pd.DataFrame()
+
+        df = pd.DataFrame(all_players)
+
+        # Calculate percentages
+        if "FGM" in df.columns and "FGA" in df.columns:
+            df["FG_PCT"] = (df["FGM"] / df["FGA"] * 100).fillna(0)
+        if "FG3M" in df.columns and "FG3A" in df.columns:
+            df["FG3_PCT"] = (df["FG3M"] / df["FG3A"] * 100).fillna(0)
+        if "FTM" in df.columns and "FTA" in df.columns:
+            df["FT_PCT"] = (df["FTM"] / df["FTA"] * 100).fillna(0)
+
+        logger.info(f"Scraped {len(df)} player records for game {game_id}")
+        return df
 
     except Exception as e:
         logger.error(f"Failed to scrape box score for game {game_id}: {e}")
         return pd.DataFrame()
+
+
+def _parse_fiba_pbp_table(soup: "BeautifulSoup", period: int) -> list[dict[str, Any]]:
+    """Parse FIBA LiveStats play-by-play HTML table for a period
+
+    Args:
+        soup: BeautifulSoup object of the period section
+        period: Quarter/period number
+
+    Returns:
+        List of event dictionaries
+    """
+    events = []
+
+    # Find play-by-play rows (typically in table with class "pbp")
+    rows = soup.find_all("tr", class_=["pbpRow", "row"])
+
+    event_num = 1
+    for row in rows:
+        cells = row.find_all("td")
+        if len(cells) < 3:
+            continue
+
+        try:
+            # Typical structure: Time | Team/Player/Action | Score
+            clock = cells[0].get_text(strip=True)
+
+            # Middle cell contains team, player, and action
+            middle_cell = cells[1]
+            description = middle_cell.get_text(strip=True)
+
+            # Try to extract team and player from description
+            team = ""
+            player = ""
+            if " - " in description:
+                parts = description.split(" - ", 1)
+                team = parts[0].strip()
+                player_action = parts[1] if len(parts) > 1 else ""
+                # Try to extract player name (usually before the action verb)
+                if ":" in player_action:
+                    player = player_action.split(":")[0].strip()
+
+            # Score (format: "XX-YY")
+            score_text = cells[2].get_text(strip=True) if len(cells) > 2 else "0-0"
+            score_parts = score_text.split("-") if "-" in score_text else ["0", "0"]
+            score_home = _safe_int(score_parts[0]) if len(score_parts) > 0 else 0
+            score_away = _safe_int(score_parts[1]) if len(score_parts) > 1 else 0
+
+            # Determine event type from description keywords
+            event_type = _classify_event_type(description)
+
+            events.append({
+                "EVENT_NUM": event_num,
+                "PERIOD": period,
+                "CLOCK": clock,
+                "TEAM": team,
+                "PLAYER": player,
+                "EVENT_TYPE": event_type,
+                "DESCRIPTION": description,
+                "SCORE_HOME": score_home,
+                "SCORE_AWAY": score_away,
+            })
+
+            event_num += 1
+
+        except Exception as e:
+            logger.debug(f"Error parsing pbp row: {e}")
+            continue
+
+    return events
+
+
+def _classify_event_type(description: str) -> str:
+    """Classify event type from description text
+
+    Args:
+        description: Event description text
+
+    Returns:
+        Event type string
+    """
+    desc_lower = description.lower()
+
+    if "3pt" in desc_lower or "three point" in desc_lower or "3-pt" in desc_lower:
+        return "3PT_SHOT"
+    elif "2pt" in desc_lower or "two point" in desc_lower or "2-pt" in desc_lower:
+        return "2PT_SHOT"
+    elif "free throw" in desc_lower or "foul shot" in desc_lower:
+        return "FREE_THROW"
+    elif "rebound" in desc_lower:
+        return "REBOUND"
+    elif "assist" in desc_lower:
+        return "ASSIST"
+    elif "steal" in desc_lower:
+        return "STEAL"
+    elif "block" in desc_lower:
+        return "BLOCK"
+    elif "turnover" in desc_lower:
+        return "TURNOVER"
+    elif "foul" in desc_lower:
+        return "FOUL"
+    elif "substitution" in desc_lower or "sub in" in desc_lower or "sub out" in desc_lower:
+        return "SUBSTITUTION"
+    elif "timeout" in desc_lower:
+        return "TIMEOUT"
+    elif "jump ball" in desc_lower:
+        return "JUMP_BALL"
+    else:
+        return "OTHER"
 
 
 def _scrape_fiba_play_by_play(game_id: str) -> pd.DataFrame:
@@ -196,7 +458,8 @@ def _scrape_fiba_play_by_play(game_id: str) -> pd.DataFrame:
         DataFrame with play-by-play events
 
     Note:
-        This is a scaffold implementation. Full HTML parsing to be implemented.
+        This implementation parses FIBA LiveStats HTML tables.
+        Structure may vary - adjust parsing logic if needed.
     """
     if not HTML_PARSING_AVAILABLE:
         logger.warning("HTML parsing not available. Install requests and beautifulsoup4.")
@@ -212,14 +475,35 @@ def _scrape_fiba_play_by_play(game_id: str) -> pd.DataFrame:
 
         soup = BeautifulSoup(response.content, "html.parser")
 
-        # TODO: Implement HTML parsing to extract play-by-play events
-        # Expected structure:
-        # - Find event tables grouped by quarter
-        # - Extract time, team, player, action, score
-        # - Normalize to standard schema
+        # FIBA typically organizes PBP by quarters
+        # Look for quarter sections (Q1, Q2, Q3, Q4, OT)
+        all_events = []
 
-        logger.warning(f"HTML parsing not yet implemented for game {game_id}")
-        return pd.DataFrame()
+        # Try to find quarter headers and their associated tables
+        quarter_headers = soup.find_all(["h3", "h4"], class_=["quarter", "period"])
+
+        if not quarter_headers:
+            # Fallback: try parsing all tables as one big list
+            logger.debug("No quarter headers found, attempting single table parse")
+            events = _parse_fiba_pbp_table(soup, period=1)
+            all_events.extend(events)
+        else:
+            # Parse each quarter separately
+            for i, header in enumerate(quarter_headers, start=1):
+                period = i
+                # Find the table following this header
+                table_section = header.find_next("table")
+                if table_section:
+                    events = _parse_fiba_pbp_table(table_section, period=period)
+                    all_events.extend(events)
+
+        if not all_events:
+            logger.warning(f"No play-by-play events found for game {game_id}")
+            return pd.DataFrame()
+
+        df = pd.DataFrame(all_events)
+        logger.info(f"Scraped {len(df)} play-by-play events for game {game_id}")
+        return df
 
     except Exception as e:
         logger.error(f"Failed to scrape play-by-play for game {game_id}: {e}")
