@@ -31,10 +31,14 @@ League = Literal[
     "EuroCup",  # EuroCup
     "ACB",  # Spanish Liga ACB
     "LNB",  # French LNB Pro A
+    "LNB_PROA",  # French LNB Pro A (alternative identifier)
     "BBL",  # German Basketball Bundesliga
     "BSL",  # Turkish Basketball Super League
     "LBA",  # Italian Lega Basket Serie A
     "BCL",  # Basketball Champions League
+    "ABA",  # ABA League (Adriatic)
+    "BAL",  # Basketball Africa League
+    "LKL",  # LKL Lithuania
     # International
     "NBL",  # Australia NBL
     "FIBA",  # FIBA competitions (World Cup, Olympics, etc.)

@@ -138,7 +138,8 @@ def _make_fiba_request(endpoint: str, params: dict[str, Any] | None = None) -> d
     try:
         response = requests.get(url, headers=FIBA_HEADERS, params=params, timeout=30)
         response.raise_for_status()
-        return response.json()
+        data: dict[str, Any] = response.json()
+        return data
     except requests.exceptions.RequestException as e:
         logger.error(f"FIBA LiveStats request failed: {url} - {e}")
         raise

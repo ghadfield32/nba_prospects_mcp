@@ -1,41 +1,45 @@
-"""NBL Australia Fetcher
+"""LKL (Lithuania) Fetcher
 
-Official NBL Australia stats portal scraper.
+Official LKL (Lithuanian Basketball League) stats portal scraper.
 
-Australia's premier professional basketball league featuring top domestic and international talent.
-Known for developing NBA prospects including Josh Giddey, Dyson Daniels, and many others.
+LKL (Lietuvos Krepšinio Lyga) is Lithuania's top-tier professional basketball league,
+featuring 10-12 teams. Lithuania has a rich basketball tradition and is known for
+developing NBA talent including Arvydas Sabonis, Šarūnas Marčiulionis, Žydrūnas Ilgauskas,
+Domantas Sabonis, and Jonas Valančiūnas.
 
 ⚠️ **DATA AVAILABILITY**:
 - **Player/Team season stats**: ❌ Unavailable (JavaScript-rendered site)
 - **Schedule/Box scores**: ⚠️ Limited (requires implementation)
 
 Key Features:
-- Web scraping from official nbl.com.au pages
+- Web scraping from official lkl.lt pages
 - Graceful degradation for JavaScript-rendered content
 - Rate-limited requests with retry logic
+- UTF-8 support for Lithuanian names (special characters: ė, ų, ū, ą, č, š, ž)
 
 Data Granularities:
 - schedule: ⚠️ Limited (requires HTML/API parsing)
 - player_game: ⚠️ Limited (box scores require scraping)
 - team_game: ⚠️ Limited (team stats require scraping)
-- pbp: ❌ Unavailable (requires FIBA LiveStats auth)
-- shots: ❌ Unavailable (requires FIBA LiveStats auth)
+- pbp: ❌ Unavailable (not published publicly)
+- shots: ❌ Unavailable (not published publicly)
 - player_season: ❌ Unavailable (JavaScript-rendered)
 - team_season: ❌ Unavailable (JavaScript-rendered)
 
 Competition Structure:
-- Regular Season: 10 teams (varies by year)
-- Finals: Top teams advance to playoffs
-- Typical season: October-March
+- Regular Season: 10-12 teams (varies by year)
+- Playoffs: Top teams advance to playoffs
+- Finals: Best-of-7 series
+- Typical season: September-May
 
 Historical Context:
-- Founded: 1979
-- Prominent teams: Sydney Kings, Melbourne United, Perth Wildcats
-- NBA pipeline: Josh Giddey, Dyson Daniels, Patty Mills, Matthew Dellavedova
-- Strong development pathway to NBA
+- Founded: 1993 (after Soviet Union dissolution)
+- Prominent teams: Žalgiris Kaunas, Rytas Vilnius, Lietkabelis
+- NBA pipeline: Arvydas Sabonis, Šarūnas Marčiulionis, Žydrūnas Ilgauskas, Domantas Sabonis, Jonas Valančiūnas
+- Strong basketball culture (EuroLeague participants)
 
-Documentation: https://www.nbl.com.au/
-Data Source: https://www.nbl.com.au/stats/statistics
+Documentation: https://www.lkl.lt/
+Data Source: https://www.lkl.lt/statistika
 
 Implementation Status:
 ✅ IMPLEMENTED - Season aggregate functions with graceful degradation
@@ -46,6 +50,7 @@ Technical Notes:
 - Static HTML scraping returns no tables
 - Requires Selenium/Playwright or API discovery for implementation
 - Rate limiting: 1 req/sec to respect website resources
+- Encoding: UTF-8 for Lithuanian names (ė, ų, ū, ą, č, š, ž)
 """
 
 from __future__ import annotations
@@ -63,22 +68,22 @@ logger = logging.getLogger(__name__)
 # Get rate limiter
 rate_limiter = get_source_limiter()
 
-# NBL URLs
-NBL_BASE_URL = "https://www.nbl.com.au"
-NBL_STATS_URL = f"{NBL_BASE_URL}/stats/statistics"
-NBL_PLAYERS_URL = f"{NBL_BASE_URL}/stats/players"
-NBL_TEAMS_URL = f"{NBL_BASE_URL}/standings"
+# LKL URLs
+LKL_BASE_URL = "https://www.lkl.lt"
+LKL_STATS_URL = f"{LKL_BASE_URL}/statistika"
+LKL_PLAYERS_URL = f"{LKL_BASE_URL}/statistika/zaidejai"
+LKL_TEAMS_URL = f"{LKL_BASE_URL}/turnyrine-lentele"
 
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
 @cached_dataframe
-def fetch_nbl_player_season(
+def fetch_lkl_player_season(
     season: str = "2024",
     per_mode: str = "Totals",
 ) -> pd.DataFrame:
-    """Fetch NBL Australia player season statistics
+    """Fetch LKL (Lithuania) player season statistics
 
-    ⚠️ LIMITATION: NBL website uses JavaScript-rendered statistics.
+    ⚠️ LIMITATION: LKL website uses JavaScript-rendered statistics.
     Returns empty DataFrame with correct schema for graceful degradation.
 
     Args:
@@ -100,45 +105,46 @@ def fetch_nbl_player_season(
         - BLK: Blocks
         - TOV: Turnovers
         - PF: Personal fouls
-        - LEAGUE: "NBL"
+        - LEAGUE: "LKL"
         - SEASON: Season string
-        - COMPETITION: "NBL Australia"
+        - COMPETITION: "LKL Lithuania"
 
     Note:
         Requires Selenium/Playwright or API discovery for actual implementation.
         See LEAGUE_WEB_SCRAPING_FINDINGS.md for details.
     """
-    rate_limiter.acquire("nbl")
+    rate_limiter.acquire("lkl")
 
-    logger.info(f"Fetching NBL player season stats: {season}, {per_mode}")
+    logger.info(f"Fetching LKL player season stats: {season}, {per_mode}")
 
     try:
         # Attempt to fetch HTML table (will fail for JS-rendered site)
         df = read_first_table(
-            url=NBL_STATS_URL,
+            url=LKL_PLAYERS_URL,
             min_columns=5,
             min_rows=10,
         )
 
+        # Lithuanian column names mapping (if available)
         column_map = {
-            "Player": "PLAYER_NAME",
-            "Team": "TEAM",
-            "Games": "GP",
-            "Minutes": "MIN",
-            "Points": "PTS",
-            "Rebounds": "REB",
-            "Assists": "AST",
-            "Steals": "STL",
-            "Blocks": "BLK",
-            "Turnovers": "TOV",
-            "Fouls": "PF",
+            "Žaidėjas": "PLAYER_NAME",  # Player
+            "Komanda": "TEAM",  # Team
+            "Rungtynės": "GP",  # Games
+            "Minutės": "MIN",  # Minutes
+            "Taškai": "PTS",  # Points
+            "Atkovoti": "REB",  # Rebounds
+            "Rezultatyvūs": "AST",  # Assists
+            "Perimti": "STL",  # Steals
+            "Blokuoti": "BLK",  # Blocks
+            "Klaidos": "TOV",  # Turnovers
+            "Pražangos": "PF",  # Fouls
         }
 
         df = normalize_league_columns(
             df=df,
-            league="NBL",
+            league="LKL",
             season=season,
-            competition="NBL Australia",
+            competition="LKL Lithuania",
             column_map=column_map,
         )
 
@@ -152,7 +158,7 @@ def fetch_nbl_player_season(
         return df
 
     except Exception as e:
-        logger.error(f"Failed to fetch NBL player season stats: {e}")
+        logger.error(f"Failed to fetch LKL player season stats: {e}")
         # Return empty DataFrame with correct schema (graceful degradation)
         return pd.DataFrame(
             columns=[
@@ -176,12 +182,12 @@ def fetch_nbl_player_season(
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
 @cached_dataframe
-def fetch_nbl_team_season(
+def fetch_lkl_team_season(
     season: str = "2024",
 ) -> pd.DataFrame:
-    """Fetch NBL Australia team season statistics/standings
+    """Fetch LKL (Lithuania) team season statistics/standings
 
-    ⚠️ LIMITATION: NBL website uses JavaScript-rendered statistics.
+    ⚠️ LIMITATION: LKL website uses JavaScript-rendered statistics.
     Returns empty DataFrame with correct schema for graceful degradation.
 
     Args:
@@ -198,37 +204,38 @@ def fetch_nbl_team_season(
         - WIN_PCT: Win percentage
         - PTS: Points scored
         - OPP_PTS: Opponent points
-        - LEAGUE: "NBL"
+        - LEAGUE: "LKL"
         - SEASON: Season string
-        - COMPETITION: "NBL Australia"
+        - COMPETITION: "LKL Lithuania"
 
     Note:
         Requires Selenium/Playwright or API discovery for actual implementation.
     """
-    rate_limiter.acquire("nbl")
+    rate_limiter.acquire("lkl")
 
-    logger.info(f"Fetching NBL team season stats: {season}")
+    logger.info(f"Fetching LKL team season stats: {season}")
 
     try:
         df = read_first_table(
-            url=NBL_TEAMS_URL,
+            url=LKL_TEAMS_URL,
             min_columns=5,
             min_rows=5,
         )
 
+        # Lithuanian column names mapping (if available)
         column_map = {
-            "Team": "TEAM",
-            "Games": "GP",
-            "Wins": "W",
-            "Losses": "L",
-            "Points": "PTS",
+            "Komanda": "TEAM",  # Team
+            "Rungtynės": "GP",  # Games
+            "Pergalės": "W",  # Wins
+            "Pralaimėjimai": "L",  # Losses
+            "Taškai": "PTS",  # Points
         }
 
         df = normalize_league_columns(
             df=df,
-            league="NBL",
+            league="LKL",
             season=season,
-            competition="NBL Australia",
+            competition="LKL Lithuania",
             column_map=column_map,
         )
 
@@ -239,7 +246,7 @@ def fetch_nbl_team_season(
         return df
 
     except Exception as e:
-        logger.error(f"Failed to fetch NBL team season stats: {e}")
+        logger.error(f"Failed to fetch LKL team season stats: {e}")
         return pd.DataFrame(
             columns=["TEAM", "GP", "W", "L", "WIN_PCT", "PTS", "LEAGUE", "SEASON", "COMPETITION"]
         )
@@ -250,11 +257,11 @@ def fetch_nbl_team_season(
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
 @cached_dataframe
-def fetch_nbl_schedule(
+def fetch_lkl_schedule(
     season: str = "2024-25",
     season_type: str = "Regular Season",
 ) -> pd.DataFrame:
-    """Fetch NBL Australia schedule (placeholder)
+    """Fetch LKL schedule (placeholder)
 
     Note: Requires HTML/API parsing implementation. Currently returns empty
     DataFrame with correct schema.
@@ -277,20 +284,16 @@ def fetch_nbl_schedule(
         - HOME_SCORE: Home team score
         - AWAY_SCORE: Away team score
         - VENUE: Arena name
-        - LEAGUE: "NBL"
+        - LEAGUE: "LKL"
 
-    TODO: Implement NBL schedule scraping
-    - Study nblR package patterns: https://github.com/JaseZiv/nblR
-    - NBL may have JSON endpoints used by their website
+    TODO: Implement LKL schedule scraping
+    - Check LKL website for JSON endpoints
     - Check network tab in browser for API calls
     """
-    logger.info(f"Fetching NBL schedule: {season}, {season_type}")
+    logger.info(f"Fetching LKL schedule: {season}, {season_type}")
 
     # TODO: Implement scraping/API logic
-    logger.warning(
-        "NBL schedule fetching requires implementation. "
-        "Reference nblR package for scraping patterns. Returning empty DataFrame."
-    )
+    logger.warning("LKL schedule fetching requires implementation. " "Returning empty DataFrame.")
 
     df = pd.DataFrame(
         columns=[
@@ -308,21 +311,21 @@ def fetch_nbl_schedule(
         ]
     )
 
-    df["LEAGUE"] = "NBL"
+    df["LEAGUE"] = "LKL"
 
-    logger.info(f"Fetched {len(df)} NBL games (scaffold mode)")
+    logger.info(f"Fetched {len(df)} LKL games (scaffold mode)")
     return df
 
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
 @cached_dataframe
-def fetch_nbl_box_score(game_id: str) -> pd.DataFrame:
-    """Fetch NBL box score for a game
+def fetch_lkl_box_score(game_id: str) -> pd.DataFrame:
+    """Fetch LKL box score for a game
 
     Note: Requires implementation. Currently returns empty DataFrame.
 
     Args:
-        game_id: Game ID (NBL game identifier)
+        game_id: Game ID (LKL game identifier)
 
     Returns:
         DataFrame with player box scores
@@ -345,17 +348,15 @@ def fetch_nbl_box_score(game_id: str) -> pd.DataFrame:
         - TOV: Turnovers
         - PF: Personal fouls
         - PLUS_MINUS: Plus/minus
-        - LEAGUE: "NBL"
+        - LEAGUE: "LKL"
 
-    TODO: Implement NBL box score scraping
-    - URL pattern likely: https://www.nbl.com.au/games/{season}/{game_id}
-    - Study nblR package for box score extraction patterns
+    TODO: Implement LKL box score scraping
     """
-    logger.info(f"Fetching NBL box score: {game_id}")
+    logger.info(f"Fetching LKL box score: {game_id}")
 
     # TODO: Implement scraping logic
     logger.warning(
-        f"NBL box score fetching for game {game_id} requires implementation. "
+        f"LKL box score fetching for game {game_id} requires implementation. "
         "Returning empty DataFrame."
     )
 
@@ -390,7 +391,7 @@ def fetch_nbl_box_score(game_id: str) -> pd.DataFrame:
         ]
     )
 
-    df["LEAGUE"] = "NBL"
+    df["LEAGUE"] = "LKL"
     df["GAME_ID"] = game_id
 
     logger.info(f"Fetched box score: {len(df)} players (scaffold mode)")
@@ -399,11 +400,11 @@ def fetch_nbl_box_score(game_id: str) -> pd.DataFrame:
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
 @cached_dataframe
-def fetch_nbl_play_by_play(game_id: str) -> pd.DataFrame:
-    """Fetch NBL play-by-play data
+def fetch_lkl_play_by_play(game_id: str) -> pd.DataFrame:
+    """Fetch LKL play-by-play data
 
-    Note: Limited availability. Some NBL games use FIBA LiveStats, which
-    requires authentication. This function returns empty DataFrame.
+    Note: Limited availability. LKL does not publish detailed play-by-play
+    publicly. This function returns empty DataFrame.
 
     Args:
         game_id: Game ID
@@ -412,13 +413,11 @@ def fetch_nbl_play_by_play(game_id: str) -> pd.DataFrame:
         Empty DataFrame (PBP limited availability)
 
     Implementation Notes:
-        - Some games may have FIBA LiveStats feeds (requires auth)
-        - NBL website may have basic play logs (requires scraping)
-        - See: https://developer.geniussports.com/livestats/tvfeed/
+        - LKL website may have basic play logs (requires scraping)
+        - No known public API for play-by-play data
     """
     logger.warning(
-        f"NBL play-by-play for game {game_id} has limited availability. "
-        "Some games use FIBA LiveStats (requires authentication)."
+        f"LKL play-by-play for game {game_id} has limited availability. " "Not published publicly."
     )
 
     df = pd.DataFrame(
@@ -433,7 +432,7 @@ def fetch_nbl_play_by_play(game_id: str) -> pd.DataFrame:
         ]
     )
 
-    df["LEAGUE"] = "NBL"
+    df["LEAGUE"] = "LKL"
     df["GAME_ID"] = game_id
 
     return df
@@ -441,11 +440,11 @@ def fetch_nbl_play_by_play(game_id: str) -> pd.DataFrame:
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
 @cached_dataframe
-def fetch_nbl_shot_chart(game_id: str) -> pd.DataFrame:
-    """Fetch NBL shot chart data
+def fetch_lkl_shot_chart(game_id: str) -> pd.DataFrame:
+    """Fetch LKL shot chart data
 
-    Note: Shot chart data has limited availability. Requires FIBA LiveStats
-    for detailed coordinates. This function returns empty DataFrame.
+    Note: Shot chart data has limited availability. Not published publicly.
+    This function returns empty DataFrame.
 
     Args:
         game_id: Game ID
@@ -454,12 +453,11 @@ def fetch_nbl_shot_chart(game_id: str) -> pd.DataFrame:
         Empty DataFrame (shot data limited availability)
 
     Implementation Notes:
-        - FIBA LiveStats may be available for some games (requires auth)
-        - NBL website may have basic shot location data (requires research)
+        - LKL website may have basic shot location data (requires research)
+        - No known public API for shot chart data
     """
     logger.warning(
-        f"NBL shot chart for game {game_id} has limited availability. "
-        "May require FIBA LiveStats authentication."
+        f"LKL shot chart for game {game_id} has limited availability. " "Not published publicly."
     )
 
     df = pd.DataFrame(
@@ -479,7 +477,7 @@ def fetch_nbl_shot_chart(game_id: str) -> pd.DataFrame:
         ]
     )
 
-    df["LEAGUE"] = "NBL"
+    df["LEAGUE"] = "LKL"
     df["GAME_ID"] = game_id
 
     return df

@@ -78,7 +78,8 @@ def _make_wnba_request(endpoint: str, params: dict) -> dict:
     try:
         response = requests.get(url, headers=WNBA_HEADERS, params=params, timeout=30)
         response.raise_for_status()
-        return response.json()
+        data: dict = response.json()
+        return data
     except requests.exceptions.RequestException as e:
         logger.error(f"WNBA API request failed: {url} - {e}")
         raise

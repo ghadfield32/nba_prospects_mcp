@@ -53,6 +53,14 @@ LEAGUE_LEVELS: dict[str, LevelType] = {
     "EuroCup": "prepro",  # EuroLeague's second-tier competition with NBA prospects
     "G-League": "prepro",  # Official NBA development league
     "CEBL": "prepro",  # Canadian Elite Basketball League with NBA prospects
+    # European & International Pre-Professional Leagues
+    "ABA": "prepro",  # ABA League (Adriatic) - Balkan region pre-NBA prospects
+    "ACB": "prepro",  # Liga Endesa (Spain) - Spanish league (Gasol brothers, Ricky Rubio pipeline)
+    "BAL": "prepro",  # Basketball Africa League - NBA-operated African league
+    "BCL": "prepro",  # Basketball Champions League - FIBA European competition
+    "LKL": "prepro",  # LKL Lithuania - Lithuanian league (Sabonis family, Valančiūnas pipeline)
+    "LNB_PROA": "prepro",  # LNB Pro A (France) - French top-tier league (Wembanyama, Gobert pipeline)
+    "NBL": "prepro",  # NBL Australia - Australian league (Josh Giddey, Dyson Daniels pipeline)
     # Professional Leagues (EXCLUDED by default)
     "WNBA": "pro",  # Women's professional league (not pre-NBA)
 }

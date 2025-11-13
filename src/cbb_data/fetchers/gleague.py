@@ -72,7 +72,8 @@ def _make_gleague_request(endpoint: str, params: dict) -> dict:
     try:
         response = requests.get(url, headers=GLEAGUE_HEADERS, params=params, timeout=30)
         response.raise_for_status()
-        return response.json()
+        data: dict = response.json()
+        return data
     except requests.exceptions.RequestException as e:
         logger.error(f"G League API request failed: {url} - {e}")
         raise

@@ -1,41 +1,44 @@
-"""NBL Australia Fetcher
+"""ACB (Liga Endesa - Spain) Fetcher
 
-Official NBL Australia stats portal scraper.
+Official ACB (Spanish professional basketball) stats portal scraper.
 
-Australia's premier professional basketball league featuring top domestic and international talent.
-Known for developing NBA prospects including Josh Giddey, Dyson Daniels, and many others.
+ACB (Asociación de Clubes de Baloncesto) is Spain's top-tier professional basketball league,
+featuring 18 teams. Known as "Liga Endesa" due to sponsorship, it's one of Europe's strongest
+leagues. NBA talent pipeline includes Pau Gasol, Marc Gasol, Ricky Rubio, and many others.
 
 ⚠️ **DATA AVAILABILITY**:
 - **Player/Team season stats**: ❌ Unavailable (JavaScript-rendered site)
 - **Schedule/Box scores**: ⚠️ Limited (requires implementation)
 
 Key Features:
-- Web scraping from official nbl.com.au pages
+- Web scraping from official acb.com pages
 - Graceful degradation for JavaScript-rendered content
 - Rate-limited requests with retry logic
+- UTF-8 support for Spanish names (accents: á, é, í, ó, ú, ñ)
 
 Data Granularities:
 - schedule: ⚠️ Limited (requires HTML/API parsing)
 - player_game: ⚠️ Limited (box scores require scraping)
 - team_game: ⚠️ Limited (team stats require scraping)
-- pbp: ❌ Unavailable (requires FIBA LiveStats auth)
-- shots: ❌ Unavailable (requires FIBA LiveStats auth)
+- pbp: ❌ Unavailable (not published publicly)
+- shots: ❌ Unavailable (not published publicly)
 - player_season: ❌ Unavailable (JavaScript-rendered)
 - team_season: ❌ Unavailable (JavaScript-rendered)
 
 Competition Structure:
-- Regular Season: 10 teams (varies by year)
-- Finals: Top teams advance to playoffs
-- Typical season: October-March
+- Regular Season: 18 teams
+- Playoffs: Top 8 teams advance to playoffs
+- Finals: Best-of-5 series
+- Typical season: October-June
 
 Historical Context:
-- Founded: 1979
-- Prominent teams: Sydney Kings, Melbourne United, Perth Wildcats
-- NBA pipeline: Josh Giddey, Dyson Daniels, Patty Mills, Matthew Dellavedova
-- Strong development pathway to NBA
+- Founded: 1957 (one of Europe's oldest leagues)
+- Prominent teams: Real Madrid, Barcelona, Valencia, Baskonia
+- NBA pipeline: Pau Gasol, Marc Gasol, Ricky Rubio, Sergio Llull
+- Multiple EuroLeague titles by ACB teams
 
-Documentation: https://www.nbl.com.au/
-Data Source: https://www.nbl.com.au/stats/statistics
+Documentation: https://www.acb.com/
+Data Source: https://www.acb.com/estadisticas
 
 Implementation Status:
 ✅ IMPLEMENTED - Season aggregate functions with graceful degradation
@@ -46,6 +49,7 @@ Technical Notes:
 - Static HTML scraping returns no tables
 - Requires Selenium/Playwright or API discovery for implementation
 - Rate limiting: 1 req/sec to respect website resources
+- Encoding: UTF-8 for Spanish names (á, é, í, ó, ú, ñ)
 """
 
 from __future__ import annotations
@@ -63,22 +67,22 @@ logger = logging.getLogger(__name__)
 # Get rate limiter
 rate_limiter = get_source_limiter()
 
-# NBL URLs
-NBL_BASE_URL = "https://www.nbl.com.au"
-NBL_STATS_URL = f"{NBL_BASE_URL}/stats/statistics"
-NBL_PLAYERS_URL = f"{NBL_BASE_URL}/stats/players"
-NBL_TEAMS_URL = f"{NBL_BASE_URL}/standings"
+# ACB URLs
+ACB_BASE_URL = "https://www.acb.com"
+ACB_STATS_URL = f"{ACB_BASE_URL}/estadisticas"
+ACB_PLAYERS_URL = f"{ACB_BASE_URL}/estadisticas/jugadores"
+ACB_TEAMS_URL = f"{ACB_BASE_URL}/clasificacion"
 
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
 @cached_dataframe
-def fetch_nbl_player_season(
+def fetch_acb_player_season(
     season: str = "2024",
     per_mode: str = "Totals",
 ) -> pd.DataFrame:
-    """Fetch NBL Australia player season statistics
+    """Fetch ACB (Liga Endesa) player season statistics
 
-    ⚠️ LIMITATION: NBL website uses JavaScript-rendered statistics.
+    ⚠️ LIMITATION: ACB website uses JavaScript-rendered statistics.
     Returns empty DataFrame with correct schema for graceful degradation.
 
     Args:
@@ -100,45 +104,46 @@ def fetch_nbl_player_season(
         - BLK: Blocks
         - TOV: Turnovers
         - PF: Personal fouls
-        - LEAGUE: "NBL"
+        - LEAGUE: "ACB"
         - SEASON: Season string
-        - COMPETITION: "NBL Australia"
+        - COMPETITION: "Liga Endesa"
 
     Note:
         Requires Selenium/Playwright or API discovery for actual implementation.
         See LEAGUE_WEB_SCRAPING_FINDINGS.md for details.
     """
-    rate_limiter.acquire("nbl")
+    rate_limiter.acquire("acb")
 
-    logger.info(f"Fetching NBL player season stats: {season}, {per_mode}")
+    logger.info(f"Fetching ACB player season stats: {season}, {per_mode}")
 
     try:
         # Attempt to fetch HTML table (will fail for JS-rendered site)
         df = read_first_table(
-            url=NBL_STATS_URL,
+            url=ACB_PLAYERS_URL,
             min_columns=5,
             min_rows=10,
         )
 
+        # Spanish column names mapping
         column_map = {
-            "Player": "PLAYER_NAME",
-            "Team": "TEAM",
-            "Games": "GP",
-            "Minutes": "MIN",
-            "Points": "PTS",
-            "Rebounds": "REB",
-            "Assists": "AST",
-            "Steals": "STL",
-            "Blocks": "BLK",
-            "Turnovers": "TOV",
-            "Fouls": "PF",
+            "Jugador": "PLAYER_NAME",
+            "Equipo": "TEAM",
+            "Partidos": "GP",
+            "Minutos": "MIN",
+            "Puntos": "PTS",
+            "Rebotes": "REB",
+            "Asistencias": "AST",
+            "Robos": "STL",
+            "Tapones": "BLK",
+            "Pérdidas": "TOV",
+            "Faltas": "PF",
         }
 
         df = normalize_league_columns(
             df=df,
-            league="NBL",
+            league="ACB",
             season=season,
-            competition="NBL Australia",
+            competition="Liga Endesa",
             column_map=column_map,
         )
 
@@ -152,7 +157,7 @@ def fetch_nbl_player_season(
         return df
 
     except Exception as e:
-        logger.error(f"Failed to fetch NBL player season stats: {e}")
+        logger.error(f"Failed to fetch ACB player season stats: {e}")
         # Return empty DataFrame with correct schema (graceful degradation)
         return pd.DataFrame(
             columns=[
@@ -176,12 +181,12 @@ def fetch_nbl_player_season(
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
 @cached_dataframe
-def fetch_nbl_team_season(
+def fetch_acb_team_season(
     season: str = "2024",
 ) -> pd.DataFrame:
-    """Fetch NBL Australia team season statistics/standings
+    """Fetch ACB (Liga Endesa) team season statistics/standings
 
-    ⚠️ LIMITATION: NBL website uses JavaScript-rendered statistics.
+    ⚠️ LIMITATION: ACB website uses JavaScript-rendered statistics.
     Returns empty DataFrame with correct schema for graceful degradation.
 
     Args:
@@ -198,37 +203,38 @@ def fetch_nbl_team_season(
         - WIN_PCT: Win percentage
         - PTS: Points scored
         - OPP_PTS: Opponent points
-        - LEAGUE: "NBL"
+        - LEAGUE: "ACB"
         - SEASON: Season string
-        - COMPETITION: "NBL Australia"
+        - COMPETITION: "Liga Endesa"
 
     Note:
         Requires Selenium/Playwright or API discovery for actual implementation.
     """
-    rate_limiter.acquire("nbl")
+    rate_limiter.acquire("acb")
 
-    logger.info(f"Fetching NBL team season stats: {season}")
+    logger.info(f"Fetching ACB team season stats: {season}")
 
     try:
         df = read_first_table(
-            url=NBL_TEAMS_URL,
+            url=ACB_TEAMS_URL,
             min_columns=5,
             min_rows=5,
         )
 
+        # Spanish column names mapping
         column_map = {
-            "Team": "TEAM",
-            "Games": "GP",
-            "Wins": "W",
-            "Losses": "L",
-            "Points": "PTS",
+            "Equipo": "TEAM",
+            "Partidos": "GP",
+            "Victorias": "W",
+            "Derrotas": "L",
+            "Puntos": "PTS",
         }
 
         df = normalize_league_columns(
             df=df,
-            league="NBL",
+            league="ACB",
             season=season,
-            competition="NBL Australia",
+            competition="Liga Endesa",
             column_map=column_map,
         )
 
@@ -239,7 +245,7 @@ def fetch_nbl_team_season(
         return df
 
     except Exception as e:
-        logger.error(f"Failed to fetch NBL team season stats: {e}")
+        logger.error(f"Failed to fetch ACB team season stats: {e}")
         return pd.DataFrame(
             columns=["TEAM", "GP", "W", "L", "WIN_PCT", "PTS", "LEAGUE", "SEASON", "COMPETITION"]
         )
@@ -250,11 +256,11 @@ def fetch_nbl_team_season(
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
 @cached_dataframe
-def fetch_nbl_schedule(
+def fetch_acb_schedule(
     season: str = "2024-25",
     season_type: str = "Regular Season",
 ) -> pd.DataFrame:
-    """Fetch NBL Australia schedule (placeholder)
+    """Fetch ACB schedule (placeholder)
 
     Note: Requires HTML/API parsing implementation. Currently returns empty
     DataFrame with correct schema.
@@ -277,20 +283,16 @@ def fetch_nbl_schedule(
         - HOME_SCORE: Home team score
         - AWAY_SCORE: Away team score
         - VENUE: Arena name
-        - LEAGUE: "NBL"
+        - LEAGUE: "ACB"
 
-    TODO: Implement NBL schedule scraping
-    - Study nblR package patterns: https://github.com/JaseZiv/nblR
-    - NBL may have JSON endpoints used by their website
+    TODO: Implement ACB schedule scraping
+    - Check ACB website for JSON endpoints
     - Check network tab in browser for API calls
     """
-    logger.info(f"Fetching NBL schedule: {season}, {season_type}")
+    logger.info(f"Fetching ACB schedule: {season}, {season_type}")
 
     # TODO: Implement scraping/API logic
-    logger.warning(
-        "NBL schedule fetching requires implementation. "
-        "Reference nblR package for scraping patterns. Returning empty DataFrame."
-    )
+    logger.warning("ACB schedule fetching requires implementation. " "Returning empty DataFrame.")
 
     df = pd.DataFrame(
         columns=[
@@ -308,21 +310,21 @@ def fetch_nbl_schedule(
         ]
     )
 
-    df["LEAGUE"] = "NBL"
+    df["LEAGUE"] = "ACB"
 
-    logger.info(f"Fetched {len(df)} NBL games (scaffold mode)")
+    logger.info(f"Fetched {len(df)} ACB games (scaffold mode)")
     return df
 
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
 @cached_dataframe
-def fetch_nbl_box_score(game_id: str) -> pd.DataFrame:
-    """Fetch NBL box score for a game
+def fetch_acb_box_score(game_id: str) -> pd.DataFrame:
+    """Fetch ACB box score for a game
 
     Note: Requires implementation. Currently returns empty DataFrame.
 
     Args:
-        game_id: Game ID (NBL game identifier)
+        game_id: Game ID (ACB game identifier)
 
     Returns:
         DataFrame with player box scores
@@ -345,17 +347,15 @@ def fetch_nbl_box_score(game_id: str) -> pd.DataFrame:
         - TOV: Turnovers
         - PF: Personal fouls
         - PLUS_MINUS: Plus/minus
-        - LEAGUE: "NBL"
+        - LEAGUE: "ACB"
 
-    TODO: Implement NBL box score scraping
-    - URL pattern likely: https://www.nbl.com.au/games/{season}/{game_id}
-    - Study nblR package for box score extraction patterns
+    TODO: Implement ACB box score scraping
     """
-    logger.info(f"Fetching NBL box score: {game_id}")
+    logger.info(f"Fetching ACB box score: {game_id}")
 
     # TODO: Implement scraping logic
     logger.warning(
-        f"NBL box score fetching for game {game_id} requires implementation. "
+        f"ACB box score fetching for game {game_id} requires implementation. "
         "Returning empty DataFrame."
     )
 
@@ -390,7 +390,7 @@ def fetch_nbl_box_score(game_id: str) -> pd.DataFrame:
         ]
     )
 
-    df["LEAGUE"] = "NBL"
+    df["LEAGUE"] = "ACB"
     df["GAME_ID"] = game_id
 
     logger.info(f"Fetched box score: {len(df)} players (scaffold mode)")
@@ -399,11 +399,11 @@ def fetch_nbl_box_score(game_id: str) -> pd.DataFrame:
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
 @cached_dataframe
-def fetch_nbl_play_by_play(game_id: str) -> pd.DataFrame:
-    """Fetch NBL play-by-play data
+def fetch_acb_play_by_play(game_id: str) -> pd.DataFrame:
+    """Fetch ACB play-by-play data
 
-    Note: Limited availability. Some NBL games use FIBA LiveStats, which
-    requires authentication. This function returns empty DataFrame.
+    Note: Limited availability. ACB does not publish detailed play-by-play
+    publicly. This function returns empty DataFrame.
 
     Args:
         game_id: Game ID
@@ -412,13 +412,11 @@ def fetch_nbl_play_by_play(game_id: str) -> pd.DataFrame:
         Empty DataFrame (PBP limited availability)
 
     Implementation Notes:
-        - Some games may have FIBA LiveStats feeds (requires auth)
-        - NBL website may have basic play logs (requires scraping)
-        - See: https://developer.geniussports.com/livestats/tvfeed/
+        - ACB website may have basic play logs (requires scraping)
+        - No known public API for play-by-play data
     """
     logger.warning(
-        f"NBL play-by-play for game {game_id} has limited availability. "
-        "Some games use FIBA LiveStats (requires authentication)."
+        f"ACB play-by-play for game {game_id} has limited availability. " "Not published publicly."
     )
 
     df = pd.DataFrame(
@@ -433,7 +431,7 @@ def fetch_nbl_play_by_play(game_id: str) -> pd.DataFrame:
         ]
     )
 
-    df["LEAGUE"] = "NBL"
+    df["LEAGUE"] = "ACB"
     df["GAME_ID"] = game_id
 
     return df
@@ -441,11 +439,11 @@ def fetch_nbl_play_by_play(game_id: str) -> pd.DataFrame:
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
 @cached_dataframe
-def fetch_nbl_shot_chart(game_id: str) -> pd.DataFrame:
-    """Fetch NBL shot chart data
+def fetch_acb_shot_chart(game_id: str) -> pd.DataFrame:
+    """Fetch ACB shot chart data
 
-    Note: Shot chart data has limited availability. Requires FIBA LiveStats
-    for detailed coordinates. This function returns empty DataFrame.
+    Note: Shot chart data has limited availability. Not published publicly.
+    This function returns empty DataFrame.
 
     Args:
         game_id: Game ID
@@ -454,12 +452,11 @@ def fetch_nbl_shot_chart(game_id: str) -> pd.DataFrame:
         Empty DataFrame (shot data limited availability)
 
     Implementation Notes:
-        - FIBA LiveStats may be available for some games (requires auth)
-        - NBL website may have basic shot location data (requires research)
+        - ACB website may have basic shot location data (requires research)
+        - No known public API for shot chart data
     """
     logger.warning(
-        f"NBL shot chart for game {game_id} has limited availability. "
-        "May require FIBA LiveStats authentication."
+        f"ACB shot chart for game {game_id} has limited availability. " "Not published publicly."
     )
 
     df = pd.DataFrame(
@@ -479,7 +476,7 @@ def fetch_nbl_shot_chart(game_id: str) -> pd.DataFrame:
         ]
     )
 
-    df["LEAGUE"] = "NBL"
+    df["LEAGUE"] = "ACB"
     df["GAME_ID"] = game_id
 
     return df

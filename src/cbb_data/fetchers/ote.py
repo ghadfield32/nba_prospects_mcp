@@ -132,7 +132,8 @@ def fetch_ote_schedule(
     for link in game_links:
         try:
             # Extract game ID from URL
-            href = link.get("href", "")
+            href_raw = link.get("href", "")
+            href = str(href_raw) if href_raw else ""
             game_id_match = re.search(r"/games/([a-f0-9\-]+)", href)
             if not game_id_match:
                 continue

@@ -62,12 +62,12 @@ curl -X POST http://localhost:8000/datasets/player_game \
 
 ### Supported Leagues & Scope
 
-**Default Scope (pre_only=True)**: 11 leagues accessible (6 college + 5 prepro)
-**Full Scope (pre_only=False)**: 12 leagues accessible (adds WNBA)
+**Default Scope (pre_only=True)**: 18 leagues accessible (6 college + 12 prepro)
+**Full Scope (pre_only=False)**: 19 leagues accessible (adds WNBA)
 
 This library focuses on **pre-NBA/WNBA prospects** and includes:
 - **College Basketball**: NCAA, NJCAA, NAIA, U-SPORTS, CCAA
-- **Pre-Professional/Development**: OTE, EuroLeague, EuroCup, G-League, CEBL (international/development leagues where NBA prospects play)
+- **Pre-Professional/Development**: OTE, EuroLeague, EuroCup, G-League, CEBL, NBL (Australia), ACB (Spain), LKL (Lithuania), ABA (Adriatic), BAL (Africa), BCL (Champions League), LNB Pro A (France)
 - **Professional** (excluded by default): WNBA only
 
 #### League × Dataset Availability Matrix
@@ -85,11 +85,19 @@ This library focuses on **pre-NBA/WNBA prospects** and includes:
 | **G-League** | PREPRO | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
 | **CEBL** | PREPRO | Yes | Yes | Yes | No | No | Yes | Yes |
 | **OTE** | PREPRO | Yes | Yes | Yes | Yes | Limited | Yes | Yes |
+| **NBL** (Australia) | PREPRO | Scaffold | Scaffold | Scaffold | No | No | Scaffold | Scaffold |
+| **ACB** (Spain) | PREPRO | Scaffold | Scaffold | Scaffold | No | No | Scaffold | Scaffold |
+| **LKL** (Lithuania) | PREPRO | Scaffold | Scaffold | Scaffold | No | No | Scaffold | Scaffold |
+| **ABA** (Adriatic) | PREPRO | Scaffold | Scaffold | Scaffold | No | No | Scaffold | Scaffold |
+| **BAL** (Africa) | PREPRO | Scaffold | Scaffold | Scaffold | No | No | Scaffold | Scaffold |
+| **BCL** (Champions) | PREPRO | Scaffold | Scaffold | Scaffold | No | No | Scaffold | Scaffold |
+| **LNB Pro A** (France) | PREPRO | Scaffold | Scaffold | Scaffold | No | No | Scaffold | Yes (16 teams) |
 | **WNBA** | PRO | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
 
 **Legend**:
 - **Yes**: Full support with comprehensive data
 - **Limited**: Partial support or limited data availability
+- **Scaffold**: Infrastructure ready, returns empty DataFrames (sites use JavaScript rendering; Selenium/Playwright required for actual data)
 - **No**: Not available for this league
 
 #### Historical Coverage & Recency
@@ -108,13 +116,21 @@ This library focuses on **pre-NBA/WNBA prospects** and includes:
 | **NAIA** | Current season | Daily updates | PrestoSports Scraping |
 | **U-SPORTS** | Current season | Post-game | TBD (Fetcher in development) |
 | **CCAA** | Current season | Post-game | TBD (Fetcher in development) |
+| **NBL** (Australia) | Current season | Scaffold only | HTML Scraping (JS-rendered) |
+| **ACB** (Spain) | Current season | Scaffold only | HTML Scraping (JS-rendered) |
+| **LKL** (Lithuania) | Current season | Scaffold only | HTML Scraping (JS-rendered) |
+| **ABA** (Adriatic) | Current season | Scaffold only | HTML Scraping (JS-rendered) |
+| **BAL** (Africa) | Current season | Scaffold only | HTML Scraping (JS-rendered) |
+| **BCL** (Champions) | Current season | Scaffold only | HTML Scraping (JS-rendered) |
+| **LNB Pro A** (France) | Current season | Post-game (standings only) | HTML Scraping (Static HTML) |
 
 #### Integration Status
 
-**Fully Integrated (12 leagues)**: All leagues accessible via Python API, REST API, and MCP Server
+**Fully Integrated (19 leagues)**: All leagues accessible via Python API, REST API, and MCP Server
 - Access via: `get_dataset()`, REST API `/datasets/*`, MCP tools
-- Default scope (pre_only=True): 11 leagues (excludes WNBA)
-- Full scope (pre_only=False): All 12 leagues
+- Default scope (pre_only=True): 18 leagues (excludes WNBA)
+- Full scope (pre_only=False): All 19 leagues
+- **Note**: 7 international leagues (NBL, ACB, LKL, ABA, BAL, BCL, LNB Pro A) return scaffold/empty data due to JavaScript-rendered websites; Selenium/Playwright required for actual data extraction
 
 **Scope Control**:
 ```python

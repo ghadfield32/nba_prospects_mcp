@@ -19,6 +19,7 @@ from typing import Any
 
 # Import basketball data functions
 from cbb_data.api.datasets import get_dataset, get_recent_games, list_datasets
+from cbb_data.catalog.levels import LEAGUE_LEVELS
 
 # ============================================================================
 # Helper Functions
@@ -184,7 +185,7 @@ def cmd_show_schema(args: argparse.Namespace) -> None:
         print("\n\nFILTERS:")
         print("-" * 60)
         filters = {
-            "league": "League identifier (NCAA-MBB, NCAA-WBB, EuroLeague)",
+            "league": "League identifier (e.g., NCAA-MBB, EuroLeague, NBL, ACB)",
             "season": "Season year OR 'this season', 'last season', '2024-25'",
             "team": "List of team names",
             "player": "List of player names",
@@ -366,7 +367,7 @@ Examples:
     parser_get.add_argument(
         "--league",
         required=True,
-        choices=["NCAA-MBB", "NCAA-WBB", "EuroLeague"],
+        choices=list(LEAGUE_LEVELS.keys()),
         help="League identifier",
     )
     parser_get.add_argument("--season", help="Season year OR 'this season', 'last season'")
@@ -395,7 +396,7 @@ Examples:
     # ========================================
     parser_recent = subparsers.add_parser("recent", help="Get recent games for a league")
     parser_recent.add_argument(
-        "league", choices=["NCAA-MBB", "NCAA-WBB", "EuroLeague"], help="League identifier"
+        "league", choices=list(LEAGUE_LEVELS.keys()), help="League identifier"
     )
     parser_recent.add_argument(
         "--days",

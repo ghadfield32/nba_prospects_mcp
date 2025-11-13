@@ -109,7 +109,8 @@ def _make_exposure_request(
     try:
         response = requests.get(url, headers=headers, params=params, timeout=30)
         response.raise_for_status()
-        return response.json()
+        data: dict[str, Any] | list[dict[str, Any]] = response.json()
+        return data
     except requests.exceptions.RequestException as e:
         logger.error(f"Exposure Events request failed ({league}): {url} - {e}")
         raise

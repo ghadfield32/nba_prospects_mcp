@@ -21,11 +21,14 @@ import pandas as pd
 
 from .. import fetchers
 from ..catalog.levels import (
+    LEAGUE_LEVELS,
     filter_leagues_by_level,
     get_excluded_leagues_message,
+    get_leagues_by_level,
     is_pre_nba_league,
 )
 from ..catalog.registry import DatasetRegistry
+from ..catalog.sources import _register_league_sources, get_league_source_config
 from ..compose.enrichers import (
     add_league_context,
     coerce_common_columns,
@@ -35,7 +38,7 @@ from ..fetchers import (
     cbbpy_mbb,  # CBBpy integration for NCAA Men's box scores
     cbbpy_wbb,  # CBBpy integration for NCAA Women's box scores
     cebl,  # Canadian Elite Basketball League
-    domestic_euro,  # European domestic leagues (ACB, LNB, BBL, BSL, LBA)
+    domestic_euro,  # European domestic leagues (BBL, BSL, LBA)
     gleague,  # G League integration
     nbl,  # NBL Australia
     ote,  # Overtime Elite
@@ -52,6 +55,12 @@ from ..utils.entity_resolver import (
 )
 
 logger = logging.getLogger(__name__)
+
+# Derive all supported leagues from LEAGUE_LEVELS (single source of truth)
+ALL_LEAGUES = list(LEAGUE_LEVELS.keys())
+
+# Register all league source configurations (must happen after fetcher imports)
+_register_league_sources()
 
 
 # ==============================================================================
@@ -448,8 +457,10 @@ def validate_fetch_request(dataset: str, filters: dict[str, Any], league: str | 
         >>> validate_fetch_request('schedule', {'season': 'abc'}, 'NCAA-MBB')
         # Raises ValueError: Invalid season format
     """
-    # 1. Check league is valid
-    valid_leagues = ["NCAA-MBB", "NCAA-WBB", "EuroLeague", "WNBA"]
+    # 1. Check league is valid (get from registered leagues in catalog)
+    from ..catalog.levels import LEAGUE_LEVELS
+
+    valid_leagues = list(LEAGUE_LEVELS.keys())
     if league and league not in valid_leagues:
         raise ValueError(f"Invalid league '{league}'. Must be one of: {valid_leagues}")
 
@@ -1473,20 +1484,27 @@ def _fetch_shots(compiled: dict[str, Any]) -> pd.DataFrame:
 def _fetch_player_season(compiled: dict[str, Any]) -> pd.DataFrame:
     """Fetch player season aggregates
 
-    Strategy:
-    1. For NCAA: Fetch season schedule first, extract game IDs, then fetch player_game data
-    2. For EuroLeague: Existing logic works (has season-wide endpoint)
-    3. Aggregate all player game data to season level
+    Strategy (config-driven):
+    1. Check LeagueSourceConfig for league-specific fetch function
+    2. If configured, use that (HTML scraper, API client, etc.)
+    3. Otherwise, fall back to generic path (aggregate from player_game)
 
-    Supports: NCAA-MBB, NCAA-WBB, EuroLeague
+    Supports: All leagues via LeagueSourceConfig
     """
     params = compiled["params"]
-    _post_mask = compiled["post_mask"]  # Reserved for future filtering
     meta = compiled["meta"]
-
     league = meta.get("league")
 
     logger.info(f"Fetching player_season for {league}, season {params.get('Season')}")
+
+    # Check if league has a config-driven direct season fetcher
+    cfg = get_league_source_config(league)
+    if cfg is not None and cfg.fetch_player_season is not None:
+        logger.info(f"Using {cfg.player_season_source} source for {league} player_season")
+        return cfg.fetch_player_season(
+            season=params.get("Season", "2024"),
+            per_mode=params.get("PerMode", "Totals"),
+        )
 
     # Fetch all player_game data for this season
     # We remove per_mode from params to get raw game data, then aggregate ourselves
@@ -1629,17 +1647,24 @@ def _unpivot_schedule_to_team_games(schedule_df: pd.DataFrame) -> pd.DataFrame:
 def _fetch_team_season(compiled: dict[str, Any]) -> pd.DataFrame:
     """Fetch team season aggregates
 
-    Strategy: Fetch all team_game data for the season, then aggregate.
+    Strategy (config-driven):
+    1. Check LeagueSourceConfig for league-specific fetch function
+    2. If configured, use that (HTML scraper, API client, etc.)
+    3. Otherwise, fall back to generic path (aggregate from team_game)
 
-    Supports: NCAA-MBB, NCAA-WBB, EuroLeague
+    Supports: All leagues via LeagueSourceConfig
     """
     params = compiled["params"]
-    _post_mask = compiled["post_mask"]  # Reserved for future filtering
     meta = compiled["meta"]
-
     league = meta.get("league")
 
     logger.info(f"Fetching team_season for {league}, season {params.get('Season')}")
+
+    # Check if league has a config-driven direct season fetcher
+    cfg = get_league_source_config(league)
+    if cfg is not None and cfg.fetch_team_season is not None:
+        logger.info(f"Using {cfg.team_season_source} source for {league} team_season")
+        return cfg.fetch_team_season(season=params.get("Season", "2024"))
 
     # Fetch all team_game data (currently proxied to schedule)
     team_games = _fetch_team_game(compiled)
@@ -1787,6 +1812,92 @@ def _fetch_player_team_season(compiled: dict[str, Any]) -> pd.DataFrame:
     return season_stats
 
 
+def _fetch_prospect_player_season(compiled: dict[str, Any]) -> pd.DataFrame:
+    """Fetch unified prospect player season stats across all pre-NBA leagues
+
+    Aggregates player_season data from all college and prepro leagues into a single
+    DataFrame with LEAGUE column for league identification. Useful for cross-league
+    prospect comparisons (e.g., "Who are the top scorers across all pre-NBA leagues?").
+
+    Strategy:
+    1. Get all pre-NBA leagues (college + prepro, excluding WNBA)
+    2. For each league, fetch player_season data using existing _fetch_player_season
+    3. Add LEAGUE column to each result
+    4. Concatenate all results into unified DataFrame
+    5. Handle errors gracefully (skip leagues that fail)
+
+    Args:
+        compiled: Compiled request parameters (season, season_type, per_mode, etc.)
+
+    Returns:
+        DataFrame with unified prospect stats from all pre-NBA leagues
+
+    Example:
+        >>> # Get top scorers across all pre-NBA leagues for 2024
+        >>> df = get_dataset("prospect_player_season", season="2024", per_mode="PerGame")
+        >>> top_scorers = df.nlargest(50, "PTS")
+        >>> print(top_scorers[["PLAYER_NAME", "LEAGUE", "PTS", "REB", "AST"]])
+    """
+    params = compiled["params"]
+    season = params.get("Season", "2024")
+    per_mode = params.get("PerMode", "Totals")
+
+    logger.info(f"Fetching prospect_player_season for season {season}, per_mode {per_mode}")
+
+    # Get all pre-NBA leagues (college + prepro, excluding WNBA)
+    college_leagues = get_leagues_by_level("college")
+    prepro_leagues = get_leagues_by_level("prepro")
+    prospect_leagues = college_leagues + prepro_leagues
+
+    logger.info(
+        f"Fetching player_season from {len(prospect_leagues)} leagues: "
+        f"{len(college_leagues)} college + {len(prepro_leagues)} prepro"
+    )
+
+    frames = []
+    successful_leagues = []
+    failed_leagues = []
+
+    for league in prospect_leagues:
+        try:
+            # Create a compiled request for this specific league
+            league_compiled = copy.deepcopy(compiled)
+            league_compiled["meta"]["league"] = league
+
+            # Fetch player_season for this league
+            logger.info(f"Fetching player_season for {league}...")
+            df = _fetch_player_season(league_compiled)
+
+            # Only add if we got data
+            if not df.empty:
+                # Add LEAGUE column to identify source league
+                df["LEAGUE"] = league
+                frames.append(df)
+                successful_leagues.append(league)
+                logger.info(f"✓ {league}: {len(df)} player-seasons")
+            else:
+                logger.info(f"⊘ {league}: empty (scaffold or no data)")
+
+        except Exception as e:
+            logger.warning(f"✗ {league} failed: {e}")
+            failed_leagues.append(league)
+
+    # Concatenate all successful fetches
+    if frames:
+        result = pd.concat(frames, ignore_index=True)
+        logger.info(
+            f"Combined {len(result)} player-seasons from {len(successful_leagues)}/{len(prospect_leagues)} leagues"
+        )
+
+        if failed_leagues:
+            logger.warning(f"Failed leagues: {', '.join(failed_leagues)}")
+
+        return result
+    else:
+        logger.warning(f"No data fetched from any of {len(prospect_leagues)} leagues")
+        return pd.DataFrame()
+
+
 # ==============================================================================
 # Dataset Registration
 # ==============================================================================
@@ -1798,20 +1909,7 @@ DatasetRegistry.register(
     fetch=_fetch_schedule,
     description="Game schedules and results",
     sources=["ESPN", "EuroLeague", "NBA Stats", "WNBA Stats", "CEBL", "OTE", "PrestoSports"],
-    leagues=[
-        "NCAA-MBB",
-        "NCAA-WBB",
-        "EuroLeague",
-        "EuroCup",
-        "G-League",
-        "WNBA",
-        "CEBL",
-        "OTE",
-        "NJCAA",
-        "NAIA",
-        "U-SPORTS",
-        "CCAA",
-    ],
+    leagues=ALL_LEAGUES,
     levels=["college", "prepro", "pro"],
     sample_columns=[
         "GAME_ID",
@@ -1841,20 +1939,7 @@ DatasetRegistry.register(
     fetch=_fetch_player_game,
     description="Per-player per-game statistics (box scores)",
     sources=["ESPN", "EuroLeague", "NBA Stats", "WNBA Stats", "CEBL", "OTE", "PrestoSports"],
-    leagues=[
-        "NCAA-MBB",
-        "NCAA-WBB",
-        "EuroLeague",
-        "EuroCup",
-        "G-League",
-        "WNBA",
-        "CEBL",
-        "OTE",
-        "NJCAA",
-        "NAIA",
-        "U-SPORTS",
-        "CCAA",
-    ],
+    leagues=ALL_LEAGUES,
     levels=["college", "prepro", "pro"],
     sample_columns=[
         "PLAYER_NAME",
@@ -1877,20 +1962,7 @@ DatasetRegistry.register(
     fetch=_fetch_team_game,
     description="Per-team per-game results",
     sources=["ESPN", "EuroLeague", "NBA Stats", "WNBA Stats", "CEBL", "OTE", "PrestoSports"],
-    leagues=[
-        "NCAA-MBB",
-        "NCAA-WBB",
-        "EuroLeague",
-        "EuroCup",
-        "G-League",
-        "WNBA",
-        "CEBL",
-        "OTE",
-        "NJCAA",
-        "NAIA",
-        "U-SPORTS",
-        "CCAA",
-    ],
+    leagues=ALL_LEAGUES,
     levels=["college", "prepro", "pro"],
     sample_columns=["TEAM_NAME", "GAME_ID", "GAME_DATE", "OPPONENT", "HOME_AWAY", "SCORE"],
 )
@@ -1902,20 +1974,7 @@ DatasetRegistry.register(
     fetch=_fetch_play_by_play,
     description="Play-by-play event data",
     sources=["ESPN", "EuroLeague", "NBA Stats", "WNBA Stats", "CEBL", "OTE", "PrestoSports"],
-    leagues=[
-        "NCAA-MBB",
-        "NCAA-WBB",
-        "EuroLeague",
-        "EuroCup",
-        "G-League",
-        "WNBA",
-        "CEBL",
-        "OTE",
-        "NJCAA",
-        "NAIA",
-        "U-SPORTS",
-        "CCAA",
-    ],
+    leagues=ALL_LEAGUES,
     levels=["college", "prepro", "pro"],
     sample_columns=["GAME_ID", "PERIOD", "CLOCK", "PLAY_TYPE", "TEXT", "SCORE"],
     requires_game_id=True,
@@ -1928,20 +1987,7 @@ DatasetRegistry.register(
     fetch=_fetch_shots,
     description="Shot chart data with X/Y coordinates (full data: NCAA-MBB, EuroLeague, EuroCup, G-League, WNBA; limited: others)",
     sources=["CBBpy", "EuroLeague", "NBA Stats", "WNBA Stats", "CEBL", "OTE", "PrestoSports"],
-    leagues=[
-        "NCAA-MBB",
-        "NCAA-WBB",
-        "EuroLeague",
-        "EuroCup",
-        "G-League",
-        "WNBA",
-        "CEBL",
-        "OTE",
-        "NJCAA",
-        "NAIA",
-        "U-SPORTS",
-        "CCAA",
-    ],
+    leagues=ALL_LEAGUES,
     levels=["college", "prepro", "pro"],
     sample_columns=["shot_x", "shot_y", "shooter", "LOC_X", "LOC_Y", "PLAYER_NAME", "SHOT_MADE"],
     requires_game_id=True,
@@ -1953,21 +1999,17 @@ DatasetRegistry.register(
     filters=["season", "season_type", "league", "team", "player", "per_mode", "min_minutes"],
     fetch=_fetch_player_season,
     description="Per-player season aggregates (totals/averages)",
-    sources=["ESPN", "EuroLeague", "NBA Stats", "WNBA Stats", "CEBL", "OTE", "PrestoSports"],
-    leagues=[
-        "NCAA-MBB",
-        "NCAA-WBB",
+    sources=[
+        "ESPN",
         "EuroLeague",
-        "EuroCup",
-        "G-League",
-        "WNBA",
+        "NBA Stats",
+        "WNBA Stats",
         "CEBL",
         "OTE",
-        "NJCAA",
-        "NAIA",
-        "U-SPORTS",
-        "CCAA",
+        "PrestoSports",
+        "Web Scraping",
     ],
+    leagues=ALL_LEAGUES,
     levels=["college", "prepro", "pro"],
     sample_columns=["PLAYER_NAME", "SEASON", "GP", "PTS", "REB", "AST", "MIN", "FG_PCT"],
     requires_game_id=False,
@@ -1979,23 +2021,32 @@ DatasetRegistry.register(
     filters=["season", "season_type", "league", "team", "conference"],
     fetch=_fetch_team_season,
     description="Per-team season aggregates",
-    sources=["ESPN", "EuroLeague", "NBA Stats", "WNBA Stats", "CEBL", "OTE", "PrestoSports"],
-    leagues=[
-        "NCAA-MBB",
-        "NCAA-WBB",
+    sources=[
+        "ESPN",
         "EuroLeague",
-        "EuroCup",
-        "G-League",
-        "WNBA",
+        "NBA Stats",
+        "WNBA Stats",
         "CEBL",
         "OTE",
-        "NJCAA",
-        "NAIA",
-        "U-SPORTS",
-        "CCAA",
+        "PrestoSports",
+        "Web Scraping",
     ],
+    leagues=ALL_LEAGUES,
     levels=["college", "prepro", "pro"],
     sample_columns=["TEAM_NAME", "SEASON", "GP", "W", "L", "PTS", "OPP_PTS"],
+    requires_game_id=False,
+)
+
+DatasetRegistry.register(
+    id="prospect_player_season",
+    keys=["PLAYER_ID", "SEASON", "LEAGUE"],
+    filters=["season", "season_type", "per_mode", "min_minutes", "team", "player"],
+    fetch=_fetch_prospect_player_season,
+    description="Unified prospect player season stats across all pre-NBA leagues (college + prepro, excludes WNBA). Aggregates player_season from 18 leagues with LEAGUE column for cross-league comparisons. Note: This dataset does not support league filtering - it always fetches from all pre-NBA leagues.",
+    sources=["ESPN", "EuroLeague", "NBA Stats", "CEBL", "OTE", "PrestoSports", "Web Scraping"],
+    leagues=["ALL"],  # Special marker: fetches from all college+prepro leagues
+    levels=["college", "prepro"],
+    sample_columns=["PLAYER_NAME", "LEAGUE", "SEASON", "GP", "PTS", "REB", "AST", "MIN", "FG_PCT"],
     requires_game_id=False,
 )
 
