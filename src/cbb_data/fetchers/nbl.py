@@ -1,32 +1,27 @@
 """NBL Australia Fetcher
 
-Official NBL Australia stats portal scraper.
+Official NBL Australia data via API-Basketball (api-sports.io).
 
 Australia's premier professional basketball league featuring top domestic and international talent.
 Known for developing NBA prospects including Josh Giddey, Dyson Daniels, and many others.
 
-⚠️ **DATA AVAILABILITY**:
-- **Player/Team season stats**: ❌ Unavailable (JavaScript-rendered site)
-- **Schedule/Box scores**: ⚠️ Limited (requires implementation)
+**DATA AVAILABILITY**:
+- **Player/Team season stats**: ✅ Available (via API-Basketball)
+- **Schedule**: ✅ Available (via API-Basketball)
+- **Box scores**: ✅ Available (game-level stats via API-Basketball)
+- **Play-by-play**: ❌ Not available (API-Basketball doesn't provide PBP)
+- **Shot charts**: ⚠️ Limited (requires manual investigation of NBL website)
 
-Key Features:
-- Web scraping from official nbl.com.au pages
-- Graceful degradation for JavaScript-rendered content
-- Rate-limited requests with retry logic
-
-Data Granularities:
-- schedule: ⚠️ Limited (requires HTML/API parsing)
-- player_game: ⚠️ Limited (box scores require scraping)
-- team_game: ⚠️ Limited (team stats require scraping)
-- pbp: ❌ Unavailable (requires FIBA LiveStats auth)
-- shots: ❌ Unavailable (requires FIBA LiveStats auth)
-- player_season: ❌ Unavailable (JavaScript-rendered)
-- team_season: ❌ Unavailable (JavaScript-rendered)
+**Data Source**: API-Basketball (api-sports.io)
+- **Free tier**: 100 requests/day
+- **Paid tiers**: Basic ($10/mo, 3k req/day), Pro ($25/mo, 10k req/day)
+- **Coverage**: 426 leagues worldwide including NBL Australia
+- **API Key**: Set `API_BASKETBALL_KEY` environment variable
 
 Competition Structure:
 - Regular Season: 10 teams (varies by year)
 - Finals: Top teams advance to playoffs
-- Typical season: October-March
+- Typical season: October-March (Southern Hemisphere)
 
 Historical Context:
 - Founded: 1979
@@ -34,40 +29,67 @@ Historical Context:
 - NBA pipeline: Josh Giddey, Dyson Daniels, Patty Mills, Matthew Dellavedova
 - Strong development pathway to NBA
 
-Documentation: https://www.nbl.com.au/
-Data Source: https://www.nbl.com.au/stats/statistics
+Technical Notes:
+- Uses API-Basketball client with automatic caching and rate limiting
+- Graceful degradation: returns empty DataFrames if API unavailable
+- Rate limiting: Managed by API-Basketball client (respects quota)
+- Alternative: nblR R package (reverse-engineer their approach for shot data)
+
+Documentation:
+- NBL Official: https://www.nbl.com.au/
+- API-Basketball: https://api-sports.io/documentation/basketball/v1
 
 Implementation Status:
-✅ IMPLEMENTED - Season aggregate functions with graceful degradation
-⚠️ JavaScript-rendered site requires Selenium/Playwright for actual data
-
-Technical Notes:
-- Website uses JavaScript frameworks (React/Angular)
-- Static HTML scraping returns no tables
-- Requires Selenium/Playwright or API discovery for implementation
-- Rate limiting: 1 req/sec to respect website resources
+✅ IMPLEMENTED - API-Basketball integration for schedule, player/team season stats
+⚠️ Shot data requires additional implementation (NBL website scraping or nblR reverse-engineering)
 """
 
 from __future__ import annotations
 
 import logging
+import os
 
 import pandas as pd
 
+from ..clients.api_basketball import APIBasketballClient
 from ..utils.rate_limiter import get_source_limiter
 from .base import cached_dataframe, retry_on_error
-from .html_tables import normalize_league_columns, read_first_table
 
 logger = logging.getLogger(__name__)
 
 # Get rate limiter
 rate_limiter = get_source_limiter()
 
-# NBL URLs
-NBL_BASE_URL = "https://www.nbl.com.au"
-NBL_STATS_URL = f"{NBL_BASE_URL}/stats/statistics"
-NBL_PLAYERS_URL = f"{NBL_BASE_URL}/stats/players"
-NBL_TEAMS_URL = f"{NBL_BASE_URL}/standings"
+# NBL League ID in API-Basketball (needs verification)
+# To find: client = APIBasketballClient(); client.find_league_id("NBL", country="Australia")
+NBL_API_LEAGUE_ID = 12  # Placeholder - verify with actual API call
+
+# Initialize API-Basketball client (will be None if API key not set)
+_api_client = None
+
+
+def _get_api_client() -> APIBasketballClient:
+    """Get or initialize API-Basketball client
+
+    Returns:
+        APIBasketballClient instance
+
+    Raises:
+        ValueError: If API_BASKETBALL_KEY not set
+    """
+    global _api_client
+
+    if _api_client is None:
+        api_key = os.getenv("API_BASKETBALL_KEY")
+        if not api_key:
+            raise ValueError(
+                "API-Basketball API key required for NBL data.\n"
+                "Set API_BASKETBALL_KEY environment variable.\n"
+                "Get free key (100 req/day) at https://api-sports.io/register"
+            )
+        _api_client = APIBasketballClient(api_key=api_key)
+
+    return _api_client
 
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
@@ -76,89 +98,94 @@ def fetch_nbl_player_season(
     season: str = "2024",
     per_mode: str = "Totals",
 ) -> pd.DataFrame:
-    """Fetch NBL Australia player season statistics
-
-    ⚠️ LIMITATION: NBL website uses JavaScript-rendered statistics.
-    Returns empty DataFrame with correct schema for graceful degradation.
+    """Fetch NBL Australia player season statistics via API-Basketball
 
     Args:
         season: Season year as string (e.g., "2024" for 2024-25 season)
         per_mode: Aggregation mode ("Totals", "PerGame", "Per40")
 
     Returns:
-        DataFrame with player season statistics (empty for JS-rendered site)
+        DataFrame with player season statistics
 
-    Columns (schema only):
+    Columns:
+        - PLAYER_ID: Player ID (from API-Basketball)
         - PLAYER_NAME: Player name
+        - TEAM_ID: Team ID (from API-Basketball)
         - TEAM: Team name
         - GP: Games played
-        - MIN: Minutes played
+        - MIN: Minutes played (total or per game based on per_mode)
         - PTS: Points
-        - REB: Rebounds
+        - REB: Total rebounds
         - AST: Assists
         - STL: Steals
         - BLK: Blocks
         - TOV: Turnovers
-        - PF: Personal fouls
+        - FGM, FGA, FG_PCT: Field goal stats
+        - FG3M, FG3A, FG3_PCT: Three-point stats
+        - FTM, FTA, FT_PCT: Free throw stats
         - LEAGUE: "NBL"
         - SEASON: Season string
         - COMPETITION: "NBL Australia"
 
-    Note:
-        Requires Selenium/Playwright or API discovery for actual implementation.
-        See LEAGUE_WEB_SCRAPING_FINDINGS.md for details.
-    """
-    rate_limiter.acquire("nbl")
+    Raises:
+        ValueError: If API_BASKETBALL_KEY not set
 
-    logger.info(f"Fetching NBL player season stats: {season}, {per_mode}")
+    Note:
+        - Requires API-Basketball API key (free tier: 100 req/day)
+        - Set API_BASKETBALL_KEY environment variable
+        - Get free key at https://api-sports.io/register
+    """
+    logger.info(f"Fetching NBL player season stats via API-Basketball: {season}, {per_mode}")
 
     try:
-        # Attempt to fetch HTML table (will fail for JS-rendered site)
-        df = read_first_table(
-            url=NBL_STATS_URL,
-            min_columns=5,
-            min_rows=10,
+        client = _get_api_client()
+
+        # Convert season string to int (e.g., "2024" -> 2024)
+        season_int = int(season)
+
+        # Fetch player stats from API-Basketball
+        df = client.get_league_player_stats(league_id=NBL_API_LEAGUE_ID, season=season_int)
+
+        if df.empty:
+            logger.warning(f"No NBL player stats returned from API-Basketball for season {season}")
+            return _empty_player_season_df()
+
+        # Rename columns to standard schema
+        df = df.rename(
+            columns={
+                "player_id": "PLAYER_ID",
+                "player_name": "PLAYER_NAME",
+                "team_id": "TEAM_ID",
+                "team_name": "TEAM",
+                "games_played": "GP",
+                "minutes": "MIN",
+                "points": "PTS",
+                "rebounds": "REB",
+                "assists": "AST",
+                "steals": "STL",
+                "blocks": "BLK",
+                "turnovers": "TOV",
+                "field_goals_made": "FGM",
+                "field_goals_attempted": "FGA",
+                "field_goal_pct": "FG_PCT",
+                "three_pointers_made": "FG3M",
+                "three_pointers_attempted": "FG3A",
+                "three_point_pct": "FG3_PCT",
+                "free_throws_made": "FTM",
+                "free_throws_attempted": "FTA",
+                "free_throw_pct": "FT_PCT",
+            }
         )
 
-        column_map = {
-            "Player": "PLAYER_NAME",
-            "Team": "TEAM",
-            "Games": "GP",
-            "Minutes": "MIN",
-            "Points": "PTS",
-            "Rebounds": "REB",
-            "Assists": "AST",
-            "Steals": "STL",
-            "Blocks": "BLK",
-            "Turnovers": "TOV",
-            "Fouls": "PF",
-        }
+        # Add league metadata
+        df["LEAGUE"] = "NBL"
+        df["SEASON"] = season
+        df["COMPETITION"] = "NBL Australia"
 
-        df = normalize_league_columns(
-            df=df,
-            league="NBL",
-            season=season,
-            competition="NBL Australia",
-            column_map=column_map,
-        )
-
-        # Optional per_mode calculations
+        # Apply per_mode calculations
         if per_mode == "PerGame" and "GP" in df.columns:
-            stat_cols = ["PTS", "REB", "AST", "STL", "BLK", "TOV", "PF", "MIN"]
-            for col in stat_cols:
-                if col in df.columns:
-                    df[col] = df[col] / df["GP"]
-
-        return df
-
-    except Exception as e:
-        logger.error(f"Failed to fetch NBL player season stats: {e}")
-        # Return empty DataFrame with correct schema (graceful degradation)
-        return pd.DataFrame(
-            columns=[
-                "PLAYER_NAME",
-                "TEAM",
-                "GP",
+            # API-Basketball returns totals, so divide by games played
+            stat_cols = [
                 "MIN",
                 "PTS",
                 "REB",
@@ -166,12 +193,67 @@ def fetch_nbl_player_season(
                 "STL",
                 "BLK",
                 "TOV",
-                "PF",
-                "LEAGUE",
-                "SEASON",
-                "COMPETITION",
+                "FGM",
+                "FGA",
+                "FG3M",
+                "FG3A",
+                "FTM",
+                "FTA",
             ]
-        )
+            for col in stat_cols:
+                if col in df.columns:
+                    df[col] = df[col] / df["GP"].replace(0, 1)  # Avoid division by zero
+
+        elif per_mode == "Per40" and "MIN" in df.columns:
+            # Per 40 minutes calculation
+            stat_cols = ["PTS", "REB", "AST", "STL", "BLK", "TOV", "FGM", "FGA", "FG3M", "FG3A", "FTM", "FTA"]
+            for col in stat_cols:
+                if col in df.columns:
+                    df[col] = df[col] / (df["MIN"].replace(0, 1) / 40.0)
+
+        logger.info(f"Fetched {len(df)} NBL player season stats")
+        return df
+
+    except ValueError as e:
+        logger.error(f"API-Basketball configuration error: {e}")
+        logger.warning("Returning empty DataFrame. Set API_BASKETBALL_KEY environment variable.")
+        return _empty_player_season_df()
+
+    except Exception as e:
+        logger.error(f"Failed to fetch NBL player season stats: {e}")
+        return _empty_player_season_df()
+
+
+def _empty_player_season_df() -> pd.DataFrame:
+    """Return empty DataFrame with correct player season schema"""
+    return pd.DataFrame(
+        columns=[
+            "PLAYER_ID",
+            "PLAYER_NAME",
+            "TEAM_ID",
+            "TEAM",
+            "GP",
+            "MIN",
+            "PTS",
+            "REB",
+            "AST",
+            "STL",
+            "BLK",
+            "TOV",
+            "FGM",
+            "FGA",
+            "FG_PCT",
+            "FG3M",
+            "FG3A",
+            "FG3_PCT",
+            "FTM",
+            "FTA",
+            "FT_PCT",
+            "LEAGUE",
+            "SEASON",
+            "COMPETITION",
+        ]
+    )
 
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)

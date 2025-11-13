@@ -380,6 +380,72 @@ class APIBasketballClient:
         return pd.DataFrame(games)
 
     # ==========================================================================
+    # Game Box Scores
+    # ==========================================================================
+
+    @cached_dataframe
+    def get_game_boxscore(self, game_id: int) -> pd.DataFrame:
+        """Get detailed box score for a specific game
+
+        Args:
+            game_id: Game ID from get_games()
+
+        Returns:
+            DataFrame with player box scores for the game
+
+        Columns:
+            - game_id, player_id, player_name, team_id, team_name
+            - minutes, points, rebounds, assists, steals, blocks, turnovers
+            - field_goals_made, field_goals_attempted, field_goal_pct
+            - three_pointers_made, three_pointers_attempted, three_point_pct
+            - free_throws_made, free_throws_attempted, free_throw_pct
+
+        Example:
+            >>> game_box = client.get_game_boxscore(game_id=123456)
+            >>> top_scorers = game_box.nlargest(5, 'points')
+        """
+        params = {"game": game_id}
+        data = self._get("/statistics", params=params)
+
+        if "response" not in data or not data["response"]:
+            logger.warning(f"No box score data for game_id={game_id}")
+            return pd.DataFrame()
+
+        players = []
+        for item in data["response"]:
+            player = item.get("player", {})
+            team = item.get("team", {})
+            stats = item.get("statistics", [{}])[0] if item.get("statistics") else {}
+
+            players.append(
+                {
+                    "game_id": game_id,
+                    "player_id": player.get("id"),
+                    "player_name": player.get("name"),
+                    "team_id": team.get("id"),
+                    "team_name": team.get("name"),
+                    "minutes": stats.get("minutes"),
+                    "points": stats.get("points"),
+                    "rebounds": stats.get("rebounds"),
+                    "assists": stats.get("assists"),
+                    "steals": stats.get("steals"),
+                    "blocks": stats.get("blocks"),
+                    "turnovers": stats.get("turnovers"),
+                    "field_goals_made": stats.get("fieldGoalsMade"),
+                    "field_goals_attempted": stats.get("fieldGoalsAttempted"),
+                    "field_goal_pct": stats.get("fieldGoalsPercentage"),
+                    "three_pointers_made": stats.get("threePointsMade"),
+                    "three_pointers_attempted": stats.get("threePointsAttempted"),
+                    "three_point_pct": stats.get("threePointsPercentage"),
+                    "free_throws_made": stats.get("freeThrowsMade"),
+                    "free_throws_attempted": stats.get("freeThrowsAttempted"),
+                    "free_throw_pct": stats.get("freeThrowsPercentage"),
+                }
+            )
+
+        return pd.DataFrame(players)
+
+    # ==========================================================================
     # Utility Methods
     # ==========================================================================
 
