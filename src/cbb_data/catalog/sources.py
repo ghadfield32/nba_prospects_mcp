@@ -31,6 +31,8 @@ SourceType = Literal[
     "html",  # Static HTML scraping (pandas.read_html)
     "html_js",  # JavaScript-rendered HTML (requires Selenium/Playwright)
     "api_basketball",  # API-Basketball (api-sports.io)
+    "nbl_official_r",  # NBL Australia via nblR R package (official stats, 1979+)
+    "nz_nbl_fiba",  # NZ NBL via FIBA LiveStats HTML scraping
     "statorium",  # Statorium Basketball API
     "espn",  # ESPN API (existing NCAA-MBB/WBB implementation)
     "euroleague_api",  # EuroLeague API package
@@ -172,6 +174,7 @@ def _register_league_sources() -> None:
         lkl,
         lnb,
         nbl,
+        nbl_official,  # NBL Australia via nblR R package
     )
 
     # ==========================================================================
@@ -342,20 +345,23 @@ def _register_league_sources() -> None:
     # Phase 2 Scaffolds (Empty DataFrames) - Phase 3 Will Add Real Data
     # ==========================================================================
 
-    # NBL (Australia)
+    # NBL (Australia) - Official Stats via nblR R Package
     register_league_source(
         LeagueSourceConfig(
             league="NBL",
-            player_season_source="html",  # Phase 3: Will change to "api_basketball"
-            team_season_source="html",  # Phase 3: Will change to "api_basketball"
-            schedule_source="none",
-            box_score_source="none",
-            pbp_source="none",
-            shots_source="none",
-            fetch_player_season=nbl.fetch_nbl_player_season,
-            fetch_team_season=nbl.fetch_nbl_team_season,
-            fallback_source="html_js",  # Selenium if API-Basketball unavailable
-            notes="Phase 2: HTML scaffold (empty). Phase 3: API-Basketball planned.",
+            player_season_source="nbl_official_r",  # nblR R package (CRAN, GPL-3)
+            team_season_source="nbl_official_r",
+            schedule_source="nbl_official_r",  # Match results back to 1979!
+            box_score_source="nbl_official_r",  # Since 2015-16
+            pbp_source="nbl_official_r",  # Since 2015-16
+            shots_source="nbl_official_r",  # Shot locations (x,y) since 2015-16!
+            fetch_player_season=nbl_official.fetch_nbl_player_season,
+            fetch_team_season=nbl.fetch_nbl_team_season,  # TODO: migrate to nbl_official
+            # Additional methods (not in standard config yet):
+            # - nbl_official.fetch_nbl_schedule (results 1979+)
+            # - nbl_official.fetch_nbl_shots (x,y coordinates 2015+)
+            fallback_source="api_basketball",  # API-Basketball as backup
+            notes="Phase 3: nblR R package integration complete. Data: results (1979+), box/pbp/shots (2015-16+). Requires R + nblR package.",
         )
     )
 

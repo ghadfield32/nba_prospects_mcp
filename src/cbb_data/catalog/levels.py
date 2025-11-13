@@ -61,6 +61,7 @@ LEAGUE_LEVELS: dict[str, LevelType] = {
     "LKL": "prepro",  # LKL Lithuania - Lithuanian league (Sabonis family, Valančiūnas pipeline)
     "LNB_PROA": "prepro",  # LNB Pro A (France) - French top-tier league (Wembanyama, Gobert pipeline)
     "NBL": "prepro",  # NBL Australia - Australian league (Josh Giddey, Dyson Daniels pipeline)
+    "NZ-NBL": "prepro",  # New Zealand NBL - Sal's NBL (developmental league, NZ prospects)
     # Professional Leagues (EXCLUDED by default)
     "WNBA": "pro",  # Women's professional league (not pre-NBA)
 }
