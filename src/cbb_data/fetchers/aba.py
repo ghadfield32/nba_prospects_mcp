@@ -78,11 +78,6 @@ from .fiba_html_common import (
 )
 from .fiba_livestats_json import FibaLiveStatsClient
 
-    load_fiba_game_index,
-    scrape_fiba_box_score,
-    scrape_fiba_play_by_play,
-)
-
 logger = logging.getLogger(__name__)
 
 # Get rate limiter
@@ -94,7 +89,7 @@ FIBA_LEAGUE_CODE = "ABA"  # FIBA LiveStats code
 MIN_SUPPORTED_SEASON = "2001-02"
 
 # Initialize JSON client (shared across all FIBA leagues for rate limiting)
-_json_client = FibaLiveStatsClient(league_code=FIBA_LEAGUE_CODE)
+_json_client = FibaLiveStatsClient()
 
 # ==============================================================================
 # Schedule Endpoint

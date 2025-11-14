@@ -24,8 +24,8 @@ from collections.abc import Callable
 
 import pandas as pd
 
-from cbb_data.fetchers.base import Cache
-from cbb_data.storage.duckdb_storage import get_storage
+from ..fetchers.base import Cache
+from .duckdb_storage import get_storage
 
 logger = logging.getLogger(__name__)
 

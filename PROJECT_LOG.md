@@ -1,5 +1,153 @@
 # PROJECT_LOG.md — College & International Basketball Dataset Puller
 
+## 2025-11-14 (Session Current+11) - Comprehensive Validation & Import Fixes ✅ COMPLETED
+
+**Summary**: Performed deep validation of international basketball data sources, fixed critical import errors blocking all testing, created comprehensive validation infrastructure, and documented clear path forward for production readiness.
+
+**Critical Import Fixes**:
+
+1. **FibaLiveStatsClient TypeError**:
+   - **Issue**: All FIBA leagues (BCL, BAL, ABA, LKL) passing invalid `league_code` parameter
+   - **Root Cause**: FibaLiveStatsClient.__init__() doesn't accept league_code parameter
+   - **Impact**: Complete failure to import any FIBA fetcher modules
+   - **Fix**: Removed `league_code=FIBA_LEAGUE_CODE` from all JSON client initializations
+   - **Files Fixed**: bcl.py, bal.py, aba.py, lkl.py (lines 91-92 each)
+
+2. **Absolute Import Errors**:
+   - **Issue**: storage/ modules using `from cbb_data.storage` instead of relative imports
+   - **Root Cause**: Changed from installed package to development source structure
+   - **Impact**: ModuleNotFoundError blocking all imports
+   - **Fixes**:
+     - `storage/__init__.py`: Changed to `.cache_helper`, `.duckdb_storage`, `.save_data`
+     - `storage/cache_helper.py`: Changed to `from ..fetchers.base` and `from .duckdb_storage`
+
+3. **Duplicate Import in aba.py**:
+   - **Issue**: Lines 75-84 had duplicate import block from fiba_html_common
+   - **Fix**: Removed duplicate lines 81-84
+
+**Validation Infrastructure Created**:
+
+1. **tools/validate_international_data.py** (NEW - 470 lines):
+   - Comprehensive validation framework for all leagues
+   - Tests each fetch function with real parameters
+   - Checks data source metadata
+   - Validates schemas and column presence
+   - Exports results to JSON for tracking
+   - Works with league-specific validators (ACBValidator, LNBValidator)
+
+2. **tools/quick_validate_leagues.py** (NEW - 200 lines):
+   - Fast code structure validation (no imports needed)
+   - Checks function definitions via grep
+   - Validates game index files
+   - Checks documentation completeness
+   - Identifies duplicate code issues
+   - **Results**: All 6 checks passing (code structure, functions, docs, quality)
+
+3. **VALIDATION_SUMMARY.md** (NEW - 800 lines):
+   - Complete validation results documentation
+   - League-by-league status breakdown
+   - Critical fixes applied this session
+   - Game index quality analysis
+   - Next steps prioritized by urgency
+   - Testing checklist
+   - Known limitations & workarounds
+   - Success criteria definition
+
+**Validation Results**:
+
+```
+✅ Code Structure: 100%
+  - BCL: 7/7 functions defined
+  - BAL: 7/7 functions defined
+  - ABA: 7/7 functions defined
+  - LKL: 7/7 functions defined
+  - ACB: 4/4 functions + error handling
+  - LNB: 4/4 functions (placeholders)
+
+✅ Import Issues: FIXED
+  - All modules import successfully
+  - FibaLiveStatsClient initialized correctly
+  - No duplicate imports
+
+✅ Documentation: Comprehensive
+  - 60KB+ of implementation guides
+  - Usage examples with code
+  - Capability matrix
+  - Test suite (370 lines)
+
+⚠️  Game Indexes: PLACEHOLDER
+  - Only 3 games per league (need 20+ real IDs)
+  - Game IDs appear to be placeholders (501234, etc.)
+  - Cannot test real data fetching without valid indexes
+
+❌ Live Testing: BLOCKED
+  - Needs real FIBA game IDs from league websites
+  - Needs local machine for ACB (403 in containers)
+  - Needs LNB API discovery (DevTools session)
+```
+
+**Dependencies Installed** (Container Environment):
+- pandas, requests, beautifulsoup4, lxml
+- pydantic, httpx, duckdb
+
+**Key Findings**:
+
+1. **FIBA Fetchers (BCL/BAL/ABA/LKL)**:
+   - ✅ Code architecture is correct
+   - ✅ JSON-first → HTML-fallback pattern implemented
+   - ✅ Source metadata tracking ready
+   - ❌ Game indexes have placeholder data only
+   - 💡 Need manual game ID collection from league websites
+
+2. **ACB Fetcher**:
+   - ✅ Error handling comprehensive
+   - ✅ Manual CSV fallback implemented
+   - ✅ Zenodo integration documented
+   - ⚠️  Schedule/box score only have placeholders (need API discovery)
+   - 💡 Requires testing from local machine (403 errors from containers)
+
+3. **LNB Fetcher**:
+   - ✅ Team standings should work (HTML scraping)
+   - ❌ Player season/schedule return empty (API not discovered)
+   - 💡 Needs browser DevTools session to find Stats Centre API
+
+**Next Actions** (Priority Order):
+
+1. **🔴 HIGH**: Create real game indexes
+   - Manually collect 20+ real BCL game IDs from championsleague.basketball
+   - Update data/game_indexes/BCL_2023_24.csv
+   - Validate IDs via FIBA HTML widget check
+   - Test one complete fetch flow with real data
+
+2. **🟡 MEDIUM**: ACB Zenodo integration
+   - Download historical player-season dataset
+   - Test fallback mechanism
+   - Attempt schedule API discovery from local machine
+
+3. **🟢 LOW**: LNB API discovery
+   - Browser DevTools session on lnb.fr/stats
+   - Document endpoints in tools/lnb/README.md
+   - Fill in LNBStatsClient with real URLs
+
+**Files Changed**:
+- `src/cbb_data/fetchers/bcl.py`: -1 line (removed league_code param)
+- `src/cbb_data/fetchers/bal.py`: -1 line (removed league_code param)
+- `src/cbb_data/fetchers/aba.py`: -5 lines (removed league_code + duplicate import)
+- `src/cbb_data/fetchers/lkl.py`: -1 line (removed league_code param)
+- `src/cbb_data/storage/__init__.py`: 3 lines (relative imports)
+- `src/cbb_data/storage/cache_helper.py`: 2 lines (relative imports)
+- `tools/validate_international_data.py`: NEW +470 lines
+- `tools/quick_validate_leagues.py`: NEW +200 lines
+- `VALIDATION_SUMMARY.md`: NEW +800 lines
+
+**Session Impact**:
+- **Unblocked**: All import errors fixed, modules load successfully
+- **Validated**: Code structure confirmed correct across all leagues
+- **Documented**: Clear path from current state to production ready
+- **Prioritized**: Next steps ordered by blocking dependencies
+
+---
+
 ## 2025-11-14 (Session Current+10) - International Data Sources Critical Fixes & Documentation ✅ COMPLETED
 
 **Summary**: Fixed critical bugs in FIBA league fetchers (duplicate code from previous session), created comprehensive validation test suite, completed documentation with examples and capability matrix, and provided implementation guides for ACB and game index builders.

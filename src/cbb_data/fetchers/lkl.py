@@ -60,8 +60,8 @@ LEAGUE = "LKL"  # Standardized league name
 FIBA_LEAGUE_CODE = "LKL"  # FIBA LiveStats code
 MIN_SUPPORTED_SEASON = "2018-19"  # Earliest season with reliable data
 
-# Initialize FIBA JSON client
-_json_client = FibaLiveStatsClient(league_code=FIBA_LEAGUE_CODE)
+# Initialize FIBA JSON client (shared across all FIBA leagues for rate limiting)
+_json_client = FibaLiveStatsClient()
 
 
 # ==============================================================================

@@ -89,7 +89,7 @@ FIBA_LEAGUE_CODE = "BCL"  # FIBA LiveStats code
 MIN_SUPPORTED_SEASON = "2016-17"
 
 # Initialize JSON client (shared across all FIBA leagues for rate limiting)
-_json_client = FibaLiveStatsClient(league_code=FIBA_LEAGUE_CODE)
+_json_client = FibaLiveStatsClient()
 
 # ==============================================================================
 # Schedule Endpoint
