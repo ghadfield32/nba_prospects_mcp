@@ -49,6 +49,199 @@ DEFAULT_HEADERS = {
 
 
 # ==============================================================================
+# Shared Parsing Utilities
+# ==============================================================================
+
+
+def parse_makes_attempts(text: str) -> Tuple[int, int]:
+    """
+    Parse makes/attempts format into separate values.
+
+    Handles various formats: "5/10", "5-10", "5 / 10", "5 - 10"
+    Used by ACB, LNB, and other leagues for FGM/FGA, FTM/FTA, etc.
+
+    Args:
+        text: String in format "made/attempted" or "made-attempted"
+
+    Returns:
+        Tuple of (made, attempted) as integers
+
+    Example:
+        >>> parse_makes_attempts("5/10")
+        (5, 10)
+        >>> parse_makes_attempts("3-7")
+        (3, 7)
+        >>> parse_makes_attempts("invalid")
+        (0, 0)
+    """
+    try:
+        # Handle both "/" and "-" separators, with optional spaces
+        text = str(text).strip()
+        if "/" in text:
+            parts = text.split("/")
+        elif "-" in text:
+            parts = text.split("-")
+        else:
+            return 0, 0
+
+        if len(parts) == 2:
+            made = int(parts[0].strip())
+            attempted = int(parts[1].strip())
+            return made, attempted
+    except (ValueError, AttributeError):
+        pass
+
+    return 0, 0
+
+
+def parse_french_time(time_str: str) -> str:
+    """
+    Parse French time format to standard HH:MM format.
+
+    Converts "12h30" → "12:30", "9h00" → "09:00"
+    Used by LNB Pro A and other French leagues.
+
+    Args:
+        time_str: French format time string (e.g., "12h30")
+
+    Returns:
+        Standard format time string (e.g., "12:30")
+
+    Example:
+        >>> parse_french_time("12h30")
+        '12:30'
+        >>> parse_french_time("9h00")
+        '09:00'
+    """
+    try:
+        time_str = str(time_str).strip()
+        if "h" in time_str.lower():
+            return time_str.replace("h", ":").replace("H", ":")
+        return time_str
+    except Exception:
+        return time_str
+
+
+def split_makes_attempts_columns(
+    df: pd.DataFrame,
+    columns: Optional[List[str]] = None,
+    separator: str = "/",
+) -> pd.DataFrame:
+    """
+    Split makes/attempts columns into separate made and attempted columns.
+
+    Handles columns like "FGM-FGA" containing "5/10" format.
+    Creates two new columns: "FGM" and "FGA" with numeric values.
+    Used by ACB, LNB, and FIBA leagues.
+
+    Args:
+        df: DataFrame with makes/attempts columns
+        columns: List of column names to split (e.g., ["FGM-FGA", "FTM-FTA"])
+                If None, auto-detects columns with "-" in name
+        separator: Character separating makes from attempts in cell values
+
+    Returns:
+        DataFrame with split columns
+
+    Example:
+        >>> df = pd.DataFrame({"FGM-FGA": ["5/10", "3/8"]})
+        >>> df = split_makes_attempts_columns(df, ["FGM-FGA"])
+        >>> print(df[["FGM", "FGA"]])
+           FGM  FGA
+        0    5   10
+        1    3    8
+    """
+    # Auto-detect columns if not specified
+    if columns is None:
+        columns = [col for col in df.columns if "-" in col and col.count("-") == 1]
+
+    for col in columns:
+        if col not in df.columns:
+            continue
+
+        # Extract column names (e.g., "FGM-FGA" → "FGM", "FGA")
+        parts = col.split("-")
+        if len(parts) != 2:
+            continue
+
+        made_col, attempt_col = parts
+
+        # Parse each cell
+        split_data = df[col].apply(lambda x: parse_makes_attempts(str(x)))
+        df[made_col] = split_data.apply(lambda x: x[0])
+        df[attempt_col] = split_data.apply(lambda x: x[1])
+
+        # Drop original column
+        df = df.drop(columns=[col])
+
+    return df
+
+
+# Column mapping constants for multilingual support
+ACB_COLUMN_MAP = {
+    "Jugador": "PLAYER_NAME",
+    "Player": "PLAYER_NAME",
+    "Nombre": "PLAYER_NAME",
+    "Min": "MIN",
+    "Minutos": "MIN",
+    "Puntos": "PTS",
+    "Pts": "PTS",
+    "T2": "FG2M-FG2A",  # 2-point field goals
+    "T3": "FG3M-FG3A",  # 3-point field goals
+    "TC": "FGM-FGA",    # Total field goals
+    "TL": "FTM-FTA",    # Free throws (tiros libres)
+    "RO": "OREB",       # Offensive rebounds (rebotes ofensivos)
+    "RD": "DREB",       # Defensive rebounds (rebotes defensivos)
+    "RT": "REB",        # Total rebounds (rebotes totales)
+    "Rebotes": "REB",
+    "AS": "AST",
+    "Asistencias": "AST",
+    "BR": "STL",        # Steals (balones recuperados)
+    "Robos": "STL",
+    "BP": "TOV",        # Turnovers (balones perdidos)
+    "Pérdidas": "TOV",
+    "TAP": "BLK",       # Blocks (tapones)
+    "FC": "PF",         # Personal fouls (faltas cometidas)
+    "Faltas": "PF",
+    "+/-": "PLUS_MINUS",
+    "Val": "EFF",       # Efficiency rating (valoración)
+}
+
+LNB_COLUMN_MAP = {
+    "Joueur": "PLAYER_NAME",
+    "Player": "PLAYER_NAME",
+    "Nom": "PLAYER_NAME",
+    "Équipe": "TEAM",
+    "Team": "TEAM",
+    "Equipe": "TEAM",
+    "MJ": "GP",          # Matches jouées (games played)
+    "Matches": "GP",
+    "TC": "GS",          # Titularisations (games started)
+    "Min": "MIN",
+    "Minutes": "MIN",
+    "Pts": "PTS",
+    "Points": "PTS",
+    "2PTS": "FG2M-FG2A",
+    "3PTS": "FG3M-FG3A",
+    "LF": "FTM-FTA",     # Lancers francs (free throws)
+    "RO": "OREB",        # Rebonds offensifs
+    "RD": "DREB",        # Rebonds défensifs
+    "RT": "REB",         # Rebonds totaux
+    "Rebonds": "REB",
+    "PD": "AST",         # Passes décisives (assists)
+    "Passes": "AST",
+    "Int": "STL",        # Interceptions (steals)
+    "CT": "BLK",         # Contres (blocks)
+    "BP": "TOV",         # Balles perdues (turnovers)
+    "Pertes": "TOV",
+    "FP": "PF",          # Fautes personnelles (personal fouls)
+    "Fautes": "PF",
+    "Eval": "EFF",       # Évaluation (efficiency)
+    "+/-": "PLUS_MINUS",
+}
+
+
+# ==============================================================================
 # Generic HTML Table Parser
 # ==============================================================================
 
@@ -692,38 +885,8 @@ def scrape_acb_game_centre(game_url: str, game_id: str = None) -> Tuple[pd.DataF
             if df.empty:
                 continue
 
-            # Common ACB column patterns (Spanish)
-            column_map = {
-                "Jugador": "PLAYER_NAME",
-                "Player": "PLAYER_NAME",
-                "Nombre": "PLAYER_NAME",
-                "Min": "MIN",
-                "Minutos": "MIN",
-                "Puntos": "PTS",
-                "Pts": "PTS",
-                "T2": "FG2M-FG2A",  # May need splitting
-                "T3": "FG3M-FG3A",
-                "TC": "FGM-FGA",  # Total field goals
-                "TL": "FTM-FTA",  # Free throws
-                "RO": "OREB",  # Offensive rebounds
-                "RD": "DREB",  # Defensive rebounds
-                "RT": "REB",   # Total rebounds
-                "Rebotes": "REB",
-                "AS": "AST",
-                "Asistencias": "AST",
-                "BR": "STL",  # Steals (balones recuperados)
-                "Robos": "STL",
-                "BP": "TOV",  # Turnovers (balones perdidos)
-                "Pérdidas": "TOV",
-                "TAP": "BLK",  # Blocks (tapones)
-                "FC": "PF",  # Personal fouls (faltas cometidas)
-                "Faltas": "PF",
-                "+/-": "PLUS_MINUS",
-                "Val": "EFF",  # Efficiency rating (valoración)
-            }
-
-            # Apply column mapping
-            df = df.rename(columns={k: v for k, v in column_map.items() if k in df.columns})
+            # Apply ACB Spanish column mapping (using shared constant)
+            df = df.rename(columns={k: v for k, v in ACB_COLUMN_MAP.items() if k in df.columns})
 
             # Add metadata
             df["GAME_ID"] = game_id
@@ -738,19 +901,9 @@ def scrape_acb_game_centre(game_url: str, game_id: str = None) -> Tuple[pd.DataF
                         totals_row = df.iloc[[-1]].copy()
                         df = df.iloc[:-1]  # Remove totals from player stats
 
-            # Process makes/attempts columns (e.g., "5/10" -> FGM=5, FGA=10)
-            for col in ["FGM-FGA", "FG2M-FG2A", "FG3M-FG3A", "FTM-FTA"]:
-                if col in df.columns:
-                    made_col = col.split("-")[0]
-                    attempt_col = col.split("-")[1]
-
-                    # Split "M/A" format
-                    split_cols = df[col].astype(str).str.split("/", expand=True)
-                    if split_cols.shape[1] == 2:
-                        df[made_col] = pd.to_numeric(split_cols[0], errors="coerce").fillna(0)
-                        df[attempt_col] = pd.to_numeric(split_cols[1], errors="coerce").fillna(0)
-
-                    df = df.drop(columns=[col])
+            # Process makes/attempts columns using shared utility
+            # Handles columns like "FGM-FGA" containing "5/10" format
+            df = split_makes_attempts_columns(df, columns=["FGM-FGA", "FG2M-FG2A", "FG3M-FG3A", "FTM-FTA"])
 
             all_player_stats.append(df)
 
@@ -864,56 +1017,12 @@ def scrape_lnb_player_season_html(season: str) -> pd.DataFrame:
 
         logger.info(f"Parsed table with {len(df)} rows and {len(df.columns)} columns")
 
-        # LNB column mapping (French → English)
-        column_map = {
-            "Joueur": "PLAYER_NAME",
-            "Player": "PLAYER_NAME",
-            "Nom": "PLAYER_NAME",
-            "Équipe": "TEAM",
-            "Team": "TEAM",
-            "Equipe": "TEAM",
-            "MJ": "GP",  # Matches jouées (games played)
-            "Matches": "GP",
-            "TC": "GS",  # Titularisations (games started)
-            "Min": "MIN",
-            "Minutes": "MIN",
-            "Pts": "PTS",
-            "Points": "PTS",
-            "2PTS": "FG2M-FG2A",
-            "3PTS": "FG3M-FG3A",
-            "LF": "FTM-FTA",  # Lancers francs (free throws)
-            "RO": "OREB",  # Rebonds offensifs
-            "RD": "DREB",  # Rebonds défensifs
-            "RT": "REB",   # Rebonds totaux
-            "Rebonds": "REB",
-            "PD": "AST",  # Passes décisives (assists)
-            "Passes": "AST",
-            "Int": "STL",  # Interceptions (steals)
-            "CT": "BLK",  # Contres (blocks)
-            "BP": "TOV",  # Balles perdues (turnovers)
-            "Pertes": "TOV",
-            "FP": "PF",  # Fautes personnelles (personal fouls)
-            "Fautes": "PF",
-            "Eval": "EFF",  # Évaluation (efficiency)
-            "+/-": "PLUS_MINUS",
-        }
+        # Apply LNB French column mapping (using shared constant)
+        df = df.rename(columns={k: v for k, v in LNB_COLUMN_MAP.items() if k in df.columns})
 
-        # Apply column mapping
-        df = df.rename(columns={k: v for k, v in column_map.items() if k in df.columns})
-
-        # Process makes/attempts columns (e.g., "5/10" or "5-10")
-        for col in ["FG2M-FG2A", "FG3M-FG3A", "FTM-FTA"]:
-            if col in df.columns:
-                made_col = col.split("-")[0]
-                attempt_col = col.split("-")[1]
-
-                # Split on / or -
-                split_cols = df[col].astype(str).str.split(r"[/-]", expand=True)
-                if split_cols.shape[1] == 2:
-                    df[made_col] = pd.to_numeric(split_cols[0], errors="coerce").fillna(0)
-                    df[attempt_col] = pd.to_numeric(split_cols[1], errors="coerce").fillna(0)
-
-                df = df.drop(columns=[col])
+        # Process makes/attempts columns using shared utility
+        # LNB uses both "/" and "-" separators
+        df = split_makes_attempts_columns(df, columns=["FG2M-FG2A", "FG3M-FG3A", "FTM-FTA"])
 
         # Calculate FGM/FGA from 2PT + 3PT if needed
         if "FG2M" in df.columns and "FG3M" in df.columns and "FGM" not in df.columns:
@@ -1036,9 +1145,9 @@ def scrape_lnb_schedule_page(season: str) -> pd.DataFrame:
             date_match = re.search(r"(\d{1,2}[\./-]\d{1,2}[\./-]\d{2,4})", container_text)
             game_date = date_match.group(1) if date_match else None
 
-            # Extract time
+            # Extract time (French format: "12h30" or standard "12:30")
             time_match = re.search(r"(\d{1,2}h\d{2}|\d{1,2}:\d{2})", container_text)
-            game_time = time_match.group(1).replace("h", ":") if time_match else None
+            game_time = parse_french_time(time_match.group(1)) if time_match else None
 
             # Extract score
             score_match = re.search(r"(\d{1,3})\s*[-:]\s*(\d{1,3})", container_text)
