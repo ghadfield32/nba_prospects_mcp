@@ -8,7 +8,15 @@ Nicolas Batum, and others.
 
 ⚠️ **DATA AVAILABILITY**:
 - **Team standings**: ✅ Available (static HTML table)
-- **Player statistics**: ❌ Unavailable (requires JavaScript execution or API)
+- **Player statistics**: ❌ Requires API discovery (see tools/lnb/README.md)
+- **Game-level data**: ❌ Requires API discovery (see tools/lnb/README.md)
+
+**TO IMPLEMENT MISSING DATA**:
+The LNB website uses a JavaScript-driven Stats Centre. To access player/game data:
+1. Follow the API discovery guide at: `tools/lnb/README.md`
+2. Use browser DevTools to reverse-engineer API endpoints
+3. Implement discovered endpoints in: `src/cbb_data/fetchers/lnb_api.py`
+4. Update placeholder functions below to use the API client
 
 Key Features:
 - Web scraping from official lnb.fr stats pages
@@ -17,12 +25,12 @@ Key Features:
 - UTF-8 support for French names (accents, special characters)
 
 Data Granularities:
-- schedule: ❌ Unavailable (not published as static HTML)
-- player_game: ❌ Unavailable (requires JS execution)
-- team_game: ❌ Unavailable (requires JS execution)
-- pbp: ❌ Unavailable (not published on website)
-- shots: ❌ Unavailable (not published on website)
-- player_season: ❌ Unavailable (requires JS execution)
+- schedule: ❌ Requires API discovery (tools/lnb/README.md)
+- player_game: ❌ Requires API discovery (tools/lnb/README.md)
+- team_game: ❌ Requires API discovery (tools/lnb/README.md)
+- pbp: ❌ Requires API discovery (tools/lnb/README.md)
+- shots: ❌ Requires API discovery (tools/lnb/README.md)
+- player_season: ❌ Requires API discovery (tools/lnb/README.md)
 - team_season: ✅ Available (via standings page)
 
 Competition Structure:
@@ -43,7 +51,8 @@ Data Source: https://www.lnb.fr/pro-a/statistiques
 
 Implementation Status:
 ✅ IMPLEMENTED - Team standings via static HTML (team_season only)
-❌ Player statistics require Selenium/Playwright (JS-rendered)
+❌ Player/game data requires API discovery - see tools/lnb/README.md for instructions
+📋 TEMPLATE - API client template created at src/cbb_data/fetchers/lnb_api.py
 
 Technical Notes:
 - Encoding: UTF-8 for French names (é, à, ç, etc.)
@@ -205,26 +214,36 @@ def fetch_lnb_player_season(
     season: str = "2024",
     per_mode: str = "Totals",
 ) -> pd.DataFrame:
-    """Fetch LNB Pro A player season statistics (NOT AVAILABLE)
+    """Fetch LNB Pro A player season statistics (REQUIRES API DISCOVERY)
 
-    ❌ Player statistics NOT available via static HTML scraping.
-    Website uses JavaScript to render player stats dynamically.
+    ❌ Player statistics require API discovery via browser DevTools.
+
+    **TO IMPLEMENT**:
+    1. Follow API discovery guide: `tools/lnb/README.md`
+    2. Discover endpoints using browser DevTools on https://www.lnb.fr/pro-a/statistiques
+    3. Implement in `src/cbb_data/fetchers/lnb_api.py`
+    4. Update this function to use the API client:
+       ```python
+       from .lnb_api import create_lnb_api_client
+       client = create_lnb_api_client()
+       return client.fetch_player_season(season)
+       ```
 
     Args:
         season: Season year as string (e.g., "2024")
-        per_mode: Aggregation mode (not applicable)
+        per_mode: Aggregation mode (not applicable until implemented)
 
     Returns:
-        Empty DataFrame (player stats require Selenium/Playwright)
+        Empty DataFrame (until API is discovered and implemented)
 
-    Note:
-        To implement player stats, use Selenium/Playwright to execute
-        JavaScript and scrape rendered DOM. See LEAGUE_WEB_SCRAPING_FINDINGS.md
-        for implementation recommendations.
+    Expected Columns (after implementation):
+        - PLAYER_NAME, TEAM, GP, MIN, PTS, REB, AST, STL, BLK, TOV, PF
+        - FGM, FGA, FG_PCT, FG3M, FG3A, FG3_PCT, FTM, FTA, FT_PCT
+        - LEAGUE, SEASON, COMPETITION
     """
     logger.warning(
-        "LNB Pro A player statistics NOT available via static HTML. "
-        "Requires Selenium/Playwright for JavaScript execution. "
+        "LNB Pro A player statistics require API discovery. "
+        "See tools/lnb/README.md for implementation instructions. "
         "Returning empty DataFrame."
     )
     return pd.DataFrame(
@@ -250,14 +269,24 @@ def fetch_lnb_player_season(
 def fetch_lnb_schedule(
     season: str = "2024",
 ) -> pd.DataFrame:
-    """Fetch LNB Pro A schedule (NOT AVAILABLE)
+    """Fetch LNB Pro A schedule (REQUIRES API DISCOVERY)
 
-    ❌ Schedule NOT available via static HTML scraping.
+    ❌ Schedule requires API discovery via browser DevTools.
+
+    **TO IMPLEMENT**: See tools/lnb/README.md for API discovery instructions.
 
     Returns:
-        Empty DataFrame (schedule requires implementation)
+        Empty DataFrame (until API is discovered and implemented)
+
+    Expected Columns (after implementation):
+        - GAME_ID, SEASON, GAME_DATE, HOME_TEAM, AWAY_TEAM
+        - HOME_SCORE, AWAY_SCORE, STATUS, LEAGUE
     """
-    logger.warning("LNB Pro A schedule fetching requires implementation (JS-rendered or API)")
+    logger.warning(
+        "LNB Pro A schedule requires API discovery. "
+        "See tools/lnb/README.md for implementation instructions. "
+        "Returning empty DataFrame."
+    )
     return pd.DataFrame(
         columns=[
             "GAME_ID",
@@ -273,12 +302,27 @@ def fetch_lnb_schedule(
 
 
 def fetch_lnb_box_score(game_id: str) -> pd.DataFrame:
-    """Fetch LNB Pro A box score (NOT AVAILABLE)
+    """Fetch LNB Pro A box score (REQUIRES API DISCOVERY)
+
+    ❌ Box scores require API discovery via browser DevTools.
+
+    **TO IMPLEMENT**: See tools/lnb/README.md for API discovery instructions.
+
+    Args:
+        game_id: Game identifier
 
     Returns:
-        Empty DataFrame (box scores require implementation)
+        Empty DataFrame (until API is discovered and implemented)
+
+    Expected Columns (after implementation):
+        - GAME_ID, PLAYER_NAME, TEAM, MIN, PTS, REB, AST, STL, BLK
+        - FGM, FGA, FG3M, FG3A, FTM, FTA, LEAGUE
     """
-    logger.warning("LNB Pro A box score fetching requires implementation (JS-rendered or API)")
+    logger.warning(
+        "LNB Pro A box scores require API discovery. "
+        "See tools/lnb/README.md for implementation instructions. "
+        "Returning empty DataFrame."
+    )
     return pd.DataFrame(
         columns=[
             "GAME_ID",

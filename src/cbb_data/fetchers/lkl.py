@@ -48,6 +48,12 @@ from .fiba_html_common import (
     scrape_fiba_box_score,
     scrape_fiba_play_by_play,
 )
+from .fiba_livestats_json import FibaLiveStatsClient
+
+    load_fiba_game_index,
+    scrape_fiba_box_score,
+    scrape_fiba_play_by_play,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -198,7 +204,7 @@ def fetch_player_game(
             continue
 
     if not all_player_stats:
-        logger.warning(f"No player stats scraped for {LEAGUE} {season}")
+        logger.warning(f"No player stats fetched for {LEAGUE} {season}")
         return pd.DataFrame()
 
     # Concatenate all games

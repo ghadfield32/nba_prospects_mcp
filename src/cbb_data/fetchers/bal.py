@@ -1,35 +1,37 @@
 """Basketball Africa League (BAL) Fetcher
 
-Official Basketball Africa League data via FIBA LiveStats HTML scraping.
+Official Basketball Africa League data via FIBA LiveStats JSON API and HTML scraping.
 
 BAL is Africa's premier professional basketball league, jointly operated by
 FIBA and the NBA with 12 teams from across Africa.
 
 ⚠️ **IMPLEMENTATION NOTE**: Originally used web scraping from thebal.com.
-Replaced with FIBA LiveStats HTML scraping for consistency and better data coverage.
+Replaced with FIBA LiveStats JSON API (primary) with HTML fallback for consistency and better data coverage.
 
 Key Features:
-- FIBA LiveStats HTML scraping (public pages)
-- Game-level data (player_game, team_game, pbp)
+- FIBA LiveStats JSON API (primary data source)
+- FIBA LiveStats HTML scraping (fallback)
+- Game-level data (player_game, team_game, pbp, shots)
 - Season aggregate data (player_season, team_season)
 - Shared infrastructure with other FIBA leagues
 - Rate-limited requests with retry logic
 - Local Parquet caching for performance
 
-Data Source: FIBA LiveStats public HTML pages
-- Box scores: https://fibalivestats.dcd.shared.geniussports.com/u/BAL/[GAME_ID]/bs.html
-- Play-by-play: https://fibalivestats.dcd.shared.geniussports.com/u/BAL/[GAME_ID]/pbp.html
+Data Source: FIBA LiveStats public API and HTML pages
+- JSON API: https://fibalivestats.dcd.shared.geniussports.com/data/[GAME_ID]/data.json (primary)
+- Box scores: https://fibalivestats.dcd.shared.geniussports.com/u/BAL/[GAME_ID]/bs.html (fallback)
+- Play-by-play: https://fibalivestats.dcd.shared.geniussports.com/u/BAL/[GAME_ID]/pbp.html (fallback)
 
 League Code: "BAL" (Basketball Africa League in FIBA LiveStats system)
 
 Data Coverage:
 - Schedule: Via pre-built game index (data/game_indexes/BAL_YYYY_YY.csv)
-- Player-game box scores: Via FIBA LiveStats HTML scraping
-- Team-game box scores: Aggregated from player stats
-- Play-by-play: Via FIBA LiveStats HTML scraping (when available)
+- Player-game box scores: Via JSON API (primary) or HTML scraping (fallback)
+- Team-game box scores: Via JSON API (primary) or aggregated from player stats (fallback)
+- Play-by-play: Via JSON API (primary) or HTML scraping (fallback)
+- Shots: ✅ Via JSON API (includes X/Y coordinates for shot charts)
 - Player-season: Aggregated from player-game
 - Team-season: Aggregated from team-game
-- Shots: ❌ Not available (FIBA HTML doesn't provide x,y coordinates)
 
 Competition Structure:
 - 12 teams from 12 African countries
@@ -73,6 +75,7 @@ from .fiba_html_common import (
     scrape_fiba_box_score,
     scrape_fiba_play_by_play,
 )
+from .fiba_livestats_json import FibaLiveStatsClient
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +86,9 @@ rate_limiter = get_source_limiter()
 LEAGUE = "BAL"  # Standardized league name
 FIBA_LEAGUE_CODE = "BAL"  # FIBA LiveStats code
 MIN_SUPPORTED_SEASON = "2020-21"
+
+# Initialize JSON client (shared across all FIBA leagues for rate limiting)
+_json_client = FibaLiveStatsClient(league_code=FIBA_LEAGUE_CODE)
 
 # ==============================================================================
 # Schedule Endpoint
@@ -158,7 +164,7 @@ def fetch_schedule(season: str = "2023-24") -> pd.DataFrame:
 def fetch_player_game(season: str = "2023-24", force_refresh: bool = False) -> pd.DataFrame:
     """Fetch Basketball Africa League player game statistics
 
-    Scrapes FIBA LiveStats HTML pages for each game in the season to collect
+    Uses FIBA LiveStats JSON API (primary) with HTML scraping fallback for each game in the season to collect
     player box score data. Uses local caching to avoid repeated requests.
 
     Args:
@@ -195,7 +201,7 @@ def fetch_player_game(season: str = "2023-24", force_refresh: bool = False) -> p
 
     Note:
         - Returns empty DataFrame if schedule not available
-        - Skips games that fail to scrape (logs warnings)
+        - Tries JSON API first, falls back to HTML on errors
         - Uses Parquet caching for each game individually
     """
     # Get schedule first
@@ -204,7 +210,7 @@ def fetch_player_game(season: str = "2023-24", force_refresh: bool = False) -> p
         logger.warning(f"{LEAGUE} schedule not available for {season}")
         return pd.DataFrame()
 
-    # Scrape player stats for each game
+    # Fetch player stats for each game
     all_player_stats = []
 
     for _, game_row in schedule.iterrows():
@@ -238,9 +244,69 @@ def fetch_player_game(season: str = "2023-24", force_refresh: bool = False) -> p
             logger.warning(f"Failed to scrape {LEAGUE} game {game_id}: {e}")
             continue
 
+
+        try:
+            # Try JSON API first
+            game_data = _json_client.fetch_game_json(game_id=int(game_id))
+            player_df = _json_client.to_player_game_df(game_data)
+
+            if not player_df.empty:
+                # Add game context
+                player_df["GAME_ID"] = game_id
+                player_df["SEASON"] = season
+                player_df["LEAGUE"] = LEAGUE
+                player_df["SOURCE"] = "fiba_json"
+
+                # Generate player IDs if needed
+                if "PLAYER_ID" not in player_df.columns and "TEAM" in player_df.columns:
+                    player_df["PLAYER_ID"] = (
+                        player_df["TEAM"].str[:3] + "_" + player_df["PLAYER_NAME"].str.replace(" ", "_")
+                    )
+
+                # Ensure team ID
+                if "TEAM_ID" not in player_df.columns:
+                    player_df["TEAM_ID"] = player_df["TEAM"]
+
+                all_player_stats.append(player_df)
+                logger.debug(f"Fetched {LEAGUE} game {game_id} via JSON API")
+                continue
+
+        except Exception as e:
+            logger.debug(f"JSON API failed for {LEAGUE} game {game_id}, trying HTML: {e}")
+
+        # Fallback to HTML scraping
+        try:
+            box_score = scrape_fiba_box_score(
+                league_code=FIBA_LEAGUE_CODE,
+                game_id=str(game_id),
+                league=LEAGUE,
+                season=season,
+                force_refresh=force_refresh,
+            )
+
+            if not box_score.empty:
+                # Add game identifier
+                box_score["GAME_ID"] = game_id
+                box_score["SOURCE"] = "fiba_html"
+
+                # Generate player IDs (TEAM_PLAYERNAME format)
+                box_score["PLAYER_ID"] = (
+                    box_score["TEAM"].str[:3] + "_" + box_score["PLAYER_NAME"].str.replace(" ", "_")
+                )
+
+                # Ensure team ID
+                box_score["TEAM_ID"] = box_score["TEAM"]
+
+                all_player_stats.append(box_score)
+                logger.debug(f"Fetched {LEAGUE} game {game_id} via HTML fallback")
+
+        except Exception as e:
+            logger.warning(f"Failed to fetch {LEAGUE} game {game_id} (both JSON and HTML): {e}")
+            continue
+
     # Combine all games
     if not all_player_stats:
-        logger.warning(f"No player stats scraped for {LEAGUE} {season}")
+        logger.warning(f"No player stats fetched for {LEAGUE} {season}")
         return pd.DataFrame()
 
     df = pd.concat(all_player_stats, ignore_index=True)
@@ -389,7 +455,7 @@ def fetch_pbp(season: str = "2023-24", force_refresh: bool = False) -> pd.DataFr
         logger.warning(f"{LEAGUE} schedule not available for {season}")
         return pd.DataFrame()
 
-    # Scrape PBP for each game
+    # Fetch PBP for each game
     all_pbp = []
 
     for _, game_row in schedule.iterrows():
@@ -413,6 +479,46 @@ def fetch_pbp(season: str = "2023-24", force_refresh: bool = False) -> pd.DataFr
             logger.warning(f"Failed to scrape {LEAGUE} PBP for game {game_id}: {e}")
             continue
 
+
+        try:
+            # Try JSON API first
+            game_data = _json_client.fetch_game_json(game_id=int(game_id))
+            pbp_df = _json_client.to_pbp_df(game_data)
+
+            if not pbp_df.empty:
+                # Add game context
+                pbp_df["GAME_ID"] = game_id
+                pbp_df["SEASON"] = season
+                pbp_df["LEAGUE"] = LEAGUE
+                pbp_df["SOURCE"] = "fiba_json"
+
+                all_pbp.append(pbp_df)
+                logger.debug(f"Fetched {LEAGUE} PBP for game {game_id} via JSON API")
+                continue
+
+        except Exception as e:
+            logger.debug(f"JSON API failed for {LEAGUE} PBP game {game_id}, trying HTML: {e}")
+
+        # Fallback to HTML scraping
+        try:
+            pbp = scrape_fiba_play_by_play(
+                league_code=FIBA_LEAGUE_CODE,
+                game_id=str(game_id),
+                league=LEAGUE,
+                season=season,
+                force_refresh=force_refresh,
+            )
+
+            if not pbp.empty:
+                pbp["GAME_ID"] = game_id
+                pbp["SOURCE"] = "fiba_html"
+                all_pbp.append(pbp)
+                logger.debug(f"Fetched {LEAGUE} PBP for game {game_id} via HTML fallback")
+
+        except Exception as e:
+            logger.warning(f"Failed to fetch {LEAGUE} PBP for game {game_id} (both JSON and HTML): {e}")
+            continue
+
     # Combine all games
     if not all_pbp:
         logger.info(f"No play-by-play data available for {LEAGUE} {season}")
@@ -423,6 +529,96 @@ def fetch_pbp(season: str = "2023-24", force_refresh: bool = False) -> pd.DataFr
     # Ensure standard columns
     df = ensure_standard_columns(df, "pbp", LEAGUE, season)
 
+    return df
+
+
+
+# ==============================================================================
+# Shots Endpoint
+# ==============================================================================
+
+
+@retry_on_error(max_attempts=3, backoff_seconds=2.0)
+@cached_dataframe
+def fetch_shots(season: str = "2023-24", force_refresh: bool = False) -> pd.DataFrame:
+    """Fetch Basketball Africa League shot data with coordinates
+
+    Uses FIBA LiveStats JSON API to extract shot events with X/Y coordinates
+    for shot chart visualization. Only available via JSON API.
+
+    Args:
+        season: Season string (e.g., "2023-24")
+        force_refresh: Force refresh cache (default: False)
+
+    Returns:
+        DataFrame with shot events
+
+    Required Columns:
+        - LEAGUE: "BAL"
+        - SEASON: Season string
+        - GAME_ID: FIBA game ID
+        - PERIOD: Period/quarter number
+        - CLOCK: Game clock time
+        - TEAM: Team name
+        - PLAYER_NAME: Player name
+        - SHOT_TYPE: "2PT" or "3PT"
+        - SHOT_RESULT: "MADE" or "MISSED"
+        - X: X coordinate (0-100 scale)
+        - Y: Y coordinate (0-100 scale)
+        - DESCRIPTION: Shot description
+
+    Example:
+        >>> shots = fetch_shots("2023-24")
+        >>> made_threes = shots[(shots['SHOT_TYPE'] == '3PT') & (shots['SHOT_RESULT'] == 'MADE')]
+        >>> print(f"3PT%: {len(made_threes) / len(shots[shots['SHOT_TYPE'] == '3PT']) * 100:.1f}%")
+
+    Note:
+        - Only available via JSON API (HTML doesn't provide coordinates)
+        - Returns empty DataFrame if schedule not available
+        - Skips games that fail to fetch
+    """
+    # Get schedule
+    schedule = fetch_schedule(season)
+    if schedule.empty:
+        logger.warning(f"{LEAGUE} schedule not available for {season}")
+        return pd.DataFrame()
+
+    # Fetch shots for each game
+    all_shots = []
+
+    for _, game_row in schedule.iterrows():
+        game_id = game_row["GAME_ID"]
+
+        try:
+            # Fetch from JSON API
+            game_data = _json_client.fetch_game_json(game_id=int(game_id))
+            shots_df = _json_client.to_shots_df(game_data)
+
+            if not shots_df.empty:
+                # Add game context
+                shots_df["GAME_ID"] = game_id
+                shots_df["SEASON"] = season
+                shots_df["LEAGUE"] = LEAGUE
+                shots_df["SOURCE"] = "fiba_json"
+
+                all_shots.append(shots_df)
+                logger.debug(f"Fetched {len(shots_df)} shots for {LEAGUE} game {game_id}")
+
+        except Exception as e:
+            logger.debug(f"Failed to fetch shots for {LEAGUE} game {game_id}: {e}")
+            continue
+
+    # Combine all games
+    if not all_shots:
+        logger.info(f"No shot data available for {LEAGUE} {season}")
+        return pd.DataFrame()
+
+    df = pd.concat(all_shots, ignore_index=True)
+
+    # Ensure standard columns
+    df = ensure_standard_columns(df, "shots", LEAGUE, season)
+
+    logger.info(f"Fetched {len(df)} total shots for {LEAGUE} {season}")
     return df
 
 
@@ -655,5 +851,6 @@ fetch_bal_schedule = fetch_schedule
 fetch_bal_player_game = fetch_player_game
 fetch_bal_team_game = fetch_team_game
 fetch_bal_pbp = fetch_pbp
+fetch_bal_shots = fetch_shots
 fetch_bal_team_season = fetch_team_season
 fetch_bal_player_season = fetch_player_season
