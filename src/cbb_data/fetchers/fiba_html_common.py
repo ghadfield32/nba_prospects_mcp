@@ -788,3 +788,178 @@ def scrape_fiba_play_by_play(
     except Exception as e:
         logger.error(f"Failed to scrape PBP for {league_code} game {game_id}: {e}")
         return pd.DataFrame()
+
+
+# ==============================================================================
+# Schedule Building from HTML (NEW)
+# ==============================================================================
+
+
+def build_fiba_schedule_from_html(
+    league_code: str,
+    season: str,
+    schedule_url: str,
+) -> pd.DataFrame:
+    """Build FIBA league schedule by scraping league website HTML.
+
+    Extracts game IDs from fibalivestats.dcd.shared.geniussports.com links
+    embedded in league schedule pages. This eliminates the need for manually
+    created game index CSV files.
+
+    Args:
+        league_code: FIBA league code (e.g., "BCL", "BAL", "ABA", "LKL")
+        season: Season string (e.g., "2023-24")
+        schedule_url: URL of league schedule page (e.g., "https://www.championsleague.basketball/schedule")
+
+    Returns:
+        DataFrame with schedule information including GAME_ID, GAME_DATE,
+        HOME_TEAM, AWAY_TEAM, and other metadata
+
+    Example:
+        >>> df = build_fiba_schedule_from_html("BCL", "2023-24", "https://www.championsleague.basketball/schedule")
+        >>> print(f"Found {len(df)} games")
+        >>> print(df[["GAME_ID", "GAME_DATE", "HOME_TEAM", "AWAY_TEAM"]].head())
+
+    Note:
+        This function is the HTML-only alternative to load_fiba_game_index().
+        It automatically discovers game IDs by parsing league websites.
+    """
+    if not HTML_PARSING_AVAILABLE:
+        logger.warning("HTML parsing not available. Install requests and beautifulsoup4.")
+        return pd.DataFrame()
+
+    try:
+        from .html_scrapers import scrape_fiba_schedule_page
+
+        logger.info(f"Building {league_code} {season} schedule from HTML: {schedule_url}")
+
+        df = scrape_fiba_schedule_page(
+            schedule_url=schedule_url,
+            league_code=league_code,
+            season=season,
+        )
+
+        if df.empty:
+            logger.warning(f"No games found at {schedule_url}")
+            logger.warning("This could mean:")
+            logger.warning("  1. Schedule page structure changed")
+            logger.warning("  2. Wrong URL for this season")
+            logger.warning("  3. Season hasn't started yet")
+            return df
+
+        # Add standardized columns
+        df["LEAGUE"] = league_code
+        df["SEASON"] = season
+
+        # Ensure required columns exist
+        if "FIBA_COMPETITION" not in df.columns:
+            df["FIBA_COMPETITION"] = league_code
+
+        if "FIBA_PHASE" not in df.columns:
+            df["FIBA_PHASE"] = "RS"  # Default to Regular Season
+
+        # Ensure standard column format
+        df = ensure_standard_columns(df, "schedule", league_code, season)
+
+        logger.info(f"Built schedule with {len(df)} games for {league_code} {season}")
+        logger.info(f"  Game ID range: {df['GAME_ID'].min()} to {df['GAME_ID'].max()}")
+
+        return df
+
+    except ImportError:
+        logger.error("html_scrapers module not found. Ensure src/cbb_data/fetchers/html_scrapers.py exists.")
+        return pd.DataFrame()
+
+    except Exception as e:
+        logger.error(f"Failed to build schedule from HTML for {league_code} {season}: {e}")
+        return pd.DataFrame()
+
+
+# ==============================================================================
+# Shot Chart Scraping from HTML (NEW)
+# ==============================================================================
+
+
+@with_cache(lambda league_code, game_id, **kwargs: f"{league_code}_{game_id}_shots")
+def scrape_fiba_shots(
+    league_code: str,
+    game_id: str | int,
+    league: str | None = None,
+    season: str | None = None,
+    force_refresh: bool = False,
+) -> pd.DataFrame:
+    """Scrape shot chart data from FIBA LiveStats HTML pages.
+
+    Extracts shot events with X/Y coordinates from FIBA LiveStats shot chart pages.
+    Uses multiple extraction strategies:
+    1. JSON embedded in <script> tags (most common)
+    2. HTML elements with data-x, data-y attributes (fallback)
+
+    Args:
+        league_code: FIBA league code (e.g., "BCL", "BAL", "ABA", "LKL")
+        game_id: FIBA game ID
+        league: Optional standardized league name
+        season: Optional season string
+        force_refresh: If True, ignore cache and re-scrape
+
+    Returns:
+        DataFrame with shot events including X, Y coordinates, SHOT_TYPE,
+        SHOT_RESULT (MADE/MISSED), PLAYER_NAME, TEAM, PERIOD, CLOCK
+
+    Columns:
+        - GAME_ID, PERIOD, CLOCK, TEAM, PLAYER_NAME
+        - SHOT_TYPE: "2PT" or "3PT"
+        - SHOT_RESULT: "MADE" or "MISSED"
+        - X, Y: Coordinates (0-100 scale)
+        - DESCRIPTION: Shot description
+
+    Example:
+        >>> df = scrape_fiba_shots("BCL", "123456", league="BCL", season="2023-24")
+        >>> made_shots = df[df['SHOT_RESULT'] == 'MADE']
+        >>> print(f"FG%: {len(made_shots) / len(df) * 100:.1f}%")
+
+    Note:
+        - Returns empty DataFrame if shot data not available
+        - Coordinates are normalized to 0-100 scale
+        - This is the HTML-only alternative to JSON API shot extraction
+    """
+    if not HTML_PARSING_AVAILABLE:
+        logger.warning("HTML parsing not available. Install requests and beautifulsoup4.")
+        return pd.DataFrame()
+
+    try:
+        from .html_scrapers import scrape_fiba_shot_chart_html
+
+        logger.debug(f"Scraping shots for {league_code} game {game_id}")
+
+        df = scrape_fiba_shot_chart_html(
+            league_code=league_code,
+            game_id=int(game_id),
+        )
+
+        if df.empty:
+            logger.debug(f"No shot data found for {league_code} game {game_id}")
+            return df
+
+        # Add game context
+        df["GAME_ID"] = str(game_id)
+
+        if league:
+            df["LEAGUE"] = league
+        if season:
+            df["SEASON"] = season
+
+        # Ensure standard columns
+        if league and season:
+            df = ensure_standard_columns(df, "shots", league, season)
+
+        logger.debug(f"Scraped {len(df)} shots for {league_code} game {game_id}")
+        return df
+
+    except ImportError:
+        logger.error("html_scrapers module not found. Ensure src/cbb_data/fetchers/html_scrapers.py exists.")
+        return pd.DataFrame()
+
+    except Exception as e:
+        logger.error(f"Failed to scrape shots for {league_code} game {game_id}: {e}")
+        return pd.DataFrame()

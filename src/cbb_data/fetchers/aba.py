@@ -72,9 +72,11 @@ from ..contracts import ensure_standard_columns
 from ..utils.rate_limiter import get_source_limiter
 from .base import cached_dataframe, retry_on_error
 from .fiba_html_common import (
+    build_fiba_schedule_from_html,
     load_fiba_game_index,
     scrape_fiba_box_score,
     scrape_fiba_play_by_play,
+    scrape_fiba_shots,
 )
 from .fiba_livestats_json import FibaLiveStatsClient
 
@@ -101,8 +103,9 @@ _json_client = FibaLiveStatsClient()
 def fetch_schedule(season: str = "2023-24") -> pd.DataFrame:
     """Fetch ABA League schedule
 
-    Loads pre-built game index from CSV file. The game index must be manually
-    created since FIBA LiveStats doesn't provide a searchable schedule API.
+    **HTML-FIRST APPROACH**: Scrapes aba-liga.com website to automatically
+    discover game IDs and build schedule. Falls back to pre-built CSV game
+    index if HTML scraping fails.
 
     Args:
         season: Season string (e.g., "2023-24")
@@ -110,7 +113,7 @@ def fetch_schedule(season: str = "2023-24") -> pd.DataFrame:
     Returns:
         DataFrame with schedule information
 
-    Required Columns (from game index):
+    Required Columns:
         - LEAGUE: League name ("ABA")
         - SEASON: Season string
         - GAME_ID: FIBA game ID
@@ -121,16 +124,46 @@ def fetch_schedule(season: str = "2023-24") -> pd.DataFrame:
         - AWAY_SCORE: Final away score (optional)
         - FIBA_COMPETITION: Competition name (e.g., "ABA Liga")
         - FIBA_PHASE: Phase (e.g., "RS" for Regular Season, "PO" for Playoffs)
+        - SOURCE: "schedule_html" (HTML scraping) or "game_index_csv" (fallback)
 
     Example:
         >>> schedule = fetch_schedule("2023-24")
         >>> print(f"Found {len(schedule)} ABA games")
-        >>> print(schedule[["GAME_DATE", "HOME_TEAM", "AWAY_TEAM"]].head())
+        >>> print(schedule[["GAME_DATE", "HOME_TEAM", "AWAY_TEAM", "SOURCE"]].head())
 
     Note:
-        If game index doesn't exist, returns empty DataFrame with instructions
-        for creating the index file.
+        - HTML scraping is attempted first (primary method)
+        - If HTML fails, falls back to CSV game index
     """
+    # PRIMARY: Try HTML scraping from league website
+    try:
+        logger.info(f"Attempting HTML-based schedule fetch for {LEAGUE} {season}")
+        df = build_fiba_schedule_from_html(
+            league_code=FIBA_LEAGUE_CODE,
+            season=season,
+            schedule_url="https://www.aba-liga.com/schedule/",
+        )
+
+        if not df.empty:
+            # Add source metadata
+            df["SOURCE"] = "schedule_html"
+
+            # Ensure team IDs (use team names as IDs for FIBA leagues)
+            if "HOME_TEAM_ID" not in df.columns:
+                df["HOME_TEAM_ID"] = df["HOME_TEAM"]
+            if "AWAY_TEAM_ID" not in df.columns:
+                df["AWAY_TEAM_ID"] = df["AWAY_TEAM"]
+
+            logger.info(f"Successfully fetched {len(df)} games via HTML scraping")
+            return df
+
+        logger.warning("HTML scraping returned empty, falling back to CSV game index")
+
+    except Exception as e:
+        logger.warning(f"HTML scraping failed, falling back to CSV game index: {e}")
+
+    # FALLBACK: Load from CSV game index
+    logger.info(f"Loading {LEAGUE} schedule from CSV game index")
     df = load_fiba_game_index(FIBA_LEAGUE_CODE, season)
 
     if df.empty:
@@ -144,7 +177,7 @@ def fetch_schedule(season: str = "2023-24") -> pd.DataFrame:
     df = ensure_standard_columns(df, "schedule", LEAGUE, season)
 
     # Add source metadata
-    df["SOURCE"] = "fiba_html"
+    df["SOURCE"] = "game_index_csv"
 
     # Ensure team IDs (use team names as IDs for FIBA leagues)
     if "HOME_TEAM_ID" not in df.columns:
@@ -496,8 +529,9 @@ def fetch_pbp(season: str = "2023-24", force_refresh: bool = False) -> pd.DataFr
 def fetch_shots(season: str = "2023-24", force_refresh: bool = False) -> pd.DataFrame:
     """Fetch ABA League shot data with coordinates
 
-    Uses FIBA LiveStats JSON API to extract shot events with X/Y coordinates
-    for shot chart visualization. Only available via JSON API.
+    **DUAL-SOURCE APPROACH**: Uses FIBA LiveStats JSON API (primary) with HTML
+    scraping fallback. HTML scraping can extract shot coordinates from embedded
+    JSON or HTML elements on FIBA LiveStats pages.
 
     Args:
         season: Season string (e.g., "2023-24")
@@ -519,6 +553,7 @@ def fetch_shots(season: str = "2023-24", force_refresh: bool = False) -> pd.Data
         - X: X coordinate (0-100 scale)
         - Y: Y coordinate (0-100 scale)
         - DESCRIPTION: Shot description
+        - SOURCE: "fiba_json" (JSON API) or "fiba_html" (HTML scraping)
 
     Example:
         >>> shots = fetch_shots("2023-24")
@@ -526,9 +561,9 @@ def fetch_shots(season: str = "2023-24", force_refresh: bool = False) -> pd.Data
         >>> print(f"3PT%: {len(made_threes) / len(shots[shots['SHOT_TYPE'] == '3PT']) * 100:.1f}%")
 
     Note:
-        - Only available via JSON API (HTML doesn't provide coordinates)
+        - Tries JSON API first, falls back to HTML on errors
         - Returns empty DataFrame if schedule not available
-        - Skips games that fail to fetch
+        - Skips games that fail to fetch from both sources
     """
     # Get schedule
     schedule = fetch_schedule(season)
@@ -542,8 +577,8 @@ def fetch_shots(season: str = "2023-24", force_refresh: bool = False) -> pd.Data
     for _, game_row in schedule.iterrows():
         game_id = game_row["GAME_ID"]
 
+        # PRIMARY: Try JSON API first
         try:
-            # Fetch from JSON API
             game_data = _json_client.fetch_game_json(game_id=int(game_id))
             shots_df = _json_client.to_shots_df(game_data)
 
@@ -555,10 +590,29 @@ def fetch_shots(season: str = "2023-24", force_refresh: bool = False) -> pd.Data
                 shots_df["SOURCE"] = "fiba_json"
 
                 all_shots.append(shots_df)
-                logger.debug(f"Fetched {len(shots_df)} shots for {LEAGUE} game {game_id}")
+                logger.debug(f"Fetched {len(shots_df)} shots for {LEAGUE} game {game_id} via JSON")
+                continue
 
         except Exception as e:
-            logger.debug(f"Failed to fetch shots for {LEAGUE} game {game_id}: {e}")
+            logger.debug(f"JSON API failed for {LEAGUE} shots game {game_id}, trying HTML: {e}")
+
+        # FALLBACK: Try HTML scraping
+        try:
+            shots_df = scrape_fiba_shots(
+                league_code=FIBA_LEAGUE_CODE,
+                game_id=game_id,
+                league=LEAGUE,
+                season=season,
+                force_refresh=force_refresh,
+            )
+
+            if not shots_df.empty:
+                shots_df["SOURCE"] = "fiba_html"
+                all_shots.append(shots_df)
+                logger.debug(f"Fetched {len(shots_df)} shots for {LEAGUE} game {game_id} via HTML")
+
+        except Exception as e:
+            logger.debug(f"Failed to fetch shots for {LEAGUE} game {game_id} (both JSON and HTML): {e}")
             continue
 
     # Combine all games
