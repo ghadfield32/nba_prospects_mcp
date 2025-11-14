@@ -210,83 +210,200 @@ def fetch_lnb_team_season(
 # Player statistics require JavaScript execution (Selenium/Playwright)
 
 
+@retry_on_error(max_attempts=3, backoff_seconds=2.0)
+@cached_dataframe
 def fetch_lnb_player_season(
     season: str = "2024",
     per_mode: str = "Totals",
 ) -> pd.DataFrame:
-    """Fetch LNB Pro A player season statistics (REQUIRES API DISCOVERY)
+    """Fetch LNB Pro A player season statistics via HTML scraping
 
-    ❌ Player statistics require API discovery via browser DevTools.
-
-    **TO IMPLEMENT**:
-    1. Follow API discovery guide: `tools/lnb/README.md`
-    2. Discover endpoints using browser DevTools on https://www.lnb.fr/pro-a/statistiques
-    3. Implement in `src/cbb_data/fetchers/lnb_api.py`
-    4. Update this function to use the API client:
-       ```python
-       from .lnb_api import create_lnb_api_client
-       client = create_lnb_api_client()
-       return client.fetch_player_season(season)
-       ```
+    **HTML-FIRST APPROACH**: Scrapes lnb.fr/pro-a/statistiques to extract
+    player season stats from HTML tables. Falls back to empty DataFrame if
+    scraping fails or table requires JavaScript rendering.
 
     Args:
-        season: Season year as string (e.g., "2024")
-        per_mode: Aggregation mode (not applicable until implemented)
+        season: Season year as string (e.g., "2024" for 2024-25 season)
+        per_mode: Aggregation mode ("Totals", "PerGame", "Per40")
+                 Note: Currently only "Totals" supported from HTML
 
     Returns:
-        Empty DataFrame (until API is discovered and implemented)
+        DataFrame with player season statistics
 
-    Expected Columns (after implementation):
-        - PLAYER_NAME, TEAM, GP, MIN, PTS, REB, AST, STL, BLK, TOV, PF
-        - FGM, FGA, FG_PCT, FG3M, FG3A, FG3_PCT, FTM, FTA, FT_PCT
-        - LEAGUE, SEASON, COMPETITION
+    Columns:
+        - LEAGUE: "LNB_PROA"
+        - SEASON: Season string
+        - COMPETITION: "LNB Pro A"
+        - PLAYER_NAME: Player name
+        - TEAM: Team name
+        - GP: Games played
+        - GS: Games started (if available)
+        - MIN: Total minutes
+        - MIN_PG: Minutes per game
+        - PTS: Total points
+        - PTS_PG: Points per game
+        - FGM, FGA, FG_PCT: Field goals
+        - FG2M, FG2A, FG2_PCT: 2-point field goals
+        - FG3M, FG3A, FG3_PCT: 3-point field goals
+        - FTM, FTA, FT_PCT: Free throws
+        - OREB, DREB, REB, REB_PG: Rebounds
+        - AST, AST_PG: Assists
+        - STL, STL_PG: Steals
+        - BLK, BLK_PG: Blocks
+        - TOV, TOV_PG: Turnovers
+        - PF: Personal fouls
+        - EFF: Efficiency rating
+        - PLUS_MINUS: Plus/minus (if available)
+        - SOURCE: "lnb_html_playerstats"
+
+    Example:
+        >>> player_season = fetch_lnb_player_season("2024")
+        >>> top_scorers = player_season.nlargest(10, "PTS_PG")
+        >>> print(top_scorers[["PLAYER_NAME", "TEAM", "PTS_PG"]])
+
+    Note:
+        - Scrapes from lnb.fr/pro-a/statistiques
+        - Table may require JavaScript - if empty, check browser
+        - French column names mapped to English
+        - Per-game stats calculated from totals
     """
-    logger.warning(
-        "LNB Pro A player statistics require API discovery. "
-        "See tools/lnb/README.md for implementation instructions. "
-        "Returning empty DataFrame."
-    )
-    return pd.DataFrame(
-        columns=[
-            "PLAYER_NAME",
-            "TEAM",
-            "GP",
-            "MIN",
-            "PTS",
-            "REB",
-            "AST",
-            "STL",
-            "BLK",
-            "TOV",
-            "PF",
-            "LEAGUE",
-            "SEASON",
-            "COMPETITION",
-        ]
-    )
+    logger.info(f"Fetching LNB Pro A player season stats: {season}")
+
+    try:
+        # Import HTML scraper
+        from .html_scrapers import scrape_lnb_player_season_html
+
+        # Scrape player season stats from LNB website
+        df = scrape_lnb_player_season_html(season)
+
+        if df.empty:
+            logger.warning(
+                f"No player stats found for LNB Pro A {season}. "
+                "This may indicate:\n"
+                "1. Season not yet started or stats not published\n"
+                "2. Website structure changed (update scraper)\n"
+                "3. JavaScript rendering required (consider Selenium)\n"
+                "4. Website blocking automated requests (403 error)"
+            )
+            return df
+
+        # Handle per_mode parameter
+        if per_mode == "PerGame":
+            # Use _PG columns if available
+            pg_cols = [c for c in df.columns if c.endswith("_PG")]
+            if pg_cols:
+                logger.info(f"Using per-game stats ({len(pg_cols)} columns)")
+        elif per_mode == "Per40":
+            logger.warning("Per40 mode not yet implemented for LNB, using Totals")
+
+        logger.info(f"Fetched {len(df)} LNB Pro A player season stats")
+        return df
+
+    except Exception as e:
+        logger.error(f"Failed to fetch LNB Pro A player season stats: {e}")
+        return pd.DataFrame(
+            columns=[
+                "LEAGUE",
+                "SEASON",
+                "COMPETITION",
+                "PLAYER_NAME",
+                "TEAM",
+                "GP",
+                "MIN",
+                "PTS",
+                "REB",
+                "AST",
+                "STL",
+                "BLK",
+                "TOV",
+                "PF",
+            ]
+        )
 
 
+@retry_on_error(max_attempts=3, backoff_seconds=2.0)
+@cached_dataframe
 def fetch_lnb_schedule(
     season: str = "2024",
 ) -> pd.DataFrame:
-    """Fetch LNB Pro A schedule (REQUIRES API DISCOVERY)
+    """Fetch LNB Pro A schedule via HTML scraping (OPTIONAL)
 
-    ❌ Schedule requires API discovery via browser DevTools.
+    **OPTIONAL HTML SCRAPER**: Attempts to scrape schedule from lnb.fr HTML.
+    May return empty DataFrame if page requires JavaScript rendering.
 
-    **TO IMPLEMENT**: See tools/lnb/README.md for API discovery instructions.
+    **Alternatives if HTML fails**:
+    1. Use Selenium/Playwright for JavaScript rendering
+    2. Reverse-engineer internal APIs (see tools/lnb/README.md)
+    3. Manual CSV creation from website
+
+    Args:
+        season: Season year as string (e.g., "2024" for 2024-25 season)
 
     Returns:
-        Empty DataFrame (until API is discovered and implemented)
+        DataFrame with schedule or empty DataFrame if scraping fails
 
-    Expected Columns (after implementation):
-        - GAME_ID, SEASON, GAME_DATE, HOME_TEAM, AWAY_TEAM
-        - HOME_SCORE, AWAY_SCORE, STATUS, LEAGUE
+    Columns (if successful):
+        - LEAGUE: "LNB_PROA"
+        - SEASON: Season string
+        - COMPETITION: "LNB Pro A"
+        - GAME_ID: Game identifier
+        - GAME_DATE: Game date
+        - GAME_TIME: Game time
+        - HOME_TEAM: Home team name
+        - AWAY_TEAM: Away team name
+        - HOME_SCORE: Home score (if completed)
+        - AWAY_SCORE: Away score (if completed)
+        - ROUND: Round/journée number
+        - VENUE: Venue name (if available)
+        - GAME_URL: Link to game page
+        - PHASE: "Regular Season" or "Playoffs"
+        - SOURCE: "lnb_html_schedule"
+
+    Example:
+        >>> schedule = fetch_lnb_schedule("2024")
+        >>> if not schedule.empty:
+        ...     print(schedule[["GAME_DATE", "HOME_TEAM", "AWAY_TEAM"]].head())
+        ... else:
+        ...     print("Schedule scraping failed - may need JavaScript rendering")
+
+    Note:
+        - Scrapes from lnb.fr/pro-a/calendrier-resultats
+        - Returns empty DataFrame if JavaScript required
+        - French date/time formats parsed (12h30 → 12:30)
     """
-    logger.warning(
-        "LNB Pro A schedule requires API discovery. "
-        "See tools/lnb/README.md for implementation instructions. "
-        "Returning empty DataFrame."
-    )
+    logger.info(f"Fetching LNB Pro A schedule: {season}")
+
+    try:
+        # Import HTML scraper
+        from .html_scrapers import scrape_lnb_schedule_page
+
+        # Attempt HTML scraping
+        df = scrape_lnb_schedule_page(season)
+
+        if df.empty:
+            logger.warning(
+                f"No schedule found for LNB Pro A {season}. "
+                "This may indicate:\n"
+                "1. JavaScript rendering required (HTML scraping insufficient)\n"
+                "2. Season not yet started or schedule not published\n"
+                "3. Website structure changed (update scraper)\n"
+                "4. Consider alternative methods:\n"
+                "   - Selenium/Playwright for JavaScript\n"
+                "   - API discovery (tools/lnb/README.md)\n"
+                "   - Manual CSV creation"
+            )
+
+        logger.info(f"Fetched {len(df)} LNB Pro A games")
+        return df
+
+    except Exception as e:
+        logger.error(f"Failed to fetch LNB Pro A schedule: {e}")
+        logger.warning(
+            "LNB Pro A schedule scraping failed. Consider:\n"
+            "1. Using Selenium/Playwright for JavaScript rendering\n"
+            "2. API discovery (see tools/lnb/README.md)\n"
+            "3. Manual CSV creation from website"
+        )
     return pd.DataFrame(
         columns=[
             "GAME_ID",
