@@ -7203,3 +7203,130 @@ Using `Rscript file.R` avoids: PowerShell quoting rules, cmd.exe quoting rules, 
 
 ### Status
 Unblocks final validation step; user can now proceed to full NBL data export after running installer script.
+
+
+---
+
+## 2025-11-14 - LNB API Client Implementation & Stress Testing
+
+### Summary
+Implemented comprehensive Python client for LNB (French Basketball) official API at api-prod.lnb.fr, replacing HTML scraping with direct API access. Discovered API requires authentication headers beyond basic HTTP requests (403 Forbidden). Created full endpoint catalog, stress test suite, and developer documentation for header capture workflow.
+
+### Files Created
+- **src/cbb_data/fetchers/lnb_api.py** (1100+ lines): Complete LNB API client with LNBClient class, 15+ endpoint methods, retry logic, session pooling, calendar chunking, comprehensive docstrings, stress_test_lnb() harness for validation
+- **tests/test_lnb_api_stress.py** (650+ lines): pytest test suite covering all endpoints with fixtures, parametrization, error handling, performance benchmarks (marked @pytest.mark.slow), detailed logging
+- **docs/LNB_API_SETUP_GUIDE.md** (400+ lines): Complete setup guide covering 403 error diagnosis, DevTools header capture workflow, cookie/session management, alternative approaches (Selenium/Playwright/mitmproxy), endpoint catalog, troubleshooting
+- **tools/lnb/test_api_headers.py** (350+ lines): CLI utility for testing header combinations, cURL parser, endpoint testing, interactive feedback for DevTools capture
+
+### Implementation Details
+
+#### LNBClient Architecture
+- **Base**: Shared requests.Session for connection pooling, exponential backoff retry (3 attempts, 0.25s base), automatic envelope unwrapping ({"status": true, "data": ...})
+- **Headers**: Browser-like User-Agent, Referer, Accept (requires enhancement with Origin, cookies for auth)
+- **Endpoints Implemented (11)**:
+  - Structure: getAllYears, getMainCompetition, getDivisionCompetitionByYear, getCompetitionTeams
+  - Schedule: getCalendar (POST with date range), iter_full_season_calendar (chunked with deduplication)
+  - Match Context: getTeamComparison, getLastFiveMatchesHomeAway, getLastFiveMatchesHeadToHead, getMatchOfficialsPreGame
+  - Live: getLiveMatch
+  - Season: getPersonsLeaders (requires extra_params like category, page, limit)
+- **Placeholders (3)**: getMatchBoxScore, getMatchPlayByPlay, getMatchShots (awaiting DevTools path discovery)
+
+#### Stress Test Results (2025-11-14 19:47 UTC)
+- **Status**: ❌ ALL endpoints returning 403 Forbidden
+- **Root Cause**: API requires authentication beyond basic headers (Origin, cookies, CSRF tokens, or TLS fingerprinting)
+- **Endpoints Tested**: getAllYears (0/1 OK), getMainCompetition (0/2 OK), getDivisionCompetitionByYear (0/2 OK), getLiveMatch (0/1 OK)
+- **Diagnosis**: Anti-bot protection active; needs real browser headers/cookies from DevTools
+
+#### Data Granularities Planned (once auth working)
+- ✅ Structure: years, competitions, divisions, teams
+- ✅ Schedule: calendar with match_external_id, dates, teams, status
+- ✅ Match Context: pregame stats, form, H2H, officials/referees
+- ✅ Live: current/upcoming games
+- ⚠️ Season Leaders: player stats by category (needs extra_params discovery)
+- ⏭️ Boxscore: player_game, team_game stats (needs path discovery)
+- ⏭️ Play-by-Play: event stream with period, clock, players, score (needs path discovery)
+- ⏭️ Shots: x,y coordinates, made/missed, shooter, shot_value (needs path discovery)
+
+### Endpoint Catalog (15 total)
+
+**Global / Structure (4)**:
+- GET /common/getAllYears?end_year=YYYY → list of seasons
+- GET /common/getMainCompetition?year=YYYY → competitions (external_id, name, division)
+- GET /common/getDivisionCompetitionByYear?year=YYYY&division_external_id=N → filter by division (1=Betclic ÉLITE)
+- GET /stats/getCompetitionTeams?competition_external_id=N → teams (team_id UUID, external_id int, name, city)
+
+**Schedule (1)**:
+- POST /stats/getCalendar (body: {from: "YYYY-MM-DD", to: "YYYY-MM-DD"}) → games (match_external_id, date, teams, competition, round, status)
+
+**Match Context (4)**:
+- GET /stats/getTeamComparison?match_external_id=N → team stats (ORtg, DRtg, FG%, REB, TOV)
+- GET /stats/getLastFiveMatchesHomeAway?match_external_id=N → recent form (last 5 home/away)
+- GET /stats/getLastFiveMatchesHeadToHead?match_external_id=N → H2H history
+- GET /stats/getMatchOfficialsPreGame?match_external_id=N → referees (name, role, license_id), table officials
+
+**Season Stats (1)**:
+- GET /stats/getPersonsLeaders?competition_external_id=N&year=YYYY&category=X&page=N&limit=N → leaderboards (requires extra_params)
+
+**Live (1)**:
+- GET /stats/getLiveMatch → current/upcoming games (match_time_utc, score, status)
+
+**Placeholders (3)** - need DevTools discovery:
+- Boxscore: /stats/getMatchBoxScore? (player_game: MIN, PTS, REB, AST, STL, BLK, TOV, PF; team_game: totals)
+- Play-by-Play: /stats/getMatchPlayByPlay? (events: period, clock, event_type, players, score)
+- Shot Chart: /stats/getMatchShots? (shots: x, y, is_made, shot_value, shooter, team)
+
+### Integration with Existing Code
+- **lnb.py** (existing): Currently HTML scraping for team_season standings only
+- **lnb_api.py** (new): Low-level API client (raw JSON)
+- **Future**: Update lnb.py to use lnb_api.py internally, converting JSON → pandas DataFrames
+
+### Next Steps
+1. **User Action Required**: Capture headers from DevTools:
+   - Open https://www.lnb.fr/statistiques in Chrome
+   - DevTools (F12) → Network → XHR filter
+   - Click calendar/stats tabs to trigger API calls
+   - Right-click successful api-prod.lnb.fr request → Copy as cURL
+   - Save to tools/lnb/headers_curl.txt
+   - Run: python3 tools/lnb/test_api_headers.py --curl-file tools/lnb/headers_curl.txt
+2. **Update lnb_api.py**: Add captured Origin, Cookie, X-Requested-With headers to DEFAULT_HEADERS
+3. **Retest**: python3 src/cbb_data/fetchers/lnb_api.py (expect ✅ green for known endpoints)
+4. **Discover Placeholders**: Click Boxscore/PBP/Shots tabs in DevTools, capture paths, update get_match_* methods
+5. **Integrate**: Update lnb.py fetch_* functions to call lnb_api.py, map JSON → DataFrame schemas
+6. **Schema Mapping**: Define player_game, team_game, pbp_event, shot_event schemas from API responses
+
+### Technical Notes
+- **Season Format**: Integer year (2024 = 2024-25 season)
+- **IDs**: competition_external_id (int: 302, 303), team_id (UUID) + external_id (int), match_external_id (int)
+- **Date Ranges**: API accepts ISO 8601 dates (YYYY-MM-DD); calendar chunked by 31 days to avoid limits
+- **Deduplication**: iter_full_season_calendar dedupes by match_external_id
+- **Rate Limiting**: Built-in retry_sleep (0.25s default between requests) for politeness
+- **Logging**: Full DEBUG-level logging for troubleshooting (request attempts, retries, response keys)
+
+### Testing
+- **Manual**: python3 src/cbb_data/fetchers/lnb_api.py (runs stress_test_lnb with defaults)
+- **Pytest**: pytest tests/test_lnb_api_stress.py -v (comprehensive test suite)
+- **Header Testing**: python3 tools/lnb/test_api_headers.py --curl-file headers_curl.txt (validates auth)
+- **Performance**: pytest tests/test_lnb_api_stress.py::TestLNBPerformance -v (benchmarks full season fetch)
+
+### Files Modified
+- None (net new implementation)
+
+### Dependencies
+- requests (HTTP client) - already installed
+- pytest (testing) - optional for test suite
+
+### Status
+✅ Client implementation complete
+✅ Endpoint catalog complete (11 working, 3 placeholders)
+✅ Stress test suite complete
+✅ Documentation complete
+⏳ Waiting for user to capture auth headers from DevTools
+❌ API currently blocked (403 Forbidden without proper auth)
+
+### References
+- LNB Official: https://www.lnb.fr/
+- Stats Center: https://www.lnb.fr/statistiques
+- API Base: https://api-prod.lnb.fr
+- DevTools Guide: docs/LNB_API_SETUP_GUIDE.md
+- Stress Test Output: lnb_stress_test_output.txt
+

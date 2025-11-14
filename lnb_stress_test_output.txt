@@ -1,0 +1,96 @@
+
+============================================================
+LNB API Stress Test - Standalone Execution
+============================================================
+
+This will test all known LNB API endpoints across multiple seasons.
+Placeholder endpoints (boxscore, PBP, shots) are expected to fail.
+
+2025-11-14 19:47:48,939 - __main__ - INFO - ============================================================
+2025-11-14 19:47:48,940 - __main__ - INFO - LNB API Stress Test - Starting
+2025-11-14 19:47:48,940 - __main__ - INFO - ============================================================
+2025-11-14 19:47:48,940 - __main__ - INFO - 
+[1/4] Discovering available years (end_year=2025)...
+2025-11-14 19:47:48,940 - __main__ - INFO - Fetching all years (end_year=2025)
+2025-11-14 19:47:49,133 - __main__ - WARNING - Request failed (attempt 1/3): GET /common/getAllYears - HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/common/getAllYears?end_year=2025')
+2025-11-14 19:47:49,387 - __main__ - WARNING - Request failed (attempt 2/3): GET /common/getAllYears - HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/common/getAllYears?end_year=2025')
+2025-11-14 19:47:49,892 - __main__ - WARNING - Request failed (attempt 3/3): GET /common/getAllYears - HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/common/getAllYears?end_year=2025')
+2025-11-14 19:47:49,892 - __main__ - ERROR - Request exhausted retries: GET /common/getAllYears - HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/common/getAllYears?end_year=2025')
+2025-11-14 19:47:49,892 - __main__ - ERROR - ❌ getAllYears failed: Request failed for /common/getAllYears: HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/common/getAllYears?end_year=2025')
+2025-11-14 19:47:49,892 - __main__ - WARNING - Using fallback years: [2024, 2025]
+2025-11-14 19:47:49,892 - __main__ - INFO - Target years for testing: [2024, 2025]
+2025-11-14 19:47:49,892 - __main__ - INFO - 
+[2/4] Testing competitions, teams, and games...
+2025-11-14 19:47:49,892 - __main__ - INFO - 
+--- Year 2024 (1/2) ---
+2025-11-14 19:47:49,892 - __main__ - INFO - Fetching main competitions for year=2024
+2025-11-14 19:47:49,895 - __main__ - WARNING - Request failed (attempt 1/3): GET /common/getMainCompetition - HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/common/getMainCompetition?year=2024')
+2025-11-14 19:47:50,149 - __main__ - WARNING - Request failed (attempt 2/3): GET /common/getMainCompetition - HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/common/getMainCompetition?year=2024')
+2025-11-14 19:47:50,654 - __main__ - WARNING - Request failed (attempt 3/3): GET /common/getMainCompetition - HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/common/getMainCompetition?year=2024')
+2025-11-14 19:47:50,654 - __main__ - ERROR - Request exhausted retries: GET /common/getMainCompetition - HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/common/getMainCompetition?year=2024')
+2025-11-14 19:47:50,654 - __main__ - ERROR - ❌ getMainCompetition failed: Request failed for /common/getMainCompetition: HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/common/getMainCompetition?year=2024')
+2025-11-14 19:47:50,654 - __main__ - INFO - Fetching division competitions: year=2024, division_external_id=1
+2025-11-14 19:47:50,657 - __main__ - WARNING - Request failed (attempt 1/3): GET /common/getDivisionCompetitionByYear - HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/common/getDivisionCompetitionByYear?year=2024&division_external_id=1')
+2025-11-14 19:47:50,911 - __main__ - WARNING - Request failed (attempt 2/3): GET /common/getDivisionCompetitionByYear - HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/common/getDivisionCompetitionByYear?year=2024&division_external_id=1')
+2025-11-14 19:47:51,415 - __main__ - WARNING - Request failed (attempt 3/3): GET /common/getDivisionCompetitionByYear - HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/common/getDivisionCompetitionByYear?year=2024&division_external_id=1')
+2025-11-14 19:47:51,416 - __main__ - ERROR - Request exhausted retries: GET /common/getDivisionCompetitionByYear - HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/common/getDivisionCompetitionByYear?year=2024&division_external_id=1')
+2025-11-14 19:47:51,416 - __main__ - ERROR - ❌ getDivisionCompetitionByYear failed: Request failed for /common/getDivisionCompetitionByYear: HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/common/getDivisionCompetitionByYear?year=2024&division_external_id=1')
+2025-11-14 19:47:51,416 - __main__ - INFO - --- Year 2024 complete ---
+2025-11-14 19:47:51,416 - __main__ - INFO - 
+--- Year 2025 (2/2) ---
+2025-11-14 19:47:51,416 - __main__ - INFO - Fetching main competitions for year=2025
+2025-11-14 19:47:51,418 - __main__ - WARNING - Request failed (attempt 1/3): GET /common/getMainCompetition - HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/common/getMainCompetition?year=2025')
+2025-11-14 19:47:51,672 - __main__ - WARNING - Request failed (attempt 2/3): GET /common/getMainCompetition - HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/common/getMainCompetition?year=2025')
+2025-11-14 19:47:52,176 - __main__ - WARNING - Request failed (attempt 3/3): GET /common/getMainCompetition - HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/common/getMainCompetition?year=2025')
+2025-11-14 19:47:52,177 - __main__ - ERROR - Request exhausted retries: GET /common/getMainCompetition - HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/common/getMainCompetition?year=2025')
+2025-11-14 19:47:52,177 - __main__ - ERROR - ❌ getMainCompetition failed: Request failed for /common/getMainCompetition: HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/common/getMainCompetition?year=2025')
+2025-11-14 19:47:52,177 - __main__ - INFO - Fetching division competitions: year=2025, division_external_id=1
+2025-11-14 19:47:52,180 - __main__ - WARNING - Request failed (attempt 1/3): GET /common/getDivisionCompetitionByYear - HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/common/getDivisionCompetitionByYear?year=2025&division_external_id=1')
+2025-11-14 19:47:52,433 - __main__ - WARNING - Request failed (attempt 2/3): GET /common/getDivisionCompetitionByYear - HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/common/getDivisionCompetitionByYear?year=2025&division_external_id=1')
+2025-11-14 19:47:52,937 - __main__ - WARNING - Request failed (attempt 3/3): GET /common/getDivisionCompetitionByYear - HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/common/getDivisionCompetitionByYear?year=2025&division_external_id=1')
+2025-11-14 19:47:52,937 - __main__ - ERROR - Request exhausted retries: GET /common/getDivisionCompetitionByYear - HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/common/getDivisionCompetitionByYear?year=2025&division_external_id=1')
+2025-11-14 19:47:52,937 - __main__ - ERROR - ❌ getDivisionCompetitionByYear failed: Request failed for /common/getDivisionCompetitionByYear: HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/common/getDivisionCompetitionByYear?year=2025&division_external_id=1')
+2025-11-14 19:47:52,937 - __main__ - INFO - --- Year 2025 complete ---
+2025-11-14 19:47:52,937 - __main__ - INFO - 
+[3/4] Testing live matches...
+2025-11-14 19:47:52,937 - __main__ - INFO - Fetching live matches
+2025-11-14 19:47:52,941 - __main__ - WARNING - Request failed (attempt 1/3): GET /stats/getLiveMatch - HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/stats/getLiveMatch')
+2025-11-14 19:47:53,196 - __main__ - WARNING - Request failed (attempt 2/3): GET /stats/getLiveMatch - HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/stats/getLiveMatch')
+2025-11-14 19:47:53,699 - __main__ - WARNING - Request failed (attempt 3/3): GET /stats/getLiveMatch - HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/stats/getLiveMatch')
+2025-11-14 19:47:53,700 - __main__ - ERROR - Request exhausted retries: GET /stats/getLiveMatch - HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/stats/getLiveMatch')
+2025-11-14 19:47:53,700 - __main__ - ERROR - ❌ getLiveMatch failed: Request failed for /stats/getLiveMatch: HTTPError('403 Client Error: Forbidden for url: https://api-prod.lnb.fr/stats/getLiveMatch')
+2025-11-14 19:47:53,700 - __main__ - INFO - 
+[4/4] Finalizing results...
+2025-11-14 19:47:53,700 - __main__ - INFO - 
+============================================================
+2025-11-14 19:47:53,700 - __main__ - INFO - LNB API Stress Test - COMPLETE
+2025-11-14 19:47:53,700 - __main__ - INFO - ============================================================
+2025-11-14 19:47:53,700 - __main__ - INFO - 
+Endpoint Health Summary:
+2025-11-14 19:47:53,700 - __main__ - INFO - ------------------------------------------------------------
+2025-11-14 19:47:53,700 - __main__ - INFO - ❌ getAllYears                                0 OK /   1 FAIL (  1 total)
+2025-11-14 19:47:53,700 - __main__ - INFO - ❌ getDivisionCompetitionByYear               0 OK /   2 FAIL (  2 total)
+2025-11-14 19:47:53,700 - __main__ - INFO - ❌ getLiveMatch                               0 OK /   1 FAIL (  1 total)
+2025-11-14 19:47:53,700 - __main__ - INFO - ❌ getMainCompetition                         0 OK /   2 FAIL (  2 total)
+2025-11-14 19:47:53,700 - __main__ - INFO - ------------------------------------------------------------
+2025-11-14 19:47:53,700 - __main__ - INFO - Target years tested: [2024, 2025]
+2025-11-14 19:47:53,700 - __main__ - INFO - Total matches sampled: 0
+2025-11-14 19:47:53,700 - __main__ - INFO - ============================================================
+
+============================================================
+RESULTS SUMMARY
+============================================================
+
+Target years: [2024, 2025]
+
+Endpoint statistics:
+  getAllYears: {'ok': 0, 'failed': 1}
+  getDivisionCompetitionByYear: {'ok': 0, 'failed': 2}
+  getLiveMatch: {'ok': 0, 'failed': 1}
+  getMainCompetition: {'ok': 0, 'failed': 2}
+
+Live matches sample: 0 games
+
+============================================================
+Stress test complete! See logs above for details.
+============================================================
