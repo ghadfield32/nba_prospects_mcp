@@ -223,35 +223,6 @@ def fetch_player_game(season: str = "2023-24", force_refresh: bool = False) -> p
         game_id = game_row["GAME_ID"]
 
         try:
-            # Scrape box score using shared FIBA HTML scraper
-            box_score = scrape_fiba_box_score(
-                league_code=FIBA_LEAGUE_CODE,
-                game_id=str(game_id),
-                league=LEAGUE,
-                season=season,
-                force_refresh=force_refresh,
-            )
-
-            if not box_score.empty:
-                # Add game identifier
-                box_score["GAME_ID"] = game_id
-
-                # Generate player IDs (TEAM_PLAYERNAME format)
-                box_score["PLAYER_ID"] = (
-                    box_score["TEAM"].str[:3] + "_" + box_score["PLAYER_NAME"].str.replace(" ", "_")
-                )
-
-                # Ensure team ID
-                box_score["TEAM_ID"] = box_score["TEAM"]
-
-                all_player_stats.append(box_score)
-
-        except Exception as e:
-            logger.warning(f"Failed to scrape {LEAGUE} game {game_id}: {e}")
-            continue
-
-
-        try:
             # Try JSON API first
             game_data = _json_client.fetch_game_json(game_id=int(game_id))
             player_df = _json_client.to_player_game_df(game_data)
@@ -466,25 +437,6 @@ def fetch_pbp(season: str = "2023-24", force_refresh: bool = False) -> pd.DataFr
 
     for _, game_row in schedule.iterrows():
         game_id = game_row["GAME_ID"]
-
-        try:
-            # Scrape PBP using shared FIBA HTML scraper
-            pbp = scrape_fiba_play_by_play(
-                league_code=FIBA_LEAGUE_CODE,
-                game_id=str(game_id),
-                league=LEAGUE,
-                season=season,
-                force_refresh=force_refresh,
-            )
-
-            if not pbp.empty:
-                pbp["GAME_ID"] = game_id
-                all_pbp.append(pbp)
-
-        except Exception as e:
-            logger.warning(f"Failed to scrape {LEAGUE} PBP for game {game_id}: {e}")
-            continue
-
 
         try:
             # Try JSON API first
