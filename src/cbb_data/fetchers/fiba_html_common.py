@@ -963,3 +963,258 @@ def scrape_fiba_shots(
     except Exception as e:
         logger.error(f"Failed to scrape shots for {league_code} game {game_id}: {e}")
         return pd.DataFrame()
+
+
+# ============================================================================
+# OPTIONAL FIBA UPGRADES - Advanced Analytics Layers
+# ============================================================================
+
+
+def build_lineup_game_from_pbp(
+    pbp_df: pd.DataFrame,
+    league: str,
+    season: str
+) -> pd.DataFrame:
+    """Build lineup-game stats from play-by-play substitution events
+
+    **OPTIONAL UPGRADE** - Derive on-court lineup combinations from PBP data.
+
+    This function reconstructs which 5 players were on the court for each team
+    during each possession/segment, enabling advanced lineup analytics like:
+    - Net rating by lineup combination
+    - Plus/minus for specific 5-man units
+    - Optimal lineup discovery
+    - Rotation pattern analysis
+
+    **Algorithm**:
+    1. Parse substitution events from PBP (SUB_IN, SUB_OUT)
+    2. Track current 5-man lineup for each team
+    3. Calculate stats for each lineup "stint" (time between substitutions)
+    4. Aggregate: Points scored/allowed, possessions, plus/minus, minutes
+
+    Args:
+        pbp_df: Play-by-play DataFrame with columns:
+            - GAME_ID: Game identifier
+            - PERIOD: Quarter/period (1-4, OT, etc.)
+            - GAME_CLOCK: Time remaining in period
+            - ACTION_TYPE: "substitution", "made_shot", etc.
+            - PLAYER_ID: Player performing action
+            - TEAM_ID: Team performing action
+            - SCORE_HOME, SCORE_AWAY: Running scores
+        league: League identifier (e.g., "BCL")
+        season: Season string (e.g., "2023-24")
+
+    Returns:
+        DataFrame with lineup-game stats:
+            - GAME_ID: Game identifier
+            - TEAM_ID: Team identifier
+            - LINEUP_ID: Hash of 5 player IDs (sorted)
+            - PLAYER_1_ID, PLAYER_2_ID, ..., PLAYER_5_ID: Player IDs
+            - PLAYER_1_NAME, PLAYER_2_NAME, ..., PLAYER_5_NAME: Player names
+            - MIN: Minutes played by this lineup
+            - PTS_FOR: Points scored while lineup on court
+            - PTS_AGAINST: Points allowed while lineup on court
+            - PLUS_MINUS: PTS_FOR - PTS_AGAINST
+            - POSS: Possessions (estimated)
+            - LEAGUE: League string
+            - SEASON: Season string
+
+    Example:
+        >>> from src.cbb_data.fetchers.bcl import fetch_bcl_pbp
+        >>> from src.cbb_data.fetchers.fiba_html_common import build_lineup_game_from_pbp
+        >>>
+        >>> # Fetch PBP for BCL season
+        >>> pbp = fetch_bcp_pbp("2023-24")
+        >>>
+        >>> # Build lineup stats
+        >>> lineup_game = build_lineup_game_from_pbp(pbp, "BCL", "2023-24")
+        >>>
+        >>> # Find best 5-man units by plus/minus
+        >>> top_lineups = lineup_game.nlargest(10, "PLUS_MINUS")
+        >>> print(top_lineups[["LINEUP_ID", "MIN", "PLUS_MINUS"]])
+
+    Note:
+        - Requires clean PBP data with substitution events
+        - Starting lineups inferred from first events (may be incomplete)
+        - Minutes calculated from game clock timestamps
+        - Possessions estimated from scoring plays (not exact)
+
+    See Also:
+        - extract_roster_from_boxscore(): Get full team rosters
+        - validate_lineup_totals(): QA helper for lineup data
+    """
+    logger.info("Building lineup-game stats from PBP data (OPTIONAL UPGRADE)")
+
+    if pbp_df.empty:
+        logger.warning("Empty PBP DataFrame, cannot build lineups")
+        return pd.DataFrame()
+
+    # Validate required columns
+    required_cols = ["GAME_ID", "PERIOD", "ACTION_TYPE", "TEAM_ID", "PLAYER_ID"]
+    missing_cols = [col for col in required_cols if col not in pbp_df.columns]
+
+    if missing_cols:
+        logger.error(f"PBP missing required columns for lineup building: {missing_cols}")
+        return pd.DataFrame()
+
+    # TODO: Implement lineup reconstruction algorithm
+    # This is a complex feature requiring:
+    # 1. Substitution event parsing
+    # 2. Lineup state tracking per team
+    # 3. Stint segmentation (time between subs)
+    # 4. Stat aggregation per lineup stint
+    #
+    # Implementation deferred to future PR due to complexity
+    # Placeholder returns empty DataFrame for now
+
+    logger.warning(
+        "build_lineup_game_from_pbp() not yet implemented. "
+        "This is an optional upgrade requiring complex substitution tracking. "
+        "Returning empty DataFrame."
+    )
+
+    return pd.DataFrame(
+        columns=[
+            "GAME_ID",
+            "TEAM_ID",
+            "LINEUP_ID",
+            "PLAYER_1_ID", "PLAYER_2_ID", "PLAYER_3_ID", "PLAYER_4_ID", "PLAYER_5_ID",
+            "PLAYER_1_NAME", "PLAYER_2_NAME", "PLAYER_3_NAME", "PLAYER_4_NAME", "PLAYER_5_NAME",
+            "MIN",
+            "PTS_FOR",
+            "PTS_AGAINST",
+            "PLUS_MINUS",
+            "POSS",
+            "LEAGUE",
+            "SEASON",
+        ]
+    )
+
+
+def extract_roster_from_boxscore(
+    player_game_df: pd.DataFrame,
+    league: str,
+    season: str
+) -> pd.DataFrame:
+    """Extract team rosters and player bio from player_game data
+
+    **OPTIONAL UPGRADE** - Build roster/player bio layer from box score data.
+
+    This function extracts unique player-team combinations across all games,
+    providing a "roster" or "player bio" layer useful for:
+    - Player directory/lookup (name, team, position)
+    - Roster composition analysis
+    - Player movement tracking (trades/transfers)
+    - Team size validation (12-15 players typical)
+
+    **Algorithm**:
+    1. Group player_game by (PLAYER_ID, TEAM_ID)
+    2. Take first/most frequent values for bio fields
+    3. Count games played (GP)
+    4. Calculate first/last game dates
+    5. Deduplicate to single row per player-team
+
+    Args:
+        player_game_df: Player game DataFrame with columns:
+            - PLAYER_ID: Unique player identifier
+            - PLAYER_NAME: Player name
+            - TEAM_ID: Team identifier
+            - TEAM_NAME: Team name
+            - POSITION: Position (if available)
+            - JERSEY_NUMBER: Jersey # (if available)
+            - GAME_DATE: Game date (if available)
+        league: League identifier (e.g., "BCL")
+        season: Season string (e.g., "2023-24")
+
+    Returns:
+        DataFrame with player-team roster:
+            - PLAYER_ID: Unique player identifier
+            - PLAYER_NAME: Player name (most common spelling)
+            - TEAM_ID: Team identifier
+            - TEAM_NAME: Team name (most common)
+            - POSITION: Position (if available)
+            - JERSEY_NUMBER: Jersey # (if available)
+            - GP: Games played for this team
+            - FIRST_GAME: Date of first game (if available)
+            - LAST_GAME: Date of last game (if available)
+            - LEAGUE: League string
+            - SEASON: Season string
+
+    Example:
+        >>> from src.cbb_data.fetchers.bcl import fetch_bcl_player_game
+        >>> from src.cbb_data.fetchers.fiba_html_common import extract_roster_from_boxscore
+        >>>
+        >>> # Fetch player game data
+        >>> player_game = fetch_bcl_player_game("2023-24")
+        >>>
+        >>> # Extract rosters
+        >>> rosters = extract_roster_from_boxscore(player_game, "BCL", "2023-24")
+        >>>
+        >>> # Show roster for specific team
+        >>> team_roster = rosters[rosters["TEAM_NAME"] == "Unicaja Malaga"]
+        >>> print(team_roster[["PLAYER_NAME", "POSITION", "GP"]])
+
+    Note:
+        - Bio fields (position, jersey) often missing in FIBA data
+        - Player IDs should be consistent across games (validate with QA)
+        - Handles mid-season team changes (multiple rows per player)
+
+    See Also:
+        - build_lineup_game_from_pbp(): Lineup-level analytics
+        - validate_roster_consistency(): QA helper for roster data
+    """
+    logger.info("Extracting team rosters from player_game data (OPTIONAL UPGRADE)")
+
+    if player_game_df.empty:
+        logger.warning("Empty player_game DataFrame, cannot extract rosters")
+        return pd.DataFrame()
+
+    # Validate required columns
+    required_cols = ["PLAYER_ID", "PLAYER_NAME", "TEAM_ID"]
+    missing_cols = [col for col in required_cols if col not in player_game_df.columns]
+
+    if missing_cols:
+        logger.error(f"player_game missing required columns: {missing_cols}")
+        return pd.DataFrame()
+
+    try:
+        # Group by player-team combination
+        groupby_cols = ["PLAYER_ID", "TEAM_ID"]
+
+        # Aggregation logic
+        agg_dict = {
+            "PLAYER_NAME": "first",  # Take first occurrence
+            "TEAM_NAME": "first" if "TEAM_NAME" in player_game_df.columns else None,
+        }
+
+        # Optional fields
+        if "POSITION" in player_game_df.columns:
+            # Take most common position (mode)
+            agg_dict["POSITION"] = lambda x: x.mode()[0] if not x.mode().empty else None
+
+        if "JERSEY_NUMBER" in player_game_df.columns:
+            agg_dict["JERSEY_NUMBER"] = lambda x: x.mode()[0] if not x.mode().empty else None
+
+        if "GAME_DATE" in player_game_df.columns:
+            agg_dict["FIRST_GAME"] = ("GAME_DATE", "min")
+            agg_dict["LAST_GAME"] = ("GAME_DATE", "max")
+
+        # Count games played
+        agg_dict["GP"] = ("PLAYER_ID", "count")
+
+        # Remove None values
+        agg_dict = {k: v for k, v in agg_dict.items() if v is not None}
+
+        # Perform aggregation
+        roster_df = player_game_df.groupby(groupby_cols).agg(agg_dict).reset_index()
+
+        # Add league and season
+        roster_df["LEAGUE"] = league
+        roster_df["SEASON"] = season
+
+        logger.info(f"Extracted {len(roster_df)} player-team roster entries")
+        return roster_df
+
+    except Exception as e:
+        logger.error(f"Failed to extract roster from player_game: {e}")
+        return pd.DataFrame()

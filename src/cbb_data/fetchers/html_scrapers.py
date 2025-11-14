@@ -1211,3 +1211,167 @@ def scrape_lnb_schedule_page(season: str) -> pd.DataFrame:
     except Exception as e:
         logger.error(f"Failed to scrape LNB schedule: {e}")
         return pd.DataFrame()
+
+
+# ============================================================================
+# OPTIONAL ENHANCEMENTS - Competition Tagging
+# ============================================================================
+
+
+def tag_acb_competition(schedule_df: pd.DataFrame) -> pd.DataFrame:
+    """Tag ACB games with competition type (Liga Regular, Playoffs, Copa del Rey)
+
+    **OPTIONAL ENHANCEMENT** - Adds COMPETITION and PHASE columns to ACB schedule.
+
+    ACB has multiple competitions throughout the season:
+    - **Liga Regular**: Regular season (18 teams, ~34 games each, Oct-May)
+    - **Playoffs**: Top 8 teams, best-of-5 series (May-June)
+    - **Copa del Rey**: Knockout tournament (mid-season, February)
+    - **Supercopa**: Preseason tournament (September)
+
+    This function attempts to infer competition type from:
+    1. Game dates (Copa del Rey typically in February)
+    2. Round numbers (Playoffs: "1/4 Final", "Semifinal", "Final")
+    3. URL patterns (acb.com URLs may contain competition codes)
+    4. Team counts (Copa/Supercopa have limited teams)
+
+    Args:
+        schedule_df: ACB schedule DataFrame with columns:
+            - GAME_DATE: Game date (required)
+            - ROUND: Round number or name (optional)
+            - GAME_URL: Link to game page (optional)
+            - HOME_TEAM, AWAY_TEAM: Team names
+
+    Returns:
+        DataFrame with added columns:
+            - COMPETITION: "Liga Regular", "Playoffs", "Copa del Rey", or "Supercopa"
+            - PHASE: More specific phase ("Regular Season", "Quarterfinals", etc.)
+
+    Example:
+        >>> from src.cbb_data.fetchers.acb import fetch_acb_schedule
+        >>> from src.cbb_data.fetchers.html_scrapers import tag_acb_competition
+        >>>
+        >>> # Fetch ACB schedule
+        >>> schedule = fetch_acb_schedule("2023-24")
+        >>>
+        >>> # Tag competitions
+        >>> schedule_tagged = tag_acb_competition(schedule)
+        >>>
+        >>> # Analyze by competition
+        >>> competition_counts = schedule_tagged["COMPETITION"].value_counts()
+        >>> print(competition_counts)
+
+    Note:
+        - **NOT YET FULLY IMPLEMENTED** - Currently uses heuristics
+        - Requires inspection of actual ACB schedule HTML structure
+        - May need manual mapping for historical seasons
+        - ACB website structure may change annually
+
+    **TO IMPLEMENT** (requires website inspection):
+    1. Visit https://www.acb.com/calendario for current season
+    2. Identify how ACB marks different competitions in HTML
+    3. Check for class names, data attributes, or URL patterns
+    4. Update detection logic below with actual patterns
+    5. Test against multiple seasons for robustness
+
+    See Also:
+        - scrape_acb_schedule_page(): Main ACB schedule scraper
+        - tag_lnb_competition(): Similar function for LNB Pro A
+    """
+    logger.info("Tagging ACB games with competition type (OPTIONAL ENHANCEMENT)")
+
+    if schedule_df.empty:
+        logger.warning("Empty schedule, cannot tag competitions")
+        return schedule_df
+
+    if "GAME_DATE" not in schedule_df.columns:
+        logger.warning("Schedule missing GAME_DATE column, cannot tag competitions")
+        return schedule_df
+
+    # Initialize competition columns
+    schedule_df["COMPETITION"] = "Liga Regular"  # Default
+    schedule_df["PHASE"] = "Regular Season"
+
+    try:
+        # Convert GAME_DATE to datetime for date-based detection
+        schedule_df["_GAME_DATE_DT"] = pd.to_datetime(schedule_df["GAME_DATE"], errors="coerce")
+
+        # Extract month for seasonal patterns
+        schedule_df["_MONTH"] = schedule_df["_GAME_DATE_DT"].dt.month
+
+        # Heuristic 1: Copa del Rey (typically February)
+        # Copa del Rey is usually mid-season knockout tournament
+        copa_mask = (schedule_df["_MONTH"] == 2)
+
+        # Heuristic 2: Supercopa (typically September, preseason)
+        supercopa_mask = (schedule_df["_MONTH"] == 9)
+
+        # Heuristic 3: Playoffs (May-June, after regular season)
+        playoffs_mask = (schedule_df["_MONTH"].isin([5, 6]))
+
+        # Check ROUND column for playoff indicators if available
+        if "ROUND" in schedule_df.columns:
+            playoff_rounds = schedule_df["ROUND"].astype(str).str.contains(
+                r"Final|Semifinal|Cuartos|1/4|1/2",
+                case=False,
+                regex=True,
+                na=False
+            )
+            playoffs_mask = playoffs_mask | playoff_rounds
+
+        # Apply competition tags
+        schedule_df.loc[copa_mask, "COMPETITION"] = "Copa del Rey"
+        schedule_df.loc[copa_mask, "PHASE"] = "Knockout Tournament"
+
+        schedule_df.loc[supercopa_mask, "COMPETITION"] = "Supercopa"
+        schedule_df.loc[supercopa_mask, "PHASE"] = "Preseason Tournament"
+
+        schedule_df.loc[playoffs_mask, "COMPETITION"] = "Playoffs"
+
+        # Further classify playoff phases if ROUND available
+        if "ROUND" in schedule_df.columns:
+            # Quarterfinals
+            qf_mask = playoffs_mask & schedule_df["ROUND"].astype(str).str.contains(
+                r"Cuartos|1/4|Quarterfinal",
+                case=False,
+                regex=True,
+                na=False
+            )
+            schedule_df.loc[qf_mask, "PHASE"] = "Quarterfinals"
+
+            # Semifinals
+            sf_mask = playoffs_mask & schedule_df["ROUND"].astype(str).str.contains(
+                r"Semifinal|1/2",
+                case=False,
+                regex=True,
+                na=False
+            )
+            schedule_df.loc[sf_mask, "PHASE"] = "Semifinals"
+
+            # Finals
+            f_mask = playoffs_mask & schedule_df["ROUND"].astype(str).str.contains(
+                r"^Final$|Finale",
+                case=False,
+                regex=True,
+                na=False
+            )
+            schedule_df.loc[f_mask, "PHASE"] = "Finals"
+
+        # Clean up temporary columns
+        schedule_df = schedule_df.drop(columns=["_GAME_DATE_DT", "_MONTH"])
+
+        # Log distribution
+        competition_counts = schedule_df["COMPETITION"].value_counts()
+        logger.info(f"Competition distribution: {competition_counts.to_dict()}")
+
+        logger.warning(
+            "ACB competition tagging uses heuristics and may not be 100% accurate. "
+            "Inspect actual ACB schedule HTML for definitive competition markers. "
+            "Update this function with discovered patterns."
+        )
+
+        return schedule_df
+
+    except Exception as e:
+        logger.error(f"Failed to tag ACB competitions: {e}")
+        return schedule_df

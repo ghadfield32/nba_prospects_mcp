@@ -418,26 +418,246 @@ def fetch_lnb_schedule(
     )
 
 
+def fetch_lnb_team_game(season: str = "2024") -> pd.DataFrame:
+    """Fetch LNB Pro A team game stats (REQUIRES INVESTIGATION)
+
+    ❌ **NOT YET IMPLEMENTED** - Awaiting investigation results.
+
+    **INVESTIGATION REQUIRED**: See docs/lnb_game_level_investigation.md for details.
+
+    **Two Potential Implementation Routes**:
+
+    1. **Scenario 1: Stats Centre JSON API** (Most Likely)
+       - Azure-hosted API similar to other French leagues
+       - Expected endpoint: `lnbstatscenter.azurewebsites.net/api/games/{game_id}/stats`
+       - Would provide: Team box scores per game
+       - Historical depth: Likely 5+ years
+
+    2. **Scenario 2: FIBA LiveStats for FFBB**
+       - Use existing FIBA infrastructure (same as BCL/BAL/ABA/LKL)
+       - Aggregate from player_game data (same pattern as other FIBA leagues)
+       - Would provide: Team box scores + derived stats
+       - Historical depth: Varies by competition
+
+    **TO INVESTIGATE**:
+    1. Open https://lnb.fr/pro-a/calendrier-resultats in browser
+    2. Click on a completed game
+    3. Open DevTools (F12) → Network tab → Filter: "XHR"
+    4. Look for API calls loading team stats
+    5. Document findings in docs/lnb_investigation_findings.md
+
+    **TO IMPLEMENT** (once investigation complete):
+    1. Update this function to call discovered API endpoint, OR
+    2. Wire into FIBA shared utilities if Scenario 2 applies, OR
+    3. Aggregate from fetch_lnb_player_game() data
+
+    Args:
+        season: Season year as string (e.g., "2024" for 2024-25 season)
+
+    Returns:
+        Empty DataFrame (until implemented)
+
+    Expected Columns (after implementation):
+        - LEAGUE: "LNB_PROA"
+        - SEASON: Season string
+        - COMPETITION: "LNB Pro A"
+        - GAME_ID: Game identifier
+        - TEAM_ID: Team identifier
+        - TEAM_NAME: Team name
+        - PTS, FGM, FGA, FG_PCT: Field goals
+        - FG2M, FG2A, FG2_PCT: 2-point field goals
+        - FG3M, FG3A, FG3_PCT: 3-point field goals
+        - FTM, FTA, FT_PCT: Free throws
+        - OREB, DREB, REB: Rebounds
+        - AST, STL, BLK, TOV, PF: Other stats
+        - PLUS_MINUS: Point differential (if available)
+        - SOURCE: "lnb_statscenter_api" or "fiba_livestats_agg"
+
+    Raises:
+        NotImplementedError: Always (until investigation complete)
+
+    See Also:
+        - docs/lnb_game_level_investigation.md: Complete investigation workflow
+        - tools/lnb/api_discovery_helper.py: Endpoint testing tool
+        - src/cbb_data/fetchers/fiba_html_common.py: FIBA shared utilities (Scenario 2)
+    """
+    raise NotImplementedError(
+        "LNB team_game not yet implemented. "
+        "Investigation required to determine data source. "
+        "See docs/lnb_game_level_investigation.md for step-by-step guide."
+    )
+
+
+def fetch_lnb_pbp(season: str = "2024") -> pd.DataFrame:
+    """Fetch LNB Pro A play-by-play data (CONDITIONAL - Scenario 2 only)
+
+    ❌ **NOT YET IMPLEMENTED** - Only available if FIBA LiveStats route viable.
+
+    **AVAILABILITY DEPENDS ON INVESTIGATION**:
+
+    - **Scenario 1** (Stats Centre API): PBP NOT available
+      - Stats centres typically don't expose play-by-play
+      - Would need separate FIBA LiveStats access
+
+    - **Scenario 2** (FIBA LiveStats): PBP AVAILABLE ✅
+      - Same infrastructure as BCL/BAL/ABA/LKL
+      - Full play-by-play with running score, substitutions
+      - Shot clock, game clock timestamps
+      - Action types: made/missed shots, fouls, timeouts, etc.
+
+    **TO INVESTIGATE**:
+    1. Check if LNB games listed on fiba.basketball
+    2. Search for FFBB (French federation) competition codes
+    3. Test FIBA LiveStats URLs:
+       - https://fibalivestats.dcd.shared.geniussports.com/u/FFBB/{GAME_ID}/pbp.html
+    4. If accessible → Scenario 2 confirmed, PBP available
+    5. If 404/blocked → Scenario 1 likely, PBP not available
+
+    **TO IMPLEMENT** (if Scenario 2):
+    ```python
+    from .fiba_html_common import fetch_fiba_pbp
+
+    df = fetch_fiba_pbp(
+        game_id=game_id,
+        comp_code="FFBB_PROA"  # Or discovered code
+    )
+    df["LEAGUE"] = "LNB_PROA"
+    df["SEASON"] = season
+    return df
+    ```
+
+    Args:
+        season: Season year as string (e.g., "2024" for 2024-25 season)
+
+    Returns:
+        Empty DataFrame (until investigation determines availability)
+
+    Expected Columns (if Scenario 2 viable):
+        - LEAGUE: "LNB_PROA"
+        - SEASON: Season string
+        - GAME_ID: Game identifier
+        - PERIOD: Quarter (1-4) or OT period
+        - GAME_CLOCK: Time remaining in period (MM:SS)
+        - SHOT_CLOCK: Shot clock (if available)
+        - TEAM_ID: Team performing action
+        - PLAYER_ID: Player performing action (if applicable)
+        - ACTION_TYPE: "made_shot", "missed_shot", "rebound", etc.
+        - SCORE_HOME: Home team running score
+        - SCORE_AWAY: Away team running score
+        - DESCRIPTION: Text description of play
+        - SOURCE: "fiba_livestats_json" or "fiba_livestats_html"
+
+    Raises:
+        NotImplementedError: Always (until investigation complete)
+
+    See Also:
+        - docs/lnb_game_level_investigation.md: Investigation workflow
+        - src/cbb_data/fetchers/fiba_html_common.py: FIBA PBP implementation
+        - src/cbb_data/fetchers/bcl.py: Example FIBA PBP usage
+    """
+    raise NotImplementedError(
+        "LNB PBP availability depends on investigation results. "
+        "Only available if FIBA LiveStats route (Scenario 2) is viable. "
+        "See docs/lnb_game_level_investigation.md Phase 1B for testing steps."
+    )
+
+
+def fetch_lnb_shots(season: str = "2024") -> pd.DataFrame:
+    """Fetch LNB Pro A shot chart data (CONDITIONAL - Scenario 2 only)
+
+    ❌ **NOT YET IMPLEMENTED** - Only available if FIBA LiveStats route viable.
+
+    **AVAILABILITY DEPENDS ON INVESTIGATION**:
+
+    - **Scenario 1** (Stats Centre API): Shots NOT available
+      - Stats centres rarely expose shot coordinates
+      - Aggregated shooting stats only (FG%, 3P%, etc.)
+
+    - **Scenario 2** (FIBA LiveStats): Shots AVAILABLE ✅
+      - Same infrastructure as BCL/BAL/ABA/LKL
+      - Shot chart with X/Y coordinates (0-100 normalized)
+      - Made/missed flag, shot type (2PT/3PT), distance
+      - Player, team, game clock for each shot
+
+    **TO INVESTIGATE**:
+    1. If Scenario 2 confirmed (see fetch_lnb_pbp docstring)
+    2. Test FIBA LiveStats shot endpoints:
+       - JSON: `/data/{GAME_ID}/data.json` → "tm.stat" array
+       - HTML: `/u/FFBB/{GAME_ID}/bs.html` → Parse shot table
+    3. Verify X/Y coordinates present and reasonable (0-100 range)
+
+    **TO IMPLEMENT** (if Scenario 2):
+    ```python
+    from .fiba_html_common import fetch_fiba_shots
+
+    df = fetch_fiba_shots(
+        game_id=game_id,
+        comp_code="FFBB_PROA"
+    )
+    df["LEAGUE"] = "LNB_PROA"
+    df["SEASON"] = season
+    return df
+    ```
+
+    Args:
+        season: Season year as string (e.g., "2024" for 2024-25 season)
+
+    Returns:
+        Empty DataFrame (until investigation determines availability)
+
+    Expected Columns (if Scenario 2 viable):
+        - LEAGUE: "LNB_PROA"
+        - SEASON: Season string
+        - GAME_ID: Game identifier
+        - TEAM_ID: Shooting team
+        - PLAYER_ID: Shooter
+        - PLAYER_NAME: Shooter name
+        - PERIOD: Quarter (1-4) or OT
+        - GAME_CLOCK: Time of shot (MM:SS)
+        - X: X coordinate (0-100, normalized court position)
+        - Y: Y coordinate (0-100, normalized court position)
+        - SHOT_MADE: 1 if made, 0 if missed
+        - SHOT_VALUE: 2 or 3 (points if made)
+        - SHOT_TYPE: "2PT" or "3PT"
+        - DISTANCE: Distance from basket (meters or feet)
+        - SOURCE: "fiba_livestats_json" or "fiba_livestats_html"
+
+    Raises:
+        NotImplementedError: Always (until investigation complete)
+
+    See Also:
+        - docs/lnb_game_level_investigation.md: Investigation workflow
+        - src/cbb_data/fetchers/fiba_html_common.py: FIBA shots implementation
+        - src/cbb_data/fetchers/bcl.py: Example FIBA shots usage
+    """
+    raise NotImplementedError(
+        "LNB shots availability depends on investigation results. "
+        "Only available if FIBA LiveStats route (Scenario 2) is viable. "
+        "See docs/lnb_game_level_investigation.md for complete investigation guide."
+    )
+
+
 def fetch_lnb_box_score(game_id: str) -> pd.DataFrame:
-    """Fetch LNB Pro A box score (REQUIRES API DISCOVERY)
+    """Fetch LNB Pro A box score for single game (LEGACY - use fetch_lnb_player_game)
 
-    ❌ Box scores require API discovery via browser DevTools.
+    ❌ **DEPRECATED** - Use fetch_lnb_player_game(season) instead.
 
-    **TO IMPLEMENT**: See tools/lnb/README.md for API discovery instructions.
+    This function signature (single game_id) is being phased out in favor of
+    season-level fetchers that handle batching internally.
 
     Args:
         game_id: Game identifier
 
     Returns:
-        Empty DataFrame (until API is discovered and implemented)
+        Empty DataFrame
 
-    Expected Columns (after implementation):
-        - GAME_ID, PLAYER_NAME, TEAM, MIN, PTS, REB, AST, STL, BLK
-        - FGM, FGA, FG3M, FG3A, FTM, FTA, LEAGUE
+    See Also:
+        - fetch_lnb_player_game(season): Preferred method for box scores
+        - fetch_lnb_team_game(season): Team-level box scores
     """
     logger.warning(
-        "LNB Pro A box scores require API discovery. "
-        "See tools/lnb/README.md for implementation instructions. "
+        "fetch_lnb_box_score(game_id) is deprecated. "
+        "Use fetch_lnb_player_game(season) for box scores. "
         "Returning empty DataFrame."
     )
     return pd.DataFrame(
