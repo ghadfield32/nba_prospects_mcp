@@ -184,6 +184,22 @@ class FilterSpec(BaseModel):
         description="Context for shot charts (e.g., 'FGA', 'FG3A')",
     )
 
+    # Game-minute filters (for shot-level queries)
+    # These filter by elapsed game time (e.g., 0-40 for FIBA, 0-48 for NBA)
+    # Implementation is dataset-specific; silently ignored if data doesn't support it
+    min_game_minute: int | None = Field(
+        default=None,
+        ge=0,
+        validation_alias=AliasChoices("min_game_minute", "MinGameMinute"),
+        description="Minimum game minute (elapsed time from game start)",
+    )
+    max_game_minute: int | None = Field(
+        default=None,
+        ge=0,
+        validation_alias=AliasChoices("max_game_minute", "MaxGameMinute"),
+        description="Maximum game minute (elapsed time from game start)",
+    )
+
     # Data quality/completeness
     only_complete: bool | None = Field(
         default=False,
@@ -246,4 +262,15 @@ class FilterSpec(BaseModel):
         for q in v:
             if q < 1:
                 raise ValueError("Quarter must be >= 1")
+        return v
+
+    @field_validator("max_game_minute")
+    @classmethod
+    def _validate_game_minute_range(cls, v: int | None, info: Any) -> int | None:
+        """Ensure max_game_minute >= min_game_minute"""
+        if v is None:
+            return v
+        min_minute = info.data.get("min_game_minute")
+        if min_minute is not None and v < min_minute:
+            raise ValueError("max_game_minute must be >= min_game_minute")
         return v

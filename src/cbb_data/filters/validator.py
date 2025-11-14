@@ -64,12 +64,16 @@ DATASET_SUPPORTED_FILTERS: dict[str, set[str]] = {
         "league",
         "game_ids",
         "season",
+        "season_type",  # Season type filter (Regular Season, Playoffs, etc.)
         "team",
         "team_ids",
+        "opponent",  # Opponent team filter
         "player",
         "player_ids",
-        "quarter",
-        "context_measure",
+        "quarter",  # Period/quarter filter
+        "min_game_minute",  # Game-minute range (lower bound)
+        "max_game_minute",  # Game-minute range (upper bound)
+        "context_measure",  # Shot context (FGA, FG3A, etc.)
     },
     # Phase 3.3: Season Aggregate Datasets
     "player_season": {
@@ -213,20 +217,23 @@ def validate_filters(
         warnings.append(FilterValidationWarning(msg, "game_ids"))
 
     if dataset_id == "shots":
-        if "game_ids" not in active_filters:
-            msg = "Dataset 'shots' requires 'game_ids' filter. " "Add game_ids to your query."
+        # Shots dataset now supports season-level queries OR game-specific queries
+        # Require: (season AND league) OR game_ids
+        has_season = "season" in active_filters
+        has_league = spec.league is not None
+        has_game_ids = "game_ids" in active_filters
+
+        if not has_game_ids and not (has_season and has_league):
+            msg = (
+                "Dataset 'shots' requires either 'game_ids' OR ('season' AND 'league'). "
+                "Add these filters to your query."
+            )
             if strict:
                 raise FilterValidationError(msg)
             warnings.append(FilterValidationWarning(msg, "game_ids"))
 
-        if spec.league != "EuroLeague":
-            msg = (
-                "Dataset 'shots' is only available for EuroLeague. "
-                f"League '{spec.league}' does not provide shot location data."
-            )
-            if strict:
-                raise FilterValidationError(msg)
-            warnings.append(FilterValidationWarning(msg, "league"))
+        # Shots now supported by multiple leagues (NCAA-MBB, EuroLeague, EuroCup,
+        # G-League, WNBA, NBL, CEBL, OTE). No longer EuroLeague-only.
 
     # Check 6: Partially implemented filters (warn users)
     # NOTE: venue, conference, division, tournament, quarter are FULLY implemented

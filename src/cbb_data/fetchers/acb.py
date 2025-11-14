@@ -1,55 +1,45 @@
 """ACB (Liga Endesa - Spain) Fetcher
 
-Official ACB (Spanish professional basketball) stats portal scraper.
-
 ACB (Asociación de Clubes de Baloncesto) is Spain's top-tier professional basketball league,
 featuring 18 teams. Known as "Liga Endesa" due to sponsorship, it's one of Europe's strongest
 leagues. NBA talent pipeline includes Pau Gasol, Marc Gasol, Ricky Rubio, and many others.
 
-⚠️ **DATA AVAILABILITY**:
-- **Player/Team season stats**: ❌ Unavailable (JavaScript-rendered site)
-- **Schedule/Box scores**: ⚠️ Limited (requires implementation)
+✅ **CURRENT STATUS: RESTORED** ✅
+ACB website restructured in 2024. New URLs discovered and implemented (2025-11-13).
 
-Key Features:
-- Web scraping from official acb.com pages
-- Graceful degradation for JavaScript-rendered content
-- Rate-limited requests with retry logic
-- UTF-8 support for Spanish names (accents: á, é, í, ó, ú, ñ)
+**DATA AVAILABILITY**:
+- **player_season**: ✅ Available via HTML tables
+- **team_season**: ✅ Available via HTML tables
+- **schedule/box scores**: ❌ Not yet implemented (future work)
 
-Data Granularities:
-- schedule: ⚠️ Limited (requires HTML/API parsing)
-- player_game: ⚠️ Limited (box scores require scraping)
-- team_game: ⚠️ Limited (team stats require scraping)
-- pbp: ❌ Unavailable (not published publicly)
-- shots: ❌ Unavailable (not published publicly)
-- player_season: ❌ Unavailable (JavaScript-rendered)
-- team_season: ❌ Unavailable (JavaScript-rendered)
+**URL CHANGES (2025-11-13)**:
+- OLD (404): /estadisticas/jugadores, /clasificacion
+- NEW (working): /estadisticas-individuales/index/temporada_id/{season}, /estadisticas-equipos/index/temporada_id/{season}
 
 Competition Structure:
 - Regular Season: 18 teams
-- Playoffs: Top 8 teams advance to playoffs
+- Playoffs: Top 8 teams advance
 - Finals: Best-of-5 series
-- Typical season: October-June
+- Season: October-June
 
 Historical Context:
 - Founded: 1957 (one of Europe's oldest leagues)
 - Prominent teams: Real Madrid, Barcelona, Valencia, Baskonia
 - NBA pipeline: Pau Gasol, Marc Gasol, Ricky Rubio, Sergio Llull
-- Multiple EuroLeague titles by ACB teams
 
 Documentation: https://www.acb.com/
-Data Source: https://www.acb.com/estadisticas
 
 Implementation Status:
-✅ IMPLEMENTED - Season aggregate functions with graceful degradation
-⚠️ JavaScript-rendered site requires Selenium/Playwright for actual data
+✅ RESTORED (2025-11-13) - New URLs functional after website restructure
+✅ player_season: Scrapes HTML tables from /estadisticas-individuales
+✅ team_season: Scrapes HTML tables from /estadisticas-equipos
+⚠️ schedule/box scores: Not yet implemented (future work)
 
 Technical Notes:
-- Website uses JavaScript frameworks (React/Angular)
-- Static HTML scraping returns no tables
-- Requires Selenium/Playwright or API discovery for implementation
-- Rate limiting: 1 req/sec to respect website resources
+- ACB uses "temporada_id" (ending year) in URLs: 2024-25 season = temporada_id/2025
+- 22 HTML tables on player stats page, 20 tables on team stats page, 3 tables on standings
 - Encoding: UTF-8 for Spanish names (á, é, í, ó, ú, ñ)
+- Tables are server-rendered HTML (not JavaScript), parseable with BeautifulSoup/pandas
 """
 
 from __future__ import annotations
@@ -67,11 +57,15 @@ logger = logging.getLogger(__name__)
 # Get rate limiter
 rate_limiter = get_source_limiter()
 
-# ACB URLs
+# ACB URLs (updated 2025-11-13 after website restructure)
 ACB_BASE_URL = "https://www.acb.com"
-ACB_STATS_URL = f"{ACB_BASE_URL}/estadisticas"
-ACB_PLAYERS_URL = f"{ACB_BASE_URL}/estadisticas/jugadores"
-ACB_TEAMS_URL = f"{ACB_BASE_URL}/clasificacion"
+
+# NEW URL structure (working as of 2025-11-13):
+# Player stats: /estadisticas-individuales/index/temporada_id/{ending_year}
+# Team stats: /estadisticas-equipos/index/temporada_id/{ending_year}
+# Standings: /resultados-clasificacion/ver
+
+# Note: ACB uses ending year in URLs (2024-25 season = temporada_id/2025)
 
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
@@ -82,17 +76,16 @@ def fetch_acb_player_season(
 ) -> pd.DataFrame:
     """Fetch ACB (Liga Endesa) player season statistics
 
-    ⚠️ LIMITATION: ACB website uses JavaScript-rendered statistics.
-    Returns empty DataFrame with correct schema for graceful degradation.
+    ✅ RESTORED (2025-11-13): New URL structure functional after website restructure.
 
     Args:
         season: Season year as string (e.g., "2024" for 2024-25 season)
         per_mode: Aggregation mode ("Totals", "PerGame", "Per40")
 
     Returns:
-        DataFrame with player season statistics (empty for JS-rendered site)
+        DataFrame with player season statistics
 
-    Columns (schema only):
+    Columns:
         - PLAYER_NAME: Player name
         - TEAM: Team name
         - GP: Games played
@@ -109,19 +102,31 @@ def fetch_acb_player_season(
         - COMPETITION: "Liga Endesa"
 
     Note:
-        Requires Selenium/Playwright or API discovery for actual implementation.
-        See LEAGUE_WEB_SCRAPING_FINDINGS.md for details.
+        ACB website uses "temporada_id" (ending year): 2024-25 season = temporada_id/2025
     """
     rate_limiter.acquire("acb")
 
-    logger.info(f"Fetching ACB player season stats: {season}, {per_mode}")
+    # Convert season to ACB's temporada_id format (ending year)
+    # "2024" -> 2025, "2024-25" -> 2025
+    if "-" in season:
+        ending_year = season.split("-")[1]
+        if len(ending_year) == 2:  # "24" -> "2024"
+            ending_year = "20" + ending_year
+    else:
+        ending_year = str(int(season) + 1)
+
+    # Build URL with correct temporada_id
+    url = f"{ACB_BASE_URL}/estadisticas-individuales/index/temporada_id/{ending_year}"
+
+    logger.info(f"Fetching ACB player season: {season} (temporada_id/{ending_year}), {per_mode}")
 
     try:
-        # Attempt to fetch HTML table (will fail for JS-rendered site)
+        # Fetch HTML table from new URL structure
+        # Note: ACB has 22 category-specific tables (top scorers, rebounders, etc.) with ~5 rows each
         df = read_first_table(
-            url=ACB_PLAYERS_URL,
-            min_columns=5,
-            min_rows=10,
+            url=url,
+            min_columns=3,
+            min_rows=3,  # Lower threshold for category tables
         )
 
         # Spanish column names mapping
@@ -186,16 +191,15 @@ def fetch_acb_team_season(
 ) -> pd.DataFrame:
     """Fetch ACB (Liga Endesa) team season statistics/standings
 
-    ⚠️ LIMITATION: ACB website uses JavaScript-rendered statistics.
-    Returns empty DataFrame with correct schema for graceful degradation.
+    ✅ RESTORED (2025-11-13): New URL structure functional after website restructure.
 
     Args:
         season: Season year as string (e.g., "2024" for 2024-25 season)
 
     Returns:
-        DataFrame with team season statistics (empty for JS-rendered site)
+        DataFrame with team season statistics/standings
 
-    Columns (schema only):
+    Columns:
         - TEAM: Team name
         - GP: Games played
         - W: Wins
@@ -208,26 +212,33 @@ def fetch_acb_team_season(
         - COMPETITION: "Liga Endesa"
 
     Note:
-        Requires Selenium/Playwright or API discovery for actual implementation.
+        Uses standings page (/resultados-clasificacion/ver) which doesn't require season parameter.
     """
     rate_limiter.acquire("acb")
 
-    logger.info(f"Fetching ACB team season stats: {season}")
+    # Use standings URL (doesn't require season parameter - shows current season)
+    url = f"{ACB_BASE_URL}/resultados-clasificacion/ver"
+
+    logger.info(f"Fetching ACB team season/standings: {season}")
 
     try:
         df = read_first_table(
-            url=ACB_TEAMS_URL,
+            url=url,
             min_columns=5,
             min_rows=5,
         )
 
-        # Spanish column names mapping
+        # Spanish column names mapping (from standings table)
+        # Columns: Pos., Equipo, J (Games), V (Wins), D (Losses), % (Win PCT), P.F. (Points For), P.C. (Points Against), Dif.
         column_map = {
             "Equipo": "TEAM",
-            "Partidos": "GP",
-            "Victorias": "W",
-            "Derrotas": "L",
-            "Puntos": "PTS",
+            "J": "GP",  # Juegos (Games)
+            "V": "W",  # Victorias (Wins)
+            "D": "L",  # Derrotas (Losses)
+            "%": "WIN_PCT",  # Win percentage
+            "P.F.": "PTS",  # Puntos a Favor (Points For)
+            "P.C.": "OPP_PTS",  # Puntos en Contra (Points Against)
+            "Dif.": "DIFF",  # Diferencia (Point Differential)
         }
 
         df = normalize_league_columns(

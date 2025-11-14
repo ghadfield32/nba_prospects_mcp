@@ -51,6 +51,9 @@ htmlcov/
 # *.json
 # data/
 
+# NBL raw data (large parquet files from R export)
+data/nbl_raw/
+
 # Cache
 .cache/
 *.cache

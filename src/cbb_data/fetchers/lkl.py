@@ -1,56 +1,37 @@
-"""LKL (Lithuania) Fetcher
+"""LKL (Lithuania Basketball League) Fetcher
 
-Official LKL (Lithuanian Basketball League) stats portal scraper.
+Fetches data for the Lithuanian Basketball League (LKL) via FIBA LiveStats HTML scraping.
+Uses shared infrastructure from fiba_html_common.py for robust, cached scraping.
 
-LKL (Lietuvos Krepšinio Lyga) is Lithuania's top-tier professional basketball league,
-featuring 10-12 teams. Lithuania has a rich basketball tradition and is known for
-developing NBA talent including Arvydas Sabonis, Šarūnas Marčiulionis, Žydrūnas Ilgauskas,
-Domantas Sabonis, and Jonas Valančiūnas.
+LKL is Lithuania's top-tier professional basketball league, featuring 10-12 teams.
+Known for developing NBA talent including Arvydas Sabonis, Šarūnas Marčiulionis,
+Žydrūnas Ilgauskas, Domantas Sabonis, and Jonas Valančiūnas.
 
-⚠️ **DATA AVAILABILITY**:
-- **Player/Team season stats**: ❌ Unavailable (JavaScript-rendered site)
-- **Schedule/Box scores**: ⚠️ Limited (requires implementation)
-
-Key Features:
-- Web scraping from official lkl.lt pages
-- Graceful degradation for JavaScript-rendered content
-- Rate-limited requests with retry logic
-- UTF-8 support for Lithuanian names (special characters: ė, ų, ū, ą, č, š, ž)
+Data Source: FIBA LiveStats HTML pages (public)
+League Code: "LKL" (in FIBA system)
 
 Data Granularities:
-- schedule: ⚠️ Limited (requires HTML/API parsing)
-- player_game: ⚠️ Limited (box scores require scraping)
-- team_game: ⚠️ Limited (team stats require scraping)
-- pbp: ❌ Unavailable (not published publicly)
-- shots: ❌ Unavailable (not published publicly)
-- player_season: ❌ Unavailable (JavaScript-rendered)
-- team_season: ❌ Unavailable (JavaScript-rendered)
+- schedule: ✅ Via game index CSV
+- player_game: ✅ Via FIBA HTML box score scraping
+- team_game: ✅ Aggregated from player_game
+- pbp: ✅ Via FIBA HTML play-by-play scraping
+- team_season: ✅ Aggregated from team_game
+- player_season: ✅ Aggregated from player_game
+- shots: ❌ FIBA HTML doesn't provide (x,y) coordinates
 
 Competition Structure:
-- Regular Season: 10-12 teams (varies by year)
-- Playoffs: Top teams advance to playoffs
+- Regular Season: 10-12 teams
+- Playoffs: Top teams advance
 - Finals: Best-of-7 series
-- Typical season: September-May
+- Season: September-May
 
 Historical Context:
-- Founded: 1993 (after Soviet Union dissolution)
+- Founded: 1993 (post-Soviet independence)
 - Prominent teams: Žalgiris Kaunas, Rytas Vilnius, Lietkabelis
-- NBA pipeline: Arvydas Sabonis, Šarūnas Marčiulionis, Žydrūnas Ilgauskas, Domantas Sabonis, Jonas Valančiūnas
-- Strong basketball culture (EuroLeague participants)
+- EuroLeague participants: Žalgiris regularly competes in EuroLeague
 
 Documentation: https://www.lkl.lt/
-Data Source: https://www.lkl.lt/statistika
-
-Implementation Status:
-✅ IMPLEMENTED - Season aggregate functions with graceful degradation
-⚠️ JavaScript-rendered site requires Selenium/Playwright for actual data
-
-Technical Notes:
-- Website uses JavaScript frameworks (React/Angular)
-- Static HTML scraping returns no tables
-- Requires Selenium/Playwright or API discovery for implementation
-- Rate limiting: 1 req/sec to respect website resources
-- Encoding: UTF-8 for Lithuanian names (ė, ų, ū, ą, č, š, ž)
+FIBA LiveStats: https://fibalivestats.dcd.shared.geniussports.com/u/LKL/
 """
 
 from __future__ import annotations
@@ -59,425 +40,547 @@ import logging
 
 import pandas as pd
 
+from ..contracts import ensure_standard_columns
 from ..utils.rate_limiter import get_source_limiter
 from .base import cached_dataframe, retry_on_error
-from .html_tables import normalize_league_columns, read_first_table
+from .fiba_html_common import (
+    load_fiba_game_index,
+    scrape_fiba_box_score,
+    scrape_fiba_play_by_play,
+)
 
 logger = logging.getLogger(__name__)
 
 # Get rate limiter
 rate_limiter = get_source_limiter()
 
-# LKL URLs
-LKL_BASE_URL = "https://www.lkl.lt"
-LKL_STATS_URL = f"{LKL_BASE_URL}/statistika"
-LKL_PLAYERS_URL = f"{LKL_BASE_URL}/statistika/zaidejai"
-LKL_TEAMS_URL = f"{LKL_BASE_URL}/turnyrine-lentele"
+# LKL configuration
+LEAGUE = "LKL"  # Standardized league name
+FIBA_LEAGUE_CODE = "LKL"  # FIBA LiveStats code
+MIN_SUPPORTED_SEASON = "2018-19"  # Earliest season with reliable data
+
+
+# ==============================================================================
+# Schedule
+# ==============================================================================
 
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
 @cached_dataframe
-def fetch_lkl_player_season(
-    season: str = "2024",
-    per_mode: str = "Totals",
-) -> pd.DataFrame:
-    """Fetch LKL (Lithuania) player season statistics
+def fetch_schedule(season: str = "2023-24") -> pd.DataFrame:
+    """Fetch LKL game schedule for a season
 
-    ⚠️ LIMITATION: LKL website uses JavaScript-rendered statistics.
-    Returns empty DataFrame with correct schema for graceful degradation.
+    Loads pre-built game index from CSV file. Game IDs must be manually collected
+    from FIBA LiveStats as there's no public searchable API.
 
     Args:
-        season: Season year as string (e.g., "2024" for 2024-25 season)
-        per_mode: Aggregation mode ("Totals", "PerGame", "Per40")
-
-    Returns:
-        DataFrame with player season statistics (empty for JS-rendered site)
-
-    Columns (schema only):
-        - PLAYER_NAME: Player name
-        - TEAM: Team name
-        - GP: Games played
-        - MIN: Minutes played
-        - PTS: Points
-        - REB: Rebounds
-        - AST: Assists
-        - STL: Steals
-        - BLK: Blocks
-        - TOV: Turnovers
-        - PF: Personal fouls
-        - LEAGUE: "LKL"
-        - SEASON: Season string
-        - COMPETITION: "LKL Lithuania"
-
-    Note:
-        Requires Selenium/Playwright or API discovery for actual implementation.
-        See LEAGUE_WEB_SCRAPING_FINDINGS.md for details.
-    """
-    rate_limiter.acquire("lkl")
-
-    logger.info(f"Fetching LKL player season stats: {season}, {per_mode}")
-
-    try:
-        # Attempt to fetch HTML table (will fail for JS-rendered site)
-        df = read_first_table(
-            url=LKL_PLAYERS_URL,
-            min_columns=5,
-            min_rows=10,
-        )
-
-        # Lithuanian column names mapping (if available)
-        column_map = {
-            "Žaidėjas": "PLAYER_NAME",  # Player
-            "Komanda": "TEAM",  # Team
-            "Rungtynės": "GP",  # Games
-            "Minutės": "MIN",  # Minutes
-            "Taškai": "PTS",  # Points
-            "Atkovoti": "REB",  # Rebounds
-            "Rezultatyvūs": "AST",  # Assists
-            "Perimti": "STL",  # Steals
-            "Blokuoti": "BLK",  # Blocks
-            "Klaidos": "TOV",  # Turnovers
-            "Pražangos": "PF",  # Fouls
-        }
-
-        df = normalize_league_columns(
-            df=df,
-            league="LKL",
-            season=season,
-            competition="LKL Lithuania",
-            column_map=column_map,
-        )
-
-        # Optional per_mode calculations
-        if per_mode == "PerGame" and "GP" in df.columns:
-            stat_cols = ["PTS", "REB", "AST", "STL", "BLK", "TOV", "PF", "MIN"]
-            for col in stat_cols:
-                if col in df.columns:
-                    df[col] = df[col] / df["GP"]
-
-        return df
-
-    except Exception as e:
-        logger.error(f"Failed to fetch LKL player season stats: {e}")
-        # Return empty DataFrame with correct schema (graceful degradation)
-        return pd.DataFrame(
-            columns=[
-                "PLAYER_NAME",
-                "TEAM",
-                "GP",
-                "MIN",
-                "PTS",
-                "REB",
-                "AST",
-                "STL",
-                "BLK",
-                "TOV",
-                "PF",
-                "LEAGUE",
-                "SEASON",
-                "COMPETITION",
-            ]
-        )
-
-
-@retry_on_error(max_attempts=3, backoff_seconds=2.0)
-@cached_dataframe
-def fetch_lkl_team_season(
-    season: str = "2024",
-) -> pd.DataFrame:
-    """Fetch LKL (Lithuania) team season statistics/standings
-
-    ⚠️ LIMITATION: LKL website uses JavaScript-rendered statistics.
-    Returns empty DataFrame with correct schema for graceful degradation.
-
-    Args:
-        season: Season year as string (e.g., "2024" for 2024-25 season)
-
-    Returns:
-        DataFrame with team season statistics (empty for JS-rendered site)
-
-    Columns (schema only):
-        - TEAM: Team name
-        - GP: Games played
-        - W: Wins
-        - L: Losses
-        - WIN_PCT: Win percentage
-        - PTS: Points scored
-        - OPP_PTS: Opponent points
-        - LEAGUE: "LKL"
-        - SEASON: Season string
-        - COMPETITION: "LKL Lithuania"
-
-    Note:
-        Requires Selenium/Playwright or API discovery for actual implementation.
-    """
-    rate_limiter.acquire("lkl")
-
-    logger.info(f"Fetching LKL team season stats: {season}")
-
-    try:
-        df = read_first_table(
-            url=LKL_TEAMS_URL,
-            min_columns=5,
-            min_rows=5,
-        )
-
-        # Lithuanian column names mapping (if available)
-        column_map = {
-            "Komanda": "TEAM",  # Team
-            "Rungtynės": "GP",  # Games
-            "Pergalės": "W",  # Wins
-            "Pralaimėjimai": "L",  # Losses
-            "Taškai": "PTS",  # Points
-        }
-
-        df = normalize_league_columns(
-            df=df,
-            league="LKL",
-            season=season,
-            competition="LKL Lithuania",
-            column_map=column_map,
-        )
-
-        # Calculate win percentage if not present
-        if "WIN_PCT" not in df.columns and "W" in df.columns and "GP" in df.columns:
-            df["WIN_PCT"] = df["W"] / df["GP"]
-
-        return df
-
-    except Exception as e:
-        logger.error(f"Failed to fetch LKL team season stats: {e}")
-        return pd.DataFrame(
-            columns=["TEAM", "GP", "W", "L", "WIN_PCT", "PTS", "LEAGUE", "SEASON", "COMPETITION"]
-        )
-
-
-# Legacy scaffold functions (kept for backwards compatibility)
-
-
-@retry_on_error(max_attempts=3, backoff_seconds=2.0)
-@cached_dataframe
-def fetch_lkl_schedule(
-    season: str = "2024-25",
-    season_type: str = "Regular Season",
-) -> pd.DataFrame:
-    """Fetch LKL schedule (placeholder)
-
-    Note: Requires HTML/API parsing implementation. Currently returns empty
-    DataFrame with correct schema.
-
-    Args:
-        season: Season string (e.g., "2024-25")
-        season_type: Season type ("Regular Season", "Playoffs")
+        season: Season string (e.g., "2023-24")
 
     Returns:
         DataFrame with game schedule
 
     Columns:
-        - GAME_ID: Unique game identifier
-        - SEASON: Season string
-        - GAME_DATE: Game date/time
-        - HOME_TEAM_ID: Home team ID
-        - HOME_TEAM: Home team name
-        - AWAY_TEAM_ID: Away team ID
-        - AWAY_TEAM: Away team name
-        - HOME_SCORE: Home team score
-        - AWAY_SCORE: Away team score
-        - VENUE: Arena name
         - LEAGUE: "LKL"
+        - SEASON: Season string
+        - GAME_ID: FIBA game ID
+        - GAME_DATE: Game date/time
+        - HOME_TEAM: Home team name
+        - AWAY_TEAM: Away team name
+        - HOME_SCORE: Final home score (if known)
+        - AWAY_SCORE: Final away score (if known)
+        - SOURCE: "fiba_html"
 
-    TODO: Implement LKL schedule scraping
-    - Check LKL website for JSON endpoints
-    - Check network tab in browser for API calls
+    Example:
+        >>> schedule = fetch_schedule("2023-24")
+        >>> print(f"Found {len(schedule)} LKL games")
     """
-    logger.info(f"Fetching LKL schedule: {season}, {season_type}")
+    logger.info(f"Fetching {LEAGUE} schedule for season {season}")
 
-    # TODO: Implement scraping/API logic
-    logger.warning("LKL schedule fetching requires implementation. " "Returning empty DataFrame.")
+    # Load game index from CSV
+    df = load_fiba_game_index(FIBA_LEAGUE_CODE, season)
 
-    df = pd.DataFrame(
-        columns=[
-            "GAME_ID",
-            "SEASON",
-            "GAME_DATE",
-            "HOME_TEAM_ID",
-            "HOME_TEAM",
-            "AWAY_TEAM_ID",
-            "AWAY_TEAM",
-            "HOME_SCORE",
-            "AWAY_SCORE",
-            "VENUE",
-            "LEAGUE",
-        ]
-    )
+    if df.empty:
+        logger.warning(
+            f"{LEAGUE} schedule not available for {season}. "
+            f"Create game index at: data/game_indexes/{FIBA_LEAGUE_CODE}_{season.replace('-', '_')}.csv"
+        )
+        return df
 
-    df["LEAGUE"] = "LKL"
+    # Ensure standard columns
+    df = ensure_standard_columns(df, "schedule", LEAGUE, season)
 
-    logger.info(f"Fetched {len(df)} LKL games (scaffold mode)")
+    # Add metadata
+    df["SOURCE"] = "fiba_html"
+    df["HOME_TEAM_ID"] = df["HOME_TEAM"]  # Use team name as ID for now
+    df["AWAY_TEAM_ID"] = df["AWAY_TEAM"]
+
+    logger.info(f"Loaded {len(df)} {LEAGUE} games for season {season}")
     return df
+
+
+# ==============================================================================
+# Player Game (Box Scores)
+# ==============================================================================
 
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
 @cached_dataframe
-def fetch_lkl_box_score(game_id: str) -> pd.DataFrame:
-    """Fetch LKL box score for a game
+def fetch_player_game(
+    season: str = "2023-24",
+    force_refresh: bool = False,
+) -> pd.DataFrame:
+    """Fetch LKL player-game box scores for a season
 
-    Note: Requires implementation. Currently returns empty DataFrame.
+    Scrapes FIBA LiveStats HTML pages for each game in the season.
+    Uses local caching to avoid re-scraping.
 
     Args:
-        game_id: Game ID (LKL game identifier)
+        season: Season string (e.g., "2023-24")
+        force_refresh: If True, ignore cache and re-scrape all games
 
     Returns:
         DataFrame with player box scores
 
     Columns:
-        - GAME_ID: Game identifier
-        - PLAYER_ID: Player ID
-        - PLAYER_NAME: Player name
-        - TEAM_ID: Team ID
-        - TEAM: Team name
-        - MIN: Minutes played
-        - PTS: Points
-        - FGM, FGA, FG_PCT: Field goals
-        - FG3M, FG3A, FG3_PCT: 3-point field goals
-        - FTM, FTA, FT_PCT: Free throws
-        - OREB, DREB, REB: Rebounds
-        - AST: Assists
-        - STL: Steals
-        - BLK: Blocks
-        - TOV: Turnovers
-        - PF: Personal fouls
-        - PLUS_MINUS: Plus/minus
-        - LEAGUE: "LKL"
+        - LEAGUE, SEASON, GAME_ID, TEAM_ID, TEAM, PLAYER_ID, PLAYER_NAME
+        - MIN, PTS, FGM, FGA, FG_PCT, FG3M, FG3A, FG3_PCT, FTM, FTA, FT_PCT
+        - REB, OREB, DREB, AST, STL, BLK, TOV, PF
+        - SOURCE: "fiba_html"
 
-    TODO: Implement LKL box score scraping
+    Example:
+        >>> player_stats = fetch_player_game("2023-24")
+        >>> top_scorers = player_stats.nlargest(10, 'PTS')
     """
-    logger.info(f"Fetching LKL box score: {game_id}")
+    logger.info(f"Fetching {LEAGUE} player_game for season {season}")
 
-    # TODO: Implement scraping logic
-    logger.warning(
-        f"LKL box score fetching for game {game_id} requires implementation. "
-        "Returning empty DataFrame."
-    )
+    # Load schedule to get game IDs
+    schedule = fetch_schedule(season)
 
-    df = pd.DataFrame(
-        columns=[
-            "GAME_ID",
-            "PLAYER_ID",
-            "PLAYER_NAME",
-            "TEAM_ID",
-            "TEAM",
-            "MIN",
-            "PTS",
-            "FGM",
-            "FGA",
-            "FG_PCT",
-            "FG3M",
-            "FG3A",
-            "FG3_PCT",
-            "FTM",
-            "FTA",
-            "FT_PCT",
-            "OREB",
-            "DREB",
-            "REB",
-            "AST",
-            "STL",
-            "BLK",
-            "TOV",
-            "PF",
-            "PLUS_MINUS",
-            "LEAGUE",
-        ]
-    )
+    if schedule.empty:
+        logger.warning(f"No schedule available for {LEAGUE} {season}")
+        return pd.DataFrame()
 
-    df["LEAGUE"] = "LKL"
-    df["GAME_ID"] = game_id
+    # Scrape box scores for each game
+    all_player_stats = []
 
-    logger.info(f"Fetched box score: {len(df)} players (scaffold mode)")
+    for _, game_row in schedule.iterrows():
+        game_id = game_row["GAME_ID"]
+
+        try:
+            # Scrape box score (with automatic caching)
+            box_score = scrape_fiba_box_score(
+                league_code=FIBA_LEAGUE_CODE,
+                game_id=str(game_id),
+                league=LEAGUE,
+                season=season,
+                force_refresh=force_refresh,
+            )
+
+            if not box_score.empty:
+                # Add game context
+                box_score["GAME_ID"] = game_id
+                box_score["SEASON"] = season
+                box_score["LEAGUE"] = LEAGUE
+
+                # Create player IDs (team_playerName for uniqueness)
+                if "TEAM" in box_score.columns and "PLAYER_NAME" in box_score.columns:
+                    box_score["PLAYER_ID"] = (
+                        box_score["TEAM"].str[:3]
+                        + "_"
+                        + box_score["PLAYER_NAME"].str.replace(" ", "_")
+                    )
+                    box_score["TEAM_ID"] = box_score["TEAM"]  # Use team name as ID
+
+                all_player_stats.append(box_score)
+
+        except Exception as e:
+            logger.warning(f"Failed to scrape {LEAGUE} game {game_id}: {e}")
+            continue
+
+    if not all_player_stats:
+        logger.warning(f"No player stats scraped for {LEAGUE} {season}")
+        return pd.DataFrame()
+
+    # Concatenate all games
+    df = pd.concat(all_player_stats, ignore_index=True)
+
+    # Ensure standard columns
+    df = ensure_standard_columns(df, "player_game", LEAGUE, season)
+
+    logger.info(f"Scraped {len(df)} player-game records for {LEAGUE} {season}")
+    return df
+
+
+# ==============================================================================
+# Team Game (Aggregated from Player Game)
+# ==============================================================================
+
+
+@retry_on_error(max_attempts=3, backoff_seconds=2.0)
+@cached_dataframe
+def fetch_team_game(season: str = "2023-24") -> pd.DataFrame:
+    """Fetch LKL team-game box scores (aggregated from player stats)
+
+    Args:
+        season: Season string (e.g., "2023-24")
+
+    Returns:
+        DataFrame with team box scores
+
+    Columns:
+        - LEAGUE, SEASON, GAME_ID, TEAM_ID, TEAM
+        - MIN, PTS, FGM, FGA, FG_PCT, FG3M, FG3A, FG3_PCT, FTM, FTA, FT_PCT
+        - REB, OREB, DREB, AST, STL, BLK, TOV, PF
+        - SOURCE: "fiba_html_aggregated"
+
+    Example:
+        >>> team_stats = fetch_team_game("2023-24")
+        >>> high_scoring = team_stats.nlargest(10, 'PTS')
+    """
+    logger.info(f"Fetching {LEAGUE} team_game for season {season}")
+
+    # Get player-game stats
+    player_game = fetch_player_game(season)
+
+    if player_game.empty:
+        logger.warning(f"No player_game data available for {LEAGUE} {season}")
+        return pd.DataFrame()
+
+    # Aggregate by game and team
+    agg_cols = {
+        "MIN": "sum",
+        "PTS": "sum",
+        "FGM": "sum",
+        "FGA": "sum",
+        "FG3M": "sum",
+        "FG3A": "sum",
+        "FTM": "sum",
+        "FTA": "sum",
+        "REB": "sum",
+        "OREB": "sum",
+        "DREB": "sum",
+        "AST": "sum",
+        "STL": "sum",
+        "BLK": "sum",
+        "TOV": "sum",
+        "PF": "sum",
+    }
+
+    # Only aggregate columns that exist
+    agg_cols = {k: v for k, v in agg_cols.items() if k in player_game.columns}
+
+    df = player_game.groupby(["GAME_ID", "TEAM_ID", "TEAM"], as_index=False).agg(agg_cols)
+
+    # Recalculate percentages
+    if "FGM" in df.columns and "FGA" in df.columns:
+        df["FG_PCT"] = (df["FGM"] / df["FGA"].replace(0, 1) * 100).round(1)
+    if "FG3M" in df.columns and "FG3A" in df.columns:
+        df["FG3_PCT"] = (df["FG3M"] / df["FG3A"].replace(0, 1) * 100).round(1)
+    if "FTM" in df.columns and "FTA" in df.columns:
+        df["FT_PCT"] = (df["FTM"] / df["FTA"].replace(0, 1) * 100).round(1)
+
+    # Add standard columns
+    df["LEAGUE"] = LEAGUE
+    df["SEASON"] = season
+    df = ensure_standard_columns(df, "team_game", LEAGUE, season)
+    df["SOURCE"] = "fiba_html_aggregated"
+
+    logger.info(f"Aggregated {len(df)} team-game records for {LEAGUE} {season}")
+    return df
+
+
+# ==============================================================================
+# Play-by-Play
+# ==============================================================================
+
+
+@retry_on_error(max_attempts=3, backoff_seconds=2.0)
+@cached_dataframe
+def fetch_pbp(
+    season: str = "2023-24",
+    force_refresh: bool = False,
+) -> pd.DataFrame:
+    """Fetch LKL play-by-play events for a season
+
+    Scrapes FIBA LiveStats HTML pages for each game.
+    Uses local caching to avoid re-scraping.
+
+    Args:
+        season: Season string (e.g., "2023-24")
+        force_refresh: If True, ignore cache and re-scrape all games
+
+    Returns:
+        DataFrame with play-by-play events
+
+    Columns:
+        - LEAGUE, SEASON, GAME_ID, EVENT_NUM, PERIOD, CLOCK
+        - TEAM, PLAYER, EVENT_TYPE, DESCRIPTION
+        - SCORE_HOME, SCORE_AWAY
+        - SOURCE: "fiba_html"
+
+    Example:
+        >>> pbp = fetch_pbp("2023-24")
+        >>> three_pointers = pbp[pbp['EVENT_TYPE'] == '3PT_SHOT']
+    """
+    logger.info(f"Fetching {LEAGUE} pbp for season {season}")
+
+    # Load schedule to get game IDs
+    schedule = fetch_schedule(season)
+
+    if schedule.empty:
+        logger.warning(f"No schedule available for {LEAGUE} {season}")
+        return pd.DataFrame()
+
+    # Scrape PBP for each game
+    all_pbp = []
+
+    for _, game_row in schedule.iterrows():
+        game_id = game_row["GAME_ID"]
+
+        try:
+            # Scrape play-by-play (with automatic caching)
+            pbp = scrape_fiba_play_by_play(
+                league_code=FIBA_LEAGUE_CODE,
+                game_id=str(game_id),
+                league=LEAGUE,
+                season=season,
+                force_refresh=force_refresh,
+            )
+
+            if not pbp.empty:
+                all_pbp.append(pbp)
+
+        except Exception as e:
+            logger.warning(f"Failed to scrape {LEAGUE} PBP for game {game_id}: {e}")
+            continue
+
+    if not all_pbp:
+        logger.warning(f"No PBP events scraped for {LEAGUE} {season}")
+        return pd.DataFrame()
+
+    # Concatenate all games
+    df = pd.concat(all_pbp, ignore_index=True)
+
+    # Ensure standard columns
+    df = ensure_standard_columns(df, "pbp", LEAGUE, season)
+
+    logger.info(f"Scraped {len(df)} PBP events for {LEAGUE} {season}")
+    return df
+
+
+# ==============================================================================
+# Season Aggregates
+# ==============================================================================
+
+
+@retry_on_error(max_attempts=3, backoff_seconds=2.0)
+@cached_dataframe
+def fetch_team_season(season: str = "2023-24") -> pd.DataFrame:
+    """Fetch LKL team season aggregates (from team_game)
+
+    Args:
+        season: Season string (e.g., "2023-24")
+
+    Returns:
+        DataFrame with team season statistics
+
+    Columns:
+        - LEAGUE, SEASON, TEAM_ID, TEAM
+        - GP: Games played
+        - MIN, PTS, FGM, FGA, FG_PCT, etc.
+        - PTS_PG: Points per game
+        - REB_PG: Rebounds per game
+        - AST_PG: Assists per game
+
+    Example:
+        >>> team_season = fetch_team_season("2023-24")
+        >>> standings = team_season.nlargest(10, 'PTS_PG')
+    """
+    logger.info(f"Fetching {LEAGUE} team_season for season {season}")
+
+    # Get team-game stats
+    team_game = fetch_team_game(season)
+
+    if team_game.empty:
+        logger.warning(f"No team_game data available for {LEAGUE} {season}")
+        return pd.DataFrame()
+
+    # Aggregate by team
+    agg_dict = {
+        "GAME_ID": "count",  # Games played
+        "MIN": "sum",
+        "PTS": "sum",
+        "FGM": "sum",
+        "FGA": "sum",
+        "FG3M": "sum",
+        "FG3A": "sum",
+        "FTM": "sum",
+        "FTA": "sum",
+        "REB": "sum",
+        "OREB": "sum",
+        "DREB": "sum",
+        "AST": "sum",
+        "STL": "sum",
+        "BLK": "sum",
+        "TOV": "sum",
+        "PF": "sum",
+    }
+
+    # Only aggregate columns that exist
+    agg_dict = {k: v for k, v in agg_dict.items() if k in team_game.columns or k == "GAME_ID"}
+
+    df = team_game.groupby(["TEAM_ID", "TEAM"], as_index=False).agg(agg_dict)
+
+    # Rename GAME_ID count to GP
+    df.rename(columns={"GAME_ID": "GP"}, inplace=True)
+
+    # Calculate per-game stats
+    gp = df["GP"].replace(0, 1)  # Avoid division by zero
+    if "PTS" in df.columns:
+        df["PTS_PG"] = (df["PTS"] / gp).round(1)
+    if "REB" in df.columns:
+        df["REB_PG"] = (df["REB"] / gp).round(1)
+    if "AST" in df.columns:
+        df["AST_PG"] = (df["AST"] / gp).round(1)
+
+    # Recalculate percentages
+    if "FGM" in df.columns and "FGA" in df.columns:
+        df["FG_PCT"] = (df["FGM"] / df["FGA"].replace(0, 1) * 100).round(1)
+    if "FG3M" in df.columns and "FG3A" in df.columns:
+        df["FG3_PCT"] = (df["FG3M"] / df["FG3A"].replace(0, 1) * 100).round(1)
+    if "FTM" in df.columns and "FTA" in df.columns:
+        df["FT_PCT"] = (df["FTM"] / df["FTA"].replace(0, 1) * 100).round(1)
+
+    # Add standard columns
+    df["LEAGUE"] = LEAGUE
+    df["SEASON"] = season
+    df = ensure_standard_columns(df, "team_season", LEAGUE, season)
+
+    logger.info(f"Aggregated {len(df)} teams for {LEAGUE} {season}")
     return df
 
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
 @cached_dataframe
-def fetch_lkl_play_by_play(game_id: str) -> pd.DataFrame:
-    """Fetch LKL play-by-play data
-
-    Note: Limited availability. LKL does not publish detailed play-by-play
-    publicly. This function returns empty DataFrame.
+def fetch_player_season(season: str = "2023-24") -> pd.DataFrame:
+    """Fetch LKL player season aggregates (from player_game)
 
     Args:
-        game_id: Game ID
+        season: Season string (e.g., "2023-24")
 
     Returns:
-        Empty DataFrame (PBP limited availability)
+        DataFrame with player season statistics
 
-    Implementation Notes:
-        - LKL website may have basic play logs (requires scraping)
-        - No known public API for play-by-play data
+    Columns:
+        - LEAGUE, SEASON, PLAYER_ID, PLAYER_NAME, TEAM_ID, TEAM
+        - GP: Games played
+        - MIN, PTS, FGM, FGA, FG_PCT, etc.
+        - PTS_PG: Points per game
+        - REB_PG: Rebounds per game
+        - AST_PG: Assists per game
+
+    Example:
+        >>> player_season = fetch_player_season("2023-24")
+        >>> top_scorers = player_season.nlargest(10, 'PTS_PG')
     """
-    logger.warning(
-        f"LKL play-by-play for game {game_id} has limited availability. " "Not published publicly."
+    logger.info(f"Fetching {LEAGUE} player_season for season {season}")
+
+    # Get player-game stats
+    player_game = fetch_player_game(season)
+
+    if player_game.empty:
+        logger.warning(f"No player_game data available for {LEAGUE} {season}")
+        return pd.DataFrame()
+
+    # Aggregate by player
+    agg_dict = {
+        "GAME_ID": "count",  # Games played
+        "MIN": "sum",
+        "PTS": "sum",
+        "FGM": "sum",
+        "FGA": "sum",
+        "FG3M": "sum",
+        "FG3A": "sum",
+        "FTM": "sum",
+        "FTA": "sum",
+        "REB": "sum",
+        "OREB": "sum",
+        "DREB": "sum",
+        "AST": "sum",
+        "STL": "sum",
+        "BLK": "sum",
+        "TOV": "sum",
+        "PF": "sum",
+    }
+
+    # Only aggregate columns that exist
+    agg_dict = {k: v for k, v in agg_dict.items() if k in player_game.columns or k == "GAME_ID"}
+
+    df = player_game.groupby(["PLAYER_ID", "PLAYER_NAME", "TEAM_ID", "TEAM"], as_index=False).agg(
+        agg_dict
     )
 
-    df = pd.DataFrame(
-        columns=[
-            "GAME_ID",
-            "EVENT_NUM",
-            "EVENT_TYPE",
-            "PERIOD",
-            "CLOCK",
-            "DESCRIPTION",
-            "LEAGUE",
-        ]
-    )
+    # Rename GAME_ID count to GP
+    df.rename(columns={"GAME_ID": "GP"}, inplace=True)
 
-    df["LEAGUE"] = "LKL"
-    df["GAME_ID"] = game_id
+    # Calculate per-game stats
+    gp = df["GP"].replace(0, 1)  # Avoid division by zero
+    if "PTS" in df.columns:
+        df["PTS_PG"] = (df["PTS"] / gp).round(1)
+    if "MIN" in df.columns:
+        df["MIN_PG"] = (df["MIN"] / gp).round(1)
+    if "REB" in df.columns:
+        df["REB_PG"] = (df["REB"] / gp).round(1)
+    if "AST" in df.columns:
+        df["AST_PG"] = (df["AST"] / gp).round(1)
 
+    # Recalculate percentages
+    if "FGM" in df.columns and "FGA" in df.columns:
+        df["FG_PCT"] = (df["FGM"] / df["FGA"].replace(0, 1) * 100).round(1)
+    if "FG3M" in df.columns and "FG3A" in df.columns:
+        df["FG3_PCT"] = (df["FG3M"] / df["FG3A"].replace(0, 1) * 100).round(1)
+    if "FTM" in df.columns and "FTA" in df.columns:
+        df["FT_PCT"] = (df["FTM"] / df["FTA"].replace(0, 1) * 100).round(1)
+
+    # Add standard columns
+    df["LEAGUE"] = LEAGUE
+    df["SEASON"] = season
+    df = ensure_standard_columns(df, "player_season", LEAGUE, season)
+
+    logger.info(f"Aggregated {len(df)} players for {LEAGUE} {season}")
     return df
 
 
-@retry_on_error(max_attempts=3, backoff_seconds=2.0)
-@cached_dataframe
-def fetch_lkl_shot_chart(game_id: str) -> pd.DataFrame:
-    """Fetch LKL shot chart data
+# ==============================================================================
+# Backwards Compatibility (Old Function Names)
+# ==============================================================================
 
-    Note: Shot chart data has limited availability. Not published publicly.
-    This function returns empty DataFrame.
 
-    Args:
-        game_id: Game ID
+def fetch_lkl_schedule(season: str = "2023-24") -> pd.DataFrame:
+    """Backwards compatibility wrapper for fetch_schedule"""
+    return fetch_schedule(season)
 
-    Returns:
-        Empty DataFrame (shot data limited availability)
 
-    Implementation Notes:
-        - LKL website may have basic shot location data (requires research)
-        - No known public API for shot chart data
-    """
-    logger.warning(
-        f"LKL shot chart for game {game_id} has limited availability. " "Not published publicly."
-    )
+def fetch_lkl_player_game(season: str = "2023-24") -> pd.DataFrame:
+    """Backwards compatibility wrapper for fetch_player_game"""
+    return fetch_player_game(season)
 
-    df = pd.DataFrame(
-        columns=[
-            "GAME_ID",
-            "PLAYER_ID",
-            "PLAYER_NAME",
-            "TEAM_ID",
-            "TEAM",
-            "SHOT_TYPE",
-            "SHOT_DISTANCE",
-            "LOC_X",
-            "LOC_Y",
-            "SHOT_MADE",
-            "PERIOD",
-            "LEAGUE",
-        ]
-    )
 
-    df["LEAGUE"] = "LKL"
-    df["GAME_ID"] = game_id
+def fetch_lkl_team_game(season: str = "2023-24") -> pd.DataFrame:
+    """Backwards compatibility wrapper for fetch_team_game"""
+    return fetch_team_game(season)
 
-    return df
+
+def fetch_lkl_pbp(season: str = "2023-24") -> pd.DataFrame:
+    """Backwards compatibility wrapper for fetch_pbp"""
+    return fetch_pbp(season)
+
+
+def fetch_lkl_player_season(season: str = "2023-24") -> pd.DataFrame:
+    """Backwards compatibility wrapper for fetch_player_season"""
+    return fetch_player_season(season)
+
+
+def fetch_lkl_team_season(season: str = "2023-24") -> pd.DataFrame:
+    """Backwards compatibility wrapper for fetch_team_season"""
+    return fetch_team_season(season)

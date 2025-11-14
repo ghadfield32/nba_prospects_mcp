@@ -1,12 +1,12 @@
-"""U SPORTS (Canada) Basketball Fetcher
+"""CCAA (Canadian Collegiate Athletic Association) Basketball Fetcher
 
-U SPORTS (formerly CIS) is Canada's national sport governing body for university athletics.
+CCAA governs Canadian college basketball (similar to NJCAA in the US).
 Uses the PrestoSports platform for stats.
 
 Key Features:
-- Canadian university basketball (equivalent to NCAA)
+- Canadian college basketball (two-year colleges)
 - PrestoSports platform infrastructure
-- Multiple conferences across Canada (OUA, Canada West, AUS, RSEQ)
+- Provincial and regional conferences
 
 Data Granularities:
 - schedule: ⚠️ Limited (PrestoSports scaffold)
@@ -17,7 +17,7 @@ Data Granularities:
 - player_season: ✅ Available (PrestoSports season leaders)
 - team_season: ✅ Available (via generic aggregation)
 
-Data Source: https://universitysport.prestosports.com/sports/mbkb/
+Data Source: https://ccaa.prestosports.com/sports/mbkb/
 
 Implementation Status:
 - Season stats via PrestoSports platform (functional)
@@ -44,8 +44,8 @@ from .prestosports import (
 logger = logging.getLogger(__name__)
 
 # League identifier in PrestoSports config
-PRESTOSPORTS_LEAGUE_CODE = "U-SPORTS"
-LEAGUE_CODE = "USPORTS"
+PRESTOSPORTS_LEAGUE_CODE = "CCAA"
+LEAGUE_CODE = "CCAA"
 
 
 # =============================================================================
@@ -55,12 +55,12 @@ LEAGUE_CODE = "USPORTS"
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
 @cached_dataframe
-def fetch_schedule(season: str = "2024-25", conference: str | None = None) -> pd.DataFrame:
-    """Fetch U SPORTS schedule
+def fetch_schedule(season: str = "2024-25", division: str | None = None) -> pd.DataFrame:
+    """Fetch CCAA schedule
 
     Args:
         season: Season string (e.g., "2024-25")
-        conference: Optional conference filter
+        division: Optional division filter
 
     Returns:
         DataFrame with game schedule
@@ -69,11 +69,11 @@ def fetch_schedule(season: str = "2024-25", conference: str | None = None) -> pd
         - GAME_ID, SEASON, GAME_DATE
         - HOME_TEAM_ID, HOME_TEAM, AWAY_TEAM_ID, AWAY_TEAM
         - HOME_SCORE, AWAY_SCORE, VENUE
-        - LEAGUE: "USPORTS"
+        - LEAGUE: "CCAA"
     """
-    logger.info(f"Fetching {LEAGUE_CODE} schedule: {season}, conference={conference}")
+    logger.info(f"Fetching {LEAGUE_CODE} schedule: {season}, division={division}")
 
-    df = fetch_prestosports_schedule(PRESTOSPORTS_LEAGUE_CODE, season, division=conference)
+    df = fetch_prestosports_schedule(PRESTOSPORTS_LEAGUE_CODE, season, division=division)
 
     # Standardize league code
     if not df.empty:
@@ -85,7 +85,7 @@ def fetch_schedule(season: str = "2024-25", conference: str | None = None) -> pd
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
 @cached_dataframe
 def fetch_player_game(season: str = "2024-25", game_id: str | None = None) -> pd.DataFrame:
-    """Fetch U SPORTS player game stats
+    """Fetch CCAA player game stats
 
     Note: Currently scaffold. Requires PrestoSports box score scraping.
 
@@ -115,7 +115,7 @@ def fetch_player_game(season: str = "2024-25", game_id: str | None = None) -> pd
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
 @cached_dataframe
 def fetch_team_game(season: str = "2024-25", game_id: str | None = None) -> pd.DataFrame:
-    """Fetch U SPORTS team game stats
+    """Fetch CCAA team game stats
 
     Note: Aggregated from player game stats (scaffold)
 
@@ -138,7 +138,7 @@ def fetch_team_game(season: str = "2024-25", game_id: str | None = None) -> pd.D
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
 @cached_dataframe
 def fetch_pbp(season: str = "2024-25", game_id: str | None = None) -> pd.DataFrame:
-    """Fetch U SPORTS play-by-play (UNAVAILABLE)
+    """Fetch CCAA play-by-play (UNAVAILABLE)
 
     PrestoSports does not provide detailed play-by-play data.
 
@@ -166,17 +166,17 @@ def fetch_pbp(season: str = "2024-25", game_id: str | None = None) -> pd.DataFra
 def fetch_player_season(
     season: str = "2024-25",
     stat_category: str = "points",
-    conference: str | None = None,
+    division: str | None = None,
     limit: int | None = None,
 ) -> pd.DataFrame:
-    """Fetch U SPORTS player season stats
+    """Fetch CCAA player season stats
 
     **IMPLEMENTED**: Uses PrestoSports season leaders infrastructure.
 
     Args:
         season: Season string (e.g., "2024-25")
         stat_category: Stat category (scoring, rebounding, assists, etc.)
-        conference: Optional conference filter
+        division: Optional division filter
         limit: Optional limit on results
 
     Returns:
@@ -185,18 +185,18 @@ def fetch_player_season(
     Columns:
         - PLAYER_ID, PLAYER_NAME, TEAM, YEAR, GP
         - Stats depend on category (PTS, REB, AST, etc.)
-        - LEAGUE: "USPORTS"
+        - LEAGUE: "CCAA"
     """
     logger.info(
         f"Fetching {LEAGUE_CODE} player season: {season}, stat={stat_category}, "
-        f"conference={conference}, limit={limit}"
+        f"division={division}, limit={limit}"
     )
 
     df = fetch_prestosports_season_leaders(
         PRESTOSPORTS_LEAGUE_CODE,
         season=season,
         stat_category=stat_category,
-        division=conference,
+        division=division,
         limit=limit,
     )
 
@@ -211,19 +211,19 @@ def fetch_player_season(
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
 @cached_dataframe
-def fetch_team_season(season: str = "2024-25", conference: str | None = None) -> pd.DataFrame:
-    """Fetch U SPORTS team season stats
+def fetch_team_season(season: str = "2024-25", division: str | None = None) -> pd.DataFrame:
+    """Fetch CCAA team season stats
 
     Note: Uses generic aggregation from player_game
 
     Args:
         season: Season string
-        conference: Optional conference filter
+        division: Optional division filter
 
     Returns:
         DataFrame with team season stats
     """
-    logger.info(f"Fetching {LEAGUE_CODE} team season: {season}, conference={conference}")
+    logger.info(f"Fetching {LEAGUE_CODE} team season: {season}, division={division}")
 
     # Would aggregate from player_game
     logger.warning(f"{LEAGUE_CODE} team_season uses generic aggregation")
@@ -236,7 +236,7 @@ def fetch_team_season(season: str = "2024-25", conference: str | None = None) ->
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
 @cached_dataframe
 def fetch_shots(season: str = "2024-25", game_id: str | None = None) -> pd.DataFrame:
-    """Fetch U SPORTS shot chart (UNAVAILABLE)
+    """Fetch CCAA shot chart (UNAVAILABLE)
 
     PrestoSports does not provide shot coordinate data.
 

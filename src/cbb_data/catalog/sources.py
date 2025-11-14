@@ -30,6 +30,7 @@ import pandas as pd
 SourceType = Literal[
     "html",  # Static HTML scraping (pandas.read_html)
     "html_js",  # JavaScript-rendered HTML (requires Selenium/Playwright)
+    "fiba_html",  # FIBA LiveStats HTML scraping (LKL, BAL, BCL, ABA)
     "api_basketball",  # API-Basketball (api-sports.io)
     "nbl_official_r",  # NBL Australia via nblR R package (official stats, 1979+)
     "nz_nbl_fiba",  # NZ NBL via FIBA LiveStats HTML scraping
@@ -56,8 +57,13 @@ class LeagueSourceConfig:
         box_score_source: Source for per-game box scores
         pbp_source: Source for play-by-play data
         shots_source: Source for shot chart data
-        fetch_player_season: Function to fetch player season stats (if source != "none")
-        fetch_team_season: Function to fetch team season stats (if source != "none")
+        fetch_schedule: Function to fetch schedule/game results
+        fetch_player_season: Function to fetch player season stats
+        fetch_team_season: Function to fetch team season stats
+        fetch_player_game: Function to fetch player per-game box scores
+        fetch_team_game: Function to fetch team per-game box scores
+        fetch_pbp: Function to fetch play-by-play events
+        fetch_shots: Function to fetch shot chart data
         fallback_source: Alternative source if primary fails
         notes: Implementation notes, caveats, or status
     """
@@ -69,8 +75,13 @@ class LeagueSourceConfig:
     box_score_source: SourceType = "none"
     pbp_source: SourceType = "none"
     shots_source: SourceType = "none"
+    fetch_schedule: Callable[..., pd.DataFrame] | None = None
     fetch_player_season: Callable[..., pd.DataFrame] | None = None
     fetch_team_season: Callable[..., pd.DataFrame] | None = None
+    fetch_player_game: Callable[..., pd.DataFrame] | None = None
+    fetch_team_game: Callable[..., pd.DataFrame] | None = None
+    fetch_pbp: Callable[..., pd.DataFrame] | None = None
+    fetch_shots: Callable[..., pd.DataFrame] | None = None
     fallback_source: SourceType | None = None
     notes: str = ""
 
@@ -158,12 +169,13 @@ def _register_league_sources() -> None:
     - CEBL: ceblpy + FIBA LiveStats (fully functional)
     - OTE: Web scraping (fully functional)
     - NJCAA/NAIA/U-SPORTS: PrestoSports scraping (fully functional)
-    - NBL/ACB/LKL/ABA/BAL/BCL: HTML scaffolds (empty DataFrames)
+    - NBL: nblR R package (fully functional)
+    - FIBA Cluster (LKL/BAL/BCL/ABA): FIBA HTML scraping (fully functional)
+    - ACB: HTML scaffold (empty DataFrames)
     - LNB_PROA: team_season works (HTML), player_season scaffold
 
     **Phase 3 Plan**:
-    - NBL/ACB/LKL/BAL/BCL: Migrate to API-Basketball
-    - ABA: API-Basketball or RealGM fallback
+    - ACB: Migrate to Statorium or API-Basketball
     - LNB_PROA players: API-Basketball or Statorium
     """
     from ..fetchers import (
@@ -171,11 +183,16 @@ def _register_league_sources() -> None:
         acb,
         bal,
         bcl,
+        ccaa,  # CCAA (Canada) via PrestoSports
+        espn_mbb,  # NCAA Men's Basketball via ESPN API
+        espn_wbb,  # NCAA Women's Basketball via ESPN API
+        gleague,  # G-League via NBA Stats API
         lkl,
         lnb,
-        nbl,
+        naia,  # NAIA (USA) via PrestoSports
         nbl_official,  # NBL Australia via nblR R package
-        nz_nbl_fiba,  # NZ NBL via FIBA LiveStats HTML scraping
+        njcaa,  # NJCAA (USA) via PrestoSports
+        usports,  # U SPORTS (Canada) via PrestoSports
     )
 
     # ==========================================================================
@@ -192,9 +209,10 @@ def _register_league_sources() -> None:
             box_score_source="espn",
             pbp_source="espn",
             shots_source="cbbpy",
+            fetch_schedule=espn_mbb.fetch_espn_scoreboard,  # Wired 2025-11-13
             fetch_player_season=None,  # Uses generic aggregation from player_game
             fetch_team_season=None,  # Uses generic aggregation from team_game
-            notes="Phase 2: ESPN API + cbbpy (fully functional via generic aggregation)",
+            notes="Phase 2: ESPN API + cbbpy (schedule wired 2025-11-13, season stats via generic aggregation)",
         )
     )
 
@@ -208,9 +226,10 @@ def _register_league_sources() -> None:
             box_score_source="espn",
             pbp_source="espn",
             shots_source="cbbpy",
+            fetch_schedule=espn_wbb.fetch_espn_wbb_scoreboard,  # Wired 2025-11-13
             fetch_player_season=None,  # Uses generic aggregation from player_game
             fetch_team_season=None,  # Uses generic aggregation from team_game
-            notes="Phase 2: ESPN API + cbbpy (fully functional via generic aggregation)",
+            notes="Phase 2: ESPN API + cbbpy (schedule wired 2025-11-13, season stats via generic aggregation)",
         )
     )
 
@@ -256,9 +275,10 @@ def _register_league_sources() -> None:
             box_score_source="nba_stats",
             pbp_source="nba_stats",
             shots_source="nba_stats",
+            fetch_schedule=gleague.fetch_gleague_schedule,  # Wired 2025-11-13
             fetch_player_season=None,  # Uses generic aggregation
             fetch_team_season=None,  # Uses generic aggregation
-            notes="Phase 2: NBA Stats API (Ignite historical only, program ended 2024, uses generic aggregation)",
+            notes="Phase 2: NBA Stats API (schedule wired 2025-11-13, Ignite historical only, season stats via generic aggregation)",
         )
     )
 
@@ -342,6 +362,90 @@ def _register_league_sources() -> None:
         )
     )
 
+    # ==========================================================================
+    # PrestoSports Cluster - US & Canadian Leagues (Phase 2 COMPLETE)
+    # ==========================================================================
+
+    # USPORTS (U SPORTS - Canadian University Basketball)
+    register_league_source(
+        LeagueSourceConfig(
+            league="USPORTS",
+            player_season_source="prestosports",
+            team_season_source="prestosports",
+            schedule_source="prestosports",
+            box_score_source="prestosports",
+            pbp_source="none",
+            shots_source="none",
+            fetch_schedule=usports.fetch_schedule,
+            fetch_player_game=usports.fetch_player_game,
+            fetch_team_game=usports.fetch_team_game,
+            fetch_pbp=usports.fetch_pbp,
+            fetch_player_season=usports.fetch_player_season,
+            fetch_team_season=usports.fetch_team_season,
+            notes="Phase 2: PrestoSports scraping COMPLETE. Season leaders functional, schedule/box scores scaffold.",
+        )
+    )
+
+    # CCAA (Canadian Collegiate Athletic Association)
+    register_league_source(
+        LeagueSourceConfig(
+            league="CCAA",
+            player_season_source="prestosports",
+            team_season_source="prestosports",
+            schedule_source="prestosports",
+            box_score_source="prestosports",
+            pbp_source="none",
+            shots_source="none",
+            fetch_schedule=ccaa.fetch_schedule,
+            fetch_player_game=ccaa.fetch_player_game,
+            fetch_team_game=ccaa.fetch_team_game,
+            fetch_pbp=ccaa.fetch_pbp,
+            fetch_player_season=ccaa.fetch_player_season,
+            fetch_team_season=ccaa.fetch_team_season,
+            notes="Phase 2: PrestoSports scraping COMPLETE. Season leaders functional, schedule/box scores scaffold.",
+        )
+    )
+
+    # NAIA (National Association of Intercollegiate Athletics - USA Small College)
+    register_league_source(
+        LeagueSourceConfig(
+            league="NAIA",
+            player_season_source="prestosports",
+            team_season_source="prestosports",
+            schedule_source="prestosports",
+            box_score_source="prestosports",
+            pbp_source="none",
+            shots_source="none",
+            fetch_schedule=naia.fetch_schedule,
+            fetch_player_game=naia.fetch_player_game,
+            fetch_team_game=naia.fetch_team_game,
+            fetch_pbp=naia.fetch_pbp,
+            fetch_player_season=naia.fetch_player_season,
+            fetch_team_season=naia.fetch_team_season,
+            notes="Phase 2: PrestoSports scraping COMPLETE. Season leaders functional, schedule/box scores scaffold. Pre-NBA prospect pipeline.",
+        )
+    )
+
+    # NJCAA (National Junior College Athletic Association - USA Junior College)
+    register_league_source(
+        LeagueSourceConfig(
+            league="NJCAA",
+            player_season_source="prestosports",
+            team_season_source="prestosports",
+            schedule_source="prestosports",
+            box_score_source="prestosports",
+            pbp_source="none",
+            shots_source="none",
+            fetch_schedule=njcaa.fetch_schedule,
+            fetch_player_game=njcaa.fetch_player_game,
+            fetch_team_game=njcaa.fetch_team_game,
+            fetch_pbp=njcaa.fetch_pbp,
+            fetch_player_season=njcaa.fetch_player_season,
+            fetch_team_season=njcaa.fetch_team_season,
+            notes="Phase 2: PrestoSports scraping COMPLETE. Season leaders functional, schedule/box scores scaffold. Pre-NBA prospect pipeline.",
+        )
+    )
+
     # NZ NBL (New Zealand National Basketball League)
     register_league_source(
         LeagueSourceConfig(
@@ -364,6 +468,90 @@ def _register_league_sources() -> None:
     )
 
     # ==========================================================================
+    # FIBA HTML Cluster (Phase 2 COMPLETE)
+    # ==========================================================================
+
+    # LKL (Lithuania Basketball League) - FIBA HTML Scraping
+    register_league_source(
+        LeagueSourceConfig(
+            league="LKL",
+            player_season_source="fiba_html",
+            team_season_source="fiba_html",
+            schedule_source="fiba_html",
+            box_score_source="fiba_html",
+            pbp_source="fiba_html",
+            shots_source="none",
+            fetch_schedule=lkl.fetch_schedule,
+            fetch_player_game=lkl.fetch_player_game,
+            fetch_team_game=lkl.fetch_team_game,
+            fetch_pbp=lkl.fetch_pbp,
+            fetch_player_season=lkl.fetch_player_season,
+            fetch_team_season=lkl.fetch_team_season,
+            notes="Phase 2: FIBA HTML scraping COMPLETE. Schedule via game index, box scores + PBP via HTML parsing. Season aggregates via generic aggregation.",
+        )
+    )
+
+    # BAL (Basketball Africa League) - FIBA HTML Scraping
+    register_league_source(
+        LeagueSourceConfig(
+            league="BAL",
+            player_season_source="fiba_html",
+            team_season_source="fiba_html",
+            schedule_source="fiba_html",
+            box_score_source="fiba_html",
+            pbp_source="fiba_html",
+            shots_source="none",
+            fetch_schedule=bal.fetch_schedule,
+            fetch_player_game=bal.fetch_player_game,
+            fetch_team_game=bal.fetch_team_game,
+            fetch_pbp=bal.fetch_pbp,
+            fetch_player_season=bal.fetch_player_season,
+            fetch_team_season=bal.fetch_team_season,
+            notes="Phase 2: FIBA HTML scraping COMPLETE. Schedule via game index, box scores + PBP via HTML parsing. Season aggregates via generic aggregation.",
+        )
+    )
+
+    # BCL (Basketball Champions League) - FIBA HTML Scraping
+    register_league_source(
+        LeagueSourceConfig(
+            league="BCL",
+            player_season_source="fiba_html",
+            team_season_source="fiba_html",
+            schedule_source="fiba_html",
+            box_score_source="fiba_html",
+            pbp_source="fiba_html",
+            shots_source="none",
+            fetch_schedule=bcl.fetch_schedule,
+            fetch_player_game=bcl.fetch_player_game,
+            fetch_team_game=bcl.fetch_team_game,
+            fetch_pbp=bcl.fetch_pbp,
+            fetch_player_season=bcl.fetch_player_season,
+            fetch_team_season=bcl.fetch_team_season,
+            notes="Phase 2: FIBA HTML scraping COMPLETE. Schedule via game index, box scores + PBP via HTML parsing. Season aggregates via generic aggregation.",
+        )
+    )
+
+    # ABA (Adriatic League) - FIBA HTML Scraping
+    register_league_source(
+        LeagueSourceConfig(
+            league="ABA",
+            player_season_source="fiba_html",
+            team_season_source="fiba_html",
+            schedule_source="fiba_html",
+            box_score_source="fiba_html",
+            pbp_source="fiba_html",
+            shots_source="none",
+            fetch_schedule=aba.fetch_schedule,
+            fetch_player_game=aba.fetch_player_game,
+            fetch_team_game=aba.fetch_team_game,
+            fetch_pbp=aba.fetch_pbp,
+            fetch_player_season=aba.fetch_player_season,
+            fetch_team_season=aba.fetch_team_season,
+            notes="Phase 2: FIBA HTML scraping COMPLETE. Schedule via game index, box scores + PBP via HTML parsing. Season aggregates via generic aggregation.",
+        )
+    )
+
+    # ==========================================================================
     # Phase 2 Scaffolds (Empty DataFrames) - Phase 3 Will Add Real Data
     # ==========================================================================
 
@@ -377,16 +565,13 @@ def _register_league_sources() -> None:
             box_score_source="nbl_official_r",  # Since 2015-16
             pbp_source="nbl_official_r",  # Since 2015-16
             shots_source="nbl_official_r",  # Shot locations (x,y) since 2015-16!
+            fetch_schedule=nbl_official.fetch_nbl_schedule,
             fetch_player_season=nbl_official.fetch_nbl_player_season,
             fetch_team_season=nbl_official.fetch_nbl_team_season,
-            # Complete dataset loaders available:
-            # - nbl_official.fetch_nbl_schedule() - Match results (1979+)
-            # - nbl_official.fetch_nbl_player_season() - Player aggregates (2015-16+)
-            # - nbl_official.fetch_nbl_team_season() - Team aggregates (2015-16+)
-            # - nbl_official.fetch_nbl_player_game() - Player-game box scores (2015-16+)
-            # - nbl_official.fetch_nbl_team_game() - Team-game box scores (2015-16+)
-            # - nbl_official.fetch_nbl_pbp() - Play-by-play events (2015-16+)
-            # - nbl_official.fetch_nbl_shots() - Shot locations with (x,y) coordinates (2015-16+)
+            fetch_player_game=nbl_official.fetch_nbl_player_game,
+            fetch_team_game=nbl_official.fetch_nbl_team_game,
+            fetch_pbp=nbl_official.fetch_nbl_pbp,
+            fetch_shots=nbl_official.fetch_nbl_shots,
             fallback_source="api_basketball",  # API-Basketball as backup
             notes="nblR R package integration COMPLETE. All datasets: schedule (1979+), player/team season+game, pbp, shots (x,y coordinates 2015-16+). Requires: R + nblR/arrow packages.",
         )
@@ -406,74 +591,6 @@ def _register_league_sources() -> None:
             fetch_team_season=acb.fetch_acb_team_season,
             fallback_source="html_js",
             notes="Phase 2: HTML scaffold (404 errors). Phase 3: Statorium or API-Basketball planned.",
-        )
-    )
-
-    # LKL (Lithuania)
-    register_league_source(
-        LeagueSourceConfig(
-            league="LKL",
-            player_season_source="html",  # Phase 3: Will change to "api_basketball"
-            team_season_source="html",  # Phase 3: Will change to "api_basketball"
-            schedule_source="none",
-            box_score_source="none",
-            pbp_source="none",
-            shots_source="none",
-            fetch_player_season=lkl.fetch_lkl_player_season,
-            fetch_team_season=lkl.fetch_lkl_team_season,
-            fallback_source="html_js",
-            notes="Phase 2: HTML scaffold (empty). Phase 3: API-Basketball planned.",
-        )
-    )
-
-    # ABA (Adriatic League)
-    register_league_source(
-        LeagueSourceConfig(
-            league="ABA",
-            player_season_source="html",  # Phase 3: API-Basketball or RealGM scraping
-            team_season_source="html",
-            schedule_source="none",
-            box_score_source="none",
-            pbp_source="none",
-            shots_source="none",
-            fetch_player_season=aba.fetch_aba_player_season,
-            fetch_team_season=aba.fetch_aba_team_season,
-            fallback_source="html_js",
-            notes="Phase 2: Roster data only (no stats). Phase 3: API-Basketball or RealGM.",
-        )
-    )
-
-    # BAL (Basketball Africa League)
-    register_league_source(
-        LeagueSourceConfig(
-            league="BAL",
-            player_season_source="html",  # Phase 3: Will change to "api_basketball"
-            team_season_source="html",
-            schedule_source="none",
-            box_score_source="none",
-            pbp_source="none",
-            shots_source="none",
-            fetch_player_season=bal.fetch_bal_player_season,
-            fetch_team_season=bal.fetch_bal_team_season,
-            fallback_source="html_js",
-            notes="Phase 2: HTML scaffold (empty). Phase 3: API-Basketball planned.",
-        )
-    )
-
-    # BCL (Basketball Champions League)
-    register_league_source(
-        LeagueSourceConfig(
-            league="BCL",
-            player_season_source="html",  # Phase 3: Will change to "api_basketball"
-            team_season_source="html",
-            schedule_source="none",
-            box_score_source="none",
-            pbp_source="none",
-            shots_source="none",
-            fetch_player_season=bcl.fetch_bcl_player_season,
-            fetch_team_season=bcl.fetch_bcl_team_season,
-            fallback_source="html_js",
-            notes="Phase 2: HTML scaffold (connection resets). Phase 3: API-Basketball planned.",
         )
     )
 

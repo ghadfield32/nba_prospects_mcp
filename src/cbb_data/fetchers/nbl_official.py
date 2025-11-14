@@ -55,7 +55,7 @@ import logging
 import os
 import subprocess
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal, cast
 
 import pandas as pd
 
@@ -142,13 +142,13 @@ def run_nblr_export(export_dir: Path | None = None, verbose: bool = True) -> Non
             capture_output=True,
             text=True,
         )
-    except (subprocess.CalledProcessError, FileNotFoundError):
+    except (subprocess.CalledProcessError, FileNotFoundError) as err:
         raise RuntimeError(
             "R not found. Install R:\n"
             "  Ubuntu/Debian: sudo apt-get install r-base\n"
             "  macOS: brew install r\n"
             "  Windows: https://cran.r-project.org/bin/windows/base/"
-        )
+        ) from err
 
     # Run R export script
     try:
@@ -178,7 +178,7 @@ def run_nblr_export(export_dir: Path | None = None, verbose: bool = True) -> Non
             )
 
         logger.error(error_msg)
-        raise RuntimeError(error_msg)
+        raise RuntimeError(error_msg) from e
 
 
 # ==============================================================================
@@ -273,52 +273,62 @@ def fetch_nbl_schedule(season: str = "2024", season_type: str = "Regular Season"
             logger.warning("No NBL results data found")
             return _empty_schedule_df()
 
-        # Filter by season (nblR uses season_slug like "2024-25")
-        # Convert input "2024" to "2024-25" format
-        season_slug = f"{season}-{str(int(season) + 1)[-2:]}"
-        df = df[df["season_slug"] == season_slug]
+        # Filter by season (nblR uses format like "2015-2016", "1979", etc.)
+        # Try both formats
+        season_variants = [
+            season,  # e.g., "2023"
+            f"{season}-{str(int(season) + 1)[-2:]}",  # e.g., "2023-24"
+            f"{season}-{str(int(season) + 1)}",  # e.g., "2023-2024"
+        ]
+        df = df[df["season"].isin(season_variants)]
 
-        # TODO: Apply season_type filter if nblR provides this info
-        # For now, we return all games
+        if df.empty:
+            logger.warning(f"No games found for season {season}")
+            return _empty_schedule_df()
 
-        # Normalize column names to cbb_data schema
-        df = df.rename(
-            columns={
-                "match_id": "GAME_ID",
-                "season_slug": "SEASON",
-                "start_time_utc": "GAME_DATE",
-                "home_team": "HOME_TEAM",
-                "away_team": "AWAY_TEAM",
-                "home_score": "HOME_SCORE",
-                "away_score": "AWAY_SCORE",
-                "venue": "VENUE",
-            }
+        # Filter by match_type if season_type specified
+        if season_type and season_type.lower() != "regular season":
+            # Map season_type to match_type
+            if "playoff" in season_type.lower():
+                df = df[df["match_type"] != "REGULAR"]
+        else:
+            # Regular season only
+            df = df[df["match_type"] == "REGULAR"]
+
+        # NBL data has one row per team per game (each game appears twice)
+        # We need to pivot this to one row per game with home/away split
+
+        # Separate home and away rows
+        home_df = df[df["is_home_competitor"] == "1"].copy()
+        away_df = df[df["is_home_competitor"] != "1"].copy()
+
+        # Merge on match_id to create one row per game
+        schedule = pd.merge(
+            home_df, away_df, on="match_id", how="outer", suffixes=("_home", "_away")
         )
 
-        # Add league identifier
-        df["LEAGUE"] = "NBL"
+        # Build standard schema
+        result = pd.DataFrame()
+        result["GAME_ID"] = schedule["match_id"]
+        result["SEASON"] = schedule["season_home"].fillna(schedule["season_away"])
+        result["GAME_DATE"] = pd.to_datetime(
+            schedule["match_time_utc_home"].fillna(schedule["match_time_utc_away"])
+        )
+        result["HOME_TEAM"] = schedule["team_name_home"]
+        result["AWAY_TEAM"] = schedule["team_name_away"]
+        result["HOME_SCORE"] = pd.to_numeric(schedule["score_string_home"], errors="coerce")
+        result["AWAY_SCORE"] = pd.to_numeric(schedule["score_string_away"], errors="coerce")
+        result["VENUE"] = schedule["venue_name_home"].fillna(schedule["venue_name_away"])
+        result["LEAGUE"] = "NBL"
 
-        # Select and order columns
-        columns = [
-            "GAME_ID",
-            "SEASON",
-            "GAME_DATE",
-            "HOME_TEAM",
-            "AWAY_TEAM",
-            "HOME_SCORE",
-            "AWAY_SCORE",
-            "VENUE",
-            "LEAGUE",
-        ]
-        df = df[[col for col in columns if col in df.columns]]
+        # Drop any rows where we couldn't match home/away properly
+        result = result.dropna(subset=["HOME_TEAM", "AWAY_TEAM"])
 
-        logger.info(f"Fetched {len(df)} NBL games for {season}")
-        return df
+        logger.info(f"Fetched {len(result)} NBL games for {season}")
+        return result
 
     except FileNotFoundError:
-        logger.warning(
-            "NBL data not yet exported. Run: Rscript tools/nbl/export_nbl.R"
-        )
+        logger.warning("NBL data not yet exported. Run: Rscript tools/nbl/export_nbl.R")
         return _empty_schedule_df()
 
     except Exception as e:
@@ -367,61 +377,132 @@ def fetch_nbl_player_season(season: str = "2024", per_mode: str = "Totals") -> p
             logger.warning("No NBL player box score data found")
             return _empty_player_season_df()
 
-        # Filter by season
-        season_slug = f"{season}-{str(int(season) + 1)[-2:]}"
-        df = df[df["season_slug"] == season_slug]
+        # Filter by season (nblR uses format like "2015-2016")
+        season_variants = [
+            season,  # e.g., "2023"
+            f"{season}-{str(int(season) + 1)[-2:]}",  # e.g., "2023-24"
+            f"{season}-{str(int(season) + 1)}",  # e.g., "2023-2024"
+        ]
+        df = df[df["season"].isin(season_variants)]
+
+        if df.empty:
+            logger.warning(f"No player data found for season {season}")
+            return _empty_player_season_df()
+
+        # Create player identifier (combine first_name + family_name)
+        df["player_full_name"] = df["first_name"] + " " + df["family_name"]
+
+        # Convert minutes from MM:SS string format to decimal minutes
+        # Format is like "38:02" (38 minutes, 2 seconds)
+        def parse_minutes(time_str: Any) -> float:
+            """Convert MM:SS string to decimal minutes"""
+            if pd.isna(time_str) or time_str == "":
+                return 0.0
+            try:
+                if isinstance(time_str, str) and ":" in time_str:
+                    parts = time_str.split(":")
+                    mins = float(parts[0])
+                    secs = float(parts[1]) if len(parts) > 1 else 0
+                    return mins + (secs / 60.0)
+                else:
+                    # Already numeric or can be converted
+                    return float(time_str)
+            except (ValueError, AttributeError):
+                return 0.0
+
+        df["minutes_numeric"] = df["minutes"].apply(parse_minutes)
 
         # Aggregate to season totals (group by player)
         agg_dict = {
             "match_id": "count",  # GP (games played)
-            "mins": "sum",
-            "pts": "sum",
-            "rebs": "sum",
-            "asts": "sum",
-            "stls": "sum",
-            "blks": "sum",
-            "tovs": "sum",
-            "fouls": "sum",
+            "minutes_numeric": "sum",  # Use numeric minutes
+            "points": "sum",
+            "rebounds_total": "sum",
+            "assists": "sum",
+            "steals": "sum",
+            "blocks": "sum",
+            "turnovers": "sum",
+            "fouls_personal": "sum",
             # Shooting stats (need weighted averages for percentages)
-            "fgm": "sum",
-            "fga": "sum",
-            "three_m": "sum",
-            "three_a": "sum",
-            "ftm": "sum",
-            "fta": "sum",
+            "field_goals_made": "sum",
+            "field_goals_attempted": "sum",
+            "three_pointers_made": "sum",
+            "three_pointers_attempted": "sum",
+            "free_throws_made": "sum",
+            "free_throws_attempted": "sum",
         }
 
         # Group by player and aggregate
-        season_df = df.groupby(["player_id", "player_name", "team_name"], as_index=False).agg(agg_dict)
+        # Note: player_id may be null in some seasons, so we use player_full_name + team_name
+        # to uniquely identify players
+        season_df = df.groupby(["player_full_name", "team_name"], as_index=False).agg(agg_dict)
 
-        # Calculate shooting percentages
-        season_df["FG_PCT"] = (season_df["fgm"] / season_df["fga"] * 100).fillna(0)
-        season_df["FG3_PCT"] = (season_df["three_m"] / season_df["three_a"] * 100).fillna(0)
-        season_df["FT_PCT"] = (season_df["ftm"] / season_df["fta"] * 100).fillna(0)
+        # Add player_id column (will be empty if not available in source data)
+        # Use first non-null player_id if available, otherwise empty string
+        if "player_id" in df.columns and df["player_id"].notna().any():
+            player_ids = df.groupby(["player_full_name", "team_name"])["player_id"].first()
+            season_df = season_df.merge(
+                player_ids.reset_index(), on=["player_full_name", "team_name"], how="left"
+            )
+        else:
+            # No player IDs available, use player_full_name as ID
+            season_df["player_id"] = season_df["player_full_name"]
 
-        # Rename columns to standard schema
+        # Rename columns to standard schema BEFORE calculations
         season_df = season_df.rename(
             columns={
-                "player_id": "PLAYER_ID",
-                "player_name": "PLAYER_NAME",
-                "team_name": "TEAM",
                 "match_id": "GP",
-                "mins": "MIN",
-                "pts": "PTS",
-                "rebs": "REB",
-                "asts": "AST",
-                "stls": "STL",
-                "blks": "BLK",
-                "tovs": "TOV",
-                "fouls": "PF",
-                "fgm": "FGM",
-                "fga": "FGA",
-                "three_m": "FG3M",
-                "three_a": "FG3A",
-                "ftm": "FTM",
-                "fta": "FTA",
+                "minutes_numeric": "MIN",  # Use parsed numeric minutes
+                "points": "PTS",
+                "rebounds_total": "REB",
+                "assists": "AST",
+                "steals": "STL",
+                "blocks": "BLK",
+                "turnovers": "TOV",
+                "fouls_personal": "PF",
+                "field_goals_made": "FGM",
+                "field_goals_attempted": "FGA",
+                "three_pointers_made": "FG3M",
+                "three_pointers_attempted": "FG3A",
+                "free_throws_made": "FTM",
+                "free_throws_attempted": "FTA",
+                "player_full_name": "PLAYER_NAME",
+                "team_name": "TEAM",
             }
         )
+
+        # Rename player_id if it exists
+        if "player_id" in season_df.columns:
+            season_df = season_df.rename(columns={"player_id": "PLAYER_ID"})
+        else:
+            season_df["PLAYER_ID"] = season_df["PLAYER_NAME"]
+
+        # Ensure all stat columns are numeric (in case merge caused type issues)
+        numeric_cols = [
+            "GP",
+            "MIN",
+            "PTS",
+            "REB",
+            "AST",
+            "STL",
+            "BLK",
+            "TOV",
+            "PF",
+            "FGM",
+            "FGA",
+            "FG3M",
+            "FG3A",
+            "FTM",
+            "FTA",
+        ]
+        for col in numeric_cols:
+            if col in season_df.columns:
+                season_df[col] = pd.to_numeric(season_df[col], errors="coerce").fillna(0)
+
+        # Calculate shooting percentages (after rename, before per_mode)
+        season_df["FG_PCT"] = (season_df["FGM"] / season_df["FGA"] * 100).fillna(0)
+        season_df["FG3_PCT"] = (season_df["FG3M"] / season_df["FG3A"] * 100).fillna(0)
+        season_df["FT_PCT"] = (season_df["FTM"] / season_df["FTA"] * 100).fillna(0)
 
         # Apply per_mode calculations
         if per_mode == "PerGame":
@@ -446,6 +527,12 @@ def fetch_nbl_player_season(season: str = "2024", per_mode: str = "Totals") -> p
                     season_df[col] = season_df[col] / season_df["GP"].replace(0, 1)
 
         elif per_mode == "Per40":
+            # Per40 formula: (stat / total_minutes) * 40
+            # This normalizes stats to a 40-minute game
+
+            # Save total minutes BEFORE modifying anything
+            total_minutes = season_df["MIN"].copy()
+
             stat_cols = [
                 "PTS",
                 "REB",
@@ -463,7 +550,11 @@ def fetch_nbl_player_season(season: str = "2024", per_mode: str = "Totals") -> p
             ]
             for col in stat_cols:
                 if col in season_df.columns:
-                    season_df[col] = season_df[col] / (season_df["MIN"].replace(0, 1) / 40.0)
+                    # Use total minutes to normalize: (stat * 40) / total_minutes
+                    season_df[col] = (season_df[col] * 40.0) / total_minutes.replace(0, 1)
+
+            # Convert MIN to per-game average for display (using saved total)
+            season_df["MIN"] = total_minutes / season_df["GP"].replace(0, 1)
 
         # Add league metadata
         season_df["LEAGUE"] = "NBL"
@@ -521,83 +612,140 @@ def fetch_nbl_team_season(season: str = "2024", per_mode: str = "Totals") -> pd.
             logger.warning("No NBL team box score data found")
             return _empty_team_season_df()
 
-        # Filter by season
-        season_slug = f"{season}-{str(int(season) + 1)[-2:]}"
-        df = df[df["season_slug"] == season_slug]
+        # Filter by season (nblR uses format like "2015-2016")
+        season_variants = [
+            season,  # e.g., "2023"
+            f"{season}-{str(int(season) + 1)[-2:]}",  # e.g., "2023-24"
+            f"{season}-{str(int(season) + 1)}",  # e.g., "2023-2024"
+        ]
+        df = df[df["season"].isin(season_variants)]
+
+        if df.empty:
+            logger.warning(f"No team data found for season {season}")
+            return _empty_team_season_df()
+
+        # Convert minutes from MM:SS string format to decimal minutes
+        def parse_minutes(time_str: Any) -> float:
+            """Convert MM:SS string to decimal minutes"""
+            if pd.isna(time_str) or time_str == "":
+                return 0.0
+            try:
+                if isinstance(time_str, str) and ":" in time_str:
+                    parts = time_str.split(":")
+                    mins = float(parts[0])
+                    secs = float(parts[1]) if len(parts) > 1 else 0
+                    return mins + (secs / 60.0)
+                else:
+                    return float(time_str)
+            except (ValueError, AttributeError):
+                return 0.0
+
+        df["minutes_numeric"] = df["minutes"].apply(parse_minutes)
 
         # Aggregate to season totals (group by team)
+        # Note: nbl_box_team uses 'name' for team name
         agg_dict = {
             "match_id": "count",  # GP (games played)
-            "mins": "sum",
-            "pts": "sum",
-            "rebs": "sum",
-            "asts": "sum",
-            "stls": "sum",
-            "blks": "sum",
-            "tovs": "sum",
-            "fouls": "sum",
-            # Shooting stats (need weighted averages for percentages)
-            "fgm": "sum",
-            "fga": "sum",
-            "three_m": "sum",
-            "three_a": "sum",
-            "ftm": "sum",
-            "fta": "sum",
+            "minutes_numeric": "sum",  # Use numeric minutes
+            "points": "sum",
+            "rebounds_total": "sum",
+            "assists": "sum",
+            "steals": "sum",
+            "blocks": "sum",
+            "turnovers": "sum",
+            "fouls_personal": "sum",
+            # Shooting stats
+            "field_goals_made": "sum",
+            "field_goals_attempted": "sum",
+            "three_pointers_made": "sum",
+            "three_pointers_attempted": "sum",
+            "free_throws_made": "sum",
+            "free_throws_attempted": "sum",
         }
 
         # Add optional columns if they exist
-        if "o_rebs" in df.columns:
-            agg_dict["o_rebs"] = "sum"
-        if "d_rebs" in df.columns:
-            agg_dict["d_rebs"] = "sum"
-        if "off_rating" in df.columns:
-            agg_dict["off_rating"] = "mean"
-        if "def_rating" in df.columns:
-            agg_dict["def_rating"] = "mean"
+        if "rebounds_offensive" in df.columns:
+            agg_dict["rebounds_offensive"] = "sum"
+        if "rebounds_defensive" in df.columns:
+            agg_dict["rebounds_defensive"] = "sum"
 
         # Group by team and aggregate
-        season_df = df.groupby("team_name", as_index=False).agg(agg_dict)
+        season_df = df.groupby("name", as_index=False).agg(agg_dict)
+
+        # Rename columns BEFORE calculations
+        season_df = season_df.rename(
+            columns={
+                "name": "TEAM",
+                "match_id": "GP",
+                "minutes_numeric": "MIN",  # Use parsed numeric minutes
+                "points": "PTS",
+                "rebounds_total": "REB",
+                "assists": "AST",
+                "steals": "STL",
+                "blocks": "BLK",
+                "turnovers": "TOV",
+                "fouls_personal": "PF",
+                "field_goals_made": "FGM",
+                "field_goals_attempted": "FGA",
+                "three_pointers_made": "FG3M",
+                "three_pointers_attempted": "FG3A",
+                "free_throws_made": "FTM",
+                "free_throws_attempted": "FTA",
+            }
+        )
+
+        # Rename optional columns
+        if "rebounds_offensive" in season_df.columns:
+            season_df = season_df.rename(columns={"rebounds_offensive": "OREB"})
+        if "rebounds_defensive" in season_df.columns:
+            season_df = season_df.rename(columns={"rebounds_defensive": "DREB"})
+
+        # Ensure all stat columns are numeric
+        numeric_cols = [
+            "GP",
+            "MIN",
+            "PTS",
+            "REB",
+            "AST",
+            "STL",
+            "BLK",
+            "TOV",
+            "PF",
+            "FGM",
+            "FGA",
+            "FG3M",
+            "FG3A",
+            "FTM",
+            "FTA",
+        ]
+        if "OREB" in season_df.columns:
+            numeric_cols.extend(["OREB", "DREB"])
+        for col in numeric_cols:
+            if col in season_df.columns:
+                season_df[col] = pd.to_numeric(season_df[col], errors="coerce").fillna(0)
 
         # Calculate shooting percentages
-        season_df["FG_PCT"] = (season_df["fgm"] / season_df["fga"] * 100).fillna(0)
-        season_df["FG3_PCT"] = (season_df["three_m"] / season_df["three_a"] * 100).fillna(0)
-        season_df["FT_PCT"] = (season_df["ftm"] / season_df["fta"] * 100).fillna(0)
-
-        # Rename columns to standard schema
-        rename_dict = {
-            "team_name": "TEAM",
-            "match_id": "GP",
-            "mins": "MIN",
-            "pts": "PTS",
-            "rebs": "REB",
-            "asts": "AST",
-            "stls": "STL",
-            "blks": "BLK",
-            "tovs": "TOV",
-            "fouls": "PF",
-            "fgm": "FGM",
-            "fga": "FGA",
-            "three_m": "FG3M",
-            "three_a": "FG3A",
-            "ftm": "FTM",
-            "fta": "FTA",
-        }
-        if "o_rebs" in season_df.columns:
-            rename_dict["o_rebs"] = "OREB"
-        if "d_rebs" in season_df.columns:
-            rename_dict["d_rebs"] = "DREB"
-        if "off_rating" in season_df.columns:
-            rename_dict["off_rating"] = "OFF_RATING"
-        if "def_rating" in season_df.columns:
-            rename_dict["def_rating"] = "DEF_RATING"
-
-        season_df = season_df.rename(columns=rename_dict)
+        season_df["FG_PCT"] = (season_df["FGM"] / season_df["FGA"] * 100).fillna(0)
+        season_df["FG3_PCT"] = (season_df["FG3M"] / season_df["FG3A"] * 100).fillna(0)
+        season_df["FT_PCT"] = (season_df["FTM"] / season_df["FTA"] * 100).fillna(0)
 
         # Apply per_mode calculations
         if per_mode == "PerGame":
             stat_cols = [
-                "MIN", "PTS", "REB", "AST", "STL", "BLK", "TOV", "PF",
-                "FGM", "FGA", "FG3M", "FG3A", "FTM", "FTA"
+                "MIN",
+                "PTS",
+                "REB",
+                "AST",
+                "STL",
+                "BLK",
+                "TOV",
+                "PF",
+                "FGM",
+                "FGA",
+                "FG3M",
+                "FG3A",
+                "FTM",
+                "FTA",
             ]
             if "OREB" in season_df.columns:
                 stat_cols.extend(["OREB", "DREB"])
@@ -606,15 +754,34 @@ def fetch_nbl_team_season(season: str = "2024", per_mode: str = "Totals") -> pd.
                     season_df[col] = season_df[col] / season_df["GP"].replace(0, 1)
 
         elif per_mode == "Per40":
+            # Per40 formula: (stat * 40) / total_minutes
+
+            # Save total minutes BEFORE modifying anything
+            total_minutes = season_df["MIN"].copy()
+
             stat_cols = [
-                "PTS", "REB", "AST", "STL", "BLK", "TOV", "PF",
-                "FGM", "FGA", "FG3M", "FG3A", "FTM", "FTA"
+                "PTS",
+                "REB",
+                "AST",
+                "STL",
+                "BLK",
+                "TOV",
+                "PF",
+                "FGM",
+                "FGA",
+                "FG3M",
+                "FG3A",
+                "FTM",
+                "FTA",
             ]
             if "OREB" in season_df.columns:
                 stat_cols.extend(["OREB", "DREB"])
             for col in stat_cols:
                 if col in season_df.columns:
-                    season_df[col] = season_df[col] / (season_df["MIN"].replace(0, 1) / 40.0)
+                    season_df[col] = (season_df[col] * 40.0) / total_minutes.replace(0, 1)
+
+            # Convert MIN to per-game average for display (using saved total)
+            season_df["MIN"] = total_minutes / season_df["GP"].replace(0, 1)
 
         # Add league metadata
         season_df["LEAGUE"] = "NBL"
@@ -672,36 +839,60 @@ def fetch_nbl_player_game(season: str = "2024") -> pd.DataFrame:
             logger.warning("No NBL player box score data found")
             return _empty_player_game_df()
 
-        # Filter by season
-        season_slug = f"{season}-{str(int(season) + 1)[-2:]}"
-        df = df[df["season_slug"] == season_slug]
+        # Filter by season (handle multiple format variants)
+        # Season may be stored as "2023", "2023-24", or "2023-2024"
+        season_variants = [
+            season,
+            f"{season}-{str(int(season) + 1)[-2:]}",
+            f"{season}-{str(int(season) + 1)}",
+        ]
+        df = df[df["season"].isin(season_variants)]
 
-        # Calculate shooting percentages
-        df["FG_PCT"] = (df["fgm"] / df["fga"] * 100).fillna(0)
-        df["FG3_PCT"] = (df["three_m"] / df["three_a"] * 100).fillna(0)
-        df["FT_PCT"] = (df["ftm"] / df["fta"] * 100).fillna(0)
+        # Parse minutes from "MM:SS" format to decimal
+        def parse_minutes(time_str: Any) -> float:
+            """Convert MM:SS string to decimal minutes"""
+            if pd.isna(time_str) or time_str == "":
+                return 0.0
+            try:
+                if isinstance(time_str, str) and ":" in time_str:
+                    parts = time_str.split(":")
+                    mins = float(parts[0])
+                    secs = float(parts[1]) if len(parts) > 1 else 0
+                    return mins + (secs / 60.0)
+                else:
+                    return float(time_str)
+            except (ValueError, AttributeError):
+                return 0.0
+
+        if "minutes" in df.columns:
+            df["minutes"] = df["minutes"].apply(parse_minutes)
+
+        # Calculate shooting percentages (using actual nblR column names)
+        df["FG_PCT"] = (df["field_goals_made"] / df["field_goals_attempted"] * 100).fillna(0)
+        df["FG3_PCT"] = (df["three_pointers_made"] / df["three_pointers_attempted"] * 100).fillna(0)
+        df["FT_PCT"] = (df["free_throws_made"] / df["free_throws_attempted"] * 100).fillna(0)
 
         # Normalize columns to standard schema
         df = df.rename(
             columns={
                 "match_id": "GAME_ID",
                 "player_id": "PLAYER_ID",
-                "player_name": "PLAYER_NAME",
+                "player_full_name": "PLAYER_NAME",
                 "team_name": "TEAM",
-                "mins": "MIN",
-                "pts": "PTS",
-                "rebs": "REB",
-                "asts": "AST",
-                "stls": "STL",
-                "blks": "BLK",
-                "tovs": "TOV",
-                "fouls": "PF",
-                "fgm": "FGM",
-                "fga": "FGA",
-                "three_m": "FG3M",
-                "three_a": "FG3A",
-                "ftm": "FTM",
-                "fta": "FTA",
+                "minutes": "MIN",
+                "points": "PTS",
+                "rebounds_total": "REB",
+                "assists": "AST",
+                "steals": "STL",
+                "blocks": "BLK",
+                "turnovers": "TOV",
+                "fouls_personal": "PF",
+                "field_goals_made": "FGM",
+                "field_goals_attempted": "FGA",
+                "three_pointers_made": "FG3M",
+                "three_pointers_attempted": "FG3A",
+                "free_throws_made": "FTM",
+                "free_throws_attempted": "FTA",
                 "plus_minus": "PLUS_MINUS",
             }
         )
@@ -712,10 +903,30 @@ def fetch_nbl_player_game(season: str = "2024") -> pd.DataFrame:
 
         # Select columns in standard order
         standard_cols = [
-            "GAME_ID", "PLAYER_ID", "PLAYER_NAME", "TEAM", "MIN",
-            "PTS", "REB", "AST", "STL", "BLK", "TOV", "PF",
-            "FGM", "FGA", "FG_PCT", "FG3M", "FG3A", "FG3_PCT",
-            "FTM", "FTA", "FT_PCT", "PLUS_MINUS", "LEAGUE", "SEASON"
+            "GAME_ID",
+            "PLAYER_ID",
+            "PLAYER_NAME",
+            "TEAM",
+            "MIN",
+            "PTS",
+            "REB",
+            "AST",
+            "STL",
+            "BLK",
+            "TOV",
+            "PF",
+            "FGM",
+            "FGA",
+            "FG_PCT",
+            "FG3M",
+            "FG3A",
+            "FG3_PCT",
+            "FTM",
+            "FTA",
+            "FT_PCT",
+            "PLUS_MINUS",
+            "LEAGUE",
+            "SEASON",
         ]
         df = df[[col for col in standard_cols if col in df.columns]]
 
@@ -770,9 +981,14 @@ def fetch_nbl_team_game(season: str = "2024") -> pd.DataFrame:
             logger.warning("No NBL team box score data found")
             return _empty_team_game_df()
 
-        # Filter by season
-        season_slug = f"{season}-{str(int(season) + 1)[-2:]}"
-        df = df[df["season_slug"] == season_slug]
+        # Filter by season (handle multiple format variants)
+        # Season may be stored as "2023", "2023-24", or "2023-2024"
+        season_variants = [
+            season,
+            f"{season}-{str(int(season) + 1)[-2:]}",
+            f"{season}-{str(int(season) + 1)}",
+        ]
+        df = df[df["season"].isin(season_variants)]
 
         # Calculate shooting percentages
         df["FG_PCT"] = (df["fgm"] / df["fga"] * 100).fillna(0)
@@ -811,11 +1027,31 @@ def fetch_nbl_team_game(season: str = "2024") -> pd.DataFrame:
 
         # Select columns in standard order
         standard_cols = [
-            "GAME_ID", "TEAM", "MIN",
-            "PTS", "REB", "AST", "STL", "BLK", "TOV", "PF",
-            "FGM", "FGA", "FG_PCT", "FG3M", "FG3A", "FG3_PCT",
-            "FTM", "FTA", "FT_PCT", "OREB", "DREB",
-            "OFF_RATING", "DEF_RATING", "LEAGUE", "SEASON"
+            "GAME_ID",
+            "TEAM",
+            "MIN",
+            "PTS",
+            "REB",
+            "AST",
+            "STL",
+            "BLK",
+            "TOV",
+            "PF",
+            "FGM",
+            "FGA",
+            "FG_PCT",
+            "FG3M",
+            "FG3A",
+            "FG3_PCT",
+            "FTM",
+            "FTA",
+            "FT_PCT",
+            "OREB",
+            "DREB",
+            "OFF_RATING",
+            "DEF_RATING",
+            "LEAGUE",
+            "SEASON",
         ]
         df = df[[col for col in standard_cols if col in df.columns]]
 
@@ -872,9 +1108,14 @@ def fetch_nbl_pbp(season: str = "2024", game_id: str | None = None) -> pd.DataFr
             logger.warning("No NBL play-by-play data found")
             return _empty_pbp_df()
 
-        # Filter by season
-        season_slug = f"{season}-{str(int(season) + 1)[-2:]}"
-        df = df[df["season_slug"] == season_slug]
+        # Filter by season (handle multiple format variants)
+        # Season may be stored as "2023", "2023-24", or "2023-2024"
+        season_variants = [
+            season,
+            f"{season}-{str(int(season) + 1)[-2:]}",
+            f"{season}-{str(int(season) + 1)}",
+        ]
+        df = df[df["season"].isin(season_variants)]
 
         # Filter by game if specified
         if game_id:
@@ -902,13 +1143,24 @@ def fetch_nbl_pbp(season: str = "2024", game_id: str | None = None) -> pd.DataFr
 
         # Select columns in standard order
         standard_cols = [
-            "GAME_ID", "EVENT_NUM", "PERIOD", "CLOCK",
-            "TEAM", "PLAYER", "EVENT_TYPE", "DESCRIPTION",
-            "SCORE_HOME", "SCORE_AWAY", "LEAGUE", "SEASON"
+            "GAME_ID",
+            "EVENT_NUM",
+            "PERIOD",
+            "CLOCK",
+            "TEAM",
+            "PLAYER",
+            "EVENT_TYPE",
+            "DESCRIPTION",
+            "SCORE_HOME",
+            "SCORE_AWAY",
+            "LEAGUE",
+            "SEASON",
         ]
         df = df[[col for col in standard_cols if col in df.columns]]
 
-        logger.info(f"Fetched {len(df)} NBL play-by-play events (season={season}, game={game_id or 'all'})")
+        logger.info(
+            f"Fetched {len(df)} NBL play-by-play events (season={season}, game={game_id or 'all'})"
+        )
         return df
 
     except FileNotFoundError:
@@ -922,7 +1174,11 @@ def fetch_nbl_pbp(season: str = "2024", game_id: str | None = None) -> pd.DataFr
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
 @cached_dataframe
-def fetch_nbl_shots(season: str = "2024", game_id: str | None = None) -> pd.DataFrame:
+def fetch_nbl_shots(
+    season: str = "2024",
+    game_id: str | None = None,
+    season_type: str = "Regular Season",
+) -> pd.DataFrame:
     """Fetch NBL shot chart data with (x, y) coordinates via nblR
 
     This is the "Shot Machine" equivalent - spatial shot data that SpatialJam charges $20/mo for!
@@ -930,6 +1186,7 @@ def fetch_nbl_shots(season: str = "2024", game_id: str | None = None) -> pd.Data
     Args:
         season: Season year (e.g., "2024")
         game_id: Optional game ID to filter (None = all games in season)
+        season_type: Season type filter (currently ignored - NBL data doesn't separate regular/playoffs)
 
     Returns:
         DataFrame with shot locations
@@ -963,9 +1220,19 @@ def fetch_nbl_shots(season: str = "2024", game_id: str | None = None) -> pd.Data
             logger.warning("No NBL shot data found")
             return _empty_shots_df()
 
-        # Filter by season
-        season_slug = f"{season}-{str(int(season) + 1)[-2:]}"
-        df = df[df["season_slug"] == season_slug]
+        # Filter by season (handle multiple format variants)
+        # Season may be stored as "2023", "2023-24", or "2023-2024"
+        # Input season may also be in any of these formats
+
+        # Extract base year (handle "2023", "2023-24", or "2023-2024")
+        base_year = season.split("-")[0] if "-" in season else season
+
+        season_variants = [
+            base_year,
+            f"{base_year}-{str(int(base_year) + 1)[-2:]}",
+            f"{base_year}-{str(int(base_year) + 1)}",
+        ]
+        df = df[df["season"].isin(season_variants)]
 
         # Filter by game if specified
         if game_id:
@@ -988,6 +1255,30 @@ def fetch_nbl_shots(season: str = "2024", game_id: str | None = None) -> pd.Data
                 "points_value": "POINTS_VALUE",
             }
         )
+
+        # Derive GAME_MINUTE from PERIOD + CLOCK for game-minute filtering
+        # NBL uses 10-minute quarters (FIBA standard)
+        def _clock_to_seconds(clock: str) -> float:
+            """Convert game clock string (MM:SS) to seconds remaining in period"""
+            try:
+                if not isinstance(clock, str):
+                    return 0.0
+                parts = str(clock).split(":")
+                if len(parts) != 2:
+                    return 0.0
+                m, s = float(parts[0]), float(parts[1])
+                return m * 60 + s
+            except Exception:
+                return 0.0
+
+        if "PERIOD" in df.columns and "CLOCK" in df.columns:
+            period_length = 10.0  # NBL uses 10-minute quarters
+            clock_seconds = df["CLOCK"].apply(_clock_to_seconds)
+            elapsed_in_period = period_length - (clock_seconds / 60.0)
+            df["GAME_MINUTE"] = (
+                df["PERIOD"].astype(float) - 1.0
+            ) * period_length + elapsed_in_period
+            df["GAME_MINUTE"] = df["GAME_MINUTE"].round(2)  # Round to 2 decimal places
 
         # Add league identifier
         df["LEAGUE"] = "NBL"
@@ -1032,7 +1323,7 @@ def ingest_nbl_into_duckdb(export_dir: Path | None = None) -> None:
 
     for table in NBL_TABLES:
         try:
-            df = load_nbl_table(table, export_dir=export_dir)
+            df = load_nbl_table(cast(NBLTableType, table), export_dir=export_dir)
 
             # Determine season from data (use most recent for table name)
             if "season_slug" in df.columns:
@@ -1245,3 +1536,77 @@ def _empty_shots_df() -> pd.DataFrame:
             "SEASON",
         ]
     )
+
+
+# ==============================================================================
+# CLI Entry Point
+# ==============================================================================
+
+
+def cli_export() -> None:
+    """CLI entrypoint for nbl-export command
+
+    This is the main entry point when running: uv run nbl-export
+
+    It performs the full NBL data refresh:
+    1. Runs the R export script (tools/nbl/export_nbl.R)
+    2. Loads the Parquet files into memory
+    3. Ingests them into DuckDB storage
+
+    Example:
+        $ uv run nbl-export
+        NBL Export Tool
+        ===============
+        Output directory: data/nbl_raw
+        [1/5] Fetching match results since 1979...
+        [nbl_results] Exporting match results... OK (10234 rows, 12 cols)
+        ...
+        ✅ NBL official data exported and ingested.
+    """
+    import sys
+
+    # Configure logging for CLI
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        handlers=[logging.StreamHandler(sys.stdout)],
+    )
+
+    logger.info("🏀 NBL Data Export Starting...")
+    logger.info("=" * 60)
+
+    try:
+        # Step 1: Run R export
+        logger.info("Step 1/2: Running R export script (nblR package)")
+        logger.info("-" * 60)
+        run_nblr_export(verbose=True)
+
+        logger.info("")
+        logger.info("Step 2/2: Ingesting data into DuckDB")
+        logger.info("-" * 60)
+
+        # Step 2: Ingest into DuckDB
+        ingest_nbl_into_duckdb()
+
+        logger.info("")
+        logger.info("=" * 60)
+        logger.info("✅ NBL official data exported and ingested successfully!")
+        logger.info("")
+        logger.info("Data available via:")
+        logger.info("  from cbb_data.api.datasets import get_dataset")
+        logger.info('  df = get_dataset("shots", filters={"league": "NBL", "season": "2024"})')
+        logger.info("")
+
+    except Exception as e:
+        logger.error("=" * 60)
+        logger.error(f"❌ NBL export failed: {e}")
+        logger.error("=" * 60)
+        logger.error("")
+        logger.error("Troubleshooting:")
+        logger.error("  1. Ensure R is installed: Rscript --version")
+        logger.error(
+            '  2. Install R packages: R -e \'install.packages(c("nblR", "dplyr", "arrow"))\''
+        )
+        logger.error("  3. See tools/nbl/SETUP_GUIDE.md for detailed setup instructions")
+        logger.error("")
+        sys.exit(1)

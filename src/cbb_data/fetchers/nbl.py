@@ -206,7 +206,20 @@ def fetch_nbl_player_season(
 
         elif per_mode == "Per40" and "MIN" in df.columns:
             # Per 40 minutes calculation
-            stat_cols = ["PTS", "REB", "AST", "STL", "BLK", "TOV", "FGM", "FGA", "FG3M", "FG3A", "FTM", "FTA"]
+            stat_cols = [
+                "PTS",
+                "REB",
+                "AST",
+                "STL",
+                "BLK",
+                "TOV",
+                "FGM",
+                "FGA",
+                "FG3M",
+                "FG3A",
+                "FTM",
+                "FTA",
+            ]
             for col in stat_cols:
                 if col in df.columns:
                     df[col] = df[col] / (df["MIN"].replace(0, 1) / 40.0)
@@ -289,42 +302,16 @@ def fetch_nbl_team_season(
     """
     rate_limiter.acquire("nbl")
 
-    logger.info(f"Fetching NBL team season stats: {season}")
+    logger.info(
+        f"Fetching NBL team season stats: {season} (returning empty - site uses JS rendering)"
+    )
 
-    try:
-        df = read_first_table(
-            url=NBL_TEAMS_URL,
-            min_columns=5,
-            min_rows=5,
-        )
-
-        column_map = {
-            "Team": "TEAM",
-            "Games": "GP",
-            "Wins": "W",
-            "Losses": "L",
-            "Points": "PTS",
-        }
-
-        df = normalize_league_columns(
-            df=df,
-            league="NBL",
-            season=season,
-            competition="NBL Australia",
-            column_map=column_map,
-        )
-
-        # Calculate win percentage if not present
-        if "WIN_PCT" not in df.columns and "W" in df.columns and "GP" in df.columns:
-            df["WIN_PCT"] = df["W"] / df["GP"]
-
-        return df
-
-    except Exception as e:
-        logger.error(f"Failed to fetch NBL team season stats: {e}")
-        return pd.DataFrame(
-            columns=["TEAM", "GP", "W", "L", "WIN_PCT", "PTS", "LEAGUE", "SEASON", "COMPETITION"]
-        )
+    # NBL website uses JavaScript-rendered statistics - cannot scrape with simple HTML parsing
+    # Return empty DataFrame with correct schema for graceful degradation
+    # TODO: Implement using Selenium/Playwright or discover underlying API
+    return pd.DataFrame(
+        columns=["TEAM", "GP", "W", "L", "WIN_PCT", "PTS", "LEAGUE", "SEASON", "COMPETITION"]
+    )
 
 
 # Legacy scaffold functions (kept for backwards compatibility)

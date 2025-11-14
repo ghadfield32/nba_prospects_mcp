@@ -199,8 +199,11 @@ def cached_dataframe(fn: Callable[..., pd.DataFrame]) -> Callable[..., pd.DataFr
 
     @functools.wraps(fn)
     def wrapper(*args: Any, **kwargs: Any) -> pd.DataFrame:
-        # Create cache key from function name + kwargs
-        cache_key = (fn.__name__, json.dumps(kwargs, sort_keys=True, default=str))
+        # Create cache key from module.function + kwargs (ensures uniqueness across modules)
+        cache_key = (
+            fn.__module__ + "." + fn.__name__,
+            json.dumps(kwargs, sort_keys=True, default=str),
+        )
 
         # Try to get from cache
         cached = _cache.get(*cache_key)
