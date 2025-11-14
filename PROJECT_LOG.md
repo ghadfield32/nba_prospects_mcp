@@ -1,5 +1,66 @@
 # PROJECT_LOG.md — College & International Basketball Dataset Puller
 
+## 2025-11-14 (Session Current+9) - FIBA JSON API Integration & International League Enhancements ✅ COMPLETED
+
+**Summary**: Implemented JSON API integration for FIBA leagues (BCL, BAL, ABA, LKL) enabling shot coordinate data, created LNB API discovery framework, and enhanced ACB error handling with manual CSV fallback mechanisms.
+
+**Key Accomplishments**:
+
+1. **FIBA Leagues (BCL, BAL, ABA, LKL) - JSON API Integration**:
+   - Implemented JSON-first architecture with HTML fallback
+   - Added `fetch_shots()` function with X/Y coordinates (NEW capability)
+   - Enhanced `fetch_player_game()`, `fetch_team_game()`, `fetch_pbp()` with JSON API support
+   - Source tracking: `fiba_json` vs `fiba_html` for transparency
+   - Shared rate limiter (0.5s between requests)
+
+2. **LNB Pro A - API Discovery Framework**:
+   - Created comprehensive guide: `tools/lnb/README.md`
+   - Template API client: `src/cbb_data/fetchers/lnb_api.py`
+   - Step-by-step browser DevTools workflow for endpoint discovery
+   - Ready for implementation once endpoints are discovered
+
+3. **ACB (Liga Endesa) - Error Handling Enhancement**:
+   - Comprehensive 403 error handling with helpful messages
+   - Manual CSV fallback: `data/manual/acb/`
+   - Error classification (403, timeout, connection) with specific guidance
+   - Zenodo historical data instructions
+
+**Capabilities Matrix Update**:
+| League | Shots (Before → After) |
+|--------|------------------------|
+| BCL    | ❌ → ✅ **NEW** |
+| BAL    | ❌ → ✅ **NEW** |
+| ABA    | ❌ → ✅ **NEW** |
+| LKL    | ❌ → ✅ **NEW** |
+
+**Technical Implementation**:
+```python
+# JSON-first with HTML fallback pattern
+try:
+    game_data = _json_client.fetch_game_json(game_id)
+    df = _json_client.to_player_game_df(game_data)
+    df["SOURCE"] = "fiba_json"
+except Exception:
+    df = scrape_fiba_box_score(game_id)
+    df["SOURCE"] = "fiba_html"
+```
+
+**Files Changed**:
+- `src/cbb_data/fetchers/bcl.py`: +273 lines (JSON API + shots)
+- `src/cbb_data/fetchers/bal.py`: +273 lines (JSON API + shots)
+- `src/cbb_data/fetchers/aba.py`: +273 lines (JSON API + shots)
+- `src/cbb_data/fetchers/lkl.py`: +273 lines (JSON API + shots)
+- `src/cbb_data/fetchers/acb.py`: +120 lines (error handling + fallback)
+- `src/cbb_data/fetchers/lnb.py`: Updated with API discovery instructions
+- `src/cbb_data/fetchers/lnb_api.py`: NEW (template for API implementation)
+- `tools/lnb/README.md`: NEW (API discovery guide)
+
+**Git Commit**: `9a0e3ad` - feat: Enhance FIBA, ACB, and LNB league fetchers with JSON API and error handling
+
+**Impact**: +1340 lines total, enabling shot-level analysis for 4 international leagues and providing robust fallback mechanisms for data source challenges.
+
+---
+
 ## 2025-11-13 (Session Current+8) - Pre-commit Fixes ✅ COMPLETED
 
 **Summary**: Fixed all pre-commit hook errors (ruff-lint, ruff-format, mypy, large files) at their root causes. No defensive fixes - systematic resolution of type errors, import issues, and code quality problems.
