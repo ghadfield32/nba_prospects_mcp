@@ -124,11 +124,14 @@ from typing import Any, Dict, List, Optional
 
 import requests
 
+from .lnb_api_config import load_lnb_headers
+
 logger = logging.getLogger(__name__)
 
 # API Configuration
 BASE_URL = "https://api-prod.lnb.fr"
 
+# Base headers (will be extended with custom headers from config)
 DEFAULT_HEADERS = {
     "Accept": "application/json, text/plain, */*",
     # Browser-like User-Agent to avoid bot detection
@@ -140,6 +143,13 @@ DEFAULT_HEADERS = {
     # Referer expected by LNB API
     "Referer": "https://www.lnb.fr/",
 }
+
+# Load custom headers from config (Origin, Cookie, etc.)
+# This happens at module import time; reloading module reloads headers
+_CUSTOM_HEADERS = load_lnb_headers()
+if _CUSTOM_HEADERS:
+    DEFAULT_HEADERS.update(_CUSTOM_HEADERS)
+    logger.info(f"LNB API: Loaded {len(_CUSTOM_HEADERS)} custom headers from config")
 
 
 class LNBAPIError(RuntimeError):

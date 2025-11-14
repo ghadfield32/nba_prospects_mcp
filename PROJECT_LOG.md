@@ -7330,3 +7330,73 @@ Implemented comprehensive Python client for LNB (French Basketball) official API
 - DevTools Guide: docs/LNB_API_SETUP_GUIDE.md
 - Stress Test Output: lnb_stress_test_output.txt
 
+
+
+---
+
+## 2025-11-14 - LNB API Phase 2: Authentication & Schema Layer (80% → 95% Complete)
+
+### Summary
+Completed Phase 2 of LNB implementation: added header config layer for clean authentication, defined 7 canonical schemas matching global conventions, updated API client to auto-load custom headers. Implementation now 95% complete, ready for final integration once auth headers captured.
+
+### Files Created
+- **src/cbb_data/fetchers/lnb_api_config.py** (250 lines): Header config loader, template generator, multi-location search (env var, module dir, tools/, root), JSON validation, integration with lnb_api.py
+- **src/cbb_data/fetchers/lnb_schemas.py** (700 lines): 7 dataclass schemas (Schedule, TeamGame, PlayerGame, PlayByPlay, Shots, PlayerSeason, TeamSeason), helper functions (calculate_efg, calculate_ts, estimate_possessions, calculate_rating), column order functions for DataFrame creation
+
+###Files Modified
+- **src/cbb_data/fetchers/lnb_api.py**: Added config import, auto-loads custom headers at module init via `load_lnb_headers()`, merges with DEFAULT_HEADERS
+
+### Implementation Details
+
+#### Header Config Layer
+- **Auto-loading**: Searches lnb_headers.json in 4 locations (LNB_HEADERS_PATH env var, module dir, tools/lnb/, repo root)
+- **Template generator**: `save_headers_template()` creates fillable JSON template with instructions
+- **Integration**: lnb_api.py imports and applies at module load (no code changes needed once config exists)
+- **Security**: Config file excluded from git (.gitignore), supports env vars for production
+
+#### Canonical Schemas (7 total)
+1. **LNBSchedule**: Game metadata (match_external_id, teams, dates, scores, venue, round, phase, status)
+2. **LNBTeamGame**: Team box score (all basic stats + eFG%, TS%, POSS, ORTG, DRTG)
+3. **LNBPlayerGame**: Player box score (all basic stats + eFG%, TS%, PLUS_MINUS, starter flag)
+4. **LNBPlayByPlayEvent**: Event stream (period, clock, seq, event_type, players, score, shot/foul/TO details)
+5. **LNBShotEvent**: Shot chart (x, y, distance, zone, made/missed, shooter, assist, score before/after)
+6. **LNBPlayerSeason**: Aggregated season stats (GP, totals, per-game, percentages, eFG%, TS%)
+7. **LNBTeamSeason**: Team standings + season aggregates (W-L, rank, ORTG, DRTG, home/away splits)
+
+#### Schema Design Principles
+- Column names match global conventions (GAME_ID, PLAYER_ID, TEAM_ID, PTS, REB, AST)
+- All schemas include LEAGUE ("LNB") and SEASON (integer year)
+- Primary keys documented for joins (GAME_ID + TEAM_ID, GAME_ID + PLAYER_ID, etc.)
+- Filter support documented (season, team_id, player_id, date_range, home_away, opponent, per_mode)
+- Derived metrics calculated consistently (eFG%, TS%, POSS, ORTG, DRTG)
+
+### Remaining Work (5% to 100%)
+1. **User Action**: Capture auth headers from DevTools → create tools/lnb/lnb_headers.json (see LNB_API_SETUP_GUIDE.md)
+2. **Create lnb_parsers.py**: JSON → DataFrame mappers for all 7 schemas (parse_schedule, parse_team_game, parse_player_game, parse_pbp, parse_shots, parse_player_season)
+3. **Update lnb.py**: Replace 6 placeholder functions with real API calls using lnb_api.py + lnb_parsers.py
+4. **Dataset Registry**: Add 7 dataset entries (lnb_schedule, lnb_team_game, lnb_player_game, lnb_pbp, lnb_shots, lnb_player_season, lnb_team_season)
+5. **Health Check**: Add `health_check_lnb()` function (lightweight monitoring, hits 2 endpoints only)
+6. **Usage Examples**: Add code snippets to docs showing dataset API usage with filters
+
+### Status
+✅ Phase 1 (Initial): API client with 15 endpoints, stress test, setup guide (80% complete)
+✅ Phase 2 (Authentication & Schemas): Header config, canonical schemas, helper functions (95% complete)
+⏳ Phase 3 (Integration): Parsers, lnb.py updates, registry, health check, docs (pending, final 5%)
+
+### Next Steps
+1. User captures auth headers (15 min) → tools/lnb/lnb_headers.json
+2. User provides sample JSON responses (5 endpoints) → create exact parsers
+3. Complete lnb_parsers.py (30 min) → JSON → DataFrame for all schemas
+4. Update lnb.py (30 min) → replace placeholders with real fetchers
+5. Add dataset registry (15 min) → 7 dataset entries with filters
+6. Add health check (10 min) → lightweight monitoring function
+7. Update docs (10 min) → usage examples with get_dataset()
+8. End-to-end test → validate full pipeline (API → DataFrame → DuckDB → filters)
+
+### References
+- Phase 1 summary: LNB_API_IMPLEMENTATION_SUMMARY.md
+- Phase 2 summary: LNB_IMPLEMENTATION_PHASE2_COMPLETE.md
+- Setup guide: docs/LNB_API_SETUP_GUIDE.md
+- Config module: src/cbb_data/fetchers/lnb_api_config.py
+- Schemas module: src/cbb_data/fetchers/lnb_schemas.py
+
