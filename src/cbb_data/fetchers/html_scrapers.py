@@ -935,6 +935,326 @@ def scrape_acb_game_centre(game_url: str, game_id: str = None) -> Tuple[pd.DataF
 # LNB HTML Scrapers
 # ==============================================================================
 
+# ------------------------------------------------------------------------------
+# LNB Game-Level Data - Stats Center JSON APIs (REQUIRES DEVTOOLS DISCOVERY)
+# ------------------------------------------------------------------------------
+
+# NOTE: LNB Stats Center is a JavaScript SPA at https://lnb.fr/fr/stats-centre
+# All game-level data (schedule, boxscores, PBP, shots) comes from JSON APIs.
+# These constants MUST be filled by inspecting network requests in DevTools.
+#
+# See: docs/lnb_game_level_investigation.md for full discovery workflow
+# See: tools/lnb/api_discovery_helper.py for endpoint testing
+
+#: Template for LNB schedule API endpoint
+#: TODO: Discover via DevTools Network tab when viewing Stats Center schedule
+#: Example (fill after discovery): "https://api.lnb.fr/stats/schedule?season={season}"
+LNB_SCHEDULE_API_URL_TEMPLATE: str | None = None
+
+#: Template for LNB game boxscore API endpoint
+#: TODO: Discover via DevTools when clicking into a game detail page
+#: Example (fill after discovery): "https://api.lnb.fr/stats/games/{game_id}/boxscore"
+LNB_BOXSCORE_API_URL_TEMPLATE: str | None = None
+
+#: Optional: PBP API endpoint if it exists
+#: TODO: Check if play-by-play data is available in Stats Center
+LNB_PBP_API_URL_TEMPLATE: str | None = None
+
+#: Optional: Shot chart API endpoint if it exists
+#: TODO: Check if shot coordinate data is available in Stats Center
+LNB_SHOTS_API_URL_TEMPLATE: str | None = None
+
+
+def _ensure_lnb_schedule_api_configured() -> None:
+    """Validate that LNB schedule API URL has been discovered and set."""
+    if not LNB_SCHEDULE_API_URL_TEMPLATE:
+        raise RuntimeError(
+            "LNB_SCHEDULE_API_URL_TEMPLATE is not configured.\n"
+            "You must discover the schedule API endpoint using DevTools:\n"
+            "1. Open https://lnb.fr/fr/stats-centre in your browser\n"
+            "2. Open DevTools → Network → XHR/Fetch\n"
+            "3. Navigate to schedule view for a season\n"
+            "4. Find the API request that returns game data\n"
+            "5. Set LNB_SCHEDULE_API_URL_TEMPLATE in html_scrapers.py\n"
+            "See: docs/lnb_game_level_investigation.md for detailed instructions"
+        )
+
+
+def _ensure_lnb_boxscore_api_configured() -> None:
+    """Validate that LNB boxscore API URL has been discovered and set."""
+    if not LNB_BOXSCORE_API_URL_TEMPLATE:
+        raise RuntimeError(
+            "LNB_BOXSCORE_API_URL_TEMPLATE is not configured.\n"
+            "You must discover the boxscore API endpoint using DevTools:\n"
+            "1. Open https://lnb.fr/fr/stats-centre in your browser\n"
+            "2. Click into a specific game's detail/stats page\n"
+            "3. Open DevTools → Network → XHR/Fetch\n"
+            "4. Find the API request that returns player boxscore data\n"
+            "5. Set LNB_BOXSCORE_API_URL_TEMPLATE in html_scrapers.py\n"
+            "See: docs/lnb_game_level_investigation.md for detailed instructions"
+        )
+
+
+def scrape_lnb_schedule_json(
+    json_data: dict,
+    season: str,
+) -> pd.DataFrame:
+    """
+    Parse LNB Stats Center schedule JSON into normalized DataFrame.
+
+    **REQUIRES IMPLEMENTATION**: This function is a skeleton that must be filled
+    with the actual JSON structure discovered via DevTools.
+
+    Args:
+        json_data: Raw JSON response from LNB schedule API
+        season: Season string (e.g., "2024-25")
+
+    Returns:
+        DataFrame with columns:
+        - LEAGUE: "LNB"
+        - SEASON: Season string
+        - GAME_ID: Unique game identifier
+        - GAME_DATE: Game date (datetime or string)
+        - HOME_TEAM: Home team name
+        - AWAY_TEAM: Away team name
+        - HOME_SCORE: Home score (None if not yet played)
+        - AWAY_SCORE: Away score (None if not yet played)
+        - GAME_URL: URL to game detail page (optional)
+        - COMPETITION: "Betclic ELITE" or other
+        - ROUND: Round/journée number (optional)
+
+    Implementation Steps (fill after DevTools discovery):
+        1. Identify which key holds the list of games:
+           >>> games = json_data["???"]  # TODO: fill from DevTools
+
+        2. For each game object, extract fields:
+           >>> game_id = game["???"]  # TODO: identify ID field
+           >>> date = game["???"]     # TODO: identify date field
+           >>> home_team = game["???"]  # TODO: identify home team field
+           >>> away_team = game["???"]  # TODO: identify away team field
+           >>> home_score = game.get("???")  # TODO: identify score fields
+           >>> away_score = game.get("???")
+
+        3. Build rows list and convert to DataFrame
+
+    Example JSON structure to discover:
+        {
+          "data": {
+            "games": [
+              {
+                "id": 12345,
+                "date": "2024-11-15T20:00:00Z",
+                "homeTeam": {"name": "ASVEL", "score": 85},
+                "awayTeam": {"name": "Monaco", "score": 78},
+                ...
+              }
+            ]
+          }
+        }
+
+    Note:
+        - All JSON key names marked with ??? are placeholders
+        - Discover actual structure via browser DevTools
+        - Save sample response to tools/lnb/sample_responses/ for reference
+    """
+    logger.info(f"Parsing LNB schedule JSON for season {season}")
+
+    # TODO: Replace this NotImplementedError once JSON structure is discovered
+    raise NotImplementedError(
+        "scrape_lnb_schedule_json: JSON structure not yet discovered.\n"
+        "Steps to implement:\n"
+        "1. Use DevTools to capture a sample schedule JSON response\n"
+        "2. Save it to tools/lnb/sample_responses/schedule_sample.json\n"
+        "3. Identify the JSON keys for games list, game_id, date, teams, scores\n"
+        "4. Implement the parsing logic in this function\n"
+        "5. Test with: scrape_lnb_schedule_json(sample_json, '2024-25')"
+    )
+
+    # TEMPLATE CODE (uncomment and fill after discovery):
+    # try:
+    #     # Extract games list from JSON
+    #     games = json_data["???"]  # TODO: fill actual key
+    #
+    #     rows = []
+    #     for game in games:
+    #         rows.append({
+    #             "LEAGUE": "LNB",
+    #             "SEASON": season,
+    #             "GAME_ID": str(game["???"]),  # TODO: ID field
+    #             "GAME_DATE": game["???"],     # TODO: date field
+    #             "HOME_TEAM": game["???"],     # TODO: home team field
+    #             "AWAY_TEAM": game["???"],     # TODO: away team field
+    #             "HOME_SCORE": game.get("???"),  # TODO: home score field
+    #             "AWAY_SCORE": game.get("???"),  # TODO: away score field
+    #             "GAME_URL": None,  # TODO: if URL available in JSON
+    #             "COMPETITION": "Betclic ELITE",
+    #             "ROUND": game.get("???"),  # TODO: round/journée if available
+    #         })
+    #
+    #     df = pd.DataFrame(rows)
+    #     logger.info(f"Parsed {len(df)} games from LNB schedule JSON")
+    #     return df
+    #
+    # except Exception as e:
+    #     logger.error(f"Failed to parse LNB schedule JSON: {e}")
+    #     return pd.DataFrame()
+
+
+def scrape_lnb_boxscore_json(
+    json_data: dict,
+    league: str,
+    season: str,
+    game_id: str,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Parse LNB Stats Center boxscore JSON into player_game and team_game DataFrames.
+
+    **REQUIRES IMPLEMENTATION**: This function is a skeleton that must be filled
+    with the actual JSON structure discovered via DevTools.
+
+    Args:
+        json_data: Raw JSON response from LNB boxscore API
+        league: League identifier (e.g., "LNB")
+        season: Season string (e.g., "2024-25")
+        game_id: Game identifier
+
+    Returns:
+        Tuple of (player_game_df, team_game_df):
+
+        player_game_df columns:
+        - LEAGUE, SEASON, GAME_ID
+        - TEAM, TEAM_ID (or just TEAM if no ID available)
+        - PLAYER_NAME, PLAYER_ID (if available)
+        - MIN, PTS, REB, AST, STL, BLK, TOV, PF
+        - FGM, FGA, FG_PCT, FG2M, FG2A, FG3M, FG3A, FTM, FTA, FT_PCT
+        - OREB, DREB (if available)
+        - Plus/minus, efficiency (if available)
+
+        team_game_df columns:
+        - Same as player_game but aggregated by TEAM
+        - One row per team (home + away)
+
+    Implementation Steps (fill after DevTools discovery):
+        1. Identify JSON structure for home/away teams:
+           >>> home_team = json_data["???"]["home"]  # TODO
+           >>> away_team = json_data["???"]["away"]  # TODO
+
+        2. Identify player roster keys:
+           >>> home_players = home_team["???"]["players"]  # TODO
+           >>> away_players = away_team["???"]["players"]  # TODO
+
+        3. For each player, extract stats:
+           >>> player_name = player["???"]  # TODO
+           >>> points = player["???"]       # TODO
+           >>> rebounds = player["???"]     # TODO
+           ... etc
+
+        4. Use LNB_COLUMN_MAP to normalize French stat names if needed
+
+        5. Aggregate team_game from player_game
+
+    Example JSON structure to discover:
+        {
+          "data": {
+            "home": {
+              "team": {"name": "ASVEL", "id": 123},
+              "players": [
+                {
+                  "name": "Player A",
+                  "minutes": "25:30",
+                  "points": 18,
+                  "rebounds": 7,
+                  "assists": 3,
+                  ...
+                }
+              ]
+            },
+            "away": {...}
+          }
+        }
+
+    Note:
+        - All JSON key names marked with ??? are placeholders
+        - Discover actual structure via browser DevTools
+        - Save sample response to tools/lnb/sample_responses/boxscore_sample.json
+        - Reuse LNB_COLUMN_MAP for French→English stat name mapping
+    """
+    logger.info(f"Parsing LNB boxscore JSON for game {game_id}")
+
+    # TODO: Replace this NotImplementedError once JSON structure is discovered
+    raise NotImplementedError(
+        "scrape_lnb_boxscore_json: JSON structure not yet discovered.\n"
+        "Steps to implement:\n"
+        "1. Use DevTools to capture a sample boxscore JSON response\n"
+        "2. Save it to tools/lnb/sample_responses/boxscore_sample.json\n"
+        "3. Identify the JSON keys for teams, players, stats\n"
+        "4. Map stat field names to standardized columns (use LNB_COLUMN_MAP)\n"
+        "5. Implement parsing logic in this function\n"
+        "6. Test with: scrape_lnb_boxscore_json(sample_json, 'LNB', '2024-25', '12345')"
+    )
+
+    # TEMPLATE CODE (uncomment and fill after discovery):
+    # try:
+    #     # Extract home and away team data
+    #     home_data = json_data["???"]  # TODO: find home team key
+    #     away_data = json_data["???"]  # TODO: find away team key
+    #
+    #     home_team_name = home_data["???"]  # TODO: team name field
+    #     away_team_name = away_data["???"]  # TODO: team name field
+    #
+    #     home_players = home_data["???"]  # TODO: players list field
+    #     away_players = away_data["???"]  # TODO: players list field
+    #
+    #     # Parse player rows
+    #     player_rows = []
+    #
+    #     for player in home_players:
+    #         row = {
+    #             "LEAGUE": league,
+    #             "SEASON": season,
+    #             "GAME_ID": game_id,
+    #             "TEAM": home_team_name,
+    #             "PLAYER_NAME": player["???"],  # TODO: player name field
+    #             "MIN": player.get("???"),      # TODO: minutes field
+    #             "PTS": player.get("???"),      # TODO: points field
+    #             "REB": player.get("???"),      # TODO: rebounds field
+    #             "AST": player.get("???"),      # TODO: assists field
+    #             # ... TODO: add all stat fields
+    #         }
+    #         player_rows.append(row)
+    #
+    #     for player in away_players:
+    #         row = {
+    #             "LEAGUE": league,
+    #             "SEASON": season,
+    #             "GAME_ID": game_id,
+    #             "TEAM": away_team_name,
+    #             "PLAYER_NAME": player["???"],  # TODO
+    #             # ... same as home
+    #         }
+    #         player_rows.append(row)
+    #
+    #     player_game_df = pd.DataFrame(player_rows)
+    #
+    #     # Aggregate team stats
+    #     numeric_cols = player_game_df.select_dtypes(include='number').columns.tolist()
+    #     team_game_df = player_game_df.groupby(
+    #         ["LEAGUE", "SEASON", "GAME_ID", "TEAM"],
+    #         as_index=False
+    #     )[numeric_cols].sum()
+    #
+    #     logger.info(f"Parsed {len(player_game_df)} player rows for game {game_id}")
+    #     return player_game_df, team_game_df
+    #
+    # except Exception as e:
+    #     logger.error(f"Failed to parse LNB boxscore JSON: {e}")
+    #     return pd.DataFrame(), pd.DataFrame()
+
+
+# ------------------------------------------------------------------------------
+# LNB Season-Level HTML Scrapers (Existing)
+# ------------------------------------------------------------------------------
+
 
 def scrape_lnb_player_season_html(season: str) -> pd.DataFrame:
     """

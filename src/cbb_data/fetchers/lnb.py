@@ -326,165 +326,322 @@ def fetch_lnb_player_season(
 def fetch_lnb_schedule(
     season: str = "2024",
 ) -> pd.DataFrame:
-    """Fetch LNB Pro A schedule via HTML scraping (OPTIONAL)
+    """Fetch LNB Pro A schedule via Stats Center JSON API (REQUIRES DEVTOOLS DISCOVERY)
 
-    **OPTIONAL HTML SCRAPER**: Attempts to scrape schedule from lnb.fr HTML.
-    May return empty DataFrame if page requires JavaScript rendering.
+    ❌ **NOT YET IMPLEMENTED** - Awaiting Stats Center API discovery.
 
-    **Alternatives if HTML fails**:
-    1. Use Selenium/Playwright for JavaScript rendering
-    2. Reverse-engineer internal APIs (see tools/lnb/README.md)
-    3. Manual CSV creation from website
+    **IMPLEMENTATION REQUIRED**: The LNB Stats Center is a JavaScript SPA that loads
+    schedule data via JSON APIs. You must discover the endpoint using DevTools.
+
+    **Discovery Steps**:
+    1. Open https://lnb.fr/fr/stats-centre in your browser
+    2. Open DevTools (F12) → Network tab → Filter: "XHR" or "Fetch"
+    3. Navigate to the schedule/calendar view for Betclic ELITE
+    4. Identify the API request that returns schedule data
+    5. Note the endpoint URL and query parameters
+    6. Save a sample response to tools/lnb/sample_responses/schedule_sample.json
+
+    **To Implement** (after discovery):
+    ```python
+    import requests
+    from .html_scrapers import (
+        LNB_SCHEDULE_API_URL_TEMPLATE,
+        _ensure_lnb_schedule_api_configured,
+        scrape_lnb_schedule_json,
+    )
+
+    # 1. Validate API URL is configured
+    _ensure_lnb_schedule_api_configured()
+
+    # 2. Build URL with season parameter
+    url = LNB_SCHEDULE_API_URL_TEMPLATE.format(season=season)
+
+    # 3. Fetch JSON from API
+    response = requests.get(url, timeout=30)
+    response.raise_for_status()
+    json_data = response.json()
+
+    # 4. Parse JSON using scrape_lnb_schedule_json
+    # (after implementing the JSON parsing logic in html_scrapers.py)
+    df = scrape_lnb_schedule_json(json_data, season)
+
+    return df
+    ```
 
     Args:
         season: Season year as string (e.g., "2024" for 2024-25 season)
 
     Returns:
-        DataFrame with schedule or empty DataFrame if scraping fails
+        Empty DataFrame (until API discovery complete)
 
-    Columns (if successful):
-        - LEAGUE: "LNB_PROA"
+    Expected Columns (after implementation):
+        - LEAGUE: "LNB"
         - SEASON: Season string
-        - COMPETITION: "LNB Pro A"
-        - GAME_ID: Game identifier
+        - COMPETITION: "Betclic ELITE"
+        - GAME_ID: Unique game identifier
         - GAME_DATE: Game date
-        - GAME_TIME: Game time
         - HOME_TEAM: Home team name
         - AWAY_TEAM: Away team name
-        - HOME_SCORE: Home score (if completed)
-        - AWAY_SCORE: Away score (if completed)
-        - ROUND: Round/journée number
-        - VENUE: Venue name (if available)
-        - GAME_URL: Link to game page
-        - PHASE: "Regular Season" or "Playoffs"
-        - SOURCE: "lnb_html_schedule"
+        - HOME_SCORE: Home score (None if not yet played)
+        - AWAY_SCORE: Away score (None if not yet played)
+        - ROUND: Round/journée number (optional)
+        - GAME_URL: Link to game detail page (optional)
 
-    Example:
-        >>> schedule = fetch_lnb_schedule("2024")
-        >>> if not schedule.empty:
-        ...     print(schedule[["GAME_DATE", "HOME_TEAM", "AWAY_TEAM"]].head())
-        ... else:
-        ...     print("Schedule scraping failed - may need JavaScript rendering")
+    Raises:
+        NotImplementedError: Always (until Stats Center API discovered)
+
+    See Also:
+        - docs/lnb_game_level_investigation.md: Complete investigation workflow
+        - html_scrapers.py: LNB_SCHEDULE_API_URL_TEMPLATE constant
+        - html_scrapers.py: scrape_lnb_schedule_json() skeleton function
+        - tools/lnb/api_discovery_helper.py: Endpoint testing tool
 
     Note:
-        - Scrapes from lnb.fr/pro-a/calendrier-resultats
-        - Returns empty DataFrame if JavaScript required
-        - French date/time formats parsed (12h30 → 12:30)
+        - The old HTML scraper (scrape_lnb_schedule_page) is still available
+          but likely returns empty due to JavaScript rendering
+        - Stats Center API is the preferred approach for reliable data
     """
     logger.info(f"Fetching LNB Pro A schedule: {season}")
 
-    try:
-        # Import HTML scraper
-        from .html_scrapers import scrape_lnb_schedule_page
-
-        # Attempt HTML scraping
-        df = scrape_lnb_schedule_page(season)
-
-        if df.empty:
-            logger.warning(
-                f"No schedule found for LNB Pro A {season}. "
-                "This may indicate:\n"
-                "1. JavaScript rendering required (HTML scraping insufficient)\n"
-                "2. Season not yet started or schedule not published\n"
-                "3. Website structure changed (update scraper)\n"
-                "4. Consider alternative methods:\n"
-                "   - Selenium/Playwright for JavaScript\n"
-                "   - API discovery (tools/lnb/README.md)\n"
-                "   - Manual CSV creation"
-            )
-
-        logger.info(f"Fetched {len(df)} LNB Pro A games")
-        return df
-
-    except Exception as e:
-        logger.error(f"Failed to fetch LNB Pro A schedule: {e}")
-        logger.warning(
-            "LNB Pro A schedule scraping failed. Consider:\n"
-            "1. Using Selenium/Playwright for JavaScript rendering\n"
-            "2. API discovery (see tools/lnb/README.md)\n"
-            "3. Manual CSV creation from website"
-        )
-    return pd.DataFrame(
-        columns=[
-            "GAME_ID",
-            "SEASON",
-            "GAME_DATE",
-            "HOME_TEAM",
-            "AWAY_TEAM",
-            "HOME_SCORE",
-            "AWAY_SCORE",
-            "LEAGUE",
-        ]
+    raise NotImplementedError(
+        "fetch_lnb_schedule: Stats Center API not yet discovered.\n"
+        "Steps to implement:\n"
+        "1. Use DevTools on https://lnb.fr/fr/stats-centre to find schedule API\n"
+        "2. Set LNB_SCHEDULE_API_URL_TEMPLATE in html_scrapers.py\n"
+        "3. Implement JSON parsing in scrape_lnb_schedule_json()\n"
+        "4. Replace this NotImplementedError with API fetch code\n"
+        "See: docs/lnb_game_level_investigation.md for detailed instructions"
     )
 
 
-def fetch_lnb_team_game(season: str = "2024") -> pd.DataFrame:
-    """Fetch LNB Pro A team game stats (REQUIRES INVESTIGATION)
+@retry_on_error(max_attempts=3, backoff_seconds=2.0)
+@cached_dataframe
+def fetch_lnb_player_game(
+    season: str = "2024",
+) -> pd.DataFrame:
+    """Fetch LNB Pro A player game stats (REQUIRES DEVTOOLS DISCOVERY)
 
-    ❌ **NOT YET IMPLEMENTED** - Awaiting investigation results.
+    ❌ **NOT YET IMPLEMENTED** - Awaiting Stats Center API discovery.
 
-    **INVESTIGATION REQUIRED**: See docs/lnb_game_level_investigation.md for details.
+    **IMPLEMENTATION REQUIRED**: Fetch player boxscores for all games in a season
+    by combining schedule API + boxscore API calls.
 
-    **Two Potential Implementation Routes**:
+    **Discovery Steps**:
+    1. Complete schedule API discovery first (see fetch_lnb_schedule)
+    2. Open https://lnb.fr/fr/stats-centre and navigate to a specific game
+    3. Open DevTools → Network → XHR/Fetch
+    4. Identify the API request that returns player boxscore/stats
+    5. Note the endpoint URL pattern (likely includes game_id)
+    6. Save sample response to tools/lnb/sample_responses/boxscore_sample.json
 
-    1. **Scenario 1: Stats Centre JSON API** (Most Likely)
-       - Azure-hosted API similar to other French leagues
-       - Expected endpoint: `lnbstatscenter.azurewebsites.net/api/games/{game_id}/stats`
-       - Would provide: Team box scores per game
-       - Historical depth: Likely 5+ years
+    **To Implement** (after discovery):
+    ```python
+    import requests
+    from .html_scrapers import (
+        LNB_BOXSCORE_API_URL_TEMPLATE,
+        _ensure_lnb_boxscore_api_configured,
+        scrape_lnb_boxscore_json,
+    )
 
-    2. **Scenario 2: FIBA LiveStats for FFBB**
-       - Use existing FIBA infrastructure (same as BCL/BAL/ABA/LKL)
-       - Aggregate from player_game data (same pattern as other FIBA leagues)
-       - Would provide: Team box scores + derived stats
-       - Historical depth: Varies by competition
+    # 1. Get schedule to find all game IDs
+    schedule_df = fetch_lnb_schedule(season)
+    if schedule_df.empty:
+        logger.warning("No schedule data, cannot fetch player_game")
+        return pd.DataFrame()
 
-    **TO INVESTIGATE**:
-    1. Open https://lnb.fr/pro-a/calendrier-resultats in browser
-    2. Click on a completed game
-    3. Open DevTools (F12) → Network tab → Filter: "XHR"
-    4. Look for API calls loading team stats
-    5. Document findings in docs/lnb_investigation_findings.md
+    # 2. Validate boxscore API is configured
+    _ensure_lnb_boxscore_api_configured()
 
-    **TO IMPLEMENT** (once investigation complete):
-    1. Update this function to call discovered API endpoint, OR
-    2. Wire into FIBA shared utilities if Scenario 2 applies, OR
-    3. Aggregate from fetch_lnb_player_game() data
+    # 3. Loop through games and fetch boxscores
+    all_player_games = []
+
+    for _, row in schedule_df.iterrows():
+        game_id = row["GAME_ID"]
+
+        # Build boxscore URL
+        url = LNB_BOXSCORE_API_URL_TEMPLATE.format(game_id=game_id)
+
+        # Fetch JSON
+        rate_limiter.acquire("lnb")  # Rate limiting
+        response = requests.get(url, timeout=30)
+        response.raise_for_status()
+        json_data = response.json()
+
+        # Parse boxscore
+        player_game_df, team_game_df = scrape_lnb_boxscore_json(
+            json_data, "LNB", season, game_id
+        )
+
+        if not player_game_df.empty:
+            all_player_games.append(player_game_df)
+
+    # 4. Concatenate all games
+    if all_player_games:
+        return pd.concat(all_player_games, ignore_index=True)
+    else:
+        return pd.DataFrame()
+    ```
 
     Args:
         season: Season year as string (e.g., "2024" for 2024-25 season)
 
     Returns:
-        Empty DataFrame (until implemented)
+        Empty DataFrame (until API discovery complete)
 
     Expected Columns (after implementation):
-        - LEAGUE: "LNB_PROA"
+        - LEAGUE: "LNB"
         - SEASON: Season string
-        - COMPETITION: "LNB Pro A"
         - GAME_ID: Game identifier
-        - TEAM_ID: Team identifier
-        - TEAM_NAME: Team name
-        - PTS, FGM, FGA, FG_PCT: Field goals
+        - TEAM: Team name
+        - TEAM_ID: Team identifier (if available)
+        - PLAYER_NAME: Player name
+        - PLAYER_ID: Player identifier (if available)
+        - MIN: Minutes played
+        - PTS: Points
+        - FGM, FGA, FG_PCT: Field goals
+        - FG2M, FG2A, FG2_PCT: 2-point field goals
+        - FG3M, FG3A, FG3_PCT: 3-point field goals
+        - FTM, FTA, FT_PCT: Free throws
+        - OREB, DREB, REB: Rebounds
+        - AST: Assists
+        - STL: Steals
+        - BLK: Blocks
+        - TOV: Turnovers
+        - PF: Personal fouls
+        - PLUS_MINUS: Plus/minus (if available)
+        - EFF: Efficiency rating (if available)
+
+    Raises:
+        NotImplementedError: Always (until Stats Center API discovered)
+
+    See Also:
+        - docs/lnb_game_level_investigation.md: Investigation workflow
+        - html_scrapers.py: LNB_BOXSCORE_API_URL_TEMPLATE constant
+        - html_scrapers.py: scrape_lnb_boxscore_json() skeleton function
+        - fetch_lnb_schedule(): Must be implemented first
+        - fetch_lnb_team_game(): Aggregated version
+
+    Note:
+        - Requires one API call per game (schedule.count() requests total)
+        - Use rate limiting (rate_limiter.acquire) between requests
+        - boxscore API should return both player and team stats
+    """
+    logger.info(f"Fetching LNB Pro A player_game: {season}")
+
+    raise NotImplementedError(
+        "fetch_lnb_player_game: Stats Center API not yet discovered.\n"
+        "Steps to implement:\n"
+        "1. Complete fetch_lnb_schedule implementation first\n"
+        "2. Use DevTools to find boxscore API endpoint for a single game\n"
+        "3. Set LNB_BOXSCORE_API_URL_TEMPLATE in html_scrapers.py\n"
+        "4. Implement JSON parsing in scrape_lnb_boxscore_json()\n"
+        "5. Replace this NotImplementedError with loop-over-schedule code\n"
+        "See: docs/lnb_game_level_investigation.md for detailed instructions"
+    )
+
+
+@retry_on_error(max_attempts=3, backoff_seconds=2.0)
+@cached_dataframe
+def fetch_lnb_team_game(season: str = "2024") -> pd.DataFrame:
+    """Fetch LNB Pro A team game stats (REQUIRES DEVTOOLS DISCOVERY)
+
+    ❌ **NOT YET IMPLEMENTED** - Awaiting Stats Center API discovery.
+
+    **IMPLEMENTATION NOTE**: Team-level stats are extracted from the same boxscore
+    API as player stats. Once `fetch_lnb_player_game()` is implemented, this function
+    can aggregate from player_game data or extract team_game_df directly.
+
+    **Implementation Option A: Aggregate from player_game** (simpler):
+    ```python
+    # Get player game data
+    player_game_df = fetch_lnb_player_game(season)
+
+    if player_game_df.empty:
+        return pd.DataFrame()
+
+    # Aggregate by GAME_ID + TEAM
+    numeric_cols = player_game_df.select_dtypes(include='number').columns.tolist()
+    team_game_df = player_game_df.groupby(
+        ["LEAGUE", "SEASON", "GAME_ID", "TEAM"],
+        as_index=False
+    )[numeric_cols].sum()
+
+    return team_game_df
+    ```
+
+    **Implementation Option B: Extract from boxscore loop** (more direct):
+    ```python
+    # Same loop as fetch_lnb_player_game, but collect team_game_df instead
+    import requests
+    from .html_scrapers import scrape_lnb_boxscore_json
+
+    schedule_df = fetch_lnb_schedule(season)
+    all_team_games = []
+
+    for _, row in schedule_df.iterrows():
+        game_id = row["GAME_ID"]
+        url = LNB_BOXSCORE_API_URL_TEMPLATE.format(game_id=game_id)
+
+        rate_limiter.acquire("lnb")
+        response = requests.get(url, timeout=30)
+        json_data = response.json()
+
+        player_game_df, team_game_df = scrape_lnb_boxscore_json(
+            json_data, "LNB", season, game_id
+        )
+
+        if not team_game_df.empty:
+            all_team_games.append(team_game_df)
+
+    return pd.concat(all_team_games, ignore_index=True) if all_team_games else pd.DataFrame()
+    ```
+
+    Args:
+        season: Season year as string (e.g., "2024" for 2024-25 season)
+
+    Returns:
+        Empty DataFrame (until API discovery complete)
+
+    Expected Columns (after implementation):
+        - LEAGUE: "LNB"
+        - SEASON: Season string
+        - GAME_ID: Game identifier
+        - TEAM: Team name
+        - TEAM_ID: Team identifier (if available)
+        - MIN: Total minutes (should be 200 for full game)
+        - PTS: Points
+        - FGM, FGA, FG_PCT: Field goals
         - FG2M, FG2A, FG2_PCT: 2-point field goals
         - FG3M, FG3A, FG3_PCT: 3-point field goals
         - FTM, FTA, FT_PCT: Free throws
         - OREB, DREB, REB: Rebounds
         - AST, STL, BLK, TOV, PF: Other stats
         - PLUS_MINUS: Point differential (if available)
-        - SOURCE: "lnb_statscenter_api" or "fiba_livestats_agg"
 
     Raises:
-        NotImplementedError: Always (until investigation complete)
+        NotImplementedError: Always (until Stats Center API discovered)
 
     See Also:
-        - docs/lnb_game_level_investigation.md: Complete investigation workflow
-        - tools/lnb/api_discovery_helper.py: Endpoint testing tool
-        - src/cbb_data/fetchers/fiba_html_common.py: FIBA shared utilities (Scenario 2)
+        - fetch_lnb_player_game(): Player-level implementation (must be done first)
+        - html_scrapers.py: scrape_lnb_boxscore_json() returns both player_game and team_game
+        - docs/lnb_game_level_investigation.md: Investigation workflow
+
+    Note:
+        - scrape_lnb_boxscore_json() returns BOTH player_game and team_game DataFrames
+        - team_game is automatically aggregated from player stats
+        - Choose Option A (aggregate) for simplicity or Option B (direct) for efficiency
     """
+    logger.info(f"Fetching LNB Pro A team_game: {season}")
+
     raise NotImplementedError(
-        "LNB team_game not yet implemented. "
-        "Investigation required to determine data source. "
-        "See docs/lnb_game_level_investigation.md for step-by-step guide."
+        "fetch_lnb_team_game: Stats Center API not yet discovered.\n"
+        "Steps to implement:\n"
+        "1. Complete fetch_lnb_player_game implementation first\n"
+        "2. Choose implementation option:\n"
+        "   Option A: Aggregate from fetch_lnb_player_game() [simpler]\n"
+        "   Option B: Extract team_game_df from boxscore loop [more efficient]\n"
+        "3. Replace this NotImplementedError with chosen implementation\n"
+        "See: docs/lnb_game_level_investigation.md for detailed instructions"
     )
 
 

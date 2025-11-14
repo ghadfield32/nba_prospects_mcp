@@ -1,5 +1,70 @@
 # PROJECT_LOG.md — College & International Basketball Dataset Puller
 
+## 2025-11-14 (Session Current+18) - LNB Game-Level Infrastructure: JSON API Skeletons ✅ COMPLETED
+
+**Summary**: Added complete LNB game-level data infrastructure skeleton with zero guessed selectors, following "DevTools-first" approach. Created TODO-marked constants, validation functions, and JSON parsing skeletons for schedule and boxscore APIs. Updated lnb.py fetch functions with detailed implementation guides. All code tested and ready for API discovery.
+
+**Core Deliverables** (2 files modified):
+
+### 1. LNB Game-Level Constants and JSON Scrapers (`html_scrapers.py`)
+- ✅ Added LNB Stats Center API constants section (lines 938-965):
+  - `LNB_SCHEDULE_API_URL_TEMPLATE` - Schedule API endpoint (TODO placeholder)
+  - `LNB_BOXSCORE_API_URL_TEMPLATE` - Boxscore API endpoint (TODO placeholder)
+  - `LNB_PBP_API_URL_TEMPLATE` - Optional PBP endpoint (TODO placeholder)
+  - `LNB_SHOTS_API_URL_TEMPLATE` - Optional shots endpoint (TODO placeholder)
+- ✅ Added validation functions (lines 968-995):
+  - `_ensure_lnb_schedule_api_configured()` - Validates schedule API with helpful error
+  - `_ensure_lnb_boxscore_api_configured()` - Validates boxscore API with helpful error
+- ✅ Added JSON parsing skeletons (lines 998-1251):
+  - `scrape_lnb_schedule_json()` - Parses schedule JSON with ??? placeholders for keys
+  - `scrape_lnb_boxscore_json()` - Parses boxscore JSON with ??? placeholders for keys
+  - Both include detailed implementation guides, example JSON structures, commented template code
+- **Result**: Complete parsing infrastructure ready for DevTools discovery, zero guessed endpoints/selectors
+
+### 2. LNB Fetch Function Implementation Guides (`lnb.py`)
+- ✅ Updated `fetch_lnb_schedule()` (lines 326-414):
+  - Changed from HTML scraping to JSON API approach
+  - Added detailed DevTools discovery steps
+  - Includes copy-paste ready implementation code in docstring
+  - Raises NotImplementedError with clear next steps
+- ✅ Added `fetch_lnb_player_game()` (lines 417-538):
+  - New function for game-level player stats
+  - Loop-over-schedule pattern (schedule → boxscore for each game)
+  - Includes rate limiting, error handling
+  - Detailed implementation template in docstring
+- ✅ Updated `fetch_lnb_team_game()` (lines 543-645):
+  - Two implementation options documented (aggregate vs direct extraction)
+  - References new boxscore infrastructure
+  - Clear guidance on which option to choose
+- ✅ Kept `fetch_lnb_pbp()` and `fetch_lnb_shots()` as existing NotImplementedError placeholders
+- **Result**: All fetch functions ready for implementation once APIs discovered
+
+**Files Modified** (2 files):
+- `src/cbb_data/fetchers/html_scrapers.py` - Added LNB JSON constants and skeleton scrapers (~320 lines)
+- `src/cbb_data/fetchers/lnb.py` - Updated schedule, added player_game, updated team_game (~300 lines modified)
+
+**Testing Summary**:
+- ✅ All LNB constants import successfully from html_scrapers.py
+- ✅ Validation functions correctly raise RuntimeError when APIs not configured
+- ✅ JSON scraper skeletons raise NotImplementedError with implementation guides
+- ✅ All fetch functions in lnb.py import and raise NotImplementedError with clear guidance
+- ✅ Retry decorators working correctly (3 retries with backoff)
+- ✅ golden_lnb.py compatible (no updates needed until APIs discovered)
+
+**Next Steps for User**:
+1. Open https://lnb.fr/fr/stats-centre in browser with DevTools
+2. Find schedule API → Set `LNB_SCHEDULE_API_URL_TEMPLATE` in html_scrapers.py
+3. Implement JSON parsing in `scrape_lnb_schedule_json()` (replace ??? with actual keys)
+4. Find boxscore API → Set `LNB_BOXSCORE_API_URL_TEMPLATE`
+5. Implement JSON parsing in `scrape_lnb_boxscore_json()`
+6. Update fetch functions in lnb.py to call the implemented scrapers
+7. Test with `fetch_lnb_schedule('2024')` and `fetch_lnb_player_game('2024')`
+8. Update golden_lnb.py methods to call actual fetch functions
+
+**Status**: LNB game-level infrastructure skeleton complete and tested ✅
+
+---
+
 ## 2025-11-14 (Session Current+17) - Optional Enhancements: Roster Layer, ACB Confidence Scoring, Lineup Skeleton ✅ COMPLETED
 
 **Summary**: Implemented three optional enhancements following 10-step methodology: (1) Added FIBA roster layer to golden season scripts with working extraction from player_game data, (2) Enhanced ACB competition tagging with confidence scoring (0.5-0.95) and 4 detection heuristics (date, round, URL, team count), (3) Expanded lineup reconstruction skeleton with 5 helper function stubs and 8-step algorithm guide.
