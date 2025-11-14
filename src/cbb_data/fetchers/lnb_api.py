@@ -473,6 +473,53 @@ class LNBClient:
         )
         return self._get("/stats/getCompetitionTeams", params=params)
 
+    def get_competitions_by_player(
+        self,
+        year: int,
+        person_external_id: int,
+    ) -> List[Dict[str, Any]]:
+        """Get all competitions a player participated in for a given year.
+
+        Endpoint: POST /competition/getCompetitionByPlayer
+
+        This is useful for driving player-specific queries: find which competitions
+        a player was active in, then fetch stats for each competition.
+
+        Args:
+            year: Season year (e.g., 2025 for 2024-25 season)
+            person_external_id: Player ID (integer)
+
+        Returns:
+            List of competition objects the player participated in:
+            - competition_id: UUID
+            - external_id: Integer competition ID
+            - name: Competition name
+            - division: Division details
+            - year: Season year
+            - team_id: Team the player was on
+            - etc.
+
+        Example:
+            >>> # Find all competitions for player 3586 in 2025
+            >>> comps = client.get_competitions_by_player(
+            ...     year=2025,
+            ...     person_external_id=3586
+            ... )
+            >>> for c in comps:
+            ...     print(f"{c['name']} (ID: {c['external_id']})")
+
+        See Also:
+            get_player_performance(): Get stats for player in a competition
+        """
+        payload = {
+            "year": year,
+            "person_external_id": person_external_id,
+        }
+        logger.info(
+            f"Fetching competitions for player: year={year}, person_external_id={person_external_id}"
+        )
+        return self._post("/competition/getCompetitionByPlayer", json=payload)
+
     # ========================================
     # Schedule / Calendar Endpoints
     # ========================================
@@ -587,6 +634,55 @@ class LNBClient:
             f"(from {season_start} to {season_end})"
         )
         return list(games_by_id.values())
+
+    def get_calendar_by_division(
+        self,
+        division_external_id: int,
+        year: int,
+    ) -> List[Dict[str, Any]]:
+        """Get full season calendar filtered by division.
+
+        Endpoint: GET /match/getCalenderByDivision?division_external_id=N&year=YYYY
+
+        This is an alternative to get_calendar() + iter_full_season_calendar() that
+        returns the full season schedule for a specific division in one call.
+
+        Note: Uses /match/ prefix (not /stats/ like other calendar endpoints).
+
+        Args:
+            division_external_id: Division ID (0=all, 1=Betclic ÉLITE, etc.)
+            year: Season year (e.g., 2025 for 2024-25 season)
+
+        Returns:
+            List of game objects with same structure as get_calendar():
+            - match_external_id: Match ID (primary key)
+            - match_time_utc: Kickoff time (UTC)
+            - match_date: Date string
+            - home_team_id / away_team_id: Team IDs
+            - competition_external_id: Competition ID
+            - round / phase: Stage info
+            - status: scheduled, finished, live, etc.
+
+        Example:
+            >>> # Get full 2024-25 Betclic ÉLITE schedule
+            >>> games = client.get_calendar_by_division(
+            ...     division_external_id=1,
+            ...     year=2025
+            ... )
+            >>> print(f"Season has {len(games)} games")
+
+        See Also:
+            get_calendar(): Date-range based calendar fetching
+            iter_full_season_calendar(): Full season via chunking
+        """
+        params = {
+            "division_external_id": division_external_id,
+            "year": year,
+        }
+        logger.info(
+            f"Fetching calendar by division: division={division_external_id}, year={year}"
+        )
+        return self._get("/match/getCalenderByDivision", params=params)
 
     # ========================================
     # Match Context Endpoints
@@ -757,6 +853,99 @@ class LNBClient:
             f"year={year}, extra_params={extra_params}"
         )
         return self._get("/stats/getPersonsLeaders", params=params)
+
+    # ========================================
+    # Alternative Stats Endpoints (/altrstats)
+    # ========================================
+
+    def get_player_performance(
+        self,
+        competition_external_id: int,
+        person_external_id: int,
+    ) -> Dict[str, Any]:
+        """Get detailed player performance stats for a competition.
+
+        Endpoint: POST /altrstats/getPerformancePersonV2
+
+        Returns comprehensive per-game and aggregate statistics for a player
+        within a specific competition (e.g., Betclic ÉLITE regular season).
+
+        Args:
+            competition_external_id: Competition ID (e.g., 302)
+            person_external_id: Player ID (integer)
+
+        Returns:
+            Player performance object with:
+            - games_played: Number of games
+            - per_game_stats: PTS, REB, AST, FG%, 3P%, FT%, etc.
+            - totals: Aggregate stats across all games
+            - advanced_metrics: PER, TS%, usage rate, etc. (if available)
+            - game_log: Per-game breakdown (if included in response)
+
+        Example:
+            >>> # Get player 3586 stats for competition 302
+            >>> perf = client.get_player_performance(
+            ...     competition_external_id=302,
+            ...     person_external_id=3586
+            ... )
+            >>> print(f"PPG: {perf['points_per_game']}")
+            >>> print(f"RPG: {perf['rebounds_per_game']}")
+            >>> print(f"APG: {perf['assists_per_game']}")
+
+        See Also:
+            get_competitions_by_player(): Find competitions for a player
+            get_standing(): Get team standings for a competition
+        """
+        payload = {
+            "competitionExternalId": competition_external_id,
+            "personExternalId": person_external_id,
+        }
+        logger.info(
+            f"Fetching player performance: competition={competition_external_id}, "
+            f"person={person_external_id}"
+        )
+        return self._post("/altrstats/getPerformancePersonV2", json=payload)
+
+    def get_standing(
+        self,
+        competition_external_id: int,
+    ) -> Dict[str, Any]:
+        """Get team standings/rankings for a competition.
+
+        Endpoint: POST /altrstats/getStanding
+
+        Returns the league table with wins, losses, points, and ranking for
+        all teams in a competition.
+
+        Args:
+            competition_external_id: Competition ID (e.g., 302)
+
+        Returns:
+            Standings object with:
+            - standings: List of team ranking objects
+              - team_id / team_external_id: Team identifiers
+              - team_name: Team name
+              - rank: Current position
+              - games_played: GP
+              - wins / losses: W-L record
+              - points_for / points_against: Scoring stats
+              - point_differential: +/-
+              - win_percentage: Win rate
+              - home_record / away_record: Split records (if available)
+
+        Example:
+            >>> standing = client.get_standing(competition_external_id=302)
+            >>> for team in standing['standings']:
+            ...     print(f"{team['rank']}. {team['team_name']}: "
+            ...           f"{team['wins']}-{team['losses']}")
+
+        See Also:
+            get_competition_teams(): Get team roster for a competition
+            get_player_performance(): Get player stats within a competition
+        """
+        payload = {"competitionExternalId": competition_external_id}
+        logger.info(f"Fetching standings for competition={competition_external_id}")
+        return self._post("/altrstats/getStanding", json=payload)
 
     # ========================================
     # Live Data Endpoints

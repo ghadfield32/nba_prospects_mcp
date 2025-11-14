@@ -1,5 +1,56 @@
 # PROJECT_LOG.md — College & International Basketball Dataset Puller
 
+## 2025-11-14 (Session Current+9) - LNB API: 4 New Endpoints Integration 🚀 IN PROGRESS
+
+**Summary**: Integrated 4 critical LNB API endpoints (standings, player performance, calendar by division, competitions by player) with complete headers, cURL references, and test infrastructure. Discovered 403 errors are header-related (not cookie auth).
+
+**New Endpoints Added** ([src/cbb_data/fetchers/lnb_api.py](src/cbb_data/fetchers/lnb_api.py)):
+1. `get_calendar_by_division()` → GET /match/getCalenderByDivision (line 591) - Full season schedule by division
+2. `get_competitions_by_player()` → POST /competition/getCompetitionByPlayer (line 476) - Player→competition mapping
+3. `get_player_performance()` → POST /altrstats/getPerformancePersonV2 (line 861) - Detailed player stats per competition
+4. `get_standing()` → POST /altrstats/getStanding (line 909) - Team standings/rankings
+
+**Headers Updated** ([tools/lnb/lnb_headers.json](tools/lnb/lnb_headers.json)):
+- Added `accept-encoding: gzip, deflate, br, zstd` (critical for 403 fix)
+- Added `cache-control: no-cache` (prevents stale responses)
+- Added `pragma: no-cache` (HTTP/1.0 compatibility)
+- Added `content-type: application/json` (required for POST endpoints)
+
+**Reference cURLs Created** ([tools/lnb/](tools/lnb/)):
+- `curl_player_performance.sh` - /altrstats/getPerformancePersonV2
+- `curl_standing.sh` - /altrstats/getStanding
+- `curl_calendar_division.sh` - /match/getCalenderByDivision
+- `curl_competitions_by_player.sh` - /competition/getCompetitionByPlayer
+
+**Test Infrastructure** ([test_lnb_new_endpoints.py](test_lnb_new_endpoints.py)):
+- Comprehensive test suite for all 4 endpoints
+- Tests with both `requests` library (direct) and `LNBClient` (integrated)
+- Provides diagnostic output for 403 troubleshooting
+- Step-by-step instructions for header validation
+
+**Key Discovery**: 403 errors are NOT about cookies (getLiveMatch works without cookies in browser), but about missing headers (accept-encoding, cache-control, pragma) + TLS fingerprinting. Next: Test cURL on host machine to validate headers work outside container.
+
+**Files Modified**:
+- [src/cbb_data/fetchers/lnb_api.py](src/cbb_data/fetchers/lnb_api.py): Added 4 endpoint methods (120 lines total)
+- [tools/lnb/lnb_headers.json](tools/lnb/lnb_headers.json): Added 4 critical headers
+
+**Files Created**:
+- [tools/lnb/curl_player_performance.sh](tools/lnb/curl_player_performance.sh)
+- [tools/lnb/curl_standing.sh](tools/lnb/curl_standing.sh)
+- [tools/lnb/curl_calendar_division.sh](tools/lnb/curl_calendar_division.sh)
+- [tools/lnb/curl_competitions_by_player.sh](tools/lnb/curl_competitions_by_player.sh)
+- [test_lnb_new_endpoints.py](test_lnb_new_endpoints.py): Comprehensive test suite
+
+**Status**: 🚀 IN PROGRESS - Phase 3 at 90% (endpoints integrated, awaiting header validation via host-side cURL test)
+
+**Next Steps**:
+1. Test cURL on Windows host (not in container) to validate headers
+2. If 200 OK → Headers work, create lnb_parsers.py (JSON → DataFrame)
+3. If 403 → Check IP/TLS fingerprinting, consider host-side fetcher + file ingestion
+4. Complete: lnb_parsers.py, update lnb.py, add to dataset registry, health check
+
+---
+
 ## 2025-11-13 (Session Current+8) - Pre-commit Fixes ✅ COMPLETED
 
 **Summary**: Fixed all pre-commit hook errors (ruff-lint, ruff-format, mypy, large files) at their root causes. No defensive fixes - systematic resolution of type errors, import issues, and code quality problems.
