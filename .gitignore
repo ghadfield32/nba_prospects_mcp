@@ -67,3 +67,8 @@ data/nbl_raw/
 
 # Redis dumps
 dump.rdb
+
+# API credentials and auth headers (contain cookies/tokens)
+tools/lnb/lnb_headers.json
+src/cbb_data/fetchers/lnb_headers.json
+**/lnb_headers.json

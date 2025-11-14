@@ -768,7 +768,9 @@ class LNBClient:
     ) -> List[Dict[str, Any]]:
         """Get current and upcoming live matches.
 
-        Endpoint: GET /stats/getLiveMatch
+        Endpoint: GET /match/getLiveMatch (discovered from DevTools)
+
+        Note: This endpoint uses /match/ prefix, not /stats/ like other endpoints.
 
         Returns:
             List of live/upcoming match objects with fields:
@@ -785,7 +787,7 @@ class LNBClient:
         """
         params = extra_params or {}
         logger.info("Fetching live matches")
-        return self._get("/stats/getLiveMatch", params=params)
+        return self._get("/match/getLiveMatch", params=params)
 
     # ========================================
     # Placeholder Endpoints (TODO: DevTools Discovery)
