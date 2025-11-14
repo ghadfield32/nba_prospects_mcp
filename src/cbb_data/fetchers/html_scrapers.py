@@ -461,51 +461,162 @@ def scrape_fiba_shot_chart_html(
 
 def scrape_acb_schedule_page(season: str) -> pd.DataFrame:
     """
-    Scrape ACB schedule/results page.
+    Scrape ACB (Liga Endesa) schedule/results page to extract games.
+
+    Scrapes the official ACB calendar/results pages to build a complete schedule
+    with game IDs, dates, teams, scores, and links to game centres.
 
     Args:
-        season: Season string (e.g., "2023-24")
+        season: Season ending year as string (e.g., "2024" for 2024-25 season)
+                ACB uses ending year in URLs (temporada_id/2025 for 2024-25)
 
     Returns:
-        DataFrame with ACB schedule
+        DataFrame with columns:
+        - LEAGUE: "ACB"
+        - SEASON: Season string
+        - GAME_ID: Extracted from game centre URL or generated
+        - GAME_DATE: Game date
+        - GAME_TIME: Game time (if available)
+        - HOME_TEAM: Home team name
+        - AWAY_TEAM: Away team name
+        - HOME_SCORE: Home team score (if final)
+        - AWAY_SCORE: Away team score (if final)
+        - ROUND: Round/jornada number
+        - VENUE: Venue name (if available)
+        - GAME_URL: Link to game centre page
+        - COMPETITION: "Liga Endesa"
+        - PHASE: "Regular Season" or "Playoffs"
+        - SOURCE: "acb_html_schedule"
 
-    Note: Implementation depends on actual ACB website structure.
-    This is a template that needs to be customized.
+    Example:
+        >>> df = scrape_acb_schedule_page("2024")
+        >>> print(df[["GAME_DATE", "HOME_TEAM", "AWAY_TEAM", "GAME_ID"]].head())
+
+    Note:
+        - ACB website structure may change; scraper may need updates
+        - Some games may not have game centres yet (future games)
+        - Game IDs are extracted from partido/{id} URLs when available
     """
     logger.info(f"Scraping ACB schedule for season {season}")
 
-    # ACB URL pattern (example - verify actual structure)
-    url = f"https://www.acb.com/resultados-clasificacion/calendario?season={season}"
+    # ACB uses ending year in URLs
+    # 2024-25 season = temporada_id/2025
+    temporada_id = int(season) if season.isdigit() else int(season.split("-")[1])
+
+    # ACB calendar/results URL
+    calendar_url = f"https://www.acb.com/resultados-clasificacion/ver/temporada_id/{temporada_id}"
 
     try:
         rate_limiter.wait()
-        response = requests.get(url, headers=DEFAULT_HEADERS, timeout=15)
+        response = requests.get(calendar_url, headers=DEFAULT_HEADERS, timeout=20)
         response.raise_for_status()
 
         soup = BeautifulSoup(response.content, "html.parser")
 
-        # Parse schedule table
-        # This is highly dependent on ACB's actual HTML structure
-        df = parse_html_table(
-            soup,
-            table_selector="table.fixtures",  # Adjust based on actual structure
-            column_map={
-                "Fecha": "GAME_DATE",
-                "Local": "HOME_TEAM",
-                "Visitante": "AWAY_TEAM",
-                "Resultado": "SCORE",
-                # Add more mappings as needed
-            }
-        )
+        games = []
 
-        # Add league and season
-        df["LEAGUE"] = "ACB"
-        df["SEASON"] = season
+        # ACB schedule is typically organized by rounds/jornadas
+        # Look for game containers - structure varies, so we use multiple strategies
 
-        # Generate game IDs (ACB-specific format)
-        df["GAME_ID"] = [f"ACB_{season}_{i:03d}" for i in range(len(df))]
+        # Strategy 1: Find all game links (partido pages)
+        game_links = soup.find_all("a", href=re.compile(r"/partido/\d+"))
 
-        logger.info(f"Scraped {len(df)} ACB games")
+        logger.info(f"Found {len(game_links)} ACB game links")
+
+        for link in game_links:
+            href = link.get("href", "")
+
+            # Extract game ID from URL (e.g., /partido/12345)
+            game_id_match = re.search(r"/partido/(\d+)", href)
+            game_id = f"ACB_{game_id_match.group(1)}" if game_id_match else None
+
+            # Build full URL
+            game_url = urljoin("https://www.acb.com", href)
+
+            # Try to extract context from parent container
+            parent = link.find_parent(["div", "tr", "li"])
+
+            if not parent:
+                # Minimal info - just save the game URL
+                games.append({
+                    "LEAGUE": "ACB",
+                    "SEASON": season,
+                    "GAME_ID": game_id,
+                    "GAME_DATE": None,
+                    "GAME_TIME": None,
+                    "HOME_TEAM": None,
+                    "AWAY_TEAM": None,
+                    "HOME_SCORE": None,
+                    "AWAY_SCORE": None,
+                    "ROUND": None,
+                    "VENUE": None,
+                    "GAME_URL": game_url,
+                    "COMPETITION": "Liga Endesa",
+                    "PHASE": "Regular Season",
+                    "SOURCE": "acb_html_schedule",
+                })
+                continue
+
+            # Extract all text from parent
+            parent_text = parent.get_text(separator=" ", strip=True)
+
+            # Extract date (various Spanish formats)
+            # e.g., "12/10/2024", "12-10-2024", "12.10.2024"
+            date_match = re.search(r"(\d{1,2}[\./-]\d{1,2}[\./-]\d{2,4})", parent_text)
+            game_date = date_match.group(1) if date_match else None
+
+            # Extract time (e.g., "20:30", "18:00")
+            time_match = re.search(r"(\d{1,2}:\d{2})", parent_text)
+            game_time = time_match.group(1) if time_match else None
+
+            # Extract score (e.g., "85-72", "85 - 72", "85:72")
+            score_match = re.search(r"(\d{1,3})\s*[-:]\s*(\d{1,3})", parent_text)
+            home_score = int(score_match.group(1)) if score_match else None
+            away_score = int(score_match.group(2)) if score_match else None
+
+            # Extract round/jornada (e.g., "Jornada 5", "J.5")
+            round_match = re.search(r"J(?:ornada)?[\s\.]?(\d+)", parent_text, re.IGNORECASE)
+            round_num = round_match.group(1) if round_match else None
+
+            # Extract team names - look for team name elements
+            team_elements = parent.find_all(["span", "div"], class_=re.compile(r"team|equipo", re.IGNORECASE))
+
+            if len(team_elements) >= 2:
+                home_team = team_elements[0].get_text(strip=True)
+                away_team = team_elements[1].get_text(strip=True)
+            else:
+                # Fallback: try to extract from link text
+                link_text = link.get_text(strip=True)
+                # Pattern: "Team A vs Team B" or "Team A - Team B"
+                vs_match = re.search(r"(.+?)\s+(?:vs|v\.|-)?\s+(.+)", link_text)
+                home_team = vs_match.group(1).strip() if vs_match else None
+                away_team = vs_match.group(2).strip() if vs_match else None
+
+            games.append({
+                "LEAGUE": "ACB",
+                "SEASON": season,
+                "GAME_ID": game_id,
+                "GAME_DATE": game_date,
+                "GAME_TIME": game_time,
+                "HOME_TEAM": home_team,
+                "AWAY_TEAM": away_team,
+                "HOME_SCORE": home_score,
+                "AWAY_SCORE": away_score,
+                "ROUND": round_num,
+                "VENUE": None,  # Can be extracted if present
+                "GAME_URL": game_url,
+                "COMPETITION": "Liga Endesa",
+                "PHASE": "Regular Season",  # Can be refined if playoffs indicated
+                "SOURCE": "acb_html_schedule",
+            })
+
+        df = pd.DataFrame(games)
+
+        # Remove duplicates (same game might be linked multiple times)
+        if not df.empty:
+            df = df.drop_duplicates(subset=["GAME_ID"], keep="first")
+
+        logger.info(f"Extracted {len(df)} unique ACB games from schedule")
 
         return df
 
@@ -514,54 +625,480 @@ def scrape_acb_schedule_page(season: str) -> pd.DataFrame:
         return pd.DataFrame()
 
 
+def scrape_acb_game_centre(game_url: str, game_id: str = None) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Scrape ACB game centre page to extract boxscore data.
+
+    Parses individual game pages to extract player and team statistics from
+    boxscore tables. Returns both player-level and team-level data.
+
+    Args:
+        game_url: URL of ACB game centre page (e.g., https://www.acb.com/partido/12345)
+        game_id: Optional game ID (extracted from URL if not provided)
+
+    Returns:
+        Tuple of (player_game_df, team_game_df):
+        - player_game_df: DataFrame with player box scores
+          Columns: GAME_ID, TEAM, PLAYER_NAME, MIN, PTS, FGM, FGA, FG3M, FG3A,
+                   FTM, FTA, OREB, DREB, REB, AST, STL, BLK, TOV, PF, PLUS_MINUS
+        - team_game_df: DataFrame with team totals
+          Columns: GAME_ID, TEAM, MIN, PTS, FGM, FGA, etc. (same structure)
+
+    Example:
+        >>> player_df, team_df = scrape_acb_game_centre("https://www.acb.com/partido/12345")
+        >>> print(f"Players: {len(player_df)}, Teams: {len(team_df)}")
+
+    Note:
+        - Returns empty DataFrames if scraping fails
+        - ACB boxscores have two tables (one per team)
+        - Table structure may vary by season - adjust selectors as needed
+    """
+    if not game_id:
+        # Extract game ID from URL
+        match = re.search(r"/partido/(\d+)", game_url)
+        game_id = f"ACB_{match.group(1)}" if match else None
+
+    logger.info(f"Scraping ACB game centre: {game_id}")
+
+    try:
+        rate_limiter.wait()
+        response = requests.get(game_url, headers=DEFAULT_HEADERS, timeout=20)
+        response.raise_for_status()
+
+        soup = BeautifulSoup(response.content, "html.parser")
+
+        # Find boxscore tables - typically 2 tables (home + away)
+        # ACB uses various class names, so we search flexibly
+        boxscore_tables = soup.find_all("table", class_=re.compile(r"stats|boxscore|estadisticas", re.IGNORECASE))
+
+        if not boxscore_tables:
+            # Fallback: find all tables and filter by size
+            all_tables = soup.find_all("table")
+            boxscore_tables = [t for t in all_tables if len(t.find_all("tr")) > 5]
+
+        logger.info(f"Found {len(boxscore_tables)} potential boxscore tables")
+
+        all_player_stats = []
+        all_team_stats = []
+
+        for table_idx, table in enumerate(boxscore_tables[:2]):  # Limit to first 2 tables
+            # Extract team name from context
+            team_header = table.find_previous(["h2", "h3", "div"], class_=re.compile(r"team|equipo", re.IGNORECASE))
+            team_name = team_header.get_text(strip=True) if team_header else f"Team {table_idx + 1}"
+
+            # Parse table to DataFrame
+            df = parse_html_table(table)
+
+            if df.empty:
+                continue
+
+            # Common ACB column patterns (Spanish)
+            column_map = {
+                "Jugador": "PLAYER_NAME",
+                "Player": "PLAYER_NAME",
+                "Nombre": "PLAYER_NAME",
+                "Min": "MIN",
+                "Minutos": "MIN",
+                "Puntos": "PTS",
+                "Pts": "PTS",
+                "T2": "FG2M-FG2A",  # May need splitting
+                "T3": "FG3M-FG3A",
+                "TC": "FGM-FGA",  # Total field goals
+                "TL": "FTM-FTA",  # Free throws
+                "RO": "OREB",  # Offensive rebounds
+                "RD": "DREB",  # Defensive rebounds
+                "RT": "REB",   # Total rebounds
+                "Rebotes": "REB",
+                "AS": "AST",
+                "Asistencias": "AST",
+                "BR": "STL",  # Steals (balones recuperados)
+                "Robos": "STL",
+                "BP": "TOV",  # Turnovers (balones perdidos)
+                "Pérdidas": "TOV",
+                "TAP": "BLK",  # Blocks (tapones)
+                "FC": "PF",  # Personal fouls (faltas cometidas)
+                "Faltas": "PF",
+                "+/-": "PLUS_MINUS",
+                "Val": "EFF",  # Efficiency rating (valoración)
+            }
+
+            # Apply column mapping
+            df = df.rename(columns={k: v for k, v in column_map.items() if k in df.columns})
+
+            # Add metadata
+            df["GAME_ID"] = game_id
+            df["TEAM"] = team_name
+
+            # Separate totals row (usually last row or marked as "TOTAL")
+            totals_row = None
+            if not df.empty:
+                last_row = df.iloc[-1]
+                if isinstance(last_row.get("PLAYER_NAME"), str):
+                    if "total" in last_row["PLAYER_NAME"].lower():
+                        totals_row = df.iloc[[-1]].copy()
+                        df = df.iloc[:-1]  # Remove totals from player stats
+
+            # Process makes/attempts columns (e.g., "5/10" -> FGM=5, FGA=10)
+            for col in ["FGM-FGA", "FG2M-FG2A", "FG3M-FG3A", "FTM-FTA"]:
+                if col in df.columns:
+                    made_col = col.split("-")[0]
+                    attempt_col = col.split("-")[1]
+
+                    # Split "M/A" format
+                    split_cols = df[col].astype(str).str.split("/", expand=True)
+                    if split_cols.shape[1] == 2:
+                        df[made_col] = pd.to_numeric(split_cols[0], errors="coerce").fillna(0)
+                        df[attempt_col] = pd.to_numeric(split_cols[1], errors="coerce").fillna(0)
+
+                    df = df.drop(columns=[col])
+
+            all_player_stats.append(df)
+
+            if totals_row is not None:
+                all_team_stats.append(totals_row)
+
+        # Combine all player stats
+        if all_player_stats:
+            player_game_df = pd.concat(all_player_stats, ignore_index=True)
+        else:
+            player_game_df = pd.DataFrame()
+
+        # Combine team stats
+        if all_team_stats:
+            team_game_df = pd.concat(all_team_stats, ignore_index=True)
+        else:
+            team_game_df = pd.DataFrame()
+
+        logger.info(f"Extracted {len(player_game_df)} player stats, {len(team_game_df)} team stats")
+
+        return player_game_df, team_game_df
+
+    except Exception as e:
+        logger.error(f"Failed to scrape ACB game centre {game_id}: {e}")
+        return pd.DataFrame(), pd.DataFrame()
+
+
 # ==============================================================================
 # LNB HTML Scrapers
 # ==============================================================================
 
 
-def scrape_lnb_stats_table(stats_url: str, league: str = "LNB", season: str = None) -> pd.DataFrame:
+def scrape_lnb_player_season_html(season: str) -> pd.DataFrame:
     """
-    Scrape LNB Stats Centre table.
+    Scrape LNB Pro A player season statistics from Stats Centre HTML tables.
 
-    Generic stats table scraper for LNB player/team season stats.
+    Parses the official LNB Pro A statistics page to extract comprehensive
+    player season data including scoring, rebounding, assists, efficiency, etc.
 
     Args:
-        stats_url: URL of stats page
-        league: League code (default: "LNB")
-        season: Season string
+        season: Season year as string (e.g., "2024" for 2024-25 season)
 
     Returns:
-        DataFrame with stats
+        DataFrame with columns:
+        - LEAGUE: "LNB_PROA"
+        - SEASON: Season string
+        - PLAYER_NAME: Player name
+        - TEAM: Team name
+        - GP: Games played
+        - GS: Games started (if available)
+        - MIN: Total minutes
+        - MIN_PG: Minutes per game
+        - PTS: Total points
+        - PTS_PG: Points per game
+        - FGM, FGA, FG_PCT: Field goals
+        - FG3M, FG3A, FG3_PCT: Three pointers
+        - FTM, FTA, FT_PCT: Free throws
+        - OREB, DREB, REB, REB_PG: Rebounds
+        - AST, AST_PG: Assists
+        - STL, STL_PG: Steals
+        - BLK, BLK_PG: Blocks
+        - TOV, TOV_PG: Turnovers
+        - PF: Personal fouls
+        - EFF: Efficiency rating
+        - SOURCE: "lnb_html_playerstats"
 
     Example:
-        >>> url = "https://lnb.fr/stats/joueurs?season=2023-24"
-        >>> df = scrape_lnb_stats_table(url, "LNB", "2023-24")
+        >>> df = scrape_lnb_player_season_html("2024")
+        >>> top_scorers = df.nlargest(10, "PTS_PG")
+        >>> print(top_scorers[["PLAYER_NAME", "TEAM", "PTS_PG"]])
+
+    Note:
+        - LNB website may use JavaScript for some tables - check if Selenium needed
+        - Column names are in French - mapping to English provided
+        - Stats page URL structure may change per season
     """
-    logger.info(f"Scraping LNB stats from: {stats_url}")
+    logger.info(f"Scraping LNB Pro A player season stats for {season}")
+
+    # LNB Pro A stats URL - adjust for actual structure
+    # The site has different views; we want the full per-game stats table
+    stats_url = f"https://www.lnb.fr/pro-a/statistiques"
 
     try:
         rate_limiter.wait()
-        response = requests.get(stats_url, headers=DEFAULT_HEADERS, timeout=15)
+        response = requests.get(stats_url, headers=DEFAULT_HEADERS, timeout=20)
         response.raise_for_status()
 
         soup = BeautifulSoup(response.content, "html.parser")
 
-        # Find stats table (adjust selector based on actual structure)
-        df = parse_html_table(
-            soup,
-            table_selector="table.stats",  # Adjust based on actual structure
-        )
+        # LNB player stats are typically in a large HTML table
+        # Find the main stats table - try multiple selectors
+        table = None
 
-        # Add league and season
-        if not df.empty:
-            df["LEAGUE"] = league
-            if season:
-                df["SEASON"] = season
+        # Try common class names
+        for selector in ["table.stats-table", "table.statistiques", "table", "#player-stats-table"]:
+            table = soup.select_one(selector)
+            if table:
+                logger.info(f"Found table with selector: {selector}")
+                break
 
-        logger.info(f"Scraped {len(df)} rows from LNB stats table")
+        if not table:
+            logger.warning("No stats table found on page")
+            return pd.DataFrame()
+
+        # Parse table
+        df = parse_html_table(table)
+
+        if df.empty:
+            logger.warning("Parsed table is empty")
+            return pd.DataFrame()
+
+        logger.info(f"Parsed table with {len(df)} rows and {len(df.columns)} columns")
+
+        # LNB column mapping (French → English)
+        column_map = {
+            "Joueur": "PLAYER_NAME",
+            "Player": "PLAYER_NAME",
+            "Nom": "PLAYER_NAME",
+            "Équipe": "TEAM",
+            "Team": "TEAM",
+            "Equipe": "TEAM",
+            "MJ": "GP",  # Matches jouées (games played)
+            "Matches": "GP",
+            "TC": "GS",  # Titularisations (games started)
+            "Min": "MIN",
+            "Minutes": "MIN",
+            "Pts": "PTS",
+            "Points": "PTS",
+            "2PTS": "FG2M-FG2A",
+            "3PTS": "FG3M-FG3A",
+            "LF": "FTM-FTA",  # Lancers francs (free throws)
+            "RO": "OREB",  # Rebonds offensifs
+            "RD": "DREB",  # Rebonds défensifs
+            "RT": "REB",   # Rebonds totaux
+            "Rebonds": "REB",
+            "PD": "AST",  # Passes décisives (assists)
+            "Passes": "AST",
+            "Int": "STL",  # Interceptions (steals)
+            "CT": "BLK",  # Contres (blocks)
+            "BP": "TOV",  # Balles perdues (turnovers)
+            "Pertes": "TOV",
+            "FP": "PF",  # Fautes personnelles (personal fouls)
+            "Fautes": "PF",
+            "Eval": "EFF",  # Évaluation (efficiency)
+            "+/-": "PLUS_MINUS",
+        }
+
+        # Apply column mapping
+        df = df.rename(columns={k: v for k, v in column_map.items() if k in df.columns})
+
+        # Process makes/attempts columns (e.g., "5/10" or "5-10")
+        for col in ["FG2M-FG2A", "FG3M-FG3A", "FTM-FTA"]:
+            if col in df.columns:
+                made_col = col.split("-")[0]
+                attempt_col = col.split("-")[1]
+
+                # Split on / or -
+                split_cols = df[col].astype(str).str.split(r"[/-]", expand=True)
+                if split_cols.shape[1] == 2:
+                    df[made_col] = pd.to_numeric(split_cols[0], errors="coerce").fillna(0)
+                    df[attempt_col] = pd.to_numeric(split_cols[1], errors="coerce").fillna(0)
+
+                df = df.drop(columns=[col])
+
+        # Calculate FGM/FGA from 2PT + 3PT if needed
+        if "FG2M" in df.columns and "FG3M" in df.columns and "FGM" not in df.columns:
+            df["FGM"] = df["FG2M"] + df["FG3M"]
+            df["FGA"] = df["FG2A"] + df["FG3A"]
+
+        # Calculate per-game stats if not present
+        if "GP" in df.columns:
+            gp = df["GP"].replace(0, 1)  # Avoid division by zero
+
+            for stat in ["MIN", "PTS", "REB", "AST", "STL", "BLK", "TOV", "PF"]:
+                if stat in df.columns and f"{stat}_PG" not in df.columns:
+                    df[f"{stat}_PG"] = (df[stat] / gp).round(1)
+
+        # Calculate shooting percentages if not present
+        if "FGM" in df.columns and "FGA" in df.columns and "FG_PCT" not in df.columns:
+            df["FG_PCT"] = (df["FGM"] / df["FGA"].replace(0, 1) * 100).round(1)
+
+        if "FG3M" in df.columns and "FG3A" in df.columns and "FG3_PCT" not in df.columns:
+            df["FG3_PCT"] = (df["FG3M"] / df["FG3A"].replace(0, 1) * 100).round(1)
+
+        if "FTM" in df.columns and "FTA" in df.columns and "FT_PCT" not in df.columns:
+            df["FT_PCT"] = (df["FTM"] / df["FTA"].replace(0, 1) * 100).round(1)
+
+        # Add metadata
+        df["LEAGUE"] = "LNB_PROA"
+        df["SEASON"] = season
+        df["COMPETITION"] = "LNB Pro A"
+        df["SOURCE"] = "lnb_html_playerstats"
+
+        # Filter out header/footer rows that may have been included
+        if "PLAYER_NAME" in df.columns:
+            df = df[df["PLAYER_NAME"].notna()]
+            df = df[~df["PLAYER_NAME"].str.contains("Joueur|Player|Total", case=False, na=False)]
+
+        logger.info(f"Extracted {len(df)} LNB player season stats")
 
         return df
 
     except Exception as e:
-        logger.error(f"Failed to scrape LNB stats: {e}")
+        logger.error(f"Failed to scrape LNB player season stats: {e}")
+        return pd.DataFrame()
+
+
+def scrape_lnb_schedule_page(season: str) -> pd.DataFrame:
+    """
+    Scrape LNB Pro A schedule/results page.
+
+    **OPTIONAL**: This function is a best-effort scraper for LNB schedule data.
+    LNB schedule pages may be JavaScript-heavy; if this returns empty, consider:
+    1. Using Selenium/Playwright for JavaScript rendering
+    2. Reverse-engineering internal APIs (see tools/lnb/README.md)
+    3. Manual CSV creation from website
+
+    Args:
+        season: Season year as string (e.g., "2024" for 2024-25 season)
+
+    Returns:
+        DataFrame with schedule or empty DataFrame if scraping fails
+
+    Columns (if successful):
+        - LEAGUE: "LNB_PROA"
+        - SEASON: Season string
+        - GAME_ID: Generated or extracted game ID
+        - GAME_DATE: Game date
+        - GAME_TIME: Game time
+        - HOME_TEAM: Home team
+        - AWAY_TEAM: Away team
+        - HOME_SCORE: Home score (if final)
+        - AWAY_SCORE: Away score (if final)
+        - ROUND: Round number
+        - VENUE: Venue name
+        - GAME_URL: Link to game page
+        - SOURCE: "lnb_html_schedule"
+
+    Example:
+        >>> df = scrape_lnb_schedule_page("2024")
+        >>> if not df.empty:
+        ...     print(df[["GAME_DATE", "HOME_TEAM", "AWAY_TEAM"]].head())
+
+    Note:
+        Returns empty DataFrame if:
+        - Page requires JavaScript execution
+        - HTML structure has changed
+        - No games found for season
+    """
+    logger.info(f"Scraping LNB Pro A schedule for {season}")
+
+    # LNB Pro A schedule URL (verify actual structure)
+    schedule_url = f"https://www.lnb.fr/pro-a/calendrier-resultats"
+
+    try:
+        rate_limiter.wait()
+        response = requests.get(schedule_url, headers=DEFAULT_HEADERS, timeout=20)
+        response.raise_for_status()
+
+        soup = BeautifulSoup(response.content, "html.parser")
+
+        games = []
+
+        # Look for game links or containers
+        # LNB typically uses match cards or table rows
+        game_containers = soup.find_all(["div", "tr"], class_=re.compile(r"match|game|rencontre", re.IGNORECASE))
+
+        if not game_containers:
+            # Try finding links to individual games
+            game_links = soup.find_all("a", href=re.compile(r"/match/|/rencontre/"))
+            game_containers = [link.find_parent(["div", "tr"]) for link in game_links if link.find_parent(["div", "tr"])]
+
+        logger.info(f"Found {len(game_containers)} potential game containers")
+
+        for idx, container in enumerate(game_containers):
+            if not container:
+                continue
+
+            # Extract text from container
+            container_text = container.get_text(separator=" ", strip=True)
+
+            # Extract date (French format: "12/10/2024" or "12 octobre 2024")
+            date_match = re.search(r"(\d{1,2}[\./-]\d{1,2}[\./-]\d{2,4})", container_text)
+            game_date = date_match.group(1) if date_match else None
+
+            # Extract time
+            time_match = re.search(r"(\d{1,2}h\d{2}|\d{1,2}:\d{2})", container_text)
+            game_time = time_match.group(1).replace("h", ":") if time_match else None
+
+            # Extract score
+            score_match = re.search(r"(\d{1,3})\s*[-:]\s*(\d{1,3})", container_text)
+            home_score = int(score_match.group(1)) if score_match else None
+            away_score = int(score_match.group(2)) if score_match else None
+
+            # Extract round
+            round_match = re.search(r"J\.?\s*(\d+)|Journée\s*(\d+)", container_text, re.IGNORECASE)
+            round_num = (round_match.group(1) or round_match.group(2)) if round_match else None
+
+            # Extract team names - challenging without knowing structure
+            # Look for team name elements
+            team_elements = container.find_all(["span", "div"], class_=re.compile(r"team|equipe", re.IGNORECASE))
+
+            if len(team_elements) >= 2:
+                home_team = team_elements[0].get_text(strip=True)
+                away_team = team_elements[1].get_text(strip=True)
+            else:
+                home_team = None
+                away_team = None
+
+            # Extract game URL
+            game_link = container.find("a", href=re.compile(r"/match/|/rencontre/"))
+            game_url = urljoin("https://www.lnb.fr", game_link.get("href")) if game_link else None
+
+            # Generate game ID
+            game_id = f"LNB_{season}_{idx+1:03d}"
+            if game_link:
+                id_match = re.search(r"/(?:match|rencontre)/(\d+)", game_link.get("href", ""))
+                if id_match:
+                    game_id = f"LNB_{id_match.group(1)}"
+
+            games.append({
+                "LEAGUE": "LNB_PROA",
+                "SEASON": season,
+                "GAME_ID": game_id,
+                "GAME_DATE": game_date,
+                "GAME_TIME": game_time,
+                "HOME_TEAM": home_team,
+                "AWAY_TEAM": away_team,
+                "HOME_SCORE": home_score,
+                "AWAY_SCORE": away_score,
+                "ROUND": round_num,
+                "VENUE": None,
+                "GAME_URL": game_url,
+                "COMPETITION": "LNB Pro A",
+                "PHASE": "Regular Season",
+                "SOURCE": "lnb_html_schedule",
+            })
+
+        df = pd.DataFrame(games)
+
+        # Remove duplicates
+        if not df.empty:
+            df = df.drop_duplicates(subset=["GAME_ID"], keep="first")
+
+        logger.info(f"Extracted {len(df)} LNB games from schedule")
+
+        return df
+
+    except Exception as e:
+        logger.error(f"Failed to scrape LNB schedule: {e}")
         return pd.DataFrame()

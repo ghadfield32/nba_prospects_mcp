@@ -400,84 +400,125 @@ def fetch_acb_team_season(
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
 @cached_dataframe
 def fetch_acb_schedule(
-    season: str = "2024-25",
+    season: str = "2024",
     season_type: str = "Regular Season",
 ) -> pd.DataFrame:
-    """Fetch ACB schedule (placeholder)
+    """Fetch ACB (Liga Endesa) schedule via HTML scraping
 
-    Note: Requires HTML/API parsing implementation. Currently returns empty
-    DataFrame with correct schema.
+    **HTML-FIRST APPROACH**: Scrapes acb.com calendar/results pages to build
+    complete schedule with game IDs, dates, teams, scores, and game centre links.
 
     Args:
-        season: Season string (e.g., "2024-25")
-        season_type: Season type ("Regular Season", "Playoffs")
+        season: Season ending year as string (e.g., "2024" for 2024-25 season)
+                ACB uses ending year in URLs (temporada_id/2025 for 2024-25)
+        season_type: Season type ("Regular Season" or "Playoffs")
+                    Note: Currently filters by PHASE column after scraping
 
     Returns:
         DataFrame with game schedule
 
     Columns:
-        - GAME_ID: Unique game identifier
-        - SEASON: Season string
-        - GAME_DATE: Game date/time
-        - HOME_TEAM_ID: Home team ID
-        - HOME_TEAM: Home team name
-        - AWAY_TEAM_ID: Away team ID
-        - AWAY_TEAM: Away team name
-        - HOME_SCORE: Home team score
-        - AWAY_SCORE: Away team score
-        - VENUE: Arena name
         - LEAGUE: "ACB"
+        - SEASON: Season string
+        - GAME_ID: ACB game ID (extracted from partido URLs)
+        - GAME_DATE: Game date
+        - GAME_TIME: Game time
+        - HOME_TEAM: Home team name
+        - HOME_TEAM_ID: Home team ID (same as name for ACB)
+        - AWAY_TEAM: Away team name
+        - AWAY_TEAM_ID: Away team ID (same as name for ACB)
+        - HOME_SCORE: Home team score (if completed)
+        - AWAY_SCORE: Away team score (if completed)
+        - ROUND: Round/jornada number
+        - VENUE: Venue name (if available)
+        - GAME_URL: Link to game centre page
+        - COMPETITION: "Liga Endesa"
+        - PHASE: "Regular Season" or "Playoffs"
+        - SOURCE: "acb_html_schedule"
 
-    TODO: Implement ACB schedule scraping
-    - Check ACB website for JSON endpoints
-    - Check network tab in browser for API calls
+    Example:
+        >>> schedule = fetch_acb_schedule("2024")
+        >>> print(f"Found {len(schedule)} ACB games")
+        >>> print(schedule[["GAME_DATE", "HOME_TEAM", "AWAY_TEAM"]].head())
+
+    Note:
+        - Scrapes from acb.com/resultados-clasificacion/ver/temporada_id/{year}
+        - May encounter 403 errors if website blocks automated requests
+        - Returns empty DataFrame if scraping fails
     """
     logger.info(f"Fetching ACB schedule: {season}, {season_type}")
 
-    # TODO: Implement scraping/API logic
-    logger.warning("ACB schedule fetching requires implementation. " "Returning empty DataFrame.")
+    try:
+        # Import HTML scraper
+        from .html_scrapers import scrape_acb_schedule_page
 
-    df = pd.DataFrame(
-        columns=[
-            "GAME_ID",
-            "SEASON",
-            "GAME_DATE",
-            "HOME_TEAM_ID",
-            "HOME_TEAM",
-            "AWAY_TEAM_ID",
-            "AWAY_TEAM",
-            "HOME_SCORE",
-            "AWAY_SCORE",
-            "VENUE",
-            "LEAGUE",
-        ]
-    )
+        # Scrape schedule from ACB website
+        df = scrape_acb_schedule_page(season)
 
-    df["LEAGUE"] = "ACB"
+        if df.empty:
+            logger.warning(f"No games found for ACB {season}")
+            return df
 
-    logger.info(f"Fetched {len(df)} ACB games (scaffold mode)")
-    return df
+        # Filter by season type if specified
+        if season_type and season_type != "All":
+            df = df[df["PHASE"].str.contains(season_type, case=False, na=False)]
+
+        # Ensure team IDs (use team names as IDs for ACB)
+        if "HOME_TEAM" in df.columns and "HOME_TEAM_ID" not in df.columns:
+            df["HOME_TEAM_ID"] = df["HOME_TEAM"]
+        if "AWAY_TEAM" in df.columns and "AWAY_TEAM_ID" not in df.columns:
+            df["AWAY_TEAM_ID"] = df["AWAY_TEAM"]
+
+        logger.info(f"Fetched {len(df)} ACB games for {season}")
+        return df
+
+    except Exception as e:
+        logger.error(f"Failed to fetch ACB schedule: {e}")
+        _handle_acb_error(e, season, "schedule")
+        # Return empty DataFrame with correct schema
+        return pd.DataFrame(
+            columns=[
+                "LEAGUE",
+                "SEASON",
+                "GAME_ID",
+                "GAME_DATE",
+                "GAME_TIME",
+                "HOME_TEAM",
+                "HOME_TEAM_ID",
+                "AWAY_TEAM",
+                "AWAY_TEAM_ID",
+                "HOME_SCORE",
+                "AWAY_SCORE",
+                "ROUND",
+                "VENUE",
+                "GAME_URL",
+                "COMPETITION",
+                "PHASE",
+                "SOURCE",
+            ]
+        )
 
 
-@retry_on_error(max_attempts=3, backoff_seconds=2.0)
-@cached_dataframe
-def fetch_acb_box_score(game_id: str) -> pd.DataFrame:
-    """Fetch ACB box score for a game
+def fetch_acb_player_game(season: str = "2024") -> pd.DataFrame:
+    """Fetch ACB player game statistics via HTML scraping
 
-    Note: Requires implementation. Currently returns empty DataFrame.
+    Scrapes individual game centre pages to extract player box scores for all
+    games in a season.
 
     Args:
-        game_id: Game ID (ACB game identifier)
+        season: Season ending year (e.g., "2024" for 2024-25 season)
 
     Returns:
-        DataFrame with player box scores
+        DataFrame with player game statistics
 
     Columns:
+        - LEAGUE: "ACB"
+        - SEASON: Season string
         - GAME_ID: Game identifier
-        - PLAYER_ID: Player ID
         - PLAYER_NAME: Player name
-        - TEAM_ID: Team ID
+        - PLAYER_ID: Generated player ID (TEAM_PLAYERNAME)
         - TEAM: Team name
+        - TEAM_ID: Team ID (same as name for ACB)
         - MIN: Minutes played
         - PTS: Points
         - FGM, FGA, FG_PCT: Field goals
@@ -489,55 +530,221 @@ def fetch_acb_box_score(game_id: str) -> pd.DataFrame:
         - BLK: Blocks
         - TOV: Turnovers
         - PF: Personal fouls
-        - PLUS_MINUS: Plus/minus
-        - LEAGUE: "ACB"
+        - PLUS_MINUS: Plus/minus (if available)
+        - EFF: Efficiency rating (if available)
+        - SOURCE: "acb_html_boxscore"
 
-    TODO: Implement ACB box score scraping
+    Example:
+        >>> player_game = fetch_acb_player_game("2024")
+        >>> top_scorers = player_game.nlargest(10, "PTS")
+
+    Note:
+        - Requires schedule to be fetched first
+        - May encounter 403 errors if website blocks requests
+        - Skips games where scraping fails
+    """
+    logger.info(f"Fetching ACB player game stats for {season}")
+
+    try:
+        from .html_scrapers import scrape_acb_game_centre
+
+        # First get schedule to know which games to scrape
+        schedule = fetch_acb_schedule(season)
+
+        if schedule.empty:
+            logger.warning(f"No schedule found for ACB {season}")
+            return pd.DataFrame()
+
+        all_player_stats = []
+
+        for _, game in schedule.iterrows():
+            game_url = game.get("GAME_URL")
+            game_id = game.get("GAME_ID")
+
+            if not game_url:
+                logger.debug(f"No game URL for {game_id}, skipping")
+                continue
+
+            try:
+                # Scrape game centre
+                player_df, _ = scrape_acb_game_centre(game_url, game_id)
+
+                if not player_df.empty:
+                    # Add metadata
+                    player_df["LEAGUE"] = "ACB"
+                    player_df["SEASON"] = season
+                    player_df["SOURCE"] = "acb_html_boxscore"
+
+                    # Generate player IDs if not present
+                    if "PLAYER_ID" not in player_df.columns and "PLAYER_NAME" in player_df.columns:
+                        player_df["PLAYER_ID"] = (
+                            player_df["TEAM"].str[:3] + "_" + player_df["PLAYER_NAME"].str.replace(" ", "_")
+                        )
+
+                    # Ensure team ID
+                    if "TEAM_ID" not in player_df.columns:
+                        player_df["TEAM_ID"] = player_df["TEAM"]
+
+                    all_player_stats.append(player_df)
+                    logger.debug(f"Scraped {len(player_df)} players from {game_id}")
+
+            except Exception as e:
+                logger.warning(f"Failed to scrape {game_id}: {e}")
+                continue
+
+        if not all_player_stats:
+            logger.warning(f"No player stats scraped for ACB {season}")
+            return pd.DataFrame()
+
+        df = pd.concat(all_player_stats, ignore_index=True)
+        logger.info(f"Fetched {len(df)} player game stats for ACB {season}")
+        return df
+
+    except Exception as e:
+        logger.error(f"Failed to fetch ACB player game stats: {e}")
+        _handle_acb_error(e, season, "player_game")
+        return pd.DataFrame()
+
+
+def fetch_acb_team_game(season: str = "2024") -> pd.DataFrame:
+    """Fetch ACB team game statistics via HTML scraping
+
+    Scrapes individual game centre pages to extract team box scores (totals)
+    for all games in a season.
+
+    Args:
+        season: Season ending year (e.g., "2024" for 2024-25 season)
+
+    Returns:
+        DataFrame with team game statistics
+
+    Columns:
+        - LEAGUE: "ACB"
+        - SEASON: Season string
+        - GAME_ID: Game identifier
+        - TEAM: Team name
+        - TEAM_ID: Team ID (same as name for ACB)
+        - MIN: Total minutes
+        - PTS: Points
+        - FGM, FGA, FG_PCT: Field goals
+        - FG3M, FG3A, FG3_PCT: 3-point field goals
+        - FTM, FTA, FT_PCT: Free throws
+        - OREB, DREB, REB: Rebounds
+        - AST: Assists
+        - STL: Steals
+        - BLK: Blocks
+        - TOV: Turnovers
+        - PF: Personal fouls
+        - SOURCE: "acb_html_boxscore"
+
+    Example:
+        >>> team_game = fetch_acb_team_game("2024")
+        >>> print(team_game[["GAME_ID", "TEAM", "PTS"]].head())
+
+    Note:
+        - Requires schedule to be fetched first
+        - May encounter 403 errors if website blocks requests
+        - Skips games where scraping fails
+    """
+    logger.info(f"Fetching ACB team game stats for {season}")
+
+    try:
+        from .html_scrapers import scrape_acb_game_centre
+
+        # First get schedule
+        schedule = fetch_acb_schedule(season)
+
+        if schedule.empty:
+            logger.warning(f"No schedule found for ACB {season}")
+            return pd.DataFrame()
+
+        all_team_stats = []
+
+        for _, game in schedule.iterrows():
+            game_url = game.get("GAME_URL")
+            game_id = game.get("GAME_ID")
+
+            if not game_url:
+                logger.debug(f"No game URL for {game_id}, skipping")
+                continue
+
+            try:
+                # Scrape game centre
+                _, team_df = scrape_acb_game_centre(game_url, game_id)
+
+                if not team_df.empty:
+                    # Add metadata
+                    team_df["LEAGUE"] = "ACB"
+                    team_df["SEASON"] = season
+                    team_df["SOURCE"] = "acb_html_boxscore"
+
+                    # Ensure team ID
+                    if "TEAM_ID" not in team_df.columns:
+                        team_df["TEAM_ID"] = team_df["TEAM"]
+
+                    all_team_stats.append(team_df)
+                    logger.debug(f"Scraped {len(team_df)} teams from {game_id}")
+
+            except Exception as e:
+                logger.warning(f"Failed to scrape {game_id}: {e}")
+                continue
+
+        if not all_team_stats:
+            logger.warning(f"No team stats scraped for ACB {season}")
+            return pd.DataFrame()
+
+        df = pd.concat(all_team_stats, ignore_index=True)
+        logger.info(f"Fetched {len(df)} team game stats for ACB {season}")
+        return df
+
+    except Exception as e:
+        logger.error(f"Failed to fetch ACB team game stats: {e}")
+        _handle_acb_error(e, season, "team_game")
+        return pd.DataFrame()
+
+
+@retry_on_error(max_attempts=3, backoff_seconds=2.0)
+@cached_dataframe
+def fetch_acb_box_score(game_id: str) -> pd.DataFrame:
+    """Fetch ACB box score for a single game via HTML scraping
+
+    Legacy function - wraps fetch_acb_player_game for single game.
+    Consider using fetch_acb_player_game() for full season scraping.
+
+    Args:
+        game_id: Game ID (ACB_123456 format or game URL)
+
+    Returns:
+        DataFrame with player box scores for the game
+
+    Note:
+        For efficiency, use fetch_acb_player_game(season) to scrape all games at once
     """
     logger.info(f"Fetching ACB box score: {game_id}")
 
-    # TODO: Implement scraping logic
-    logger.warning(
-        f"ACB box score fetching for game {game_id} requires implementation. "
-        "Returning empty DataFrame."
-    )
+    try:
+        from .html_scrapers import scrape_acb_game_centre
 
-    df = pd.DataFrame(
-        columns=[
-            "GAME_ID",
-            "PLAYER_ID",
-            "PLAYER_NAME",
-            "TEAM_ID",
-            "TEAM",
-            "MIN",
-            "PTS",
-            "FGM",
-            "FGA",
-            "FG_PCT",
-            "FG3M",
-            "FG3A",
-            "FG3_PCT",
-            "FTM",
-            "FTA",
-            "FT_PCT",
-            "OREB",
-            "DREB",
-            "REB",
-            "AST",
-            "STL",
-            "BLK",
-            "TOV",
-            "PF",
-            "PLUS_MINUS",
-            "LEAGUE",
-        ]
-    )
+        # Construct game URL if not provided
+        if game_id.startswith("ACB_"):
+            numeric_id = game_id.replace("ACB_", "")
+            game_url = f"https://www.acb.com/partido/{numeric_id}"
+        else:
+            game_url = game_id  # Assume it's already a URL
 
-    df["LEAGUE"] = "ACB"
-    df["GAME_ID"] = game_id
+        # Scrape game centre
+        player_df, _ = scrape_acb_game_centre(game_url, game_id)
 
-    logger.info(f"Fetched box score: {len(df)} players (scaffold mode)")
-    return df
+        if not player_df.empty:
+            player_df["LEAGUE"] = "ACB"
+            player_df["SOURCE"] = "acb_html_boxscore"
+
+        logger.info(f"Fetched box score: {len(player_df)} players")
+        return player_df
+
+    except Exception as e:
+        logger.error(f"Failed to fetch ACB box score for {game_id}: {e}")
+        return pd.DataFrame()
 
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
