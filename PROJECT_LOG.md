@@ -7203,3 +7203,166 @@ Using `Rscript file.R` avoids: PowerShell quoting rules, cmd.exe quoting rules, 
 
 ### Status
 Unblocks final validation step; user can now proceed to full NBL data export after running installer script.
+
+
+---
+
+## 2025-11-14 - Comprehensive Data Source Enhancement: ACB, FIBA, LNB
+
+### Objective
+Add/update/enhance data fetchers for ACB (Liga Endesa), FIBA-hosted leagues (BCL, BAL, ABA, LKL), and LNB Pro A with comprehensive, validated data access using official APIs and structured scraping.
+
+### Current State Analysis
+
+**ACB (acb.py)**:
+- ✅ player_season, team_season via HTML (restored 2025-11-13 after site restructure)
+- ❌ schedule, box scores, PBP, shots not implemented
+- Uses `/estadisticas-individuales/` and `/resultados-clasificacion/` endpoints
+
+**FIBA Leagues (BCL, BAL, ABA, LKL)**:
+- Current: HTML scraping from `fibalivestats.dcd.shared.geniussports.com/u/{CODE}/{GAME_ID}/bs.html`
+- ✅ Schedule (via CSV game indexes), player_game, team_game, PBP (HTML parsing)
+- ❌ Shots (HTML lacks X/Y coordinates)
+- ⚠️ fiba_livestats_direct.py exists but marked as BLOCKED (403 errors on JSON API)
+
+**LNB Pro A (lnb.py)**:
+- ✅ team_season only (via standings HTML at `lnb.fr/pro-a/statistiques`)
+- ❌ player_season (requires JS execution or API reverse-engineering)
+- ❌ schedule, box scores, PBP not available
+
+### Implementation Plan
+
+#### Phase 1: ACB Enhancement
+**Goals**: Add schedule scraping, game box scores, optional LiveStats integration
+
+1. **Schedule Scraper**:
+   - Target: `acb.com/calendario/index/temporada_id/{YEAR}` (jornadas pages)
+   - Extract: GAME_ID (from `/partido/estadisticas/id/{ID}` links), date, teams, scores
+   - Output: `data/game_indexes/ACB_{season}.csv` for reusability
+   - Validation: Check IDs are numeric, dates parseable, teams non-empty
+
+2. **Game Box Score Scraper**:
+   - Target: `acb.com/partido/estadisticas/id/{GAME_ID}` (HTML tables)
+   - Parse: Two team tables (home/away), player stats columns (PTS, REB, AST, etc.)
+   - Handle: Spanish column names (Jugador, Puntos, Rebotes, etc.)
+   - Output: player_game DataFrame with standard schema
+
+3. **Optional LiveStats Integration**:
+   - Investigate: ACB Live embedded stats (Genius Sports LiveStats)
+   - If accessible: Extract game IDs from live.acb.com, fetch JSON from `fibalivestats.dcd.shared.geniussports.com/data/{ID}/data.json`
+   - Provides: PBP events, shot coordinates (X/Y) when available
+
+#### Phase 2: FIBA LiveStats JSON API Enhancement
+**Goals**: Add robust JSON fetching alongside HTML for shot data and better reliability
+
+1. **Game Index Builder Tools**:
+   - Create: `tools/fiba/build_game_index.py` 
+   - Function: Scrape official sites (championsleague.basketball, thebal.com, aba-liga.com, lkl.lt)
+   - Extract: Real FIBA game IDs from page HTML or embedded LiveStats widgets
+   - Output: CSVs to `data/game_indexes/{LEAGUE}_{SEASON}.csv`
+   - Validate: Test random IDs via HTML fetch, ensure 200 OK
+
+2. **Direct JSON Fetchers** (update fiba_livestats_direct.py):
+   - Fix 403 errors: Add proper headers, user agents, referrers (mimic browser)
+   - Endpoints:
+     - Schedule: `/data/{CODE}/{SEASON}/games/{ROUND}` (may require auth bypass)
+     - Box score: `/data/{CODE}/{SEASON}/data/{GAME_ID}/boxscore.json`
+     - PBP: `/data/{CODE}/{SEASON}/data/{GAME_ID}/pbp.json`
+     - Shots: `/data/{CODE}/{SEASON}/data/{GAME_ID}/shots.json` (includes X/Y)
+   - Fallback: If JSON blocked, continue using HTML; document limitation
+   - Test: BCL game 2023-24 season, BAL recent games
+
+3. **Update League Fetchers** (bcl.py, bal.py, aba.py, lkl.py):
+   - Add: `fetch_shots()` functions using JSON API (if accessible)
+   - Keep: Existing HTML scrapers as fallback
+   - Conditional: Try JSON first, fall back to HTML on auth errors
+
+#### Phase 3: LNB Pro A API Reverse Engineering
+**Goals**: Get player stats via Stats Centre API
+
+1. **API Discovery**:
+   - Method: Browser DevTools → Network tab → load lnb.fr/fr/stats-centre
+   - Find: XHR/Fetch requests with JSON payloads (likely GraphQL or REST)
+   - Example hypothetical endpoint: `lnb.fr/api/stats/player?season=2024&competition=ProA`
+   - Document: Request headers, params, response structure
+
+2. **Implementation**:
+   - If REST: Direct GET requests with `requests.get(url, params={...})`
+   - If GraphQL: POST requests with query payload `requests.post(url, json={"query": "..."})`
+   - Parse: Player name, team, stats (PTS, REB, AST, etc.)
+   - Handle: Season parameter format (might be "2024/2025" vs "2024-25")
+
+3. **Fallback (if API unavailable)**:
+   - Use Playwright/Selenium to render JS, scrape DOM
+   - Document as "requires headless browser" in capabilities
+
+4. **Update lnb.py**:
+   - Replace placeholder `fetch_lnb_player_season()` with API calls
+   - Add schedule fetcher if discoverable
+   - Keep team_season (standings) as-is (working)
+
+#### Phase 4: Validation & Testing
+**Goals**: Ensure all data accurate, complete, and reliable
+
+1. **Create Validation Tests**:
+   - `tests/test_acb_comprehensive.py`: Test schedule, box scores, aggregations
+   - `tests/test_fiba_json_fetchers.py`: Test JSON vs HTML consistency
+   - `tests/test_lnb_stats_api.py`: Test player stats accuracy
+
+2. **Spot Checks**:
+   - ACB: Compare top scorer stats with official leaderboards
+   - FIBA: Verify game scores match official results
+   - LNB: Cross-reference player stats with website display
+
+3. **Data Quality Checks**:
+   - No duplicate GAME_IDs
+   - All stats are numeric where expected
+   - Dates are valid and in correct format
+   - Team names consistent across datasets
+
+#### Phase 5: Integration & Documentation
+**Goals**: Update pipeline, configurations, and docs
+
+1. **Update Configurations**:
+   - Modify league source configs to use new fetchers
+   - Enable shot data for FIBA leagues (if JSON accessible)
+   - Mark capabilities accurately (player_season, shots, PBP, etc.)
+
+2. **Update Documentation**:
+   - Capabilities matrix: Show ACB full support, FIBA shots support, LNB player stats
+   - Data coverage: Document historical ranges (ACB 1983+, FIBA varies, LNB current season)
+   - Update frequency: ACB (post-game), FIBA (real-time/post-game), LNB (daily)
+
+3. **PROJECT_LOG Update**:
+   - Document all changes, file modifications, validation results
+   - Note any blockers or limitations discovered
+   - Provide usage examples for new fetchers
+
+### Files to Create/Modify
+
+**New Files**:
+- `tools/fiba/build_game_index.py` - FIBA game index builder
+- `tools/acb/build_schedule_index.py` - ACB schedule scraper
+- `tests/test_acb_comprehensive.py` - ACB validation tests
+- `tests/test_fiba_json_api.py` - FIBA JSON validation tests
+- `tests/test_lnb_api.py` - LNB API validation tests
+
+**Modified Files**:
+- `src/cbb_data/fetchers/acb.py` - Add schedule, box scores, LiveStats
+- `src/cbb_data/fetchers/fiba_livestats_direct.py` - Fix 403 errors, enhance
+- `src/cbb_data/fetchers/bcl.py` - Add shot fetchers
+- `src/cbb_data/fetchers/bal.py` - Add shot fetchers
+- `src/cbb_data/fetchers/aba.py` - Add shot fetchers
+- `src/cbb_data/fetchers/lkl.py` - Add shot fetchers
+- `src/cbb_data/fetchers/lnb.py` - Add player stats API fetchers
+
+### Success Criteria
+- ✅ ACB: schedule + box scores working, tested on 2023-24 season
+- ✅ FIBA: Shot data accessible (JSON) OR documented as blocked with HTML fallback
+- ✅ LNB: Player stats fetched via API OR Playwright (documented)
+- ✅ All tests passing with >90% data completeness
+- ✅ Documentation updated to reflect new capabilities
+
+### Status
+🚧 In Progress - Starting Phase 1 (ACB Enhancement)
+
