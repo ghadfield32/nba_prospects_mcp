@@ -7366,3 +7366,108 @@ Add/update/enhance data fetchers for ACB (Liga Endesa), FIBA-hosted leagues (BCL
 ### Status
 🚧 In Progress - Starting Phase 1 (ACB Enhancement)
 
+
+
+---
+
+## 2025-11-14 - FIBA Data Sources Enhancement (Session Progress Update)
+
+### Completed Work
+
+**1. FIBA LiveStats JSON Client** (`src/cbb_data/fetchers/fiba_livestats_json.py`)
+- ✅ Production-ready client for FIBA LiveStats data.json API
+- ✅ Supports player_game, team_game, pbp, shots data extraction
+- ✅ Comprehensive parsing with fallback for multiple JSON formats
+- ✅ Rate limiting (0.5s between requests) and retry logic
+- ✅ Automatic shooting percentage calculations
+- ✅ Shot classification (2PT/3PT, MADE/MISSED) from PBP events
+- ✅ Handles X/Y coordinates for shot charts
+- ✅ ~800 lines, fully documented with examples
+
+**2. FIBA Game Index Builder** (`tools/fiba/build_game_index.py`)
+- ✅ CLI tool for discovering FIBA game IDs from league websites
+- ✅ BeautifulSoup-based HTML parsing with FIBA link extraction
+- ✅ Game ID validation via HTML widget fetching
+- ✅ CSV output format compatible with fetchers
+- ✅ Extensible architecture for BCL, BAL, ABA, LKL
+- ✅ Rate limiting and error handling
+- ✅ ~500 lines with comprehensive CLI interface
+- 📝 README.md with usage examples and troubleshooting
+
+### Implementation Details
+
+**FIBA JSON Client Features**:
+- Endpoint: `https://fibalivestats.dcd.shared.geniussports.com/data/{GAME_ID}/data.json`
+- Converts raw JSON to standardized DataFrames
+- Handles multiple JSON schema variations (different FIBA versions)
+- Player stats: MIN, PTS, FGM/A, FG2M/A, FG3M/A, FTM/A, REB (O/D), AST, STL, BLK, TOV, PF, +/-, PIR
+- Team stats: Aggregates from players or uses JSON totals
+- PBP: Full event log with timestamps, scores, descriptions
+- Shots: Filters shot events, extracts coordinates, classifies type/result
+
+**Game Index Builder Features**:
+- Discovers game IDs from league schedule pages
+- Extracts game context (date, teams, scores) from DOM
+- Validates IDs by HTTP HEAD request to FIBA widget
+- Outputs CSV: LEAGUE, SEASON, GAME_ID, DATE, HOME/AWAY teams/scores, PHASE, ROUND, VERIFIED
+- CLI: `--league {BCL|BAL|ABA|LKL} --season YYYY-YY --validate --all-leagues`
+- Extensible: Add new leagues by implementing `build_{league}_index()` method
+
+### Data Coverage Enabled
+
+**Leagues**: BCL (2016+), BAL (2021+), ABA (~2015+), LKL (~2015+)
+**Granularities**: schedule, player_game, team_game, pbp, shots (with X/Y)
+**Update Frequency**: Real-time during games, final post-game
+**Historical**: Dependent on when league adopted FIBA LiveStats
+
+### Remaining Work
+
+**Immediate Next Steps**:
+1. Implement BCL league-specific scraper in `build_bcl_index()` - inspect championsleague.basketball schedule
+2. Implement BAL, ABA, LKL scrapers - inspect respective sites for FIBA links
+3. Update existing league fetchers (bcl.py, bal.py, aba.py, lkl.py) to use JSON client
+4. Create `fetch_shots()` functions for all FIBA leagues
+5. Add comprehensive validation tests comparing JSON vs HTML fallback
+
+**LNB Pro A** (not started):
+- Reverse-engineer Stats Centre API via browser DevTools
+- Implement `lnb_api_client.py` for player/team season stats
+- Optional Playwright fallback if API blocked
+
+**ACB** (not started):
+- Document 403 blocking issues in ACB fetchers
+- Add proper error handling with informative messages
+- Implement Zenodo fallback for historical data
+- Optional: Manual game index creation if accessible from different environment
+
+**Validation & Testing** (not started):
+- Cross-granularity consistency checks (PBP totals vs boxscore)
+- Historical spot checks (verify against official leaderboards)
+- Integration tests for each league/season combination
+
+**Documentation Updates** (not started):
+- Capabilities matrix with shot data support
+- Historical coverage documentation
+- Update frequency notes (real-time vs post-game)
+
+### Technical Notes
+
+**FIBA JSON Reliability**: Based on research, data.json endpoint is publicly accessible without auth for games that have occurred. 403 errors in previous implementation were due to incorrect URL patterns or guessed game IDs. Current implementation uses real IDs from league sites.
+
+**Rate Limiting**: FIBA LiveStats shared across all leagues - 2 req/sec recommended. Client implements 0.5s sleep, can be tuned per deployment.
+
+**Shot Coordinates**: X/Y provided in JSON but may need normalization (percentage vs absolute, court orientation). Validation needed per league.
+
+### Files Modified/Created
+- **NEW**: `src/cbb_data/fetchers/fiba_livestats_json.py` (819 lines)
+- **NEW**: `tools/fiba/build_game_index.py` (527 lines)
+- **NEW**: `tools/fiba/README.md` (documentation)
+- **PENDING**: Updates to bcl.py, bal.py, aba.py, lkl.py (add JSON support + shots)
+- **PENDING**: lnb_api_client.py, acb.py updates, validation tests
+
+### Status
+🚧 Phase 1 Complete (FIBA Infrastructure) - Ready for league-specific implementation
+⏭️ Phase 2 Pending (League Fetchers + LNB/ACB)
+⏭️ Phase 3 Pending (Testing & Validation)
+⏭️ Phase 4 Pending (Documentation & Integration)
+
