@@ -1291,6 +1291,7 @@ def tag_acb_competition(schedule_df: pd.DataFrame) -> pd.DataFrame:
     # Initialize competition columns
     schedule_df["COMPETITION"] = "Liga Regular"  # Default
     schedule_df["PHASE"] = "Regular Season"
+    schedule_df["CONFIDENCE"] = 0.5  # Default confidence (50% - pure guess)
 
     try:
         # Convert GAME_DATE to datetime for date-based detection
@@ -1299,18 +1300,25 @@ def tag_acb_competition(schedule_df: pd.DataFrame) -> pd.DataFrame:
         # Extract month for seasonal patterns
         schedule_df["_MONTH"] = schedule_df["_GAME_DATE_DT"].dt.month
 
-        # Heuristic 1: Copa del Rey (typically February)
-        # Copa del Rey is usually mid-season knockout tournament
+        # Confidence scores for each detection method
+        confidence_scores = pd.Series(0.5, index=schedule_df.index)  # Start at 0.5
+
+        # === HEURISTIC 1: Date-based Detection ===
+        # Copa del Rey (typically February, confidence: +0.3)
         copa_mask = (schedule_df["_MONTH"] == 2)
+        confidence_scores[copa_mask] = 0.8
 
-        # Heuristic 2: Supercopa (typically September, preseason)
+        # Supercopa (typically September, confidence: +0.3)
         supercopa_mask = (schedule_df["_MONTH"] == 9)
+        confidence_scores[supercopa_mask] = 0.8
 
-        # Heuristic 3: Playoffs (May-June, after regular season)
+        # Playoffs (May-June, confidence: +0.2)
         playoffs_mask = (schedule_df["_MONTH"].isin([5, 6]))
+        confidence_scores[playoffs_mask] = 0.7
 
-        # Check ROUND column for playoff indicators if available
+        # === HEURISTIC 2: Round-based Detection ===
         if "ROUND" in schedule_df.columns:
+            # Playoff rounds (confidence: +0.3)
             playoff_rounds = schedule_df["ROUND"].astype(str).str.contains(
                 r"Final|Semifinal|Cuartos|1/4|1/2",
                 case=False,
@@ -1318,8 +1326,66 @@ def tag_acb_competition(schedule_df: pd.DataFrame) -> pd.DataFrame:
                 na=False
             )
             playoffs_mask = playoffs_mask | playoff_rounds
+            confidence_scores[playoff_rounds] = confidence_scores[playoff_rounds] + 0.3
 
-        # Apply competition tags
+        # === HEURISTIC 3: URL Pattern Detection (if available) ===
+        # HTML inspection guide: Look for these patterns in actual ACB URLs
+        # - Copa: /copa-del-rey/, /copa/
+        # - Supercopa: /supercopa/, /spanish-supercup/
+        # - Playoffs: /playoff/, /finals/
+        if "GAME_URL" in schedule_df.columns:
+            url_series = schedule_df["GAME_URL"].astype(str).str.lower()
+
+            # Copa URL patterns (confidence: +0.4)
+            copa_url_mask = url_series.str.contains(r"copa-del-rey|copa/", case=False, regex=True, na=False)
+            copa_mask = copa_mask | copa_url_mask
+            confidence_scores[copa_url_mask] = 0.9
+
+            # Supercopa URL patterns (confidence: +0.4)
+            supercopa_url_mask = url_series.str.contains(r"supercopa|spanish-supercup", case=False, regex=True, na=False)
+            supercopa_mask = supercopa_mask | supercopa_url_mask
+            confidence_scores[supercopa_url_mask] = 0.9
+
+            # Playoff URL patterns (confidence: +0.3)
+            playoff_url_mask = url_series.str.contains(r"playoff|finals", case=False, regex=True, na=False)
+            playoffs_mask = playoffs_mask | playoff_url_mask
+            confidence_scores[playoff_url_mask] = confidence_scores[playoff_url_mask] + 0.3
+
+        # === HEURISTIC 4: Team Count Detection ===
+        # Group by date to detect unique teams per game day
+        # Copa del Rey: 8 teams (4 games max per day in later rounds)
+        # Supercopa: 4 teams (2 games max per day)
+        # This is more complex and requires careful grouping
+        if "HOME_TEAM" in schedule_df.columns and "AWAY_TEAM" in schedule_df.columns:
+            # For Copa/Supercopa, limited team sets in short time windows
+            # Group games by week
+            schedule_df["_WEEK"] = schedule_df["_GAME_DATE_DT"].dt.isocalendar().week
+
+            for week in schedule_df["_WEEK"].unique():
+                if pd.isna(week):
+                    continue
+
+                week_mask = schedule_df["_WEEK"] == week
+                week_df = schedule_df[week_mask]
+
+                # Get unique teams in this week
+                teams_in_week = set(week_df["HOME_TEAM"]).union(set(week_df["AWAY_TEAM"]))
+                team_count = len(teams_in_week)
+
+                # Supercopa: 4 teams, 3 games total (2 semis + final)
+                if team_count == 4 and len(week_df) <= 3 and schedule_df.loc[week_mask, "_MONTH"].iloc[0] == 9:
+                    supercopa_mask[week_mask] = True
+                    confidence_scores[week_mask] = 0.95
+
+                # Copa del Rey: 8-16 teams in knockout rounds (harder to detect)
+                elif team_count <= 16 and schedule_df.loc[week_mask, "_MONTH"].iloc[0] == 2:
+                    copa_mask[week_mask] = True
+                    confidence_scores[week_mask] = confidence_scores[week_mask] + 0.1
+
+            # Clean up temporary week column
+            schedule_df = schedule_df.drop(columns=["_WEEK"], errors="ignore")
+
+        # === Apply Competition Tags ===
         schedule_df.loc[copa_mask, "COMPETITION"] = "Copa del Rey"
         schedule_df.loc[copa_mask, "PHASE"] = "Knockout Tournament"
 
@@ -1328,7 +1394,7 @@ def tag_acb_competition(schedule_df: pd.DataFrame) -> pd.DataFrame:
 
         schedule_df.loc[playoffs_mask, "COMPETITION"] = "Playoffs"
 
-        # Further classify playoff phases if ROUND available
+        # === Further Classify Playoff Phases ===
         if "ROUND" in schedule_df.columns:
             # Quarterfinals
             qf_mask = playoffs_mask & schedule_df["ROUND"].astype(str).str.contains(
@@ -1338,6 +1404,7 @@ def tag_acb_competition(schedule_df: pd.DataFrame) -> pd.DataFrame:
                 na=False
             )
             schedule_df.loc[qf_mask, "PHASE"] = "Quarterfinals"
+            confidence_scores[qf_mask] = 0.9
 
             # Semifinals
             sf_mask = playoffs_mask & schedule_df["ROUND"].astype(str).str.contains(
@@ -1347,6 +1414,7 @@ def tag_acb_competition(schedule_df: pd.DataFrame) -> pd.DataFrame:
                 na=False
             )
             schedule_df.loc[sf_mask, "PHASE"] = "Semifinals"
+            confidence_scores[sf_mask] = 0.9
 
             # Finals
             f_mask = playoffs_mask & schedule_df["ROUND"].astype(str).str.contains(
@@ -1356,18 +1424,33 @@ def tag_acb_competition(schedule_df: pd.DataFrame) -> pd.DataFrame:
                 na=False
             )
             schedule_df.loc[f_mask, "PHASE"] = "Finals"
+            confidence_scores[f_mask] = 0.95
+
+        # === Assign Confidence Scores ===
+        # Cap confidence at 0.95 (never 100% certain with heuristics)
+        schedule_df["CONFIDENCE"] = confidence_scores.clip(upper=0.95)
 
         # Clean up temporary columns
-        schedule_df = schedule_df.drop(columns=["_GAME_DATE_DT", "_MONTH"])
+        schedule_df = schedule_df.drop(columns=["_GAME_DATE_DT", "_MONTH"], errors="ignore")
 
         # Log distribution
         competition_counts = schedule_df["COMPETITION"].value_counts()
         logger.info(f"Competition distribution: {competition_counts.to_dict()}")
 
+        # Log confidence distribution
+        avg_confidence = schedule_df["CONFIDENCE"].mean()
+        logger.info(f"Average confidence score: {avg_confidence:.2f}")
+        low_confidence = (schedule_df["CONFIDENCE"] < 0.7).sum()
+        if low_confidence > 0:
+            logger.warning(f"{low_confidence} games tagged with low confidence (<0.7)")
+
         logger.warning(
-            "ACB competition tagging uses heuristics and may not be 100% accurate. "
-            "Inspect actual ACB schedule HTML for definitive competition markers. "
-            "Update this function with discovered patterns."
+            "ACB competition tagging uses enhanced heuristics (confidence scores included). "
+            "For 100% accuracy, inspect ACB HTML at https://www.acb.com/calendario and look for:\n"
+            "  - HTML class names (e.g., 'copa-game', 'playoff-game')\n"
+            "  - Data attributes (e.g., data-competition='copa')\n"
+            "  - URL patterns (e.g., /copa-del-rey/, /playoff/)\n"
+            "Update heuristic patterns in this function with discoveries."
         )
 
         return schedule_df

@@ -98,6 +98,21 @@ class GoldenSeasonScript(ABC):
         logger.info(f"{self.league}: Team season not implemented, returning empty DataFrame")
         return pd.DataFrame()
 
+    def fetch_roster(self) -> pd.DataFrame:
+        """Fetch team rosters/player bio (optional)
+
+        Extracts unique player-team combinations from player_game data.
+        Useful for:
+        - Player directory/lookup
+        - Roster composition analysis
+        - Team size validation
+
+        Returns:
+            DataFrame with roster entries or empty DataFrame if not implemented
+        """
+        logger.info(f"{self.league}: Roster not implemented, returning empty DataFrame")
+        return pd.DataFrame()
+
     # Core workflow methods
 
     def fetch_all_data(self):
@@ -145,6 +160,13 @@ class GoldenSeasonScript(ABC):
         self.datasets['team_season'] = self.fetch_team_season()
         if not self.datasets['team_season'].empty:
             logger.info(f"  ✓ {len(self.datasets['team_season'])} teams\n")
+        else:
+            logger.info(f"  - Skipped (not available)\n")
+
+        logger.info("Fetching rosters...")
+        self.datasets['roster'] = self.fetch_roster()
+        if not self.datasets['roster'].empty:
+            logger.info(f"  ✓ {len(self.datasets['roster'])} player-team roster entries\n")
         else:
             logger.info(f"  - Skipped (not available)\n")
 

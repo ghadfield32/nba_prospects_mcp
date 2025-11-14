@@ -1057,21 +1057,183 @@ def build_lineup_game_from_pbp(
         logger.error(f"PBP missing required columns for lineup building: {missing_cols}")
         return pd.DataFrame()
 
-    # TODO: Implement lineup reconstruction algorithm
-    # This is a complex feature requiring:
-    # 1. Substitution event parsing
-    # 2. Lineup state tracking per team
-    # 3. Stint segmentation (time between subs)
-    # 4. Stat aggregation per lineup stint
+    # ======================================================================
+    # PARTIAL IMPLEMENTATION - Detailed skeleton with TODOs
+    # ======================================================================
+    # This is a complex feature. Below is a detailed implementation guide
+    # with helper function stubs and algorithm steps marked with TODOs.
     #
-    # Implementation deferred to future PR due to complexity
-    # Placeholder returns empty DataFrame for now
+    # Future implementer: Follow the steps below, test each section,
+    # and gradually remove TODO markers as you complete each part.
+    # ======================================================================
 
     logger.warning(
-        "build_lineup_game_from_pbp() not yet implemented. "
-        "This is an optional upgrade requiring complex substitution tracking. "
-        "Returning empty DataFrame."
+        "build_lineup_game_from_pbp() is partially implemented with detailed TODOs. "
+        "This is a complex feature requiring careful testing. "
+        "Returning empty DataFrame for now."
     )
+
+    # ===== HELPER FUNCTIONS (Stubs - TODO: Implement) =====
+
+    def parse_substitution_events(pbp_sub_df):
+        """
+        Parse substitution events into IN/OUT pairs.
+
+        TODO: Implement logic to:
+        1. Filter PBP for ACTION_TYPE containing 'substitution' or 'sub'
+        2. Parse DESCRIPTION for player IN/OUT (varies by source)
+        3. Return DataFrame with columns: GAME_ID, PERIOD, TIME, TEAM_ID, PLAYER_IN_ID, PLAYER_OUT_ID
+
+        Test case:
+        Input: DESCRIPTION = "Player A substitutes Player B"
+        Output: PLAYER_IN_ID = "A", PLAYER_OUT_ID = "B"
+        """
+        # TODO: Implement substitution parsing
+        logger.debug("Parsing substitution events (TODO)")
+        return pd.DataFrame()
+
+    def infer_starting_lineups(pbp_df, game_id, team_id):
+        """
+        Infer starting lineup from first few events.
+
+        TODO: Implement logic to:
+        1. Get first events for this game/team (before first substitution)
+        2. Extract unique PLAYER_IDs from those events
+        3. Validate we have exactly 5 players (warn if not)
+        4. Return list of 5 PLAYER_IDs
+
+        Fallback: If < 5 players detected, return empty list (incomplete data)
+        """
+        # TODO: Implement starting lineup inference
+        logger.debug(f"Inferring starting lineup for game {game_id}, team {team_id} (TODO)")
+        return []
+
+    def track_lineup_changes(game_pbp, subs_df):
+        """
+        Track lineup state changes throughout game.
+
+        TODO: Implement logic to:
+        1. Start with inferred starting lineup
+        2. Process substitutions chronologically
+        3. Update lineup state at each sub (remove OUT, add IN)
+        4. Validate 5 players at all times
+        5. Return list of lineup "stints" with start/end times
+
+        Data structure: List[Dict] with keys:
+        - lineup_players: List[player_id] (5 players)
+        - start_time: Timestamp
+        - end_time: Timestamp
+        - start_score_home: int
+        - start_score_away: int
+        """
+        # TODO: Implement lineup state tracking
+        logger.debug("Tracking lineup changes (TODO)")
+        return []
+
+    def aggregate_stint_stats(stint, pbp_df):
+        """
+        Aggregate stats for a single lineup stint.
+
+        TODO: Implement logic to:
+        1. Filter PBP events during stint time window
+        2. Calculate:
+           - Minutes played (end_time - start_time)
+           - Points scored (score delta)
+           - Points allowed (opponent score delta)
+           - Plus/minus
+           - Possessions (estimate from events)
+        3. Return Dict with stint stats
+
+        Possession estimation heuristics:
+        - FGM/FGA = possession end
+        - Turnover = possession end
+        - Defensive rebound = possession change
+        """
+        # TODO: Implement stint aggregation
+        logger.debug("Aggregating stint stats (TODO)")
+        return {}
+
+    def calculate_lineup_id(player_ids):
+        """
+        Generate unique lineup ID from player IDs.
+
+        TODO: Implement logic to:
+        1. Sort player IDs (consistent ordering)
+        2. Hash sorted list (MD5 or simple concatenation)
+        3. Return lineup_id string
+
+        Example:
+        Input: ["P123", "P456", "P789", "P012", "P345"]
+        Output: "P012_P123_P345_P456_P789" (sorted concatenation)
+        """
+        # TODO: Implement lineup ID generation
+        if not player_ids or len(player_ids) != 5:
+            return None
+        # Simple implementation: sorted concatenation
+        return "_".join(sorted(player_ids))
+
+    # ===== ALGORITHM IMPLEMENTATION (TODOs) =====
+
+    # TODO STEP 1: Parse all substitution events
+    # subs_df = parse_substitution_events(pbp_df)
+    # if subs_df.empty:
+    #     logger.warning("No substitution events found in PBP")
+    #     # Could still build lineups from first 5 players per team
+    #     pass
+
+    # TODO STEP 2: Group PBP by game and team
+    # lineup_stints = []
+    # for (game_id, team_id), game_team_pbp in pbp_df.groupby(['GAME_ID', 'TEAM_ID']):
+    #     logger.debug(f"Processing game {game_id}, team {team_id}")
+    #
+    #     # TODO STEP 3: Infer starting lineup
+    #     starting_five = infer_starting_lineups(pbp_df, game_id, team_id)
+    #     if len(starting_five) != 5:
+    #         logger.warning(f"Could not infer 5 starters for {game_id}/{team_id}, skipping")
+    #         continue
+    #
+    #     # TODO STEP 4: Track lineup changes
+    #     game_subs = subs_df[(subs_df['GAME_ID'] == game_id) & (subs_df['TEAM_ID'] == team_id)]
+    #     stints = track_lineup_changes(game_team_pbp, game_subs)
+    #
+    #     # TODO STEP 5: Aggregate stats for each stint
+    #     for stint in stints:
+    #         stint_stats = aggregate_stint_stats(stint, game_team_pbp)
+    #         stint_stats['GAME_ID'] = game_id
+    #         stint_stats['TEAM_ID'] = team_id
+    #         stint_stats['LINEUP_ID'] = calculate_lineup_id(stint['lineup_players'])
+    #         stint_stats['LEAGUE'] = league
+    #         stint_stats['SEASON'] = season
+    #         lineup_stints.append(stint_stats)
+
+    # TODO STEP 6: Aggregate stints to lineup-game level
+    # Multiple stints may have same lineup in different periods
+    # Group by (GAME_ID, TEAM_ID, LINEUP_ID) and sum stats
+    # lineup_df = pd.DataFrame(lineup_stints)
+    # if not lineup_df.empty:
+    #     agg_cols = ['GAME_ID', 'TEAM_ID', 'LINEUP_ID', 'LEAGUE', 'SEASON']
+    #     stat_cols = ['MIN', 'PTS_FOR', 'PTS_AGAINST', 'PLUS_MINUS', 'POSS']
+    #     lineup_game_df = lineup_df.groupby(agg_cols)[stat_cols].sum().reset_index()
+    #
+    #     # TODO STEP 7: Add player names (join from roster or PBP)
+    #     # Expand LINEUP_ID back to PLAYER_1_ID...PLAYER_5_ID columns
+    #     # Join with player names
+    #
+    #     logger.info(f"Built {len(lineup_game_df)} lineup-game records")
+    #     return lineup_game_df
+
+    # TODO STEP 8: Validation (uncomment when implemented)
+    # if not lineup_df.empty:
+    #     # Validate: Sum of lineup minutes should = game minutes (48 min regulation)
+    #     game_totals = lineup_df.groupby('GAME_ID')['MIN'].sum()
+    #     games_with_wrong_total = (game_totals < 45) | (game_totals > 60)  # Allow OT
+    #     if games_with_wrong_total.any():
+    #         logger.warning(f"{games_with_wrong_total.sum()} games have incorrect total minutes")
+    #
+    #     # Validate: Each lineup has exactly 5 unique players
+    #     # (Check via LINEUP_ID split)
+
+    # For now, return empty DataFrame with correct schema
 
     return pd.DataFrame(
         columns=[
@@ -1181,13 +1343,16 @@ def extract_roster_from_boxscore(
         # Group by player-team combination
         groupby_cols = ["PLAYER_ID", "TEAM_ID"]
 
-        # Aggregation logic
+        # Build aggregation dictionary
+        # Use simple column names that exist in player_game_df
         agg_dict = {
             "PLAYER_NAME": "first",  # Take first occurrence
-            "TEAM_NAME": "first" if "TEAM_NAME" in player_game_df.columns else None,
         }
 
-        # Optional fields
+        # Add optional fields if they exist
+        if "TEAM_NAME" in player_game_df.columns:
+            agg_dict["TEAM_NAME"] = "first"
+
         if "POSITION" in player_game_df.columns:
             # Take most common position (mode)
             agg_dict["POSITION"] = lambda x: x.mode()[0] if not x.mode().empty else None
@@ -1196,17 +1361,26 @@ def extract_roster_from_boxscore(
             agg_dict["JERSEY_NUMBER"] = lambda x: x.mode()[0] if not x.mode().empty else None
 
         if "GAME_DATE" in player_game_df.columns:
-            agg_dict["FIRST_GAME"] = ("GAME_DATE", "min")
-            agg_dict["LAST_GAME"] = ("GAME_DATE", "max")
-
-        # Count games played
-        agg_dict["GP"] = ("PLAYER_ID", "count")
-
-        # Remove None values
-        agg_dict = {k: v for k, v in agg_dict.items() if v is not None}
+            agg_dict["GAME_DATE"] = ["min", "max"]  # Will create GAME_DATE_min and GAME_DATE_max
 
         # Perform aggregation
         roster_df = player_game_df.groupby(groupby_cols).agg(agg_dict).reset_index()
+
+        # Flatten multi-level columns if GAME_DATE was aggregated
+        if "GAME_DATE" in player_game_df.columns:
+            roster_df.columns = [
+                f"{col[0]}_{col[1]}" if col[1] else col[0]
+                for col in roster_df.columns
+            ]
+            # Rename GAME_DATE columns
+            if "GAME_DATE_min" in roster_df.columns:
+                roster_df.rename(columns={"GAME_DATE_min": "FIRST_GAME"}, inplace=True)
+            if "GAME_DATE_max" in roster_df.columns:
+                roster_df.rename(columns={"GAME_DATE_max": "LAST_GAME"}, inplace=True)
+
+        # Count games played (number of rows per player-team combo)
+        gp_counts = player_game_df.groupby(groupby_cols).size().reset_index(name="GP")
+        roster_df = roster_df.merge(gp_counts, on=groupby_cols, how="left")
 
         # Add league and season
         roster_df["LEAGUE"] = league

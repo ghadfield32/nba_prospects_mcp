@@ -295,6 +295,38 @@ class FIBAGoldenSeason(GoldenSeasonScript):
             logger.info(f"Aggregated to {len(df_agg)} team season records")
             return df_agg
 
+    def fetch_roster(self) -> pd.DataFrame:
+        """
+        Fetch team rosters/player bio from player_game data.
+
+        Uses the FIBA optional upgrade function extract_roster_from_boxscore()
+        to build a roster layer from player_game data.
+        """
+        try:
+            # Import the roster extraction function
+            from src.cbb_data.fetchers.fiba_html_common import extract_roster_from_boxscore
+
+            # Check if player_game data exists
+            if self.datasets.get('player_game') is None or self.datasets['player_game'].empty:
+                logger.warning("Cannot extract roster without player_game data")
+                return pd.DataFrame()
+
+            logger.info(f"Extracting rosters from player_game data...")
+
+            # Extract rosters using the implemented function
+            df = extract_roster_from_boxscore(
+                self.datasets['player_game'],
+                self.league,
+                self.season
+            )
+
+            logger.info(f"Extracted {len(df)} player-team roster entries")
+            return df
+
+        except Exception as e:
+            logger.error(f"Failed to extract rosters: {e}")
+            return pd.DataFrame()
+
 
 def main():
     """Main entry point"""
