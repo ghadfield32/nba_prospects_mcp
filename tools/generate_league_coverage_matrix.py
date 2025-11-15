@@ -77,10 +77,12 @@ def get_dataset_status(config, dataset_type: str) -> str:
 
     # Special cases based on notes
     if config.league == "LNB_PROA":
-        if dataset_type in ["schedule", "player_season", "team_season"]:
+        if dataset_type in ["schedule", "player_season", "team_season", "pbp", "shots"]:
             return "Yes"
         elif dataset_type in ["player_game"]:
             return "Limited"
+        elif dataset_type in ["team_game"]:
+            return "No"
         return "No"
     elif config.league in ["NBL"]:
         if dataset_type in [

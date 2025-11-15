@@ -91,7 +91,7 @@ This library focuses on **pre-NBA/WNBA prospects** and includes:
 | **ABA** (Adriatic) | PREPRO | Yes | Yes | Yes | Yes | No | Yes | Yes |
 | **BAL** (Africa) | PREPRO | Yes | Yes | Yes | Yes | No | Yes | Yes |
 | **BCL** (Champions) | PREPRO | Yes | Yes | Yes | Yes | No | Yes | Yes |
-| **LNB Pro A** (France) | PREPRO | Yes | Limited | No | No | No | Yes | Yes |
+| **LNB Pro A** (France) | PREPRO | Yes | Limited | No | Yes | Yes | Yes | Yes |
 | **ACB** (Spain) | PREPRO | No | No | No | No | No | Scaffold | Scaffold |
 | **WNBA** | PRO | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
 
@@ -135,7 +135,7 @@ This library focuses on **pre-NBA/WNBA prospects** and includes:
 
 **Data Availability Notes**:
 - **Full Data**: 15 leagues with comprehensive datasets (NCAA, EuroLeague, G-League, NBL, FIBA Cluster, etc.)
-- **LNB Pro A**: Schedule, player_season, and team_season fully functional via LNB Official API (2023-present); player_game data limited; pbp/shots not yet available
+- **LNB Pro A**: Schedule, player_season, team_season, pbp, and shots fully functional (2025-2026: 8 games, 3,336 PBP events, 973 shots); player_game data limited; team_game not yet available
 - **NZ-NBL**: Scaffold only (requires manual game index creation)
 - **ACB**: Scaffold only (JavaScript-rendered site, requires Selenium/Playwright)
 

@@ -77,6 +77,7 @@ import json
 import logging
 import zlib
 from io import StringIO
+from typing import Any
 
 import pandas as pd
 import requests
@@ -1585,3 +1586,82 @@ def fetch_lnb_player_game(
             "See LNB_BOXSCORE_DISCOVERY_GUIDE.md for discovery instructions."
         )
         return pd.DataFrame(columns=get_player_game_columns())
+
+
+# ==============================================================================
+# Historical Data Wrappers (PBP & Shots) - Catalog Integration
+# ==============================================================================
+
+
+def fetch_lnb_pbp_historical(
+    season: str | None = None,
+    game_ids: list[str] | None = None,
+    **kwargs: Any,
+) -> pd.DataFrame:
+    """Fetch LNB play-by-play data from historical parquet files
+
+    This fetcher accesses pre-ingested historical PBP data stored in
+    data/lnb/historical/{season}/pbp_events.parquet files.
+
+    Args:
+        season: Season in format "2024-2025" or "2025-2026"
+        game_ids: List of game/fixture UUIDs to filter
+        **kwargs: Additional filters (team, player, event_type, limit)
+
+    Returns:
+        DataFrame with PBP events
+
+    Example:
+        >>> pbp = fetch_lnb_pbp_historical(season="2025-2026")
+        >>> game_pbp = fetch_lnb_pbp_historical(season="2025-2026", game_ids=["abc-123"])
+    """
+    from ..api.lnb_historical import get_lnb_historical_pbp
+
+    if season is None:
+        logger.warning("fetch_lnb_pbp_historical: season is required, defaulting to 2025-2026")
+        season = "2025-2026"
+
+    try:
+        return get_lnb_historical_pbp(season=season, fixture_uuid=game_ids, **kwargs)
+    except Exception as e:
+        logger.error(f"fetch_lnb_pbp_historical failed: {e}")
+        return pd.DataFrame()
+
+
+def fetch_lnb_shots_historical(
+    season: str | None = None,
+    game_ids: list[str] | None = None,
+    **kwargs: Any,
+) -> pd.DataFrame:
+    """Fetch LNB shot chart data from historical parquet files
+
+    This fetcher accesses pre-ingested historical shot data stored in
+    data/lnb/historical/{season}/shots.parquet files.
+
+    Note: This is different from fetch_lnb_shots() which fetches a single game
+    via Atrium Sports API. This function fetches from pre-ingested historical
+    parquet files and supports season-level queries.
+
+    Args:
+        season: Season in format "2024-2025" or "2025-2026"
+        game_ids: List of game/fixture UUIDs to filter
+        **kwargs: Additional filters (team, player, shot_made, limit)
+
+    Returns:
+        DataFrame with shot events including x/y coordinates
+
+    Example:
+        >>> shots = fetch_lnb_shots_historical(season="2025-2026")
+        >>> game_shots = fetch_lnb_shots_historical(season="2025-2026", game_ids=["abc-123"])
+    """
+    from ..api.lnb_historical import get_lnb_historical_shots
+
+    if season is None:
+        logger.warning("fetch_lnb_shots_historical: season is required, defaulting to 2025-2026")
+        season = "2025-2026"
+
+    try:
+        return get_lnb_historical_shots(season=season, fixture_uuid=game_ids, **kwargs)
+    except Exception as e:
+        logger.error(f"fetch_lnb_shots_historical failed: {e}")
+        return pd.DataFrame()
