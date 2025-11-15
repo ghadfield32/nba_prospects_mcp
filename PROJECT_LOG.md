@@ -1,4 +1,62 @@
-## 2025-11-15 - LNB Pro A Full Integration via API-Basketball ✅ COMPLETED
+## 2025-11-15 (Later) - LNB Pro A Migration: API-Basketball → Parquet ✅ COMPLETED
+
+**Summary**: Migrated LNB Pro A from API-Basketball to Parquet-based storage following NBL pattern. User has LNB data from external source. Core datasets (schedule, pbp, shots) fully functional. MCP integration automatic.
+
+**Migration Rationale**: User requested Parquet approach to match NBL pattern and use existing LNB data source.
+
+**Integration Scope**:
+- ✅ Schedule/Fixtures: 8 games (2025-26 sample) via Parquet
+- ✅ Team Season: Aggregated from fixtures (8 teams, W/L/PTS)
+- ✅ PBP Events: 3,336 events via Parquet (~417/game)
+- ✅ Shots: 976 shots via Parquet with x,y coordinates (~122/game)
+- ⚠️ Player Season: Empty (pending lnb_box_player.parquet)
+- ⚠️ Player Game: Empty (pending lnb_box_player.parquet)
+- ⚠️ Team Game: Empty (pending lnb_box_team.parquet)
+
+**New Files Created**:
+1. `src/cbb_data/fetchers/lnb_official.py` (900+ lines) - 7 fetch functions, Parquet loading, schema normalization
+2. `tools/lnb/export_lnb.py` - Export script with --sample flag (generates 8 games, 3,336 PBP, 976 shots)
+3. `tools/lnb/README.md` - Setup and usage documentation
+4. `IMPLEMENTATION_PLAN_LNB.md` - Architecture plan following NBL pattern
+5. `LNB_INTEGRATION_ANALYSIS.md` - Comprehensive integration analysis
+6. `data/lnb_raw/*.parquet` - 3 Parquet files (fixtures, pbp_events, shots)
+
+**Files Modified**:
+1. `src/cbb_data/api/datasets.py` - Added LNB_PROA to _fetch_schedule() + _fetch_play_by_play(), imported lnb_official
+2. `src/cbb_data/catalog/sources.py` - Replaced API-Basketball config with Parquet config, registered 7 lnb_official fetchers
+3. `src/cbb_data/catalog/capabilities.py` - Updated: shots=FULL, pbp=FULL, box_scores=LIMITED
+4. `src/cbb_data/fetchers/__init__.py` - Exported lnb_official module
+
+**Technical Implementation**:
+- **GAME_ID Fix**: Convert int64→str for API compatibility, removed @cached_dataframe to prevent type conflicts
+- **Schema**: Parquet lowercase→UPPERCASE standard columns, inject LEAGUE="LNB_PROA"
+- **Graceful Degradation**: Empty DataFrames with correct schema when box data unavailable
+- **Data Flow**: External LNB data → export_lnb.py → Parquet files → lnb_official.py → get_dataset()
+
+**Testing Results** (via get_dataset()):
+- ✅ Schedule: 8 games (all columns present)
+- ✅ Team Season: 8 teams (W/L/PTS aggregated correctly)
+- ✅ PBP (all games): 3,336 events
+- ✅ PBP (single game filter): 417 events for game_id="1"
+- ✅ Shots (season): 976 shots with coordinates
+- ✅ Team filter: Works correctly (e.g., team=["Monaco"])
+
+**MCP Integration**: ✅ Automatic via get_dataset() - tools use dynamic league parameter, no hardcoded leagues
+
+**Deprecation**: API-Basketball LNB integration (lnb.py) superseded by Parquet approach (lnb_official.py)
+
+**Pending**:
+- Box score Parquet files (user data dependency)
+- Formal test coverage in test_comprehensive_datasets.py
+- MCP validation testing
+
+**Commit**: `27a8efd` - "feat: Complete LNB Pro A Parquet-based integration following NBL pattern"
+
+---
+
+## 2025-11-15 - LNB Pro A Full Integration via API-Basketball ⚠️ DEPRECATED
+
+[NOTE: This integration was replaced by Parquet-based approach (see entry above). Kept for historical reference.]
 
 **Summary**: Implemented comprehensive LNB Pro A (France) data integration using API-Basketball API. All dataset granularities now supported: schedule, player_season, player_game, team_season, pbp, shots. Historical coverage 2015-2026 with ~11,000 games total.
 
