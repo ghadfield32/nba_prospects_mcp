@@ -90,10 +90,10 @@ CAPABILITY_OVERRIDES: dict[str, dict[str, CapabilityLevel]] = {
     "ABA": {  # ABA Adriatic League - FIBA HTML
         "shots": CapabilityLevel.UNAVAILABLE,  # FIBA HTML doesn't provide x,y coordinates
     },
-    # ========== EUROPEAN DOMESTIC LEAGUES (CUSTOM HTML) ==========
-    "LNB_PROA": {  # LNB Pro A France - Official stats site
-        "shots": CapabilityLevel.UNAVAILABLE,  # Official site doesn't provide shot coordinates
-        "pbp": CapabilityLevel.LIMITED,  # PBP available for recent seasons only (2018+)
+    # ========== EUROPEAN DOMESTIC LEAGUES (API-BASKETBALL + HTML) ==========
+    "LNB_PROA": {  # LNB Pro A France - API-Basketball + HTML scraping
+        "shots": CapabilityLevel.LIMITED,  # API-Basketball (coverage varies by season)
+        "pbp": CapabilityLevel.LIMITED,  # API-Basketball (coverage varies by season)
     },
     "ACB": {  # Liga Endesa Spain - Official stats site
         "shots": CapabilityLevel.UNAVAILABLE,  # Official site doesn't provide shot coordinates

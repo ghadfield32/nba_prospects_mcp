@@ -490,13 +490,13 @@ class APIBasketballClient:
 # For now, these are placeholders - actual IDs need verification
 
 LEAGUE_ID_MAP: dict[str, int] = {
-    # "NBL": 12,  # Example - needs verification
-    # "ACB": ??,
-    # "LKL": ??,
-    # "BAL": ??,
-    # "BCL": ??,
-    # "LNB_PROA": ??,
-    # "ABA": ??,
+    "LNB_PROA": 62,  # France - LNB Pro A (verified)
+    # "NBL": 12,  # Australia - needs verification
+    # "ACB": ??,  # Spain - needs verification
+    # "LKL": ??,  # Lithuania - needs verification
+    # "BAL": ??,  # Africa - needs verification
+    # "BCL": ??,  # Basketball Champions League - needs verification
+    # "ABA": ??,  # ABA League - needs verification
 }
 
 

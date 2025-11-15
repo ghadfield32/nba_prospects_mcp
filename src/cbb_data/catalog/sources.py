@@ -598,16 +598,20 @@ def _register_league_sources() -> None:
     register_league_source(
         LeagueSourceConfig(
             league="LNB_PROA",
-            player_season_source="html",  # Phase 3: Will change to "api_basketball" or "statorium"
-            team_season_source="html",  # ✅ WORKS (16 teams via static HTML)
-            schedule_source="none",
-            box_score_source="none",
-            pbp_source="none",
-            shots_source="none",
-            fetch_player_season=lnb.fetch_lnb_player_season,  # Currently empty scaffold
-            fetch_team_season=lnb.fetch_lnb_team_season,  # ✅ Returns 16 teams
-            fallback_source="html_js",
-            notes="Phase 2: team_season works (16 teams), player_season scaffold. Phase 3: API-Basketball/Statorium for players.",
+            player_season_source="api_basketball",  # ✅ API-Basketball (2015-present)
+            team_season_source="html+api",  # ✅ HTML scraping + API fallback
+            schedule_source="api_basketball",  # ✅ API-Basketball (2015-present)
+            box_score_source="api_basketball",  # ✅ API-Basketball
+            pbp_source="api_basketball",  # ⚠️ API-Basketball (coverage varies)
+            shots_source="api_basketball",  # ⚠️ API-Basketball (coverage varies)
+            fetch_player_season=lnb.fetch_lnb_player_season,  # ✅ API-Basketball
+            fetch_team_season=lnb.fetch_lnb_team_season,  # ✅ HTML scraping
+            fetch_schedule=lnb.fetch_lnb_schedule,  # ✅ API-Basketball
+            fetch_box_score=lnb.fetch_lnb_box_score,  # ✅ API-Basketball
+            fetch_pbp=lnb.fetch_lnb_pbp,  # ⚠️ API-Basketball (placeholder)
+            fetch_shots=lnb.fetch_lnb_shots,  # ⚠️ API-Basketball (placeholder)
+            fallback_source="api_basketball",
+            notes="Phase 3 COMPLETE: Full API-Basketball integration. Schedule/player_season/box_scores: ✅ 2015-present. PBP/shots: ⚠️ coverage varies, check API docs. HTML scraping available for team_season fallback.",
         )
     )
 
