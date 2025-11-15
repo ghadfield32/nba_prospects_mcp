@@ -1,0 +1,43 @@
+{
+  "url": "https://api-prod.lnb.fr/competition/getCompetitionByPlayer",
+  "type": "competition",
+  "timestamp": "211754",
+  "data": {
+    "status": true,
+    "message": "Player Competition found",
+    "data": [
+      {
+        "external_id": 302,
+        "competition_name": "Betclic ÉLITE",
+        "logo_white": {
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/sm.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/md.png",
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/lg.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/or.png"
+        },
+        "logo_black": {
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/sm.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/md.png",
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/lg.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/or.png"
+        }
+      },
+      {
+        "external_id": 301,
+        "competition_name": "Supercoupe",
+        "logo_white": {
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/301/logoWhite/sm.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/301/logoWhite/md.png",
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/301/logoWhite/lg.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/301/logoWhite/or.png"
+        },
+        "logo_black": {
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/301/logoBlack/sm.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/301/logoBlack/md.png",
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/301/logoBlack/lg.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/301/logoBlack/or.png"
+        }
+      }
+    ]
+  }
+}

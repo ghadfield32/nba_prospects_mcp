@@ -1,0 +1,96 @@
+{
+  "url": "https://api-prod.lnb.fr/shop/getWebShopList",
+  "type": "unknown",
+  "timestamp": "211759",
+  "data": {
+    "status": true,
+    "message": "Shop fetched (from cache)",
+    "data": {
+      "shop": [
+        {
+          "id": 44,
+          "slug": "lnb-shop-banner",
+          "status": "published",
+          "scheduled_at": null,
+          "published_at": "2025-09-09T15:58:23.000Z",
+          "publish_platforms": [],
+          "metadata": {
+            "seo_tag": "",
+            "seo_title": "",
+            "seo_description": ""
+          },
+          "created_at": "2025-09-09T15:57:59.000Z",
+          "updated_at": "2025-09-09T15:58:25.000Z",
+          "shop_image_url": "uploads/page-service/block/72beba01dae0f1b33c4d355f4da4136891c2967b4ca6cac08a8cfd02dfc66e40.jpg",
+          "shop_hover_image_url": "uploads/page-service/block/4fcf18262525789eca150b2edf371092e8e3f546dfe90c6ce97b9876a6582fbd.jpg",
+          "product_name": "BANNIÈRE DE LA BOUTIQUE LNB",
+          "original_price": "0",
+          "button_label": "EXPLORER LA BOUTIQUE",
+          "button_url": "https://store.lnb.fr",
+          "languages": [
+            "en",
+            "fr"
+          ]
+        },
+        {
+          "id": 25,
+          "slug": "warm-up-jersey-sharks-antibes-navy-blue",
+          "status": "published",
+          "scheduled_at": null,
+          "published_at": "2025-08-10T05:58:11.000Z",
+          "publish_platforms": [
+            "app"
+          ],
+          "metadata": {
+            "seo_tag": "",
+            "seo_title": "",
+            "seo_description": ""
+          },
+          "created_at": "2025-08-02T08:35:27.000Z",
+          "updated_at": "2025-09-13T04:57:44.000Z",
+          "shop_image_url": "uploads/page-service/block/70fd81b24eceeddc19ca333257e9124216dc981c86e7cf318b729716236cda4c.jpg",
+          "shop_hover_image_url": "uploads/page-service/block/1d955ae6ac136311688971666a271669e588e7b942c619b076423bbeb297fb17.jpg",
+          "product_name": "Révelons le Basket Français",
+          "original_price": "50",
+          "button_label": "ACHETER",
+          "button_url": "https://store.lnb.fr/article/hoodie-lnb-revelons-le-basket-francais",
+          "languages": [
+            "en",
+            "fr"
+          ]
+        },
+        {
+          "id": 26,
+          "slug": "warm-up-jersey-sharks-antibes-navy-blue_1",
+          "status": "published",
+          "scheduled_at": null,
+          "published_at": "2025-08-20T06:16:30.000Z",
+          "publish_platforms": [
+            "app"
+          ],
+          "metadata": {
+            "seo_tag": "",
+            "seo_title": "",
+            "seo_description": ""
+          },
+          "created_at": "2025-08-02T08:36:32.000Z",
+          "updated_at": "2025-09-13T04:57:47.000Z",
+          "shop_image_url": "uploads/content-library/d1e0662e3066cc48299b969b0ebff870a82d56098a8967dcd4ae49f956a18a08.jpg",
+          "shop_hover_image_url": "uploads/content-library/28d025f173874d2244d8ca1aa6a7841de3855b65f95c83d19bab8a2c9135f545.jpg",
+          "product_name": "T-Shirt LNB - Révelons le Basket Français fr",
+          "original_price": "20",
+          "button_label": "ACHETER",
+          "button_url": "https://store.lnb.fr",
+          "languages": [
+            "en",
+            "fr"
+          ]
+        }
+      ],
+      "totalDocs": 3,
+      "totalPages": 1,
+      "page": 1,
+      "limit": 10
+    }
+  }
+}

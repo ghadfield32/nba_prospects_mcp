@@ -1,0 +1,88 @@
+{
+  "url": "https://api-prod.lnb.fr/altrstats/getPerformancePersonV2",
+  "type": "performance",
+  "timestamp": "211800",
+  "data": {
+    "status": true,
+    "message": "Performance Person fetched (from cache)",
+    "data": {
+      "team": {
+        "external_id": 1794,
+        "team_name": "Paris",
+        "logo_white": {
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoWhite/sm.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoWhite/md.png",
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoWhite/lg.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoWhite/or.png"
+        },
+        "logo_black": {
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoBlack/sm.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoBlack/md.png",
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoBlack/lg.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoBlack/or.png"
+        }
+      },
+      "person": {
+        "external_id": 3586,
+        "first_name": "Nadir",
+        "family_name": "Hifi",
+        "is_favourite": "no"
+      },
+      "playerRole": {
+        "external_id": 28756,
+        "shirt_number": "2",
+        "photo": {
+          "sm": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/28756/photo/sm.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/28756/photo/md.png",
+          "lg": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/28756/photo/lg.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/28756/photo/or.png"
+        }
+      },
+      "statData": [
+        {
+          "title": "Seasonal Averages",
+          "data": {
+            "games_played": 6,
+            "minutes": "18' 46''",
+            "first_five": 5,
+            "points": 20.33,
+            "rebounds": 1.17,
+            "assists": 2.83,
+            "steals": 1,
+            "contributions": 0.17,
+            "efficiency": 15.33
+          }
+        },
+        {
+          "title": "Career Averages",
+          "data": {
+            "minutes": "23' 26''",
+            "points": 14.72,
+            "rebounds": 2.18,
+            "assists": 2.52,
+            "interceptions": 0.88,
+            "contributions": 0.06,
+            "efficiency": 12.73
+          }
+        },
+        {
+          "title": "Career Total",
+          "data": {
+            "games": 129,
+            "points": 1899,
+            "assists": 325,
+            "rebounds": 281
+          }
+        },
+        {
+          "title": "Shooting Efficiency",
+          "data": {
+            "field_goal_per": 48.75,
+            "three_point_per": 42.86,
+            "free_throw_per": 86.67
+          }
+        }
+      ]
+    }
+  }
+}

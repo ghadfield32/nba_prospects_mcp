@@ -1,0 +1,88 @@
+{
+  "url": "https://api-prod.lnb.fr/altrstats/getPerformancePersonV2",
+  "type": "performance",
+  "timestamp": "211800",
+  "data": {
+    "status": true,
+    "message": "Performance Person fetched (from cache)",
+    "data": {
+      "team": {
+        "external_id": 1787,
+        "team_name": "Le Mans",
+        "logo_white": {
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1787/logoWhite/sm.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Team/1787/logoWhite/md.png",
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1787/logoWhite/lg.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Team/1787/logoWhite/or.png"
+        },
+        "logo_black": {
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1787/logoBlack/sm.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Team/1787/logoBlack/md.png",
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1787/logoBlack/lg.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Team/1787/logoBlack/or.png"
+        }
+      },
+      "person": {
+        "external_id": 9931,
+        "first_name": "Trevor",
+        "family_name": "Hudgins",
+        "is_favourite": "no"
+      },
+      "playerRole": {
+        "external_id": 27917,
+        "shirt_number": "12",
+        "photo": {
+          "sm": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/27917/photo/sm.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/27917/photo/md.png",
+          "lg": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/27917/photo/lg.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/27917/photo/or.png"
+        }
+      },
+      "statData": [
+        {
+          "title": "Seasonal Averages",
+          "data": {
+            "games_played": 7,
+            "minutes": "27' 29''",
+            "first_five": 7,
+            "points": 18.43,
+            "rebounds": 1.57,
+            "assists": 3.29,
+            "steals": 1.57,
+            "contributions": 0.14,
+            "efficiency": 16.14
+          }
+        },
+        {
+          "title": "Career Averages",
+          "data": {
+            "minutes": "25' 49''",
+            "points": 15.09,
+            "rebounds": 1.72,
+            "assists": 2.88,
+            "interceptions": 0.66,
+            "contributions": 0.03,
+            "efficiency": 13.45
+          }
+        },
+        {
+          "title": "Career Total",
+          "data": {
+            "games": 58,
+            "points": 875,
+            "assists": 167,
+            "rebounds": 100
+          }
+        },
+        {
+          "title": "Shooting Efficiency",
+          "data": {
+            "field_goal_per": 46.24,
+            "three_point_per": 40,
+            "free_throw_per": 85.19
+          }
+        }
+      ]
+    }
+  }
+}

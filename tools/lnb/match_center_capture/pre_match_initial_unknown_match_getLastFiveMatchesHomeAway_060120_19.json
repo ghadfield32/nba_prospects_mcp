@@ -1,0 +1,648 @@
+{
+  "url": "https://api-prod.lnb.fr/match/getLastFiveMatchesHomeAway?match_external_id=28914",
+  "host": "api-prod.lnb.fr",
+  "path": "/match/getLastFiveMatchesHomeAway",
+  "page_type": "pre_match",
+  "section": "initial",
+  "response_type": "unknown",
+  "timestamp": "060120",
+  "data": {
+    "status": true,
+    "message": "Last Five Matches (Home/Away) found",
+    "data": {
+      "home_team": {
+        "team_name": "Saint-Quentin",
+        "logo_white": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/sm.png"
+        },
+        "logo_black": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/sm.png"
+        },
+        "last_five_match": [
+          {
+            "match_id": "0ce02919-6715-11f0-9d01-27e6e78614e1",
+            "match_external_id": 28905,
+            "match_time": "2025-11-09T15:30:00",
+            "home_team_name": "Monaco",
+            "home_team_score": "92",
+            "home_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1791/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1791/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1791/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1791/logoWhite/or.png"
+            },
+            "home_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1791/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1791/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1791/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1791/logoBlack/or.png"
+            },
+            "away_team_name": "Saint-Quentin",
+            "away_team_score": "84",
+            "away_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/or.png"
+            },
+            "away_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/or.png"
+            },
+            "score_description": "Aller | 7ème journée",
+            "result": "L"
+          },
+          {
+            "match_id": "0cac6e1b-6715-11f0-a9f3-27e6e78614e1",
+            "match_external_id": 28898,
+            "match_time": "2025-10-31T19:30:00",
+            "home_team_name": "Saint-Quentin",
+            "home_team_score": "65",
+            "home_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/or.png"
+            },
+            "home_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/or.png"
+            },
+            "away_team_name": "Nanterre",
+            "away_team_score": "89",
+            "away_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoWhite/or.png"
+            },
+            "away_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoBlack/or.png"
+            },
+            "score_description": "Aller | 6ème journée",
+            "result": "L"
+          },
+          {
+            "match_id": "0c63bb5e-6715-11f0-bc0c-27e6e78614e1",
+            "match_external_id": 28889,
+            "match_time": "2025-10-24T18:30:00",
+            "home_team_name": "Limoges",
+            "home_team_score": "80",
+            "home_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoWhite/or.png"
+            },
+            "home_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoBlack/or.png"
+            },
+            "away_team_name": "Saint-Quentin",
+            "away_team_score": "62",
+            "away_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/or.png"
+            },
+            "away_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/or.png"
+            },
+            "score_description": "Aller | 5ème journée",
+            "result": "L"
+          },
+          {
+            "match_id": "0c0d2399-6715-11f0-b612-27e6e78614e1",
+            "match_external_id": 28878,
+            "match_time": "2025-10-17T18:30:00",
+            "home_team_name": "Saint-Quentin",
+            "home_team_score": "86",
+            "home_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/or.png"
+            },
+            "home_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/or.png"
+            },
+            "away_team_name": "Gravelines-Dunkerque",
+            "away_team_score": "74",
+            "away_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoWhite/or.png"
+            },
+            "away_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoBlack/or.png"
+            },
+            "score_description": "Aller | 4ème journée",
+            "result": "W"
+          },
+          {
+            "match_id": "0bbaf1d4-6715-11f0-82a2-27e6e78614e1",
+            "match_external_id": 28868,
+            "match_time": "2025-10-11T16:10:00",
+            "home_team_name": "Chalon/Saône",
+            "home_team_score": "84",
+            "home_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoWhite/or.png"
+            },
+            "home_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoBlack/or.png"
+            },
+            "away_team_name": "Saint-Quentin",
+            "away_team_score": "82",
+            "away_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/or.png"
+            },
+            "away_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/or.png"
+            },
+            "score_description": "Aller | 3ème journée",
+            "result": "L"
+          }
+        ],
+        "other_match": [
+          {
+            "match_id": "0cac6e1b-6715-11f0-a9f3-27e6e78614e1",
+            "match_external_id": 28898,
+            "match_time": "2025-10-31T19:30:00",
+            "home_team_name": "Saint-Quentin",
+            "home_team_score": "65",
+            "home_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/or.png"
+            },
+            "home_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/or.png"
+            },
+            "away_team_name": "Nanterre",
+            "away_team_score": "89",
+            "away_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoWhite/or.png"
+            },
+            "away_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoBlack/or.png"
+            },
+            "score_description": "Aller | 6ème journée",
+            "result": "L"
+          },
+          {
+            "match_id": "0c0d2399-6715-11f0-b612-27e6e78614e1",
+            "match_external_id": 28878,
+            "match_time": "2025-10-17T18:30:00",
+            "home_team_name": "Saint-Quentin",
+            "home_team_score": "86",
+            "home_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/or.png"
+            },
+            "home_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/or.png"
+            },
+            "away_team_name": "Gravelines-Dunkerque",
+            "away_team_score": "74",
+            "away_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoWhite/or.png"
+            },
+            "away_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoBlack/or.png"
+            },
+            "score_description": "Aller | 4ème journée",
+            "result": "W"
+          },
+          {
+            "match_id": "0b8dd72d-6715-11f0-8c5d-27e6e78614e1",
+            "match_external_id": 28862,
+            "match_time": "2025-10-05T17:00:00",
+            "home_team_name": "Saint-Quentin",
+            "home_team_score": "76",
+            "home_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/or.png"
+            },
+            "home_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/or.png"
+            },
+            "away_team_name": "Lyon-Villeurbanne",
+            "away_team_score": "81",
+            "away_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoWhite/or.png"
+            },
+            "away_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoBlack/or.png"
+            },
+            "score_description": "Aller | 2ème journée",
+            "result": "L"
+          }
+        ]
+      },
+      "away_team": {
+        "team_name": "Nancy",
+        "logo_white": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/sm.png"
+        },
+        "logo_black": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/sm.png"
+        },
+        "last_five_match": [
+          {
+            "match_id": "0ce79e46-6715-11f0-9095-27e6e78614e1",
+            "match_external_id": 28906,
+            "match_time": "2025-11-07T19:30:00",
+            "home_team_name": "Nancy",
+            "home_team_score": "91",
+            "home_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/or.png"
+            },
+            "home_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/or.png"
+            },
+            "away_team_name": "Cholet",
+            "away_team_score": "87",
+            "away_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1784/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1784/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1784/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1784/logoWhite/or.png"
+            },
+            "away_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1784/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1784/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1784/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1784/logoBlack/or.png"
+            },
+            "score_description": "Aller | 7ème journée",
+            "result": "W"
+          },
+          {
+            "match_id": "0c86e7dd-6715-11f0-ac7c-27e6e78614e1",
+            "match_external_id": 28893,
+            "match_time": "2025-11-01T17:10:00",
+            "home_team_name": "Strasbourg",
+            "home_team_score": "86",
+            "home_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoWhite/or.png"
+            },
+            "home_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoBlack/or.png"
+            },
+            "away_team_name": "Nancy",
+            "away_team_score": "82",
+            "away_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/or.png"
+            },
+            "away_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/or.png"
+            },
+            "score_description": "Aller | 6ème journée",
+            "result": "L"
+          },
+          {
+            "match_id": "0c54f4fe-6715-11f0-8fcf-27e6e78614e1",
+            "match_external_id": 28887,
+            "match_time": "2025-10-25T16:10:00",
+            "home_team_name": "Gravelines-Dunkerque",
+            "home_team_score": "107",
+            "home_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoWhite/or.png"
+            },
+            "home_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoBlack/or.png"
+            },
+            "away_team_name": "Nancy",
+            "away_team_score": "79",
+            "away_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/or.png"
+            },
+            "away_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/or.png"
+            },
+            "score_description": "Aller | 5ème journée",
+            "result": "L"
+          },
+          {
+            "match_id": "0c1ca8d7-6715-11f0-aa83-27e6e78614e1",
+            "match_external_id": 28880,
+            "match_time": "2025-10-18T16:20:00",
+            "home_team_name": "Nancy",
+            "home_team_score": "117",
+            "home_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/or.png"
+            },
+            "home_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/or.png"
+            },
+            "away_team_name": "Limoges",
+            "away_team_score": "85",
+            "away_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoWhite/or.png"
+            },
+            "away_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoBlack/or.png"
+            },
+            "score_description": "Aller | 4ème journée",
+            "result": "W"
+          },
+          {
+            "match_id": "0bedf92c-6715-11f0-9c10-27e6e78614e1",
+            "match_external_id": 28874,
+            "match_time": "2025-10-11T16:20:00",
+            "home_team_name": "Boulazac",
+            "home_team_score": "65",
+            "home_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoWhite/or.png"
+            },
+            "home_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoBlack/or.png"
+            },
+            "away_team_name": "Nancy",
+            "away_team_score": "87",
+            "away_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/or.png"
+            },
+            "away_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/or.png"
+            },
+            "score_description": "Aller | 3ème journée",
+            "result": "W"
+          }
+        ],
+        "other_match": [
+          {
+            "match_id": "0c86e7dd-6715-11f0-ac7c-27e6e78614e1",
+            "match_external_id": 28893,
+            "match_time": "2025-11-01T17:10:00",
+            "home_team_name": "Strasbourg",
+            "home_team_score": "86",
+            "home_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoWhite/or.png"
+            },
+            "home_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoBlack/or.png"
+            },
+            "away_team_name": "Nancy",
+            "away_team_score": "82",
+            "away_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/or.png"
+            },
+            "away_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/or.png"
+            },
+            "score_description": "Aller | 6ème journée",
+            "result": "L"
+          },
+          {
+            "match_id": "0c54f4fe-6715-11f0-8fcf-27e6e78614e1",
+            "match_external_id": 28887,
+            "match_time": "2025-10-25T16:10:00",
+            "home_team_name": "Gravelines-Dunkerque",
+            "home_team_score": "107",
+            "home_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoWhite/or.png"
+            },
+            "home_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoBlack/or.png"
+            },
+            "away_team_name": "Nancy",
+            "away_team_score": "79",
+            "away_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/or.png"
+            },
+            "away_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/or.png"
+            },
+            "score_description": "Aller | 5ème journée",
+            "result": "L"
+          },
+          {
+            "match_id": "0bedf92c-6715-11f0-9c10-27e6e78614e1",
+            "match_external_id": 28874,
+            "match_time": "2025-10-11T16:20:00",
+            "home_team_name": "Boulazac",
+            "home_team_score": "65",
+            "home_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoWhite/or.png"
+            },
+            "home_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoBlack/or.png"
+            },
+            "away_team_name": "Nancy",
+            "away_team_score": "87",
+            "away_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/or.png"
+            },
+            "away_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/or.png"
+            },
+            "score_description": "Aller | 3ème journée",
+            "result": "W"
+          },
+          {
+            "match_id": "0b28bc3a-6715-11f0-b78a-27e6e78614e1",
+            "match_external_id": 28853,
+            "match_time": "2025-09-28T17:00:00",
+            "home_team_name": "Lyon-Villeurbanne",
+            "home_team_score": "115",
+            "home_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoWhite/or.png"
+            },
+            "home_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoBlack/or.png"
+            },
+            "away_team_name": "Nancy",
+            "away_team_score": "71",
+            "away_team_logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/or.png"
+            },
+            "away_team_logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/or.png"
+            },
+            "score_description": "Aller | 1ère journée",
+            "result": "L"
+          }
+        ]
+      }
+    }
+  }
+}

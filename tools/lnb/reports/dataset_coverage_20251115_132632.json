@@ -1,0 +1,261 @@
+{
+  "timestamp": "2025-11-15T13:26:32.702292",
+  "total_games": 7,
+  "total_player": 7,
+  "total_team": 7,
+  "total_shots": 7,
+  "by_season": {
+    "2021-2022": {
+      "season": "2021-2022",
+      "total_games": 1,
+      "have_player": 1,
+      "have_team": 1,
+      "have_shots_normalized": 1,
+      "coverage_player": 100.0,
+      "coverage_team": 100.0,
+      "coverage_shots_normalized": 100.0,
+      "missing_player": [],
+      "missing_team": [],
+      "missing_shots_normalized": [],
+      "anomalies": {
+        "zero_players": [],
+        "zero_teams": [],
+        "team_count_mismatch": [],
+        "negative_stats": [],
+        "missing_required_fields": [
+          [
+            "7d414bce-f5da-11eb-b3fd-a23ac5ab90da",
+            "player",
+            [
+              "player_id",
+              "team_id",
+              "game_id",
+              "pts",
+              "reb",
+              "ast"
+            ]
+          ],
+          [
+            "7d414bce-f5da-11eb-b3fd-a23ac5ab90da",
+            "team",
+            [
+              "team_id",
+              "game_id",
+              "pts",
+              "reb",
+              "ast",
+              "fg_pct"
+            ]
+          ]
+        ]
+      }
+    },
+    "2022-2023": {
+      "season": "2022-2023",
+      "total_games": 1,
+      "have_player": 1,
+      "have_team": 1,
+      "have_shots_normalized": 1,
+      "coverage_player": 100.0,
+      "coverage_team": 100.0,
+      "coverage_shots_normalized": 100.0,
+      "missing_player": [],
+      "missing_team": [],
+      "missing_shots_normalized": [],
+      "anomalies": {
+        "zero_players": [],
+        "zero_teams": [],
+        "team_count_mismatch": [],
+        "negative_stats": [],
+        "missing_required_fields": [
+          [
+            "cc7e470e-11a0-11ed-8ef5-8d12cdc95909",
+            "player",
+            [
+              "player_id",
+              "team_id",
+              "game_id",
+              "pts",
+              "reb",
+              "ast"
+            ]
+          ],
+          [
+            "cc7e470e-11a0-11ed-8ef5-8d12cdc95909",
+            "team",
+            [
+              "team_id",
+              "game_id",
+              "pts",
+              "reb",
+              "ast",
+              "fg_pct"
+            ]
+          ]
+        ]
+      }
+    },
+    "2023-2024": {
+      "season": "2023-2024",
+      "total_games": 1,
+      "have_player": 1,
+      "have_team": 1,
+      "have_shots_normalized": 1,
+      "coverage_player": 100.0,
+      "coverage_team": 100.0,
+      "coverage_shots_normalized": 100.0,
+      "missing_player": [],
+      "missing_team": [],
+      "missing_shots_normalized": [],
+      "anomalies": {
+        "zero_players": [],
+        "zero_teams": [],
+        "team_count_mismatch": [],
+        "negative_stats": [],
+        "missing_required_fields": [
+          [
+            "3fcea9a1-1f10-11ee-a687-db190750bdda",
+            "player",
+            [
+              "player_id",
+              "team_id",
+              "game_id",
+              "pts",
+              "reb",
+              "ast"
+            ]
+          ],
+          [
+            "3fcea9a1-1f10-11ee-a687-db190750bdda",
+            "team",
+            [
+              "team_id",
+              "game_id",
+              "pts",
+              "reb",
+              "ast",
+              "fg_pct"
+            ]
+          ]
+        ]
+      }
+    },
+    "2024-2025": {
+      "season": "2024-2025",
+      "total_games": 4,
+      "have_player": 4,
+      "have_team": 4,
+      "have_shots_normalized": 4,
+      "coverage_player": 100.0,
+      "coverage_team": 100.0,
+      "coverage_shots_normalized": 100.0,
+      "missing_player": [],
+      "missing_team": [],
+      "missing_shots_normalized": [],
+      "anomalies": {
+        "zero_players": [],
+        "zero_teams": [],
+        "team_count_mismatch": [],
+        "negative_stats": [],
+        "missing_required_fields": [
+          [
+            "0cac6e1b-6715-11f0-a9f3-27e6e78614e1",
+            "player",
+            [
+              "player_id",
+              "team_id",
+              "game_id",
+              "pts",
+              "reb",
+              "ast"
+            ]
+          ],
+          [
+            "0cac6e1b-6715-11f0-a9f3-27e6e78614e1",
+            "team",
+            [
+              "team_id",
+              "game_id",
+              "pts",
+              "reb",
+              "ast",
+              "fg_pct"
+            ]
+          ],
+          [
+            "0cd1323f-6715-11f0-86f4-27e6e78614e1",
+            "player",
+            [
+              "player_id",
+              "team_id",
+              "game_id",
+              "pts",
+              "reb",
+              "ast"
+            ]
+          ],
+          [
+            "0cd1323f-6715-11f0-86f4-27e6e78614e1",
+            "team",
+            [
+              "team_id",
+              "game_id",
+              "pts",
+              "reb",
+              "ast",
+              "fg_pct"
+            ]
+          ],
+          [
+            "0ce02919-6715-11f0-9d01-27e6e78614e1",
+            "player",
+            [
+              "player_id",
+              "team_id",
+              "game_id",
+              "pts",
+              "reb",
+              "ast"
+            ]
+          ],
+          [
+            "0ce02919-6715-11f0-9d01-27e6e78614e1",
+            "team",
+            [
+              "team_id",
+              "game_id",
+              "pts",
+              "reb",
+              "ast",
+              "fg_pct"
+            ]
+          ],
+          [
+            "0d0504a0-6715-11f0-98ab-27e6e78614e1",
+            "player",
+            [
+              "player_id",
+              "team_id",
+              "game_id",
+              "pts",
+              "reb",
+              "ast"
+            ]
+          ],
+          [
+            "0d0504a0-6715-11f0-98ab-27e6e78614e1",
+            "team",
+            [
+              "team_id",
+              "game_id",
+              "pts",
+              "reb",
+              "ast",
+              "fg_pct"
+            ]
+          ]
+        ]
+      }
+    }
+  }
+}

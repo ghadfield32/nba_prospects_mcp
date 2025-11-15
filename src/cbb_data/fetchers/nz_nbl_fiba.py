@@ -111,13 +111,29 @@ def load_game_index(index_path: Path | None = None) -> pd.DataFrame:
                 "Create game index first. See documentation for details."
             )
             return pd.DataFrame(
-                columns=["SEASON", "GAME_ID", "GAME_DATE", "HOME_TEAM", "AWAY_TEAM", "HOME_SCORE", "AWAY_SCORE"]
+                columns=[
+                    "SEASON",
+                    "GAME_ID",
+                    "GAME_DATE",
+                    "HOME_TEAM",
+                    "AWAY_TEAM",
+                    "HOME_SCORE",
+                    "AWAY_SCORE",
+                ]
             )
 
     if not index_path.exists():
         logger.warning(f"NZ-NBL game index not found: {index_path}")
         return pd.DataFrame(
-            columns=["SEASON", "GAME_ID", "GAME_DATE", "HOME_TEAM", "AWAY_TEAM", "HOME_SCORE", "AWAY_SCORE"]
+            columns=[
+                "SEASON",
+                "GAME_ID",
+                "GAME_DATE",
+                "HOME_TEAM",
+                "AWAY_TEAM",
+                "HOME_SCORE",
+                "AWAY_SCORE",
+            ]
         )
 
     try:
@@ -146,7 +162,7 @@ def load_game_index(index_path: Path | None = None) -> pd.DataFrame:
 # ==============================================================================
 
 
-def _parse_fiba_html_table(soup: "BeautifulSoup", team_name: str) -> list[dict[str, Any]]:
+def _parse_fiba_html_table(soup: BeautifulSoup, team_name: str) -> list[dict[str, Any]]:
     """Parse FIBA LiveStats HTML table to extract player stats
 
     Args:
@@ -204,14 +220,16 @@ def _parse_fiba_html_table(soup: "BeautifulSoup", team_name: str) -> list[dict[s
                 ftm, fta = _parse_made_attempted(ft_text)
 
                 # Calculate total field goals
-                player_stat.update({
-                    "FGM": fg2m + fg3m,
-                    "FGA": fg2a + fg3a,
-                    "FG3M": fg3m,
-                    "FG3A": fg3a,
-                    "FTM": ftm,
-                    "FTA": fta,
-                })
+                player_stat.update(
+                    {
+                        "FGM": fg2m + fg3m,
+                        "FGA": fg2a + fg3a,
+                        "FG3M": fg3m,
+                        "FG3A": fg3a,
+                        "FTM": ftm,
+                        "FTA": fta,
+                    }
+                )
 
                 # Rebounds and other stats
                 if len(cells) > 8:
@@ -339,7 +357,7 @@ def _scrape_fiba_box_score(game_id: str) -> pd.DataFrame:
         return pd.DataFrame()
 
 
-def _parse_fiba_pbp_table(soup: "BeautifulSoup", period: int) -> list[dict[str, Any]]:
+def _parse_fiba_pbp_table(soup: BeautifulSoup, period: int) -> list[dict[str, Any]]:
     """Parse FIBA LiveStats play-by-play HTML table for a period
 
     Args:
@@ -388,17 +406,19 @@ def _parse_fiba_pbp_table(soup: "BeautifulSoup", period: int) -> list[dict[str, 
             # Determine event type from description keywords
             event_type = _classify_event_type(description)
 
-            events.append({
-                "EVENT_NUM": event_num,
-                "PERIOD": period,
-                "CLOCK": clock,
-                "TEAM": team,
-                "PLAYER": player,
-                "EVENT_TYPE": event_type,
-                "DESCRIPTION": description,
-                "SCORE_HOME": score_home,
-                "SCORE_AWAY": score_away,
-            })
+            events.append(
+                {
+                    "EVENT_NUM": event_num,
+                    "PERIOD": period,
+                    "CLOCK": clock,
+                    "TEAM": team,
+                    "PLAYER": player,
+                    "EVENT_TYPE": event_type,
+                    "DESCRIPTION": description,
+                    "SCORE_HOME": score_home,
+                    "SCORE_AWAY": score_away,
+                }
+            )
 
             event_num += 1
 
@@ -648,7 +668,22 @@ def fetch_nz_nbl_team_game(season: str = "2024") -> pd.DataFrame:
         return _empty_team_game_df()
 
     # Aggregate by game and team
-    stat_cols = ["MIN", "PTS", "REB", "AST", "STL", "BLK", "TOV", "PF", "FGM", "FGA", "FG3M", "FG3A", "FTM", "FTA"]
+    stat_cols = [
+        "MIN",
+        "PTS",
+        "REB",
+        "AST",
+        "STL",
+        "BLK",
+        "TOV",
+        "PF",
+        "FGM",
+        "FGA",
+        "FG3M",
+        "FG3A",
+        "FTM",
+        "FTA",
+    ]
     available_cols = [col for col in stat_cols if col in player_game.columns]
 
     team_game = player_game.groupby(["GAME_ID", "TEAM"], as_index=False)[available_cols].sum()
@@ -743,7 +778,16 @@ def fetch_nz_nbl_pbp(season: str = "2024", game_id: str | None = None) -> pd.Dat
 def _empty_schedule_df() -> pd.DataFrame:
     """Return empty DataFrame with schedule schema"""
     return pd.DataFrame(
-        columns=["GAME_ID", "SEASON", "GAME_DATE", "HOME_TEAM", "AWAY_TEAM", "HOME_SCORE", "AWAY_SCORE", "LEAGUE"]
+        columns=[
+            "GAME_ID",
+            "SEASON",
+            "GAME_DATE",
+            "HOME_TEAM",
+            "AWAY_TEAM",
+            "HOME_SCORE",
+            "AWAY_SCORE",
+            "LEAGUE",
+        ]
     )
 
 

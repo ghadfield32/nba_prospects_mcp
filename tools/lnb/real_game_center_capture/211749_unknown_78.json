@@ -1,0 +1,2315 @@
+{
+  "url": "https://api-prod.lnb.fr/common/getLanguageLocalization",
+  "type": "unknown",
+  "timestamp": "211749",
+  "data": {
+    "status": true,
+    "message": "Language Localization fetched",
+    "data": [
+      {
+        "id": 1,
+        "key": "home",
+        "en_value": "Home",
+        "fr_value": "Accueil"
+      },
+      {
+        "id": 2,
+        "key": "corporate",
+        "en_value": "Corporate",
+        "fr_value": "Institutionnel"
+      },
+      {
+        "id": 3,
+        "key": "partners",
+        "en_value": "Partners",
+        "fr_value": "Partenaires"
+      },
+      {
+        "id": 4,
+        "key": "media",
+        "en_value": "Media",
+        "fr_value": "Médias"
+      },
+      {
+        "id": 5,
+        "key": "read_more",
+        "en_value": "Read More",
+        "fr_value": "En savoir plus"
+      },
+      {
+        "id": 6,
+        "key": "recent_searches",
+        "en_value": "Recent Searches",
+        "fr_value": "Recherches récentes"
+      },
+      {
+        "id": 7,
+        "key": "no_live_match",
+        "en_value": "No Live Match",
+        "fr_value": "Aucun match en direct"
+      },
+      {
+        "id": 8,
+        "key": "cookie_policy",
+        "en_value": "Cookie Policy",
+        "fr_value": "Politique relative aux cookies"
+      },
+      {
+        "id": 9,
+        "key": "loading",
+        "en_value": "Loading",
+        "fr_value": "Chargement"
+      },
+      {
+        "id": 10,
+        "key": "back_to_top",
+        "en_value": "Back To Top",
+        "fr_value": "Retour en haut"
+      },
+      {
+        "id": 11,
+        "key": "subscribe_newsletter",
+        "en_value": "Subscribe Newsletter",
+        "fr_value": "S’abonner à la newsletter"
+      },
+      {
+        "id": 12,
+        "key": "subscribe",
+        "en_value": "Subscribe",
+        "fr_value": "S’abonner"
+      },
+      {
+        "id": 13,
+        "key": "email_address",
+        "en_value": "Email Address",
+        "fr_value": "Adresse mail"
+      },
+      {
+        "id": 14,
+        "key": "by_submitting",
+        "en_value": "By submitting, you agree to our",
+        "fr_value": "En soumettant, vous acceptez nos"
+      },
+      {
+        "id": 15,
+        "key": "subscribe_newsletter_1",
+        "en_value": "Subscribe Newsletter",
+        "fr_value": "S’abonner à la newsletter"
+      },
+      {
+        "id": 16,
+        "key": "success",
+        "en_value": "Success",
+        "fr_value": "Succès"
+      },
+      {
+        "id": 17,
+        "key": "designed_&_developed_by",
+        "en_value": "Designed & Developed by",
+        "fr_value": "Conçu & développé par"
+      },
+      {
+        "id": 18,
+        "key": "lnb_partners",
+        "en_value": "LNB Partners",
+        "fr_value": "Partenaires LNB"
+      },
+      {
+        "id": 19,
+        "key": "lnb_broadcasters",
+        "en_value": "LNB Broadcasters",
+        "fr_value": "Diffuseurs LNB"
+      },
+      {
+        "id": 20,
+        "key": "for_you",
+        "en_value": "For You",
+        "fr_value": "Pour toi"
+      },
+      {
+        "id": 21,
+        "key": "performance",
+        "en_value": "Performance",
+        "fr_value": "Performance"
+      },
+      {
+        "id": 22,
+        "key": "face-off",
+        "en_value": "Face-Off",
+        "fr_value": "Duel"
+      },
+      {
+        "id": 23,
+        "key": "contact_us",
+        "en_value": "Contact Us",
+        "fr_value": "Contactez-nous"
+      },
+      {
+        "id": 24,
+        "key": "view_more_seasonal_averages",
+        "en_value": "View More Seasonal Averages",
+        "fr_value": "Voir plus de moyennes saisonnières"
+      },
+      {
+        "id": 25,
+        "key": "swap_player",
+        "en_value": "Swap Player",
+        "fr_value": "Changer de joueur"
+      },
+      {
+        "id": 26,
+        "key": "view_all",
+        "en_value": "View All",
+        "fr_value": "Voir tout"
+      },
+      {
+        "id": 27,
+        "key": "no_data_found",
+        "en_value": "No Data Found",
+        "fr_value": "Aucune donnée trouvée"
+      },
+      {
+        "id": 28,
+        "key": "vs",
+        "en_value": "vs",
+        "fr_value": "vs"
+      },
+      {
+        "id": 29,
+        "key": "games",
+        "en_value": "Games",
+        "fr_value": "Matchs"
+      },
+      {
+        "id": 30,
+        "key": "game",
+        "en_value": "Game",
+        "fr_value": "Match"
+      },
+      {
+        "id": 31,
+        "key": "sponsored_by",
+        "en_value": "Sponsored by",
+        "fr_value": "Sponsorisé par"
+      },
+      {
+        "id": 32,
+        "key": "qualifications",
+        "en_value": "Qualifications",
+        "fr_value": "Qualifications"
+      },
+      {
+        "id": 33,
+        "key": "leaders_cup",
+        "en_value": "Leaders Cup",
+        "fr_value": "Leaders Cup"
+      },
+      {
+        "id": 34,
+        "key": "play_in",
+        "en_value": "play-in",
+        "fr_value": "play-in"
+      },
+      {
+        "id": 35,
+        "key": "enters_pro_b_playoffs",
+        "en_value": "enters Playoffs Accession Betclic ÉLITE",
+        "fr_value": "Relégué Playoffs Accession Betclic ÉLITE"
+      },
+      {
+        "id": 36,
+        "key": "relegated_to_pro_b",
+        "en_value": "relegated to ÉLITE 2",
+        "fr_value": "relégué en ÉLITE 2"
+      },
+      {
+        "id": 37,
+        "key": "oops!_we_can't_seem_to_find_the_page_you're_looking_for,_but_we_have_other_options_for_you.",
+        "en_value": "Oops! We can't seem to find the page you're looking for, but we have other options for you.",
+        "fr_value": "Oups ! La page que vous cherchez est introuvable, mais nous avons d’autres options pour vous."
+      },
+      {
+        "id": 38,
+        "key": "go_to_homepage",
+        "en_value": "Go to homepage",
+        "fr_value": "Aller à l’accueil"
+      },
+      {
+        "id": 39,
+        "key": "view_calendar",
+        "en_value": "View Calendar",
+        "fr_value": "Voir le calendrier"
+      },
+      {
+        "id": 40,
+        "key": "personal_information",
+        "en_value": "Personal Information",
+        "fr_value": "Informations personnelles"
+      },
+      {
+        "id": 41,
+        "key": "age",
+        "en_value": "Age",
+        "fr_value": "Âge"
+      },
+      {
+        "id": 42,
+        "key": "team_name",
+        "en_value": "Team Name",
+        "fr_value": "Nom de l’équipe"
+      },
+      {
+        "id": 43,
+        "key": "no_teams_available_for_the_selected_season",
+        "en_value": "No teams available for the selected season",
+        "fr_value": "Aucune équipe disponible pour la saison sélectionnée"
+      },
+      {
+        "id": 44,
+        "key": "average",
+        "en_value": "Average",
+        "fr_value": "Moyenne"
+      },
+      {
+        "id": 45,
+        "key": "defence",
+        "en_value": "Defence",
+        "fr_value": "Défense"
+      },
+      {
+        "id": 46,
+        "key": "offence",
+        "en_value": "offence",
+        "fr_value": "Attaque"
+      },
+      {
+        "id": 47,
+        "key": "all",
+        "en_value": "All",
+        "fr_value": "Tous"
+      },
+      {
+        "id": 48,
+        "key": "away",
+        "en_value": "Away",
+        "fr_value": "Extérieur"
+      },
+      {
+        "id": 49,
+        "key": "select_an_option",
+        "en_value": "Select an option",
+        "fr_value": "Sélectionnez une option"
+      },
+      {
+        "id": 50,
+        "key": "selected",
+        "en_value": "selected",
+        "fr_value": "sélectionné"
+      },
+      {
+        "id": 51,
+        "key": "of",
+        "en_value": "of",
+        "fr_value": "de"
+      },
+      {
+        "id": 52,
+        "key": "deselect_all",
+        "en_value": "Deselect All",
+        "fr_value": "Tout désélectionner"
+      },
+      {
+        "id": 53,
+        "key": "select_all",
+        "en_value": "Select All",
+        "fr_value": "Tout sélectionner"
+      },
+      {
+        "id": 54,
+        "key": "select_competition",
+        "en_value": "Select Competition",
+        "fr_value": "Sélectionner une compétition"
+      },
+      {
+        "id": 210,
+        "key": "filter_by_season",
+        "en_value": "Filter by Season",
+        "fr_value": "Filtrer par saison"
+      },
+      {
+        "id": 211,
+        "key": "loading_1",
+        "en_value": "Loading",
+        "fr_value": "Chargement"
+      },
+      {
+        "id": 212,
+        "key": "win%",
+        "en_value": "win%",
+        "fr_value": "% de victoires"
+      },
+      {
+        "id": 213,
+        "key": "competition_rules",
+        "en_value": "competition rules",
+        "fr_value": "Règlement de la compétition"
+      },
+      {
+        "id": 214,
+        "key": "select_round",
+        "en_value": "select round",
+        "fr_value": "Journée"
+      },
+      {
+        "id": 215,
+        "key": "filter_by_season_1",
+        "en_value": "Filter by Season",
+        "fr_value": "Filtrer par saison"
+      },
+      {
+        "id": 216,
+        "key": "winner",
+        "en_value": "winner",
+        "fr_value": "Vainqueur"
+      },
+      {
+        "id": 217,
+        "key": "basketball_tournament",
+        "en_value": "basketball tournament",
+        "fr_value": "Tournoi de basketball"
+      },
+      {
+        "id": 218,
+        "key": "championship_bracket",
+        "en_value": "championship bracket",
+        "fr_value": "Tableau du championnat"
+      },
+      {
+        "id": 219,
+        "key": "winner_1",
+        "en_value": "winner",
+        "fr_value": "Gagnant"
+      },
+      {
+        "id": 220,
+        "key": "phase_01",
+        "en_value": "phase 01",
+        "fr_value": "phase 01"
+      },
+      {
+        "id": 221,
+        "key": "phase_02",
+        "en_value": "phase 02",
+        "fr_value": "phase 02"
+      },
+      {
+        "id": 222,
+        "key": "quarter_finals",
+        "en_value": "quarter-finals",
+        "fr_value": "Quarts de finale"
+      },
+      {
+        "id": 223,
+        "key": "semi_finals",
+        "en_value": "semi_finals",
+        "fr_value": "Demi-finales"
+      },
+      {
+        "id": 224,
+        "key": "finals",
+        "en_value": "finals",
+        "fr_value": "Finale"
+      },
+      {
+        "id": 225,
+        "key": "match_centre",
+        "en_value": "Match Centre",
+        "fr_value": "Match Center"
+      },
+      {
+        "id": 226,
+        "key": "view_highlights",
+        "en_value": "view highlights",
+        "fr_value": "Voir les highlights"
+      },
+      {
+        "id": 227,
+        "key": "watch_live",
+        "en_value": "watch live",
+        "fr_value": "Regarder en direct"
+      },
+      {
+        "id": 228,
+        "key": "more_info",
+        "en_value": "more info",
+        "fr_value": "Plus d’infos"
+      },
+      {
+        "id": 229,
+        "key": "broadcasters",
+        "en_value": "Broadcasters",
+        "fr_value": "Diffuseur"
+      },
+      {
+        "id": 230,
+        "key": "with",
+        "en_value": "with",
+        "fr_value": "Avec"
+      },
+      {
+        "id": 231,
+        "key": "register_to_receive_lnb_press_releases",
+        "en_value": "Register to receive LNB Press Releases",
+        "fr_value": "Inscrivez-vous pour recevoir les communiqués de presse LNB"
+      },
+      {
+        "id": 232,
+        "key": "thank_you_for_subscribing!",
+        "en_value": "Thank you for subscribing!",
+        "fr_value": "Merci pour votre inscription !"
+      },
+      {
+        "id": 233,
+        "key": "something_went_wrong",
+        "en_value": "Something went wrong",
+        "fr_value": "Une erreur est survenue"
+      },
+      {
+        "id": 234,
+        "key": "please_fill_valid_email_address",
+        "en_value": "Please fill valid email address",
+        "fr_value": "Veuillez saisir une adresse e-mail valide"
+      },
+      {
+        "id": 235,
+        "key": "please_fill_email_address",
+        "en_value": "Please fill email address",
+        "fr_value": "Veuillez saisir une adresse e-mail"
+      },
+      {
+        "id": 236,
+        "key": "swap_player_1",
+        "en_value": "SWAP PLAYER",
+        "fr_value": "ÉCHANGER JOUEUR"
+      },
+      {
+        "id": 237,
+        "key": "swap_team",
+        "en_value": "swap team",
+        "fr_value": "ÉCHANGER ÉQUIPE"
+      },
+      {
+        "id": 238,
+        "key": "seasonal_averages",
+        "en_value": "seasonal averages",
+        "fr_value": "Moyennes saisonnières"
+      },
+      {
+        "id": 239,
+        "key": "games_played",
+        "en_value": "Games Played",
+        "fr_value": "Matchs joués"
+      },
+      {
+        "id": 240,
+        "key": "minutes",
+        "en_value": "minutes",
+        "fr_value": "minutes"
+      },
+      {
+        "id": 241,
+        "key": "points",
+        "en_value": "Points",
+        "fr_value": "Points"
+      },
+      {
+        "id": 242,
+        "key": "rebounds",
+        "en_value": "rebounds",
+        "fr_value": "Rebonds"
+      },
+      {
+        "id": 243,
+        "key": "assists",
+        "en_value": "assists",
+        "fr_value": "Passes décisives"
+      },
+      {
+        "id": 244,
+        "key": "blocks",
+        "en_value": "blocks",
+        "fr_value": "Contres"
+      },
+      {
+        "id": 245,
+        "key": "steals",
+        "en_value": "steals",
+        "fr_value": "Interceptions"
+      },
+      {
+        "id": 246,
+        "key": "efficiency",
+        "en_value": "efficiency",
+        "fr_value": "Eval"
+      },
+      {
+        "id": 247,
+        "key": "view_more_seasonal_averages_1",
+        "en_value": "view more seasonal averages",
+        "fr_value": "VOIR PLUS de moyennes saisonnières"
+      },
+      {
+        "id": 248,
+        "key": "visit_site",
+        "en_value": "visit site",
+        "fr_value": "Visiter le site"
+      },
+      {
+        "id": 249,
+        "key": "more_photos",
+        "en_value": "More Photos",
+        "fr_value": "plus de photos"
+      },
+      {
+        "id": 250,
+        "key": "gallery",
+        "en_value": "Gallery",
+        "fr_value": "Galerie"
+      },
+      {
+        "id": 251,
+        "key": "no_gallery_found",
+        "en_value": "No gallery found",
+        "fr_value": "Aucune galerie trouvée"
+      },
+      {
+        "id": 252,
+        "key": "join_our_team",
+        "en_value": "Join Our Team",
+        "fr_value": "Rejoignez notre équipe"
+      },
+      {
+        "id": 253,
+        "key": "success_1",
+        "en_value": "success",
+        "fr_value": "Succès"
+      },
+      {
+        "id": 254,
+        "key": "contact_us_1",
+        "en_value": "contact_us",
+        "fr_value": "Contactez-nous"
+      },
+      {
+        "id": 255,
+        "key": "submit",
+        "en_value": "submit",
+        "fr_value": "envoyer"
+      },
+      {
+        "id": 256,
+        "key": "create_a_request",
+        "en_value": "create a request",
+        "fr_value": "Créer une demande"
+      },
+      {
+        "id": 257,
+        "key": "year",
+        "en_value": "year",
+        "fr_value": "Ans"
+      },
+      {
+        "id": 258,
+        "key": "event",
+        "en_value": "event",
+        "fr_value": "Événements"
+      },
+      {
+        "id": 259,
+        "key": "coaching_record",
+        "en_value": "coaching record",
+        "fr_value": "Carrière"
+      },
+      {
+        "id": 260,
+        "key": "position",
+        "en_value": "position",
+        "fr_value": "Poste"
+      },
+      {
+        "id": 261,
+        "key": "bio",
+        "en_value": "bio",
+        "fr_value": "Biographie"
+      },
+      {
+        "id": 262,
+        "key": "select_date_range",
+        "en_value": "Select date range",
+        "fr_value": "Sélectionnez une période"
+      },
+      {
+        "id": 263,
+        "key": "calendar",
+        "en_value": "calendar",
+        "fr_value": "Calendrier"
+      },
+      {
+        "id": 264,
+        "key": "roster",
+        "en_value": "roster",
+        "fr_value": "Effectif"
+      },
+      {
+        "id": 265,
+        "key": "height",
+        "en_value": "Height",
+        "fr_value": "Taille"
+      },
+      {
+        "id": 266,
+        "key": "age_1",
+        "en_value": "Age",
+        "fr_value": "Âge"
+      },
+      {
+        "id": 267,
+        "key": "ppg",
+        "en_value": "PPG",
+        "fr_value": "PPM"
+      },
+      {
+        "id": 268,
+        "key": "rpg",
+        "en_value": "RPG",
+        "fr_value": "RPM"
+      },
+      {
+        "id": 269,
+        "key": "apg",
+        "en_value": "apg",
+        "fr_value": "PdPM"
+      },
+      {
+        "id": 270,
+        "key": "eff",
+        "en_value": "EFF",
+        "fr_value": "EFF"
+      },
+      {
+        "id": 271,
+        "key": "view_profile",
+        "en_value": "view profile",
+        "fr_value": "Voir le profil"
+      },
+      {
+        "id": 272,
+        "key": "total",
+        "en_value": "Total",
+        "fr_value": "Total"
+      },
+      {
+        "id": 273,
+        "key": "records",
+        "en_value": "Records",
+        "fr_value": "Statistiques"
+      },
+      {
+        "id": 274,
+        "key": "average_1",
+        "en_value": "Average",
+        "fr_value": "Moyenne"
+      },
+      {
+        "id": 275,
+        "key": "won",
+        "en_value": "Won",
+        "fr_value": "Gagnés"
+      },
+      {
+        "id": 276,
+        "key": "lost",
+        "en_value": "Lost",
+        "fr_value": "Perdus"
+      },
+      {
+        "id": 277,
+        "key": "general",
+        "en_value": "General",
+        "fr_value": "Général"
+      },
+      {
+        "id": 278,
+        "key": "advanced",
+        "en_value": "Advanced",
+        "fr_value": "Détaillées"
+      },
+      {
+        "id": 279,
+        "key": "general_stats",
+        "en_value": "general stats",
+        "fr_value": "Statistiques générales"
+      },
+      {
+        "id": 280,
+        "key": "records_by_game",
+        "en_value": "season records per game",
+        "fr_value": "Records saison par match"
+      },
+      {
+        "id": 281,
+        "key": "blocks_1",
+        "en_value": "blocks",
+        "fr_value": "Contres"
+      },
+      {
+        "id": 282,
+        "key": "efficiency_1",
+        "en_value": "efficiency",
+        "fr_value": "Efficacité"
+      },
+      {
+        "id": 283,
+        "key": "free_throws",
+        "en_value": "free throws",
+        "fr_value": "Lancers francs"
+      },
+      {
+        "id": 284,
+        "key": "minutes_1",
+        "en_value": "minutes",
+        "fr_value": "minutes"
+      },
+      {
+        "id": 285,
+        "key": "points_1",
+        "en_value": "points",
+        "fr_value": "points"
+      },
+      {
+        "id": 286,
+        "key": "shots",
+        "en_value": "shots",
+        "fr_value": "tirs"
+      },
+      {
+        "id": 287,
+        "key": "steals_1",
+        "en_value": "steals",
+        "fr_value": "Interceptions"
+      },
+      {
+        "id": 288,
+        "key": "three_pointers",
+        "en_value": "three pointers",
+        "fr_value": "Tirs à 3 points"
+      },
+      {
+        "id": 289,
+        "key": "first_five",
+        "en_value": "first five",
+        "fr_value": "Cinq majeur"
+      },
+      {
+        "id": 290,
+        "key": "no_additional_news_articles_found",
+        "en_value": "No additional news articles found",
+        "fr_value": "Aucun article trouvé"
+      },
+      {
+        "id": 291,
+        "key": "major_victory_against_bayern_munich_puts",
+        "en_value": "Major victory against Bayern Munich puts",
+        "fr_value": "Grande victoire contre le Bayern Munich met"
+      },
+      {
+        "id": 292,
+        "key": "discover_the_talents_of_french_basketball",
+        "en_value": "discover the talents of French basketball",
+        "fr_value": "découvrez les talents du basketball français"
+      },
+      {
+        "id": 293,
+        "key": "loading_club_information",
+        "en_value": "Loading club information",
+        "fr_value": "Chargement des informations du club"
+      },
+      {
+        "id": 422,
+        "key": "error",
+        "en_value": "error",
+        "fr_value": "Erreur"
+      },
+      {
+        "id": 423,
+        "key": "no_image_available",
+        "en_value": "No image available",
+        "fr_value": "Aucune image disponible"
+      },
+      {
+        "id": 424,
+        "key": "loading_club_contacts",
+        "en_value": "Loading club contacts",
+        "fr_value": "Chargement des contacts du club"
+      },
+      {
+        "id": 425,
+        "key": "no_club_contacts_availabl",
+        "en_value": "No club contacts available",
+        "fr_value": "Aucun contact de club disponible"
+      },
+      {
+        "id": 426,
+        "key": "lnb_equipment",
+        "en_value": "LNB Equipment",
+        "fr_value": "Équipements LNB"
+      },
+      {
+        "id": 427,
+        "key": "discover_the_talents_of_french_basketball_1",
+        "en_value": "discover the talents of French basketball",
+        "fr_value": "découvrez les talents du basketball français"
+      },
+      {
+        "id": 428,
+        "key": "total_score",
+        "en_value": "total score",
+        "fr_value": "Score total"
+      },
+      {
+        "id": 429,
+        "key": "view_game_log",
+        "en_value": "VIEW GAME LOG",
+        "fr_value": "MATCH CENTER"
+      },
+      {
+        "id": 430,
+        "key": "recent_searches_1",
+        "en_value": "Recent Searches",
+        "fr_value": "Recherches récentes"
+      },
+      {
+        "id": 431,
+        "key": "share_this",
+        "en_value": "Share this",
+        "fr_value": "Partager"
+      },
+      {
+        "id": 432,
+        "key": "key_responsibilities",
+        "en_value": "key responsibilities",
+        "fr_value": "Responsabilités principales"
+      },
+      {
+        "id": 433,
+        "key": "qualifications_1",
+        "en_value": "Qualifications",
+        "fr_value": "Qualifications"
+      },
+      {
+        "id": 434,
+        "key": "apply_now",
+        "en_value": "apply now",
+        "fr_value": "POSTULER MAINTENANT"
+      },
+      {
+        "id": 435,
+        "key": "choose_team",
+        "en_value": "Choose Team",
+        "fr_value": "CHOISIR ÉQUIPE"
+      },
+      {
+        "id": 436,
+        "key": "add_to_favorites",
+        "en_value": "ADD TO FAVORITES",
+        "fr_value": "AJOUTER AUX FAVORIS"
+      },
+      {
+        "id": 437,
+        "key": "filter_by_season_2",
+        "en_value": "Filter by Season",
+        "fr_value": "Filtrer par saison"
+      },
+      {
+        "id": 438,
+        "key": "club",
+        "en_value": "Club",
+        "fr_value": "Club"
+      },
+      {
+        "id": 439,
+        "key": "sp",
+        "en_value": "SP",
+        "fr_value": "MJ"
+      },
+      {
+        "id": 440,
+        "key": "2p%",
+        "en_value": "2P%",
+        "fr_value": "%2P"
+      },
+      {
+        "id": 441,
+        "key": "b",
+        "en_value": "B",
+        "fr_value": "CT"
+      },
+      {
+        "id": 442,
+        "key": "ba",
+        "en_value": "BA",
+        "fr_value": "CS"
+      },
+      {
+        "id": 443,
+        "key": "stl",
+        "en_value": "STL",
+        "fr_value": "INT"
+      },
+      {
+        "id": 444,
+        "key": "trn",
+        "en_value": "TO",
+        "fr_value": "BP"
+      },
+      {
+        "id": 445,
+        "key": "season",
+        "en_value": "Season",
+        "fr_value": "Saison"
+      },
+      {
+        "id": 446,
+        "key": "club_1",
+        "en_value": "Club",
+        "fr_value": "Club"
+      },
+      {
+        "id": 447,
+        "key": "gp",
+        "en_value": "GP",
+        "fr_value": "MJ"
+      },
+      {
+        "id": 448,
+        "key": "w_l",
+        "en_value": "W/L",
+        "fr_value": "V/D"
+      },
+      {
+        "id": 449,
+        "key": "5d",
+        "en_value": "5D",
+        "fr_value": "5M"
+      },
+      {
+        "id": 450,
+        "key": "min",
+        "en_value": "MIN",
+        "fr_value": "MIN"
+      },
+      {
+        "id": 451,
+        "key": "pts",
+        "en_value": "PTS",
+        "fr_value": "PTS"
+      },
+      {
+        "id": 452,
+        "key": "2r",
+        "en_value": "2R",
+        "fr_value": "2R"
+      },
+      {
+        "id": 453,
+        "key": "2t",
+        "en_value": "2T",
+        "fr_value": "2T"
+      },
+      {
+        "id": 454,
+        "key": "3r",
+        "en_value": "3R",
+        "fr_value": "3r"
+      },
+      {
+        "id": 455,
+        "key": "lr",
+        "en_value": "LR",
+        "fr_value": "LF"
+      },
+      {
+        "id": 456,
+        "key": "pd",
+        "en_value": "PD",
+        "fr_value": "PD"
+      },
+      {
+        "id": 457,
+        "key": "ct",
+        "en_value": "CT",
+        "fr_value": "CT"
+      },
+      {
+        "id": 458,
+        "key": "cs",
+        "en_value": "CS",
+        "fr_value": "CS"
+      },
+      {
+        "id": 459,
+        "key": "in",
+        "en_value": "IN",
+        "fr_value": "IN"
+      },
+      {
+        "id": 460,
+        "key": "bp",
+        "en_value": "BP",
+        "fr_value": "BP"
+      },
+      {
+        "id": 461,
+        "key": "records_by_game_1",
+        "en_value": "Records by game",
+        "fr_value": "Statistiques par match"
+      },
+      {
+        "id": 463,
+        "key": "live",
+        "en_value": "LIVE",
+        "fr_value": "direct"
+      },
+      {
+        "id": 464,
+        "key": "powered_by",
+        "en_value": "Powered by:",
+        "fr_value": "Avec:"
+      },
+      {
+        "id": 465,
+        "key": "for",
+        "en_value": "For",
+        "fr_value": "Pour"
+      },
+      {
+        "id": 466,
+        "key": "you",
+        "en_value": "You",
+        "fr_value": "toi"
+      },
+      {
+        "id": 467,
+        "key": "buy_tickets",
+        "en_value": "Buy Tickets",
+        "fr_value": "Acceder a la billetterie"
+      },
+      {
+        "id": 468,
+        "key": "starts_in",
+        "en_value": "Starts in:",
+        "fr_value": "Commence dans :"
+      },
+      {
+        "id": 469,
+        "key": "latest",
+        "en_value": "Latest",
+        "fr_value": "Dernières"
+      },
+      {
+        "id": 470,
+        "key": "news",
+        "en_value": "News",
+        "fr_value": "Actualités"
+      },
+      {
+        "id": 476,
+        "key": "standing",
+        "en_value": "Standings",
+        "fr_value": "Classement"
+      },
+      {
+        "id": 477,
+        "key": "shop",
+        "en_value": "Shop",
+        "fr_value": "Boutique"
+      },
+      {
+        "id": 478,
+        "key": "visit_shop",
+        "en_value": "VISIT SHOP",
+        "fr_value": "VISITER LA BOUTIQUE"
+      },
+      {
+        "id": 479,
+        "key": "lnb_tv",
+        "en_value": "LNB TV",
+        "fr_value": "LNB TV"
+      },
+      {
+        "id": 480,
+        "key": "more",
+        "en_value": "More",
+        "fr_value": "Voir plus "
+      },
+      {
+        "id": 481,
+        "key": "terms_and_conditions",
+        "en_value": "Terms & Conditions",
+        "fr_value": "Conditions générales"
+      },
+      {
+        "id": 482,
+        "key": "privacy_policy",
+        "en_value": "Privacy Policy",
+        "fr_value": "Politique de confidentialité"
+      },
+      {
+        "id": 483,
+        "key": "newsletter",
+        "en_value": "Newsletter",
+        "fr_value": "newsletter"
+      },
+      {
+        "id": 484,
+        "key": "photo_gallery",
+        "en_value": "Photo Gallery",
+        "fr_value": "Galerie photo"
+      },
+      {
+        "id": 485,
+        "key": "stats_centre",
+        "en_value": "Stats Centre",
+        "fr_value": "Stats Center"
+      },
+      {
+        "id": 486,
+        "key": "leader_cup",
+        "en_value": "Leaders Cup qualification",
+        "fr_value": "qualifiés pour les Playoffs"
+      },
+      {
+        "id": 487,
+        "key": "qualification_key",
+        "en_value": "Qualification Key:",
+        "fr_value": "Légende :"
+      },
+      {
+        "id": 488,
+        "key": "events",
+        "en_value": "Events",
+        "fr_value": "Événements"
+      },
+      {
+        "id": 489,
+        "key": "w-l",
+        "en_value": "W-L",
+        "fr_value": "V-D"
+      },
+      {
+        "id": 490,
+        "key": "ps-po",
+        "en_value": "PS-PO",
+        "fr_value": "PS-PO"
+      },
+      {
+        "id": 491,
+        "key": "pa",
+        "en_value": "PA",
+        "fr_value": "MP"
+      },
+      {
+        "id": 492,
+        "key": "h_wl",
+        "en_value": "H (W-L)",
+        "fr_value": "D (V-D)"
+      },
+      {
+        "id": 493,
+        "key": "a_wl",
+        "en_value": "A (W-L)",
+        "fr_value": "E (V-D)"
+      },
+      {
+        "id": 494,
+        "key": "last_5",
+        "en_value": "LAST 5",
+        "fr_value": "5 DERNIERS"
+      },
+      {
+        "id": 495,
+        "key": "next_match",
+        "en_value": "Next Match",
+        "fr_value": "Prochain match"
+      },
+      {
+        "id": 496,
+        "key": "w_percentage",
+        "en_value": "W%",
+        "fr_value": "%V"
+      },
+      {
+        "id": 497,
+        "key": "name",
+        "en_value": "Name",
+        "fr_value": "Nom"
+      },
+      {
+        "id": 498,
+        "key": "pos",
+        "en_value": "POS",
+        "fr_value": "POS"
+      },
+      {
+        "id": 499,
+        "key": "tickets",
+        "en_value": "Tickets",
+        "fr_value": "Billets"
+      },
+      {
+        "id": 504,
+        "key": "photo",
+        "en_value": "photo",
+        "fr_value": "photo"
+      },
+      {
+        "id": 505,
+        "key": "view_more",
+        "en_value": "View More",
+        "fr_value": "Voir plus"
+      },
+      {
+        "id": 506,
+        "key": "stats",
+        "en_value": "Stats",
+        "fr_value": "Stats"
+      },
+      {
+        "id": 507,
+        "key": "centre",
+        "en_value": "Centre",
+        "fr_value": "Center"
+      },
+      {
+        "id": 508,
+        "key": "Player_stats",
+        "en_value": "Player stats",
+        "fr_value": "Stats joueurs"
+      },
+      {
+        "id": 509,
+        "key": "teams",
+        "en_value": "Teams",
+        "fr_value": "Équipes"
+      },
+      {
+        "id": 510,
+        "key": "latest_result",
+        "en_value": "LATEST RESULTS",
+        "fr_value": "DERNIERS RÉSULTATS"
+      },
+      {
+        "id": 511,
+        "key": "rank",
+        "en_value": "Rank",
+        "fr_value": "Rang"
+      },
+      {
+        "id": 512,
+        "key": "buy_now",
+        "en_value": "Buy Now",
+        "fr_value": "AJOUTER AU PANIER"
+      },
+      {
+        "id": 513,
+        "key": "coaching_staff",
+        "en_value": "COACHING STAFF",
+        "fr_value": "STAFF TECHNIQUE"
+      },
+      {
+        "id": 514,
+        "key": "competition",
+        "en_value": "Competition",
+        "fr_value": "Compétition"
+      },
+      {
+        "id": 515,
+        "key": "rules",
+        "en_value": "Rules",
+        "fr_value": "Règles"
+      },
+      {
+        "id": 516,
+        "key": "play-in_qualification",
+        "en_value": "play-in qualification",
+        "fr_value": "qualifiés en Play-In"
+      },
+      {
+        "id": 517,
+        "key": "2p",
+        "en_value": "2P",
+        "fr_value": "2R"
+      },
+      {
+        "id": 518,
+        "key": "2pa",
+        "en_value": "2PA",
+        "fr_value": "2T"
+      },
+      {
+        "id": 519,
+        "key": "3p",
+        "en_value": "3P",
+        "fr_value": "3R"
+      },
+      {
+        "id": 520,
+        "key": "3pa",
+        "en_value": "3PA",
+        "fr_value": "3T"
+      },
+      {
+        "id": 521,
+        "key": "3p%",
+        "en_value": "3P%",
+        "fr_value": "%3P"
+      },
+      {
+        "id": 522,
+        "key": "ft",
+        "en_value": "FT",
+        "fr_value": "LFR"
+      },
+      {
+        "id": 523,
+        "key": "fta",
+        "en_value": "FTA",
+        "fr_value": "LFT"
+      },
+      {
+        "id": 524,
+        "key": "ft%",
+        "en_value": "FT%",
+        "fr_value": "%LF"
+      },
+      {
+        "id": 525,
+        "key": "or",
+        "en_value": "OR",
+        "fr_value": "RO"
+      },
+      {
+        "id": 526,
+        "key": "dr",
+        "en_value": "DR",
+        "fr_value": "RD"
+      },
+      {
+        "id": 527,
+        "key": "tr",
+        "en_value": "TR",
+        "fr_value": "RT"
+      },
+      {
+        "id": 528,
+        "key": "ast",
+        "en_value": "AST",
+        "fr_value": "PD"
+      },
+      {
+        "id": 643,
+        "key": "s5",
+        "en_value": "S5",
+        "fr_value": "S5"
+      },
+      {
+        "id": 644,
+        "key": "my_profile",
+        "en_value": "My Profile",
+        "fr_value": "Mon profil"
+      },
+      {
+        "id": 645,
+        "key": "performance_faceoff",
+        "en_value": "Performance Face-Off",
+        "fr_value": "Performance Duel"
+      },
+      {
+        "id": 646,
+        "key": "latest_highlights",
+        "en_value": "LATEST HIGHLIGHTS",
+        "fr_value": "DERNIERS HIGHLIGHTS"
+      },
+      {
+        "id": 647,
+        "key": "share",
+        "en_value": "Share",
+        "fr_value": "Partager"
+      },
+      {
+        "id": 648,
+        "key": "latest_news",
+        "en_value": "Latest News",
+        "fr_value": "DERNIÈRES ACTUALITÉS"
+      },
+      {
+        "id": 650,
+        "key": "first_name",
+        "en_value": "First Name",
+        "fr_value": "Prénom"
+      },
+      {
+        "id": 651,
+        "key": "last_name",
+        "en_value": "Last Name",
+        "fr_value": "Nom de famille "
+      },
+      {
+        "id": 670,
+        "key": "player",
+        "en_value": "Player",
+        "fr_value": "joueur"
+      },
+      {
+        "id": 671,
+        "key": "+/-",
+        "en_value": "+/-",
+        "fr_value": "+/-"
+      },
+      {
+        "id": 672,
+        "key": "fo",
+        "en_value": "FO",
+        "fr_value": "FO"
+      },
+      {
+        "id": 673,
+        "key": "f",
+        "en_value": "F",
+        "fr_value": "FTE"
+      },
+      {
+        "id": 674,
+        "key": "game_log",
+        "en_value": "GAME LOG",
+        "fr_value": "FEUILLE DE MATCH"
+      },
+      {
+        "id": 675,
+        "key": "last_record",
+        "en_value": "*Last record made in this division",
+        "fr_value": "*Dernier enregistrement effectué dans cette division"
+      },
+      {
+        "id": 676,
+        "key": "score",
+        "en_value": "Score",
+        "fr_value": "Score"
+      },
+      {
+        "id": 677,
+        "key": "nationality",
+        "en_value": "Nationality",
+        "fr_value": "Nationalité"
+      },
+      {
+        "id": 678,
+        "key": "lnb_exp",
+        "en_value": "LNB EXP",
+        "fr_value": "Expérience LNB"
+      },
+      {
+        "id": 679,
+        "key": "dob",
+        "en_value": "DOB",
+        "fr_value": "DDN"
+      },
+      {
+        "id": 709,
+        "key": "date",
+        "en_value": "Date",
+        "fr_value": "Date"
+      },
+      {
+        "id": 710,
+        "key": "opponent",
+        "en_value": "Opponent",
+        "fr_value": "Adversaire"
+      },
+      {
+        "id": 711,
+        "key": "arena",
+        "en_value": "Arena",
+        "fr_value": "Arena"
+      },
+      {
+        "id": 712,
+        "key": "score_table",
+        "en_value": "Score",
+        "fr_value": "Résultat / Score"
+      },
+      {
+        "id": 719,
+        "key": "2pa%",
+        "en_value": "2PA",
+        "fr_value": "2T"
+      },
+      {
+        "id": 720,
+        "key": "%",
+        "en_value": "%",
+        "fr_value": "%"
+      },
+      {
+        "id": 721,
+        "key": "3t",
+        "en_value": "3T",
+        "fr_value": "3T"
+      },
+      {
+        "id": 722,
+        "key": "lt",
+        "en_value": "LT",
+        "fr_value": "LT"
+      },
+      {
+        "id": 723,
+        "key": "ro",
+        "en_value": "RO",
+        "fr_value": "RO"
+      },
+      {
+        "id": 724,
+        "key": "rd",
+        "en_value": "RD",
+        "fr_value": "RD"
+      },
+      {
+        "id": 725,
+        "key": "rt",
+        "en_value": "RT",
+        "fr_value": "RT"
+      },
+      {
+        "id": 726,
+        "key": "fte",
+        "en_value": "FTE",
+        "fr_value": "FTE"
+      },
+      {
+        "id": 727,
+        "key": "fpr",
+        "en_value": "FPR",
+        "fr_value": "FPR"
+      },
+      {
+        "id": 728,
+        "key": "eval",
+        "en_value": "EVAL",
+        "fr_value": "EVAL"
+      },
+      {
+        "id": 729,
+        "key": "ef",
+        "en_value": "EF",
+        "fr_value": "Eval"
+      },
+      {
+        "id": 730,
+        "key": "fd",
+        "en_value": "FD",
+        "fr_value": "FPR"
+      },
+      {
+        "id": 732,
+        "key": "search_team",
+        "en_value": "Search Team",
+        "fr_value": "Rechercher une équipe"
+      },
+      {
+        "id": 733,
+        "key": "stats_leaders",
+        "en_value": "Stats Leaders",
+        "fr_value": "Stats Leaders"
+      },
+      {
+        "id": 734,
+        "key": "total_games",
+        "en_value": "TOTAL GAMES",
+        "fr_value": "Total des matchs"
+      },
+      {
+        "id": 735,
+        "key": "win_percentage",
+        "en_value": "WIN PERCENTAGE",
+        "fr_value": "Pourcentage de victoires"
+      },
+      {
+        "id": 736,
+        "key": "wins",
+        "en_value": "WINS",
+        "fr_value": "VICTOIRES"
+      },
+      {
+        "id": 737,
+        "key": "losses",
+        "en_value": "LOSSES",
+        "fr_value": "DÉFAITES"
+      },
+      {
+        "id": 738,
+        "key": "ranking",
+        "en_value": "Ranking",
+        "fr_value": "Classement"
+      },
+      {
+        "id": 739,
+        "key": "stats_overview",
+        "en_value": "Stats Overview",
+        "fr_value": "Aperçu des statistiques"
+      },
+      {
+        "id": 740,
+        "key": "no_options_available",
+        "en_value": "No options available",
+        "fr_value": "Aucune option disponible"
+      },
+      {
+        "id": 741,
+        "key": "no_results_found",
+        "en_value": "No results found",
+        "fr_value": "No results found"
+      },
+      {
+        "id": 742,
+        "key": "team_stats",
+        "en_value": "Team stats",
+        "fr_value": "Stats équipes"
+      },
+      {
+        "id": 743,
+        "key": "description",
+        "en_value": "Description",
+        "fr_value": "Description"
+      },
+      {
+        "id": 744,
+        "key": "all_wins",
+        "en_value": "All wins",
+        "fr_value": "Toutes les victoires"
+      },
+      {
+        "id": 745,
+        "key": "select_clubs",
+        "en_value": "Select Clubs",
+        "fr_value": "Sélectionner des clubs"
+      },
+      {
+        "id": 746,
+        "key": "create_password",
+        "en_value": "Create password",
+        "fr_value": "Créer un mot de passe"
+      },
+      {
+        "id": 747,
+        "key": "related_news",
+        "en_value": "Related News",
+        "fr_value": "Actualités liées"
+      },
+      {
+        "id": 748,
+        "key": "i_have",
+        "en_value": "I have read and agree to the",
+        "fr_value": "J’ai lu et j’accepte les"
+      },
+      {
+        "id": 749,
+        "key": "i_agree",
+        "en_value": "I agree to receive news, updates, and special offers from LNB and selected partners.",
+        "fr_value": "J’accepte de recevoir des nouvelles, mises à jour et offres spéciales de la LNB et de partenaires sélectionnés."
+      },
+      {
+        "id": 750,
+        "key": "enter_first_name",
+        "en_value": "Enter first name",
+        "fr_value": "Saisir le prénom"
+      },
+      {
+        "id": 751,
+        "key": "enter_last_name",
+        "en_value": "Enter last name",
+        "fr_value": "Saisir le nom"
+      },
+      {
+        "id": 752,
+        "key": "enter_email_address",
+        "en_value": "Enter email address",
+        "fr_value": "Saisir l’adresse e-mail"
+      },
+      {
+        "id": 753,
+        "key": "all_rights_reserved",
+        "en_value": "All Rights Reserved",
+        "fr_value": "Tous droits réservés"
+      },
+      {
+        "id": 754,
+        "key": "copyright",
+        "en_value": "Copyright",
+        "fr_value": "Droits d’auteur"
+      },
+      {
+        "id": 756,
+        "key": "about_lnb",
+        "en_value": "About LNB",
+        "fr_value": "À propos de la LNB"
+      },
+      {
+        "id": 757,
+        "key": "media_center",
+        "en_value": "Media Center",
+        "fr_value": "Médias"
+      },
+      {
+        "id": 758,
+        "key": "championship",
+        "en_value": "Championship",
+        "fr_value": "championnat"
+      },
+      {
+        "id": 759,
+        "key": "mj",
+        "en_value": "MJ",
+        "fr_value": "MJ"
+      },
+      {
+        "id": 760,
+        "key": "all_competition",
+        "en_value": "All Competition",
+        "fr_value": "Toutes compétitions"
+      },
+      {
+        "id": 761,
+        "key": "weight",
+        "en_value": "Weight",
+        "fr_value": "Poids"
+      },
+      {
+        "id": 762,
+        "key": "career_totals",
+        "en_value": "Career Totals",
+        "fr_value": "Stats en carrière"
+      },
+      {
+        "id": 763,
+        "key": "page_not_found",
+        "en_value": "Page not found",
+        "fr_value": "Page non trouvée"
+      },
+      {
+        "id": 764,
+        "key": "we_cant",
+        "en_value": "Oops! We can't seem to find the page you're looking for, but we have other options for you.",
+        "fr_value": "Oups ! Nous ne trouvons pas la page que vous cherchez, mais nous avons d'autres options."
+      },
+      {
+        "id": 765,
+        "key": "minutes_display",
+        "en_value": "Minutes Display",
+        "fr_value": "Minutes jouées"
+      },
+      {
+        "id": 766,
+        "key": "contributions",
+        "en_value": "Blocks",
+        "fr_value": "Contres"
+      },
+      {
+        "id": 767,
+        "key": "interceptions",
+        "en_value": "Interceptions",
+        "fr_value": "interceptions"
+      },
+      {
+        "id": 768,
+        "key": "field_goal_per",
+        "en_value": "Field Goal",
+        "fr_value": "field goal"
+      },
+      {
+        "id": 769,
+        "key": "three_point_per",
+        "en_value": "Three Point",
+        "fr_value": "Trois Points"
+      },
+      {
+        "id": 770,
+        "key": "free_throw_per",
+        "en_value": "Free Throw",
+        "fr_value": "lancer franc"
+      },
+      {
+        "id": 771,
+        "key": "completed",
+        "en_value": "COMPLETED",
+        "fr_value": "TERMINÉ"
+      },
+      {
+        "id": 772,
+        "key": "logout",
+        "en_value": "Logout",
+        "fr_value": "Se déconnecter"
+      },
+      {
+        "id": 773,
+        "key": "complete",
+        "en_value": "Completed",
+        "fr_value": "TERMINÉ"
+      },
+      {
+        "id": 774,
+        "key": "birth_date",
+        "en_value": "Birth Date",
+        "fr_value": "Date de naissance"
+      },
+      {
+        "id": 775,
+        "key": "country",
+        "en_value": "Country",
+        "fr_value": "Pays"
+      },
+      {
+        "id": 776,
+        "key": "city",
+        "en_value": "City",
+        "fr_value": "Ville"
+      },
+      {
+        "id": 777,
+        "key": "prep_your",
+        "en_value": "PREP YOUR",
+        "fr_value": "PRÉPAREZ VOTRE"
+      },
+      {
+        "id": 778,
+        "key": "follow_your_favorite_team",
+        "en_value": "Follow your favorite team for exclusive content, real-time updates, and a fan experience built just for you.",
+        "fr_value": "Suivez votre équipe préférée pour du contenu exclusif, des mises à jour en temps réel et une expérience de fan conçue spécialement pour vous."
+      },
+      {
+        "id": 779,
+        "key": "next",
+        "en_value": "NEXT",
+        "fr_value": "SUIVANT"
+      },
+      {
+        "id": 780,
+        "key": "skip",
+        "en_value": "SKIP",
+        "fr_value": " SAUTER"
+      },
+      {
+        "id": 781,
+        "key": "follow_your_favorite_player",
+        "en_value": "Get highlights, stats, and stories tailored around your favorite player — straight to your feed.",
+        "fr_value": "Obtenez des moments forts, des statistiques et des histoires adaptées à votre joueur préféré, directement dans votre flux."
+      },
+      {
+        "id": 782,
+        "key": "whos_your",
+        "en_value": "Who's your",
+        "fr_value": "Qui est ton"
+      },
+      {
+        "id": 783,
+        "key": "mvp",
+        "en_value": "MVP?",
+        "fr_value": "MVP?"
+      },
+      {
+        "id": 784,
+        "key": "player_not_found",
+        "en_value": "Player Not Found.",
+        "fr_value": "Joueur introuvable."
+      },
+      {
+        "id": 785,
+        "key": "search_player",
+        "en_value": "Search Player",
+        "fr_value": "Rechercher un joueur"
+      },
+      {
+        "id": 786,
+        "key": "favourite_team",
+        "en_value": "Favourite Team",
+        "fr_value": "Équipe préférée"
+      },
+      {
+        "id": 787,
+        "key": "favourite_player",
+        "en_value": "Favourite Player",
+        "fr_value": "Joueur préféré"
+      },
+      {
+        "id": 788,
+        "key": "profile",
+        "en_value": "Profile",
+        "fr_value": "Profil"
+      },
+      {
+        "id": 789,
+        "key": "my",
+        "en_value": "My",
+        "fr_value": "Mon"
+      },
+      {
+        "id": 790,
+        "key": "saving",
+        "en_value": "Saving",
+        "fr_value": "Économie"
+      },
+      {
+        "id": 791,
+        "key": "close",
+        "en_value": "Close",
+        "fr_value": "Fermer"
+      },
+      {
+        "id": 792,
+        "key": "club_not_found",
+        "en_value": "Club Not Found.",
+        "fr_value": " Club introuvable."
+      },
+      {
+        "id": 793,
+        "key": "login",
+        "en_value": "login",
+        "fr_value": "se connecter"
+      },
+      {
+        "id": 794,
+        "key": "season_advanced",
+        "en_value": "Per Season",
+        "fr_value": "Par Saison"
+      },
+      {
+        "id": 795,
+        "key": "two_points",
+        "en_value": "Two Points",
+        "fr_value": "Tirs à 2 points"
+      },
+      {
+        "id": 796,
+        "key": "terms_use",
+        "en_value": "Terms Of Use",
+        "fr_value": "Conditions d'utilisation"
+      },
+      {
+        "id": 797,
+        "key": "competition_advanced",
+        "en_value": "Per Competition",
+        "fr_value": "Par Compétition"
+      },
+      {
+        "id": 798,
+        "key": "all_season",
+        "en_value": "All Season",
+        "fr_value": "Toutes saisons"
+      },
+      {
+        "id": 799,
+        "key": "organization_name",
+        "en_value": "Organisation name (if applicable)",
+        "fr_value": "Nom de l'organisation (le cas échéant)"
+      },
+      {
+        "id": 800,
+        "key": "two_pointers",
+        "en_value": "2-Point",
+        "fr_value": "Tirs à 2 points"
+      },
+      {
+        "id": 801,
+        "key": "pour_leader_cup",
+        "en_value": "Qualifiés pour la Leaders Cup",
+        "fr_value": "Qualifiés pour la Leaders Cup"
+      },
+      {
+        "id": 802,
+        "key": "qualifies",
+        "en_value": "Qualifiés",
+        "fr_value": "Qualifiés"
+      },
+      {
+        "id": 803,
+        "key": "team_achivements",
+        "en_value": "Team Achivements",
+        "fr_value": "Réalisations de l'équipe"
+      },
+      {
+        "id": 804,
+        "key": "alltime_record_per_game",
+        "en_value": "All Time Record per game",
+        "fr_value": "Records Absolus"
+      },
+      {
+        "id": 805,
+        "key": "month",
+        "en_value": "Month",
+        "fr_value": "Mois"
+      },
+      {
+        "id": 806,
+        "key": "flag",
+        "en_value": "Flag",
+        "fr_value": ""
+      },
+      {
+        "id": 807,
+        "key": "birth_nationality",
+        "en_value": "Birth Nationality",
+        "fr_value": "Lieu de naissance"
+      },
+      {
+        "id": 808,
+        "key": "upcomming",
+        "en_value": "UPCOMINNG",
+        "fr_value": "PROCHAIN"
+      },
+      {
+        "id": 809,
+        "key": "general_proa_rank_a",
+        "en_value": "Qualifiés pour les Plavoffs",
+        "fr_value": "Qualifiés pour les Plavoffs"
+      },
+      {
+        "id": 810,
+        "key": "general_proa_rank_b",
+        "en_value": "Qualifiés pour le Play-In",
+        "fr_value": "Qualifiés pour le Play-In"
+      },
+      {
+        "id": 811,
+        "key": "general_proa_rank_c",
+        "en_value": "Intègre les Playoffs Accession Betclic ÉLITE",
+        "fr_value": "Intègre les Playoffs Accession Betclic ÉLITE"
+      },
+      {
+        "id": 812,
+        "key": "general_proa_rank_d",
+        "en_value": "Relégué en ÉLITE 2",
+        "fr_value": "Relégué en ÉLITE 2"
+      },
+      {
+        "id": 813,
+        "key": "leader_cup_proa_rank_a",
+        "en_value": "Qualifiés pour la Leaders Cup",
+        "fr_value": "Qualifiés pour la Leaders Cup"
+      },
+      {
+        "id": 814,
+        "key": "general_prob_rank_a",
+        "en_value": "Champion d'ÉLITE 2 et promu en Betclic ÉLITE",
+        "fr_value": "Champion d'ÉLITE 2 et promu en Betclic ÉLITE"
+      },
+      {
+        "id": 815,
+        "key": "general_prob_rank_b",
+        "en_value": "Qualifiés pour les Playoffs Accession Betclic ÉLITE",
+        "fr_value": "Qualifiés pour les Playoffs Accession Betclic ÉLITE"
+      },
+      {
+        "id": 816,
+        "key": "general_prob_rank_c",
+        "en_value": "Qualifiés pour le Play-In",
+        "fr_value": "Qualifiés pour le Play-In"
+      },
+      {
+        "id": 817,
+        "key": "general_prob_rank_d",
+        "en_value": "Relégués en NM1",
+        "fr_value": "Relégués en NM1"
+      },
+      {
+        "id": 818,
+        "key": "leader_cup_prob_rank_a",
+        "en_value": "Qualifiés pour la Leaders Cup ÉLITE 2",
+        "fr_value": "Qualifiés pour la Leaders Cup ÉLITE 2"
+      },
+      {
+        "id": 819,
+        "key": "general_espa_rank_a",
+        "en_value": "Champion de France Espoirs ELITE et Qualifiés pour le Trophée du Futur",
+        "fr_value": "Champion de France Espoirs ELITE et Qualifiés pour le Trophée du Futur"
+      },
+      {
+        "id": 820,
+        "key": "general_espa_rank_b",
+        "en_value": "Qualifiés pour le Trophée du Futur",
+        "fr_value": "Qualifiés pour le Trophée du Futur"
+      },
+      {
+        "id": 821,
+        "key": "additional_stats",
+        "en_value": "Additional Stats",
+        "fr_value": "Statistiques supplémentaires"
+      },
+      {
+        "id": 822,
+        "key": "points_second_chance",
+        "en_value": "Points Second Chance",
+        "fr_value": "Points sur seconde chance"
+      },
+      {
+        "id": 823,
+        "key": "points_in_the_paint",
+        "en_value": "Points In The Paint",
+        "fr_value": " Points dans la raquette"
+      },
+      {
+        "id": 824,
+        "key": "points_from_turnovers",
+        "en_value": "Points From Turnovers",
+        "fr_value": " Points sur balles perdues"
+      },
+      {
+        "id": 825,
+        "key": "fast_break_points",
+        "en_value": "Fast Break Points",
+        "fr_value": "Points de contre-attaque"
+      },
+      {
+        "id": 826,
+        "key": "max_five_players",
+        "en_value": "You can select up to 5 players.",
+        "fr_value": "Vous pouvez sélectionner jusqu'à 5 joueurs."
+      },
+      {
+        "id": 827,
+        "key": "min_one_player",
+        "en_value": "Please select one player.",
+        "fr_value": "Veuillez sélectionner un joueur."
+      },
+      {
+        "id": 828,
+        "key": "player_save_fail",
+        "en_value": "Failed to save player selection.",
+        "fr_value": "Échec de l'enregistrement de la sélection du joueur."
+      },
+      {
+        "id": 829,
+        "key": "and",
+        "en_value": "and",
+        "fr_value": "et notre"
+      },
+      {
+        "id": 837,
+        "key": "career_averages",
+        "en_value": "Career Averages",
+        "fr_value": "Moyennes de carrière"
+      },
+      {
+        "id": 838,
+        "key": "shooting_efficiency",
+        "en_value": "Shooting Efficiency",
+        "fr_value": "Efficacité de tir"
+      },
+      {
+        "id": 839,
+        "key": "last_five_match",
+        "en_value": "LAST 5 MATCHES",
+        "fr_value": "5 DERNIERS MATCHS"
+      },
+      {
+        "id": 840,
+        "key": "last_five_home_matches",
+        "en_value": "LAST 5 HOME MATCHES",
+        "fr_value": "5 DERNIERS MATCHS À DOMICILE"
+      },
+      {
+        "id": 841,
+        "key": "last_five_away_matches",
+        "en_value": "LAST 5 AWAY MATCHES",
+        "fr_value": "5 DERNIERS MATCHS À L'EXTÉRIEUR"
+      },
+      {
+        "id": 842,
+        "key": "team_comparison",
+        "en_value": "TEAM COMPARISON",
+        "fr_value": "COMPARAISON D'ÉQUIPE"
+      },
+      {
+        "id": 843,
+        "key": "view_more_statistics",
+        "en_value": "VIEW MORE STATISTICS",
+        "fr_value": "VOIR PLUS DE STATISTIQUES"
+      },
+      {
+        "id": 844,
+        "key": "spg",
+        "en_value": "SPG",
+        "fr_value": "SPG"
+      },
+      {
+        "id": 845,
+        "key": "bpg",
+        "en_value": "BPG",
+        "fr_value": "BPG"
+      },
+      {
+        "id": 846,
+        "key": "pir",
+        "en_value": "PIR",
+        "fr_value": "PIR"
+      },
+      {
+        "id": 847,
+        "key": "match_officials",
+        "en_value": "Match Officials",
+        "fr_value": "Officiels de match"
+      },
+      {
+        "id": 848,
+        "key": "search",
+        "en_value": "Search",
+        "fr_value": "Chercher"
+      },
+      {
+        "id": 849,
+        "key": "personalize_your_experience",
+        "en_value": "PERSONALIZE YOUR EXPERIENCE",
+        "fr_value": " PERSONNALISEZ VOTRE EXPÉRIENCE"
+      },
+      {
+        "id": 850,
+        "key": "signup_banner_subtitle",
+        "en_value": "Get news and videos tailored to your favorite teams and players.",
+        "fr_value": "Recevez des actualités et des vidéos personnalisées sur vos équipes et joueurs préférés."
+      },
+      {
+        "id": 851,
+        "key": "signup_banner_cta_title",
+        "en_value": "LOG IN / SIGN UP",
+        "fr_value": "SE CONNECTER / S'INSCRIRE"
+      },
+      {
+        "id": 852,
+        "key": "games_are_sorted",
+        "en_value": "Games are sorted from latest (left) to oldest (right)",
+        "fr_value": "Les matchs sont classés du plus récent (gauche) au plus ancien (droite)"
+      },
+      {
+        "id": 853,
+        "key": "login_to_vote",
+        "en_value": "Login to vote",
+        "fr_value": "Connectez-vous pour pouvoir voter"
+      },
+      {
+        "id": 854,
+        "key": "login_to_watch",
+        "en_value": "Login to watch",
+        "fr_value": "Connectez-vous pour regarder"
+      }
+    ]
+  }
+}

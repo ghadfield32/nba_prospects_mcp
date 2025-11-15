@@ -1,0 +1,26 @@
+{
+  "metadata": {
+    "generated_at": "2025-11-15T16:02:16.954424",
+    "version": "2.0",
+    "description": "Historical LNB Pro A fixture UUIDs with metadata",
+    "seasons_covered": [
+      "2025-2026"
+    ],
+    "total_games": 0,
+    "total_validated": 0
+  },
+  "seasons": {
+    "2025-2026": {
+      "season": "2025-2026",
+      "division": 1,
+      "division_name": "Betclic ÉLITE",
+      "total_games": 0,
+      "completed_games": 0,
+      "games_with_pbp": 0,
+      "games_with_shots": 0,
+      "last_updated": "2025-11-15T16:00:58.390960",
+      "scrape_source": "lnb.fr/resultats",
+      "games": {}
+    }
+  }
+}

@@ -1,0 +1,2 @@
+game_id,pbp_ok,pbp_rows,pbp_missing_columns,pbp_error,pbp_event_types_count,pbp_has_nulls,shots_ok,shots_rows,shots_missing_columns,shots_error,shots_made,shots_missed,shots_fg_pct,shots_coords_valid,shots_has_nulls
+3522345e-3362-11f0-b97d-7be2bdc7a840,True,544,,,12,False,True,136,,,61,75,0.4485294117647059,True,False

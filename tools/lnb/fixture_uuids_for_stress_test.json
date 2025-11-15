@@ -1,0 +1,261 @@
+{
+  "extracted_at": "2025-11-15T06:49:01.298356",
+  "source_url": "https://www.lnb.fr/pro-a/calendrier",
+  "total_games": 42,
+  "fixture_uuids": [
+    "0d0504a0-6715-11f0-98ab-27e6e78614e1",
+    "0cd1323f-6715-11f0-86f4-27e6e78614e1",
+    "0cac6e1b-6715-11f0-a9f3-27e6e78614e1",
+    "0c6cb54d-6715-11f0-940b-27e6e78614e1",
+    "0c1513b4-6715-11f0-9c8b-27e6e78614e1",
+    "0ce02919-6715-11f0-9d01-27e6e78614e1",
+    "0ca54c63-6715-11f0-9d8c-27e6e78614e1",
+    "0c767f2a-6715-11f0-93e6-27e6e78614e1",
+    "0bfe4c54-6715-11f0-847a-27e6e78614e1",
+    "0bf65e4f-6715-11f0-bfe1-27e6e78614e1",
+    "0cc9a08e-6715-11f0-bdfa-27e6e78614e1",
+    "0c86e7dd-6715-11f0-ac7c-27e6e78614e1",
+    "0c5c2d35-6715-11f0-bc54-27e6e78614e1",
+    "0bd4aab5-6715-11f0-ab66-27e6e78614e1",
+    "0cbb07ab-6715-11f0-b691-27e6e78614e1",
+    "0c7eb77a-6715-11f0-9424-27e6e78614e1",
+    "0bc2e243-6715-11f0-8b5b-27e6e78614e1",
+    "0c8f110b-6715-11f0-afd9-27e6e78614e1",
+    "0c4d9879-6715-11f0-bd72-27e6e78614e1",
+    "0c2ba79c-6715-11f0-887a-27e6e78614e1",
+    "0cd8e889-6715-11f0-b88a-27e6e78614e1",
+    "0cb364a6-6715-11f0-a2fb-27e6e78614e1",
+    "0c435d61-6715-11f0-b5b4-27e6e78614e1",
+    "0c23a3de-6715-11f0-b3f9-27e6e78614e1",
+    "0ceedd59-6715-11f0-a368-27e6e78614e1",
+    "0c96c493-6715-11f0-aab9-27e6e78614e1",
+    "0c3c0409-6715-11f0-880a-27e6e78614e1",
+    "0bca8ce0-6715-11f0-956e-27e6e78614e1",
+    "0cc220af-6715-11f0-8302-27e6e78614e1",
+    "0c05ec96-6715-11f0-88e1-27e6e78614e1",
+    "0bbaf1d4-6715-11f0-82a2-27e6e78614e1",
+    "0ce79e46-6715-11f0-9095-27e6e78614e1",
+    "0c54f4fe-6715-11f0-8fcf-27e6e78614e1",
+    "0c1ca8d7-6715-11f0-aa83-27e6e78614e1",
+    "0bedf92c-6715-11f0-9c10-27e6e78614e1",
+    "0daf5704-6715-11f0-bfac-27e6e78614e1",
+    "0c3324ee-6715-11f0-ab98-27e6e78614e1",
+    "2d899ed2-6715-11f0-973d-3deba12f98c8",
+    "0c63bb5e-6715-11f0-bc0c-27e6e78614e1",
+    "0be4d30c-6715-11f0-b6e1-27e6e78614e1",
+    "0c9e4842-6715-11f0-81b7-27e6e78614e1",
+    "0c0d2399-6715-11f0-b612-27e6e78614e1"
+  ],
+  "games": [
+    {
+      "fixture_uuid": "0d0504a0-6715-11f0-98ab-27e6e78614e1",
+      "match_url": "https://lnb.fr/fr/match-center/0d0504a0-6715-11f0-98ab-27e6e78614e1",
+      "link_text": "MATCH CENTER"
+    },
+    {
+      "fixture_uuid": "0cd1323f-6715-11f0-86f4-27e6e78614e1",
+      "match_url": "fr/match-center/0cd1323f-6715-11f0-86f4-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0cac6e1b-6715-11f0-a9f3-27e6e78614e1",
+      "match_url": "fr/match-center/0cac6e1b-6715-11f0-a9f3-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0c6cb54d-6715-11f0-940b-27e6e78614e1",
+      "match_url": "fr/match-center/0c6cb54d-6715-11f0-940b-27e6e78614e1",
+      "link_text": "D"
+    },
+    {
+      "fixture_uuid": "0c1513b4-6715-11f0-9c8b-27e6e78614e1",
+      "match_url": "fr/match-center/0c1513b4-6715-11f0-9c8b-27e6e78614e1",
+      "link_text": "D"
+    },
+    {
+      "fixture_uuid": "0ce02919-6715-11f0-9d01-27e6e78614e1",
+      "match_url": "fr/match-center/0ce02919-6715-11f0-9d01-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0ca54c63-6715-11f0-9d8c-27e6e78614e1",
+      "match_url": "fr/match-center/0ca54c63-6715-11f0-9d8c-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0c767f2a-6715-11f0-93e6-27e6e78614e1",
+      "match_url": "fr/match-center/0c767f2a-6715-11f0-93e6-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0bfe4c54-6715-11f0-847a-27e6e78614e1",
+      "match_url": "fr/match-center/0bfe4c54-6715-11f0-847a-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0bf65e4f-6715-11f0-bfe1-27e6e78614e1",
+      "match_url": "fr/match-center/0bf65e4f-6715-11f0-bfe1-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0cc9a08e-6715-11f0-bdfa-27e6e78614e1",
+      "match_url": "fr/match-center/0cc9a08e-6715-11f0-bdfa-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0c86e7dd-6715-11f0-ac7c-27e6e78614e1",
+      "match_url": "fr/match-center/0c86e7dd-6715-11f0-ac7c-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0c5c2d35-6715-11f0-bc54-27e6e78614e1",
+      "match_url": "fr/match-center/0c5c2d35-6715-11f0-bc54-27e6e78614e1",
+      "link_text": "D"
+    },
+    {
+      "fixture_uuid": "0bd4aab5-6715-11f0-ab66-27e6e78614e1",
+      "match_url": "fr/match-center/0bd4aab5-6715-11f0-ab66-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0cbb07ab-6715-11f0-b691-27e6e78614e1",
+      "match_url": "fr/match-center/0cbb07ab-6715-11f0-b691-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0c7eb77a-6715-11f0-9424-27e6e78614e1",
+      "match_url": "fr/match-center/0c7eb77a-6715-11f0-9424-27e6e78614e1",
+      "link_text": "D"
+    },
+    {
+      "fixture_uuid": "0bc2e243-6715-11f0-8b5b-27e6e78614e1",
+      "match_url": "fr/match-center/0bc2e243-6715-11f0-8b5b-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0c8f110b-6715-11f0-afd9-27e6e78614e1",
+      "match_url": "fr/match-center/0c8f110b-6715-11f0-afd9-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0c4d9879-6715-11f0-bd72-27e6e78614e1",
+      "match_url": "fr/match-center/0c4d9879-6715-11f0-bd72-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0c2ba79c-6715-11f0-887a-27e6e78614e1",
+      "match_url": "fr/match-center/0c2ba79c-6715-11f0-887a-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0cd8e889-6715-11f0-b88a-27e6e78614e1",
+      "match_url": "fr/match-center/0cd8e889-6715-11f0-b88a-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0cb364a6-6715-11f0-a2fb-27e6e78614e1",
+      "match_url": "fr/match-center/0cb364a6-6715-11f0-a2fb-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0c435d61-6715-11f0-b5b4-27e6e78614e1",
+      "match_url": "fr/match-center/0c435d61-6715-11f0-b5b4-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0c23a3de-6715-11f0-b3f9-27e6e78614e1",
+      "match_url": "fr/match-center/0c23a3de-6715-11f0-b3f9-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0ceedd59-6715-11f0-a368-27e6e78614e1",
+      "match_url": "fr/match-center/0ceedd59-6715-11f0-a368-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0c96c493-6715-11f0-aab9-27e6e78614e1",
+      "match_url": "fr/match-center/0c96c493-6715-11f0-aab9-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0c3c0409-6715-11f0-880a-27e6e78614e1",
+      "match_url": "fr/match-center/0c3c0409-6715-11f0-880a-27e6e78614e1",
+      "link_text": "D"
+    },
+    {
+      "fixture_uuid": "0bca8ce0-6715-11f0-956e-27e6e78614e1",
+      "match_url": "fr/match-center/0bca8ce0-6715-11f0-956e-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0cc220af-6715-11f0-8302-27e6e78614e1",
+      "match_url": "fr/match-center/0cc220af-6715-11f0-8302-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0c05ec96-6715-11f0-88e1-27e6e78614e1",
+      "match_url": "fr/match-center/0c05ec96-6715-11f0-88e1-27e6e78614e1",
+      "link_text": "D"
+    },
+    {
+      "fixture_uuid": "0bbaf1d4-6715-11f0-82a2-27e6e78614e1",
+      "match_url": "fr/match-center/0bbaf1d4-6715-11f0-82a2-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0ce79e46-6715-11f0-9095-27e6e78614e1",
+      "match_url": "fr/match-center/0ce79e46-6715-11f0-9095-27e6e78614e1",
+      "link_text": "D"
+    },
+    {
+      "fixture_uuid": "0c54f4fe-6715-11f0-8fcf-27e6e78614e1",
+      "match_url": "fr/match-center/0c54f4fe-6715-11f0-8fcf-27e6e78614e1",
+      "link_text": "D"
+    },
+    {
+      "fixture_uuid": "0c1ca8d7-6715-11f0-aa83-27e6e78614e1",
+      "match_url": "fr/match-center/0c1ca8d7-6715-11f0-aa83-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0bedf92c-6715-11f0-9c10-27e6e78614e1",
+      "match_url": "fr/match-center/0bedf92c-6715-11f0-9c10-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0daf5704-6715-11f0-bfac-27e6e78614e1",
+      "match_url": "fr/match-center/0daf5704-6715-11f0-bfac-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0c3324ee-6715-11f0-ab98-27e6e78614e1",
+      "match_url": "fr/match-center/0c3324ee-6715-11f0-ab98-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "2d899ed2-6715-11f0-973d-3deba12f98c8",
+      "match_url": "fr/match-center/2d899ed2-6715-11f0-973d-3deba12f98c8",
+      "link_text": "D"
+    },
+    {
+      "fixture_uuid": "0c63bb5e-6715-11f0-bc0c-27e6e78614e1",
+      "match_url": "fr/match-center/0c63bb5e-6715-11f0-bc0c-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0be4d30c-6715-11f0-b6e1-27e6e78614e1",
+      "match_url": "fr/match-center/0be4d30c-6715-11f0-b6e1-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0c9e4842-6715-11f0-81b7-27e6e78614e1",
+      "match_url": "fr/match-center/0c9e4842-6715-11f0-81b7-27e6e78614e1",
+      "link_text": "V"
+    },
+    {
+      "fixture_uuid": "0c0d2399-6715-11f0-b612-27e6e78614e1",
+      "match_url": "fr/match-center/0c0d2399-6715-11f0-b612-27e6e78614e1",
+      "link_text": "D"
+    }
+  ]
+}

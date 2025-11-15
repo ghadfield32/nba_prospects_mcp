@@ -1,0 +1,311 @@
+{
+  "url": "https://api-prod.lnb.fr/person/getTeamPersons?team_external_id=1781",
+  "type": "unknown",
+  "timestamp": "211755",
+  "data": {
+    "status": true,
+    "message": "Competition Teams fetched",
+    "data": [
+      {
+        "id": 0,
+        "external_id": 5398,
+        "first_name": "Essome",
+        "family_name": "Miyem",
+        "full_name": "Essome Miyem",
+        "dob": "2001-07-15T00:00:00.000Z",
+        "nationality_code": "FR",
+        "nationality_code_ioc": "FRA",
+        "playing_position": "5 - Pivot",
+        "shirt_number": "13",
+        "gender": "MALE",
+        "is_favourite": "no",
+        "photo": {
+          "sm": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/27835/photo/sm.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/27835/photo/md.png",
+          "lg": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/27835/photo/lg.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/27835/photo/or.png"
+        }
+      },
+      {
+        "id": 0,
+        "external_id": 7894,
+        "first_name": "Thomas",
+        "family_name": "Ville",
+        "full_name": "Thomas Ville",
+        "dob": "1995-05-06T00:00:00.000Z",
+        "nationality_code": "FR",
+        "nationality_code_ioc": "FRA",
+        "playing_position": "2 - Arrière",
+        "shirt_number": "25",
+        "gender": "MALE",
+        "is_favourite": "no",
+        "photo": {
+          "sm": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/27836/photo/sm.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/27836/photo/md.png",
+          "lg": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/27836/photo/lg.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/27836/photo/or.png"
+        }
+      },
+      {
+        "id": 0,
+        "external_id": 2513,
+        "first_name": "Cyrille",
+        "family_name": "Eliezer-Vanerot",
+        "full_name": "Cyrille Eliezer-Vanerot",
+        "dob": "1996-08-01T00:00:00.000Z",
+        "nationality_code": "FR",
+        "nationality_code_ioc": "FRA",
+        "playing_position": "3/4 - Ailier/Ailier fort",
+        "shirt_number": "",
+        "gender": "MALE",
+        "is_favourite": "no",
+        "photo": {
+          "sm": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/27837/photo/sm.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/27837/photo/md.png",
+          "lg": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/27837/photo/lg.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/27837/photo/or.png"
+        }
+      },
+      {
+        "id": 0,
+        "external_id": 8844,
+        "first_name": "Jean",
+        "family_name": "Noba",
+        "full_name": "Jean Noba",
+        "dob": "2005-01-13T00:00:00.000Z",
+        "nationality_code": "FR",
+        "nationality_code_ioc": "FRA",
+        "playing_position": "3 - Ailier",
+        "shirt_number": "32",
+        "gender": "MALE",
+        "is_favourite": "no",
+        "photo": {
+          "sm": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/27848/photo/sm.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/27848/photo/md.png",
+          "lg": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/27848/photo/lg.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/27848/photo/or.png"
+        }
+      },
+      {
+        "id": 0,
+        "external_id": 4274,
+        "first_name": "Ousman",
+        "family_name": "Krubally",
+        "full_name": "Ousman Krubally",
+        "dob": "1988-03-13T00:00:00.000Z",
+        "nationality_code": "GM",
+        "nationality_code_ioc": "GAM",
+        "playing_position": "4 - Ailier fort",
+        "shirt_number": "5",
+        "gender": "MALE",
+        "is_favourite": "no",
+        "photo": {
+          "sm": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/28106/photo/sm.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/28106/photo/md.png",
+          "lg": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/28106/photo/lg.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/28106/photo/or.png"
+        }
+      },
+      {
+        "id": 0,
+        "external_id": 9570,
+        "first_name": "Angelo",
+        "family_name": "Warner",
+        "full_name": "Angelo Warner",
+        "dob": "1992-02-12T00:00:00.000Z",
+        "nationality_code": "US",
+        "nationality_code_ioc": "USA",
+        "playing_position": "1 - Meneur",
+        "shirt_number": "1",
+        "gender": "MALE",
+        "is_favourite": "no",
+        "photo": {
+          "sm": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/28109/photo/sm.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/28109/photo/md.png",
+          "lg": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/28109/photo/lg.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/28109/photo/or.png"
+        }
+      },
+      {
+        "id": 0,
+        "external_id": 6637,
+        "first_name": "Hugo",
+        "family_name": "Robineau",
+        "full_name": "Hugo Robineau",
+        "dob": "2000-02-27T00:00:00.000Z",
+        "nationality_code": "FR",
+        "nationality_code_ioc": "FRA",
+        "playing_position": "2 - Arrière",
+        "shirt_number": "8",
+        "gender": "MALE",
+        "is_favourite": "no",
+        "photo": {
+          "sm": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/28153/photo/sm.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/28153/photo/md.png",
+          "lg": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/28153/photo/lg.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/28153/photo/or.png"
+        }
+      },
+      {
+        "id": 0,
+        "external_id": 10048,
+        "first_name": "Malik",
+        "family_name": "Fitts",
+        "full_name": "Malik Fitts",
+        "dob": "1997-07-04T00:00:00.000Z",
+        "nationality_code": "US",
+        "nationality_code_ioc": "USA",
+        "playing_position": "3 - Ailier",
+        "shirt_number": "24",
+        "gender": "MALE",
+        "is_favourite": "no",
+        "photo": {
+          "sm": null,
+          "md": null,
+          "lg": null,
+          "or": null
+        }
+      },
+      {
+        "id": 0,
+        "external_id": 10596,
+        "first_name": "Amit",
+        "family_name": "Ebo",
+        "full_name": "Amit Ebo",
+        "dob": "1999-10-06T00:00:00.000Z",
+        "nationality_code": "IL",
+        "nationality_code_ioc": "ISR",
+        "playing_position": "1 - Meneur",
+        "shirt_number": "2",
+        "gender": "MALE",
+        "is_favourite": "no",
+        "photo": {
+          "sm": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/28505/photo/sm.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/28505/photo/md.png",
+          "lg": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/28505/photo/lg.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/28505/photo/or.png"
+        }
+      },
+      {
+        "id": 0,
+        "external_id": 10595,
+        "first_name": "K.J.",
+        "family_name": "Williams",
+        "full_name": "K.J. Williams",
+        "dob": "1999-09-03T00:00:00.000Z",
+        "nationality_code": "US",
+        "nationality_code_ioc": "USA",
+        "playing_position": "4 - Ailier fort",
+        "shirt_number": "0",
+        "gender": "MALE",
+        "is_favourite": "no",
+        "photo": {
+          "sm": null,
+          "md": null,
+          "lg": null,
+          "or": null
+        }
+      },
+      {
+        "id": 0,
+        "external_id": 10525,
+        "first_name": "Tony",
+        "family_name": "Snell",
+        "full_name": "Tony Snell",
+        "dob": "1991-11-10T00:00:00.000Z",
+        "nationality_code": "US",
+        "nationality_code_ioc": "USA",
+        "playing_position": "2/3 - Arrière/Ailier",
+        "shirt_number": "21",
+        "gender": "MALE",
+        "is_favourite": "no",
+        "photo": {
+          "sm": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/28823/photo/sm.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/28823/photo/md.png",
+          "lg": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/28823/photo/lg.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/28823/photo/or.png"
+        }
+      },
+      {
+        "id": 0,
+        "external_id": 4857,
+        "first_name": "Théo",
+        "family_name": "Magrit",
+        "full_name": "Théo Magrit",
+        "dob": "2001-05-10T00:00:00.000Z",
+        "nationality_code": "FR",
+        "nationality_code_ioc": "FRA",
+        "playing_position": "1 - Meneur",
+        "shirt_number": "22",
+        "gender": "MALE",
+        "is_favourite": "no",
+        "photo": {
+          "sm": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/28887/photo/sm.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/28887/photo/md.png",
+          "lg": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/28887/photo/lg.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/PlayerRole/28887/photo/or.png"
+        }
+      },
+      {
+        "id": 0,
+        "external_id": 10679,
+        "first_name": "Jacob",
+        "family_name": "Grandison",
+        "full_name": "Jacob Grandison",
+        "dob": "1998-04-02T00:00:00.000Z",
+        "nationality_code": "FI",
+        "nationality_code_ioc": "FIN",
+        "playing_position": "3 - Ailier",
+        "shirt_number": "34",
+        "gender": "MALE",
+        "is_favourite": "no",
+        "photo": {
+          "sm": null,
+          "md": null,
+          "lg": null,
+          "or": null
+        }
+      },
+      {
+        "id": 0,
+        "external_id": 8704,
+        "first_name": "Quentin",
+        "family_name": "Bonneau",
+        "full_name": "Quentin Bonneau",
+        "dob": "2005-05-17T00:00:00.000Z",
+        "nationality_code": "FR",
+        "nationality_code_ioc": "FRA",
+        "playing_position": "2 - Arrière",
+        "shirt_number": "",
+        "gender": "MALE",
+        "is_favourite": "no",
+        "photo": {
+          "sm": null,
+          "md": null,
+          "lg": null,
+          "or": null
+        }
+      },
+      {
+        "id": 0,
+        "external_id": 2478,
+        "first_name": "Antoine",
+        "family_name": "Eito",
+        "full_name": "Antoine Eito",
+        "dob": "1988-04-06T00:00:00.000Z",
+        "nationality_code": "FR",
+        "nationality_code_ioc": "FRA",
+        "playing_position": "1 - Meneur",
+        "shirt_number": "",
+        "gender": "MALE",
+        "is_favourite": "no",
+        "photo": {
+          "sm": null,
+          "md": null,
+          "lg": null,
+          "or": null
+        }
+      }
+    ]
+  }
+}

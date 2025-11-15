@@ -1,0 +1,135 @@
+[
+  {
+    "labeled_season": "2022-2023 (labeled in file)",
+    "uuid": "1515cca4-67e6-11f0-908d-9d1d3a927139",
+    "actual_date": "2025-11-15",
+    "status": "SCHEDULED",
+    "time_status": "PAST (-0d)"
+  },
+  {
+    "labeled_season": "2022-2023 (labeled in file)",
+    "uuid": "0d0504a0-6715-11f0-98ab-27e6e78614e1",
+    "actual_date": "2025-11-14",
+    "status": "COMPLETE",
+    "time_status": "PAST (-1d)"
+  },
+  {
+    "labeled_season": "2022-2023 (labeled in file)",
+    "uuid": "0d346b41-6715-11f0-b247-27e6e78614e1",
+    "actual_date": "2025-11-15",
+    "status": "SCHEDULED",
+    "time_status": "PAST (-0d)"
+  },
+  {
+    "labeled_season": "2022-2023 (labeled in file)",
+    "uuid": "0d2989af-6715-11f0-b609-27e6e78614e1",
+    "actual_date": "2025-11-15",
+    "status": "SCHEDULED",
+    "time_status": "PAST (-0d)"
+  },
+  {
+    "labeled_season": "2022-2023 (labeled in file)",
+    "uuid": "0d0c88fe-6715-11f0-9d9c-27e6e78614e1",
+    "actual_date": "2025-11-15",
+    "status": "SCHEDULED",
+    "time_status": "PAST (-0d)"
+  },
+  {
+    "labeled_season": "2022-2023 (labeled in file)",
+    "uuid": "14fa0584-67e6-11f0-8cb3-9d1d3a927139",
+    "actual_date": "2025-11-15",
+    "status": "SCHEDULED",
+    "time_status": "PAST (-0d)"
+  },
+  {
+    "labeled_season": "2022-2023 (labeled in file)",
+    "uuid": "0d225fad-6715-11f0-810f-27e6e78614e1",
+    "actual_date": "2025-11-16",
+    "status": "SCHEDULED",
+    "time_status": "FUTURE (+0d)"
+  },
+  {
+    "labeled_season": "2022-2023 (labeled in file)",
+    "uuid": "0cfdeaf9-6715-11f0-87bc-27e6e78614e1",
+    "actual_date": "2025-11-15",
+    "status": "SCHEDULED",
+    "time_status": "PAST (-0d)"
+  },
+  {
+    "labeled_season": "2022-2023 (labeled in file)",
+    "uuid": "0cf637f3-6715-11f0-b9ed-27e6e78614e1",
+    "actual_date": "2025-11-16",
+    "status": "SCHEDULED",
+    "time_status": "FUTURE (+0d)"
+  },
+  {
+    "labeled_season": "2022-2023 (labeled in file)",
+    "uuid": "0d141f9e-6715-11f0-bf7e-27e6e78614e1",
+    "actual_date": "2025-11-15",
+    "status": "SCHEDULED",
+    "time_status": "PAST (-0d)"
+  },
+  {
+    "labeled_season": "2023-2024 (labeled in file)",
+    "uuid": "3fcea9a1-1f10-11ee-a687-db190750bdda",
+    "actual_date": "2023-11-15",
+    "status": "COMPLETE",
+    "time_status": "PAST (-731d)"
+  },
+  {
+    "labeled_season": "2023-2024 (labeled in file)",
+    "uuid": "cc7e470e-11a0-11ed-8ef5-8d12cdc95909",
+    "actual_date": "2022-11-18",
+    "status": "COMPLETE",
+    "time_status": "PAST (-1093d)"
+  },
+  {
+    "labeled_season": "2023-2024 (labeled in file)",
+    "uuid": "7d414bce-f5da-11eb-b3fd-a23ac5ab90da",
+    "actual_date": "2021-11-18",
+    "status": "COMPLETE",
+    "time_status": "PAST (-1458d)"
+  },
+  {
+    "labeled_season": "2023-2024 (labeled in file)",
+    "uuid": "0cac6e1b-6715-11f0-a9f3-27e6e78614e1",
+    "actual_date": "2025-10-31",
+    "status": "COMPLETE",
+    "time_status": "PAST (-15d)"
+  },
+  {
+    "labeled_season": "2023-2024 (labeled in file)",
+    "uuid": "0cd1323f-6715-11f0-86f4-27e6e78614e1",
+    "actual_date": "2025-11-08",
+    "status": "COMPLETE",
+    "time_status": "PAST (-7d)"
+  },
+  {
+    "labeled_season": "2024-2025 (labeled in file)",
+    "uuid": "0cac6e1b-6715-11f0-a9f3-27e6e78614e1",
+    "actual_date": "2025-10-31",
+    "status": "COMPLETE",
+    "time_status": "PAST (-15d)"
+  },
+  {
+    "labeled_season": "2024-2025 (labeled in file)",
+    "uuid": "0cd1323f-6715-11f0-86f4-27e6e78614e1",
+    "actual_date": "2025-11-08",
+    "status": "COMPLETE",
+    "time_status": "PAST (-7d)"
+  },
+  {
+    "labeled_season": "2024-2025 (labeled in file)",
+    "uuid": "0ce02919-6715-11f0-9d01-27e6e78614e1",
+    "actual_date": "2025-11-09",
+    "status": "COMPLETE",
+    "time_status": "PAST (-6d)"
+  },
+  {
+    "labeled_season": "2024-2025 (labeled in file)",
+    "uuid": "0d0504a0-6715-11f0-98ab-27e6e78614e1",
+    "actual_date": "2025-11-14",
+    "status": "COMPLETE",
+    "time_status": "PAST (-1d)"
+  }
+]

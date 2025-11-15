@@ -1,0 +1,62 @@
+[
+  {
+    "index": 0,
+    "classes": "fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm transition-opacity duration-300 pointer-events-none opacity-0",
+    "text": "",
+    "html_preview": ""
+  },
+  {
+    "index": 1,
+    "classes": "fixed top-0 left-1/2 z-[101] w-full max-w-[120rem] -translate-x-1/2 transform px-6 transition-all duration-300 ease-out pointer-events-none -translate-y-full opacity-0",
+    "text": "RECENT SEARCHES\nToday Matches\nNews\nPlayers",
+    "html_preview": "<form class=\"rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md\"><div class=\"relative flex items-center\"><div class=\"bg-primary absolute left-4 z-1 grid h-[3.375rem] w-[3.375rem] place-content-center rounded-xl\"><svg width=\"24\" height=\"24\" fill=\"none\" viewBox=\"0 0 24 24\" class=\"h-6 w-6 text-white/70\"><path stroke=\"currentColor\" stroke-width=\"2\" d=\"M10.48 17.835a7.293 7.293 0 1 0 0-14.585 7.293 7.293 0 0 0 0 14.585ZM15.633 15.7l5.053 5.052\"></path></svg></div><input placeholder=\"Sear"
+  },
+  {
+    "index": 2,
+    "classes": "fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm transition-opacity duration-300 pointer-events-none opacity-0",
+    "text": "",
+    "html_preview": ""
+  },
+  {
+    "index": 3,
+    "classes": "fixed top-0 z-[101] flex h-full w-full max-w-[28.125rem] transform items-center transition-all duration-300 ease-out pointer-events-none opacity-0 left-0 -translate-x-full",
+    "text": "CHOISIR ÉQUIPE\nBOULAZAC\nESSOME MIYEM\nTHOMAS VILLE\nCYRILLE ELIEZER-VANEROT\nJEAN NOBA\nOUSMAN KRUBALLY\nANGELO WARNER\nHUGO ROBINEAU\nMALIK FITTS\nAMIT EBO\nK.J. WILLIAMS\nTONY SNELL\nTHÉO MAGRIT\nJACOB GRANDISO",
+    "html_preview": "<div class=\"relative flex h-[90vh] w-full flex-col overflow-hidden rounded-4xl bg-white shadow-xl\"><div class=\"flex items-center justify-between p-5\"><h2 class=\"font-vinila-compressed text-[2.125rem] font-bold text-black uppercase\">CHOISIR ÉQUIPE</h2><button class=\"absolute top-2 right-2 grid h-12 w-12 cursor-pointer place-content-center rounded-full border border-black text-black\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"30\" height=\"30\" fill=\"currentColor\" viewBox=\"0 0 16 16\"><path d=\"M4."
+  },
+  {
+    "index": 4,
+    "classes": "pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3",
+    "text": "",
+    "html_preview": "<svg width=\"24\" height=\"24\" fill=\"none\" viewBox=\"0 0 24 24\" class=\"h-5 w-5 text-gray-400\"><path stroke=\"currentColor\" stroke-width=\"2\" d=\"M10.48 17.835a7.293 7.293 0 1 0 0-14.585 7.293 7.293 0 0 0 0 14.585ZM15.633 15.7l5.053 5.052\"></path></svg>"
+  },
+  {
+    "index": 5,
+    "classes": "fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm transition-opacity duration-300 pointer-events-none opacity-0",
+    "text": "",
+    "html_preview": ""
+  },
+  {
+    "index": 6,
+    "classes": "fixed top-0 z-[101] flex h-full w-full max-w-[28.125rem] transform items-center transition-all duration-300 ease-out pointer-events-none opacity-0 right-0 translate-x-full",
+    "text": "CHOISIR ÉQUIPE\nBOULAZAC\nESSOME MIYEM\nTHOMAS VILLE\nCYRILLE ELIEZER-VANEROT\nJEAN NOBA\nOUSMAN KRUBALLY\nANGELO WARNER\nHUGO ROBINEAU\nMALIK FITTS\nAMIT EBO\nK.J. WILLIAMS\nTONY SNELL\nTHÉO MAGRIT\nJACOB GRANDISO",
+    "html_preview": "<div class=\"relative flex h-[90vh] w-full flex-col overflow-hidden rounded-4xl bg-white shadow-xl\"><div class=\"flex items-center justify-between p-5\"><h2 class=\"font-vinila-compressed text-[2.125rem] font-bold text-black uppercase\">CHOISIR ÉQUIPE</h2><button class=\"absolute top-2 right-2 grid h-12 w-12 cursor-pointer place-content-center rounded-full border border-black text-black\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"30\" height=\"30\" fill=\"currentColor\" viewBox=\"0 0 16 16\"><path d=\"M4."
+  },
+  {
+    "index": 7,
+    "classes": "pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3",
+    "text": "",
+    "html_preview": "<svg width=\"24\" height=\"24\" fill=\"none\" viewBox=\"0 0 24 24\" class=\"h-5 w-5 text-gray-400\"><path stroke=\"currentColor\" stroke-width=\"2\" d=\"M10.48 17.835a7.293 7.293 0 1 0 0-14.585 7.293 7.293 0 0 0 0 14.585ZM15.633 15.7l5.053 5.052\"></path></svg>"
+  },
+  {
+    "index": 8,
+    "classes": "pointer-events-none absolute -bottom-20 left-1/2 z-10 line-clamp-3 w-48 -translate-x-1/2 rounded-md bg-white px-2 py-2 text-center text-sm break-words whitespace-normal text-black opacity-0 transition-all duration-200 group-focus-within:opacity-100 group-hover:opacity-100",
+    "text": "Les matchs sont classés du plus récent (gauche) au plus ancien (droite)",
+    "html_preview": "Les matchs sont classés du plus récent (gauche) au plus ancien (droite)"
+  },
+  {
+    "index": 9,
+    "classes": "pointer-events-none absolute -bottom-20 left-1/2 z-10 line-clamp-3 w-48 -translate-x-1/2 rounded-md bg-white px-2 py-2 text-center text-sm break-words whitespace-normal text-black opacity-0 transition-all duration-200 group-focus-within:opacity-100 group-hover:opacity-100",
+    "text": "Les matchs sont classés du plus récent (gauche) au plus ancien (droite)",
+    "html_preview": "Les matchs sont classés du plus récent (gauche) au plus ancien (droite)"
+  }
+]

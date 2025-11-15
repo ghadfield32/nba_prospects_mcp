@@ -1,0 +1,20 @@
+[
+  {
+    "game_id": "3522345e-3362-11f0-b97d-7be2bdc7a840",
+    "pbp_ok": true,
+    "pbp_rows": 544,
+    "pbp_missing_columns": null,
+    "pbp_error": null,
+    "pbp_event_types_count": 12,
+    "pbp_has_nulls": false,
+    "shots_ok": true,
+    "shots_rows": 136,
+    "shots_missing_columns": null,
+    "shots_error": null,
+    "shots_made": 61,
+    "shots_missed": 75,
+    "shots_fg_pct": 0.4485294117647059,
+    "shots_coords_valid": true,
+    "shots_has_nulls": false
+  }
+]

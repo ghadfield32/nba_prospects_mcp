@@ -43,7 +43,9 @@ def test_nbl_player_vs_team_points_consistent():
     player_pts_by_game.rename(columns={"PTS": "PLAYER_PTS"}, inplace=True)
 
     # Merge with team stats
-    merged = team_game[["GAME_ID", "TEAM", "PTS"]].merge(player_pts_by_game, on=["GAME_ID", "TEAM"], how="left")
+    merged = team_game[["GAME_ID", "TEAM", "PTS"]].merge(
+        player_pts_by_game, on=["GAME_ID", "TEAM"], how="left"
+    )
 
     # Calculate differences
     merged["PTS_DIFF"] = (merged["PTS"] - merged["PLAYER_PTS"]).abs()
@@ -68,7 +70,9 @@ def test_nbl_player_vs_team_rebounds_consistent():
     player_reb_by_game.rename(columns={"REB": "PLAYER_REB"}, inplace=True)
 
     # Merge with team stats
-    merged = team_game[["GAME_ID", "TEAM", "REB"]].merge(player_reb_by_game, on=["GAME_ID", "TEAM"], how="left")
+    merged = team_game[["GAME_ID", "TEAM", "REB"]].merge(
+        player_reb_by_game, on=["GAME_ID", "TEAM"], how="left"
+    )
 
     # Calculate differences (allow larger tolerance for rebounds due to team rebounds)
     merged["REB_DIFF"] = (merged["REB"] - merged["PLAYER_REB"]).abs()
@@ -93,7 +97,9 @@ def test_nbl_player_vs_team_assists_consistent():
     player_ast_by_game.rename(columns={"AST": "PLAYER_AST"}, inplace=True)
 
     # Merge with team stats
-    merged = team_game[["GAME_ID", "TEAM", "AST"]].merge(player_ast_by_game, on=["GAME_ID", "TEAM"], how="left")
+    merged = team_game[["GAME_ID", "TEAM", "AST"]].merge(
+        player_ast_by_game, on=["GAME_ID", "TEAM"], how="left"
+    )
 
     # Calculate differences
     merged["AST_DIFF"] = (merged["AST"] - merged["PLAYER_AST"]).abs()
@@ -177,7 +183,15 @@ def test_nbl_shots_schema():
     if shots.empty:
         pytest.skip("NBL data not available")
 
-    required_cols = ["GAME_ID", "PLAYER_NAME", "LOC_X", "LOC_Y", "IS_MAKE", "POINTS_VALUE", "LEAGUE"]
+    required_cols = [
+        "GAME_ID",
+        "PLAYER_NAME",
+        "LOC_X",
+        "LOC_Y",
+        "IS_MAKE",
+        "POINTS_VALUE",
+        "LEAGUE",
+    ]
     for col in required_cols:
         assert col in shots.columns, f"Missing required column: {col}"
 
@@ -242,7 +256,8 @@ def test_nbl_player_game_refers_to_valid_games():
     orphaned_games = player_game_ids - valid_game_ids
 
     assert len(orphaned_games) == 0, (
-        f"Found {len(orphaned_games)} player-game records referencing " f"games not in schedule: {list(orphaned_games)[:10]}"
+        f"Found {len(orphaned_games)} player-game records referencing "
+        f"games not in schedule: {list(orphaned_games)[:10]}"
     )
 
 
@@ -260,5 +275,6 @@ def test_nbl_shots_refer_to_valid_games():
     orphaned_shots = shot_game_ids - valid_game_ids
 
     assert len(orphaned_shots) == 0, (
-        f"Found {len(orphaned_shots)} shot records referencing " f"games not in schedule: {list(orphaned_shots)[:10]}"
+        f"Found {len(orphaned_shots)} shot records referencing "
+        f"games not in schedule: {list(orphaned_shots)[:10]}"
     )

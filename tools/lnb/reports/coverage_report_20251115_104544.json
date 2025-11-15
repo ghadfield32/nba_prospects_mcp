@@ -1,0 +1,76 @@
+{
+  "2022-2023": {
+    "season": "2022-2023",
+    "total_games": 10,
+    "have_pbp": 0,
+    "have_shots": 0,
+    "coverage_pbp": 0.0,
+    "coverage_shots": 0.0,
+    "missing_pbp": [
+      "1515cca4-67e6-11f0-908d-9d1d3a927139",
+      "0d0504a0-6715-11f0-98ab-27e6e78614e1",
+      "0d346b41-6715-11f0-b247-27e6e78614e1",
+      "0d2989af-6715-11f0-b609-27e6e78614e1",
+      "0d0c88fe-6715-11f0-9d9c-27e6e78614e1",
+      "14fa0584-67e6-11f0-8cb3-9d1d3a927139",
+      "0d225fad-6715-11f0-810f-27e6e78614e1",
+      "0cfdeaf9-6715-11f0-87bc-27e6e78614e1",
+      "0cf637f3-6715-11f0-b9ed-27e6e78614e1",
+      "0d141f9e-6715-11f0-bf7e-27e6e78614e1"
+    ],
+    "missing_shots": [
+      "1515cca4-67e6-11f0-908d-9d1d3a927139",
+      "0d0504a0-6715-11f0-98ab-27e6e78614e1",
+      "0d346b41-6715-11f0-b247-27e6e78614e1",
+      "0d2989af-6715-11f0-b609-27e6e78614e1",
+      "0d0c88fe-6715-11f0-9d9c-27e6e78614e1",
+      "14fa0584-67e6-11f0-8cb3-9d1d3a927139",
+      "0d225fad-6715-11f0-810f-27e6e78614e1",
+      "0cfdeaf9-6715-11f0-87bc-27e6e78614e1",
+      "0cf637f3-6715-11f0-b9ed-27e6e78614e1",
+      "0d141f9e-6715-11f0-bf7e-27e6e78614e1"
+    ]
+  },
+  "2023-2024": {
+    "season": "2023-2024",
+    "total_games": 5,
+    "have_pbp": 0,
+    "have_shots": 0,
+    "coverage_pbp": 0.0,
+    "coverage_shots": 0.0,
+    "missing_pbp": [
+      "3fcea9a1-1f10-11ee-a687-db190750bdda",
+      "cc7e470e-11a0-11ed-8ef5-8d12cdc95909",
+      "7d414bce-f5da-11eb-b3fd-a23ac5ab90da",
+      "0cac6e1b-6715-11f0-a9f3-27e6e78614e1",
+      "0cd1323f-6715-11f0-86f4-27e6e78614e1"
+    ],
+    "missing_shots": [
+      "3fcea9a1-1f10-11ee-a687-db190750bdda",
+      "cc7e470e-11a0-11ed-8ef5-8d12cdc95909",
+      "7d414bce-f5da-11eb-b3fd-a23ac5ab90da",
+      "0cac6e1b-6715-11f0-a9f3-27e6e78614e1",
+      "0cd1323f-6715-11f0-86f4-27e6e78614e1"
+    ]
+  },
+  "2024-2025": {
+    "season": "2024-2025",
+    "total_games": 4,
+    "have_pbp": 0,
+    "have_shots": 0,
+    "coverage_pbp": 0.0,
+    "coverage_shots": 0.0,
+    "missing_pbp": [
+      "0cac6e1b-6715-11f0-a9f3-27e6e78614e1",
+      "0cd1323f-6715-11f0-86f4-27e6e78614e1",
+      "0ce02919-6715-11f0-9d01-27e6e78614e1",
+      "0d0504a0-6715-11f0-98ab-27e6e78614e1"
+    ],
+    "missing_shots": [
+      "0cac6e1b-6715-11f0-a9f3-27e6e78614e1",
+      "0cd1323f-6715-11f0-86f4-27e6e78614e1",
+      "0ce02919-6715-11f0-9d01-27e6e78614e1",
+      "0d0504a0-6715-11f0-98ab-27e6e78614e1"
+    ]
+  }
+}

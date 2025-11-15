@@ -1,0 +1,42 @@
+{
+  "2021-2022": {
+    "season": "2021-2022",
+    "total_games": 1,
+    "have_pbp": 1,
+    "have_shots": 1,
+    "coverage_pbp": 100.0,
+    "coverage_shots": 100.0,
+    "missing_pbp": [],
+    "missing_shots": []
+  },
+  "2022-2023": {
+    "season": "2022-2023",
+    "total_games": 1,
+    "have_pbp": 1,
+    "have_shots": 1,
+    "coverage_pbp": 100.0,
+    "coverage_shots": 100.0,
+    "missing_pbp": [],
+    "missing_shots": []
+  },
+  "2023-2024": {
+    "season": "2023-2024",
+    "total_games": 1,
+    "have_pbp": 1,
+    "have_shots": 1,
+    "coverage_pbp": 100.0,
+    "coverage_shots": 100.0,
+    "missing_pbp": [],
+    "missing_shots": []
+  },
+  "2024-2025": {
+    "season": "2024-2025",
+    "total_games": 4,
+    "have_pbp": 4,
+    "have_shots": 4,
+    "coverage_pbp": 100.0,
+    "coverage_shots": 100.0,
+    "missing_pbp": [],
+    "missing_shots": []
+  }
+}

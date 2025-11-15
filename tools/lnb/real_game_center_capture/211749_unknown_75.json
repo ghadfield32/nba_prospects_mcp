@@ -1,0 +1,131 @@
+{
+  "url": "https://api-prod.lnb.fr/competition/getMainCompetition?year=2024",
+  "type": "unknown",
+  "timestamp": "211749",
+  "data": {
+    "status": true,
+    "message": "Main Competition fetched (from cache)",
+    "data": [
+      {
+        "id": 285,
+        "competition_id": "a2262b45-2fab-11ef-8eb7-99149ebb5652",
+        "external_id": 287,
+        "division_external_id": 1,
+        "season_id": "cab2f926-2fab-11ef-8b99-e553c4d56b24",
+        "league_id": "9e75699e-f524-11eb-803a-969e9eebd316",
+        "start_date": "2024-07-01T00:00:00.000Z",
+        "end_date": "2025-06-30T00:00:00.000Z",
+        "competition_name": "Betclic ÉLITE",
+        "competition_name_international": "LNB - Betclic ÉLITE",
+        "competition_abbrev": "PROA",
+        "year": "2024",
+        "gender": "MALE",
+        "rules": [],
+        "logo_white": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/287/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/287/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/287/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/287/logoWhite/sm.png"
+        },
+        "logo_black": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/287/logoBlack/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/287/logoBlack/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/287/logoBlack/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/287/logoBlack/sm.png"
+        },
+        "competition_filter_name": "GENERAL",
+        "competition_filter_value": "GENERAL"
+      },
+      {
+        "id": 286,
+        "competition_id": "0847055c-2fb3-11ef-9b30-3333ffdb8385",
+        "external_id": 288,
+        "division_external_id": 2,
+        "season_id": "91334b18-2fb3-11ef-be14-e92481b1d83d",
+        "league_id": "9e75699e-f524-11eb-803a-969e9eebd316",
+        "start_date": "2024-07-01T00:00:00.000Z",
+        "end_date": "2025-06-30T00:00:00.000Z",
+        "competition_name": "PROB",
+        "competition_name_international": "LNB - PROB",
+        "competition_abbrev": "PROB",
+        "year": "2024",
+        "gender": "MALE",
+        "rules": [],
+        "logo_white": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/288/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/288/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/288/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/288/logoWhite/sm.png"
+        },
+        "logo_black": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/288/logoBlack/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/288/logoBlack/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/288/logoBlack/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/288/logoBlack/sm.png"
+        },
+        "competition_filter_name": "GENERAL",
+        "competition_filter_value": "GENERAL"
+      },
+      {
+        "id": 287,
+        "competition_id": "ac2bc8df-2fb4-11ef-9e38-9f35926cbbae",
+        "external_id": 289,
+        "division_external_id": 3,
+        "season_id": "c68a19df-2fb4-11ef-bf65-c13f469726eb",
+        "league_id": "9e75699e-f524-11eb-803a-969e9eebd316",
+        "start_date": "2024-07-01T00:00:00.000Z",
+        "end_date": "2025-06-30T00:00:00.000Z",
+        "competition_name": "Espoirs ELITE",
+        "competition_name_international": "LNB - Espoirs ELITE",
+        "competition_abbrev": "ESPA",
+        "year": "2024",
+        "gender": "MALE",
+        "rules": [],
+        "logo_white": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/289/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/289/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/289/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/289/logoWhite/sm.png"
+        },
+        "logo_black": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/289/logoBlack/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/289/logoBlack/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/289/logoBlack/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/289/logoBlack/sm.png"
+        },
+        "competition_filter_name": "GENERAL",
+        "competition_filter_value": "GENERAL"
+      },
+      {
+        "id": 288,
+        "competition_id": "59512848-2fb5-11ef-9343-f7ede79b7e49",
+        "external_id": 290,
+        "division_external_id": 4,
+        "season_id": "702b8520-2fb5-11ef-8f58-ed6f7e8cdcbb",
+        "league_id": "9e75699e-f524-11eb-803a-969e9eebd316",
+        "start_date": "2024-07-01T00:00:00.000Z",
+        "end_date": "2025-06-30T00:00:00.000Z",
+        "competition_name": "Espoirs PROB",
+        "competition_name_international": "LNB - Espoirs PROB",
+        "competition_abbrev": "ESPB",
+        "year": "2024",
+        "gender": "MALE",
+        "rules": [],
+        "logo_white": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/290/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/290/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/290/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/290/logoWhite/sm.png"
+        },
+        "logo_black": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/290/logoBlack/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/290/logoBlack/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/290/logoBlack/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/290/logoBlack/sm.png"
+        },
+        "competition_filter_name": "",
+        "competition_filter_value": ""
+      }
+    ]
+  }
+}

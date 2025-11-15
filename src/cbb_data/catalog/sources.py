@@ -32,6 +32,7 @@ SourceType = Literal[
     "html_js",  # JavaScript-rendered HTML (requires Selenium/Playwright)
     "fiba_html",  # FIBA LiveStats HTML scraping (LKL, BAL, BCL, ABA)
     "api_basketball",  # API-Basketball (api-sports.io)
+    "lnb_api",  # LNB Official API (France - Betclic ÉLITE)
     "nbl_official_r",  # NBL Australia via nblR R package (official stats, 1979+)
     "nz_nbl_fiba",  # NZ NBL via FIBA LiveStats HTML scraping
     "statorium",  # Statorium Basketball API
@@ -594,20 +595,22 @@ def _register_league_sources() -> None:
         )
     )
 
-    # LNB Pro A (France)
+    # LNB Pro A (France) - API Integration Complete
     register_league_source(
         LeagueSourceConfig(
             league="LNB_PROA",
-            player_season_source="html",  # Phase 3: Will change to "api_basketball" or "statorium"
-            team_season_source="html",  # ✅ WORKS (16 teams via static HTML)
-            schedule_source="none",
-            box_score_source="none",
+            player_season_source="lnb_api",  # LNB Official API (via lnb_api.py client)
+            team_season_source="lnb_api",  # LNB Official API
+            schedule_source="lnb_api",  # LNB Official API
+            box_score_source="html",  # Boxscore endpoint not yet discovered
             pbp_source="none",
             shots_source="none",
-            fetch_player_season=lnb.fetch_lnb_player_season,  # Currently empty scaffold
-            fetch_team_season=lnb.fetch_lnb_team_season,  # ✅ Returns 16 teams
-            fallback_source="html_js",
-            notes="Phase 2: team_season works (16 teams), player_season scaffold. Phase 3: API-Basketball/Statorium for players.",
+            fetch_schedule=lnb.fetch_lnb_schedule_v2,  # ✅ API-based schedule
+            fetch_player_season=lnb.fetch_lnb_player_season_v2,  # ✅ API-based player stats
+            fetch_team_season=lnb.fetch_lnb_team_season_v2,  # ✅ API-based team standings
+            fetch_player_game=lnb.fetch_lnb_player_game,  # Placeholder (boxscore endpoint TODO)
+            fallback_source="html",  # Old HTML scrapers as backup
+            notes="Phase 4-5 COMPLETE: LNB Official API integration. Schedule, player_season, team_season functional. Boxscore endpoint discovery pending.",
         )
     )
 

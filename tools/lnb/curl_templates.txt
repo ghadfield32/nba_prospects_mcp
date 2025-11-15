@@ -1,0 +1,297 @@
+================================================================================
+  LNB Boxscore Endpoint - cURL Test Templates
+================================================================================
+
+Generated: 2025-11-14 19:32:25
+
+
+================================================================================
+Game ID: 28931
+Endpoint: /stats/getMatchBoxScore
+Method: GET
+================================================================================
+
+curl -X GET \
+  "https://www.lnb.fr/stats/getMatchBoxScore" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+================================================================================
+Game ID: 28931
+Endpoint: /stats/getMatchBoxScore
+Method: POST
+================================================================================
+
+curl -X POST \
+  "https://www.lnb.fr/stats/getMatchBoxScore" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" \
+  -d '{"match_external_id": 28931}'
+
+================================================================================
+Game ID: 28931
+Endpoint: /api/match/{game_id}/boxscore
+Method: GET
+================================================================================
+
+curl -X GET \
+  "https://www.lnb.fr/api/match/28931/boxscore" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+================================================================================
+Game ID: 28931
+Endpoint: /api/match/{game_id}/stats
+Method: GET
+================================================================================
+
+curl -X GET \
+  "https://www.lnb.fr/api/match/28931/stats" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+================================================================================
+Game ID: 28931
+Endpoint: /api/games/{game_id}/boxscore
+Method: GET
+================================================================================
+
+curl -X GET \
+  "https://www.lnb.fr/api/games/28931/boxscore" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+================================================================================
+Game ID: 28931
+Endpoint: /api/v1/match/{game_id}/boxscore
+Method: GET
+================================================================================
+
+curl -X GET \
+  "https://www.lnb.fr/api/v1/match/28931/boxscore" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+================================================================================
+Game ID: 28931
+Endpoint: /stats/match/{game_id}
+Method: GET
+================================================================================
+
+curl -X GET \
+  "https://www.lnb.fr/stats/match/28931" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+================================================================================
+Game ID: 28931
+Endpoint: /boxscore/{game_id}
+Method: GET
+================================================================================
+
+curl -X GET \
+  "https://www.lnb.fr/boxscore/28931" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+================================================================================
+Game ID: 28910
+Endpoint: /stats/getMatchBoxScore
+Method: GET
+================================================================================
+
+curl -X GET \
+  "https://www.lnb.fr/stats/getMatchBoxScore" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+================================================================================
+Game ID: 28910
+Endpoint: /stats/getMatchBoxScore
+Method: POST
+================================================================================
+
+curl -X POST \
+  "https://www.lnb.fr/stats/getMatchBoxScore" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" \
+  -d '{"match_external_id": 28910}'
+
+================================================================================
+Game ID: 28910
+Endpoint: /api/match/{game_id}/boxscore
+Method: GET
+================================================================================
+
+curl -X GET \
+  "https://www.lnb.fr/api/match/28910/boxscore" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+================================================================================
+Game ID: 28910
+Endpoint: /api/match/{game_id}/stats
+Method: GET
+================================================================================
+
+curl -X GET \
+  "https://www.lnb.fr/api/match/28910/stats" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+================================================================================
+Game ID: 28910
+Endpoint: /api/games/{game_id}/boxscore
+Method: GET
+================================================================================
+
+curl -X GET \
+  "https://www.lnb.fr/api/games/28910/boxscore" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+================================================================================
+Game ID: 28910
+Endpoint: /api/v1/match/{game_id}/boxscore
+Method: GET
+================================================================================
+
+curl -X GET \
+  "https://www.lnb.fr/api/v1/match/28910/boxscore" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+================================================================================
+Game ID: 28910
+Endpoint: /stats/match/{game_id}
+Method: GET
+================================================================================
+
+curl -X GET \
+  "https://www.lnb.fr/stats/match/28910" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+================================================================================
+Game ID: 28910
+Endpoint: /boxscore/{game_id}
+Method: GET
+================================================================================
+
+curl -X GET \
+  "https://www.lnb.fr/boxscore/28910" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+================================================================================
+Game ID: 28914
+Endpoint: /stats/getMatchBoxScore
+Method: GET
+================================================================================
+
+curl -X GET \
+  "https://www.lnb.fr/stats/getMatchBoxScore" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+================================================================================
+Game ID: 28914
+Endpoint: /stats/getMatchBoxScore
+Method: POST
+================================================================================
+
+curl -X POST \
+  "https://www.lnb.fr/stats/getMatchBoxScore" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" \
+  -d '{"match_external_id": 28914}'
+
+================================================================================
+Game ID: 28914
+Endpoint: /api/match/{game_id}/boxscore
+Method: GET
+================================================================================
+
+curl -X GET \
+  "https://www.lnb.fr/api/match/28914/boxscore" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+================================================================================
+Game ID: 28914
+Endpoint: /api/match/{game_id}/stats
+Method: GET
+================================================================================
+
+curl -X GET \
+  "https://www.lnb.fr/api/match/28914/stats" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+================================================================================
+Game ID: 28914
+Endpoint: /api/games/{game_id}/boxscore
+Method: GET
+================================================================================
+
+curl -X GET \
+  "https://www.lnb.fr/api/games/28914/boxscore" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+================================================================================
+Game ID: 28914
+Endpoint: /api/v1/match/{game_id}/boxscore
+Method: GET
+================================================================================
+
+curl -X GET \
+  "https://www.lnb.fr/api/v1/match/28914/boxscore" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+================================================================================
+Game ID: 28914
+Endpoint: /stats/match/{game_id}
+Method: GET
+================================================================================
+
+curl -X GET \
+  "https://www.lnb.fr/stats/match/28914" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+================================================================================
+Game ID: 28914
+Endpoint: /boxscore/{game_id}
+Method: GET
+================================================================================
+
+curl -X GET \
+  "https://www.lnb.fr/boxscore/28914" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"

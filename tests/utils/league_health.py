@@ -489,3 +489,73 @@ def assert_league_endpoints_ok(
 
     if player_season is not None and not player_season.empty:
         assert_player_season_ok(league, season, player_season, player_game, strict)
+
+
+# ==============================================================================
+# LNB API Health Check
+# ==============================================================================
+
+
+def health_check_lnb() -> dict[str, str]:
+    """Health check for LNB API endpoints.
+
+    Tests all 4 production LNB API endpoints:
+    - get_standing (team standings)
+    - get_calendar_by_division (game schedule)
+    - get_competitions_by_player (player→competitions mapping)
+    - get_player_performance (player stats)
+
+    Returns:
+        Dict mapping endpoint name to status ("OK" or "FAIL: <reason>")
+
+    Example:
+        >>> results = health_check_lnb()
+        >>> print(results)
+        {'standings': 'OK', 'calendar': 'OK', 'player_competitions': 'OK', 'player_performance': 'OK'}
+    """
+    from cbb_data.fetchers.lnb_api import LNBClient
+
+    client = LNBClient()
+    results = {}
+
+    # Test 1: Standings (team season stats)
+    try:
+        standing = client.get_standing(competition_external_id=302)
+        if "statistics" in standing and len(standing["statistics"]) > 0:
+            results["standings"] = "OK"
+        else:
+            results["standings"] = "FAIL: Empty response"
+    except Exception as e:
+        results["standings"] = f"FAIL: {e}"
+
+    # Test 2: Calendar (game schedule)
+    try:
+        games = client.get_calendar_by_division(division_external_id=1, year=2025)
+        if len(games) > 0:
+            results["calendar"] = "OK"
+        else:
+            results["calendar"] = "FAIL: Empty response"
+    except Exception as e:
+        results["calendar"] = f"FAIL: {e}"
+
+    # Test 3: Player competitions (player→competitions mapping)
+    try:
+        comps = client.get_competitions_by_player(year=2025, person_external_id=3586)
+        if len(comps) > 0:
+            results["player_competitions"] = "OK"
+        else:
+            results["player_competitions"] = "FAIL: Empty response"
+    except Exception as e:
+        results["player_competitions"] = f"FAIL: {e}"
+
+    # Test 4: Player performance (player season stats)
+    try:
+        perf = client.get_player_performance(competition_external_id=302, person_external_id=3586)
+        if "person" in perf and "statData" in perf:
+            results["player_performance"] = "OK"
+        else:
+            results["player_performance"] = "FAIL: Empty response"
+    except Exception as e:
+        results["player_performance"] = f"FAIL: {e}"
+
+    return results

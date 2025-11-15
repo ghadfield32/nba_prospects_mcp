@@ -1,0 +1,1544 @@
+{
+  "url": "https://api-prod.lnb.fr/altrstats/getStanding",
+  "type": "standings",
+  "timestamp": "211800",
+  "data": {
+    "status": true,
+    "message": "Standing fetched (from cache)",
+    "data": {
+      "division_external_id": 1,
+      "division_old_id": "1",
+      "division_name": "PROA",
+      "division_long_name": "Pro A",
+      "competition_id": "3f4064bb-51ad-11f0-aaaf-2923c944b404",
+      "competition_external_id": 302,
+      "competition_old_id": null,
+      "competition_abbrev": "PROA",
+      "competition_name": "Betclic ÉLITE",
+      "year": 2025,
+      "notes": "",
+      "statistics": [
+        {
+          "rank": 1,
+          "s_wins_average": 75,
+          "s_games": 8,
+          "s_wins": 6,
+          "s_losses": 2,
+          "penalty": 0,
+          "penalty_note": "",
+          "s_points": 673,
+          "s_points_against": 621,
+          "plus_minus": 52,
+          "s_home_wins": 3,
+          "s_home_losses": 1,
+          "s_away_wins": 3,
+          "s_away_losses": 1,
+          "s_results": "11100111",
+          "s_points_average": "84.13",
+          "is_home_game": true,
+          "last_five_details": [
+            {
+              "notes": "Cholet 76 - Nanterre 78",
+              "match_id": "0d0504a0-6715-11f0-98ab-27e6e78614e1",
+              "match_external_id": 28910,
+              "result_placing": 1,
+              "match_time": "2025-11-14 19:30:00"
+            },
+            {
+              "notes": "Nanterre 81 - Le Portel 74",
+              "match_id": "0cd1323f-6715-11f0-86f4-27e6e78614e1",
+              "match_external_id": 28903,
+              "result_placing": 1,
+              "match_time": "2025-11-08 17:20:00"
+            },
+            {
+              "notes": "Saint-Quentin 65 - Nanterre 89",
+              "match_id": "0cac6e1b-6715-11f0-a9f3-27e6e78614e1",
+              "match_external_id": 28898,
+              "result_placing": 1,
+              "match_time": "2025-10-31 19:30:00"
+            },
+            {
+              "notes": "Nanterre 73 - Lyon-Villeurbanne 76",
+              "match_id": "0c6cb54d-6715-11f0-940b-27e6e78614e1",
+              "match_external_id": 28890,
+              "result_placing": 0,
+              "match_time": "2025-10-25 18:30:00"
+            },
+            {
+              "notes": "Strasbourg 84 - Nanterre 74",
+              "match_id": "0c1513b4-6715-11f0-9c8b-27e6e78614e1",
+              "match_external_id": 28879,
+              "result_placing": 0,
+              "match_time": "2025-10-18 16:00:00"
+            }
+          ],
+          "away_team": {
+            "team_id": "c3b5d870-55b5-11f0-9d0f-171bcde6f181",
+            "external_id": 1781,
+            "team_name": "Boulazac",
+            "team_nickname": "Boulazac",
+            "team_code": "BLZ",
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoBlack/sm.png"
+            },
+            "match_time_utc": "2025-11-22 17:00:00"
+          },
+          "team": {
+            "team_id": "e796c4fa-55bc-11f0-a2f1-8f0878f0f894",
+            "external_id": 1793,
+            "team_name": "Nanterre",
+            "team_nickname": "Nanterre",
+            "team_code": "NTR",
+            "logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoWhite/or.png"
+            },
+            "logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoBlack/or.png"
+            }
+          }
+        },
+        {
+          "rank": 2,
+          "s_wins_average": 71.43,
+          "s_games": 7,
+          "s_wins": 5,
+          "s_losses": 1,
+          "penalty": 1,
+          "penalty_note": "Monaco: -1 Victoire",
+          "s_points": 662,
+          "s_points_against": 605,
+          "plus_minus": 57,
+          "s_home_wins": 2,
+          "s_home_losses": 1,
+          "s_away_wins": 4,
+          "s_away_losses": 0,
+          "s_results": "1111101",
+          "s_points_average": "94.57",
+          "is_home_game": false,
+          "last_five_details": [
+            {
+              "notes": "Monaco 92 - Saint-Quentin 84",
+              "match_id": "0ce02919-6715-11f0-9d01-27e6e78614e1",
+              "match_external_id": 28905,
+              "result_placing": 1,
+              "match_time": "2025-11-09 15:30:00"
+            },
+            {
+              "notes": "Limoges 77 - Monaco 94",
+              "match_id": "0ca54c63-6715-11f0-9d8c-27e6e78614e1",
+              "match_external_id": 28897,
+              "result_placing": 1,
+              "match_time": "2025-11-02 18:00:00"
+            },
+            {
+              "notes": "Monaco 92 - Boulazac 85",
+              "match_id": "0c767f2a-6715-11f0-93e6-27e6e78614e1",
+              "match_external_id": 28891,
+              "result_placing": 1,
+              "match_time": "2025-10-26 15:30:00"
+            },
+            {
+              "notes": "Lyon-Villeurbanne 98 - Monaco 102",
+              "match_id": "0bfe4c54-6715-11f0-847a-27e6e78614e1",
+              "match_external_id": 28876,
+              "result_placing": 1,
+              "match_time": "2025-10-19 17:00:00"
+            },
+            {
+              "notes": "Paris 94 - Monaco 99",
+              "match_id": "0bf65e4f-6715-11f0-bfe1-27e6e78614e1",
+              "match_external_id": 28875,
+              "result_placing": 1,
+              "match_time": "2025-10-12 17:00:00"
+            }
+          ],
+          "away_team": {
+            "team_id": "7e9f3d8d-55bb-11f0-ae66-df8c8ac8c329",
+            "external_id": 1787,
+            "team_name": "Le Mans",
+            "team_nickname": "Le Mans",
+            "team_code": "LEM",
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1787/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1787/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1787/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1787/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1787/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1787/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1787/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1787/logoBlack/sm.png"
+            },
+            "match_time_utc": "2025-11-16 18:00:00"
+          },
+          "team": {
+            "team_id": "736b73ae-55bc-11f0-820e-2bf5ce89dac3",
+            "external_id": 1791,
+            "team_name": "Monaco",
+            "team_nickname": "Monaco",
+            "team_code": "MON",
+            "logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1791/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1791/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1791/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1791/logoWhite/or.png"
+            },
+            "logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1791/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1791/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1791/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1791/logoBlack/or.png"
+            }
+          }
+        },
+        {
+          "rank": 3,
+          "s_wins_average": 71.43,
+          "s_games": 7,
+          "s_wins": 5,
+          "s_losses": 2,
+          "penalty": 0,
+          "penalty_note": "",
+          "s_points": 584,
+          "s_points_against": 571,
+          "plus_minus": 13,
+          "s_home_wins": 3,
+          "s_home_losses": 0,
+          "s_away_wins": 2,
+          "s_away_losses": 2,
+          "s_results": "1101110",
+          "s_points_average": "83.43",
+          "is_home_game": true,
+          "last_five_details": [
+            {
+              "notes": "Le Mans 72 - Strasbourg 84",
+              "match_id": "0cc9a08e-6715-11f0-bdfa-27e6e78614e1",
+              "match_external_id": 28902,
+              "result_placing": 1,
+              "match_time": "2025-11-08 17:00:00"
+            },
+            {
+              "notes": "Strasbourg 86 - Nancy 82",
+              "match_id": "0c86e7dd-6715-11f0-ac7c-27e6e78614e1",
+              "match_external_id": 28893,
+              "result_placing": 1,
+              "match_time": "2025-11-01 17:10:00"
+            },
+            {
+              "notes": "Dijon 95 - Strasbourg 89",
+              "match_id": "0c5c2d35-6715-11f0-bc54-27e6e78614e1",
+              "match_external_id": 28888,
+              "result_placing": 0,
+              "match_time": "2025-10-25 16:20:00"
+            },
+            {
+              "notes": "Strasbourg 84 - Nanterre 74",
+              "match_id": "0c1513b4-6715-11f0-9c8b-27e6e78614e1",
+              "match_external_id": 28879,
+              "result_placing": 1,
+              "match_time": "2025-10-18 16:00:00"
+            },
+            {
+              "notes": "Gravelines-Dunkerque 81 - Strasbourg 87",
+              "match_id": "0bd4aab5-6715-11f0-ab66-27e6e78614e1",
+              "match_external_id": 28871,
+              "result_placing": 1,
+              "match_time": "2025-10-12 14:30:00"
+            }
+          ],
+          "away_team": {
+            "team_id": "c3b5d870-55b5-11f0-9d0f-171bcde6f181",
+            "external_id": 1781,
+            "team_name": "Boulazac",
+            "team_nickname": "Boulazac",
+            "team_code": "BLZ",
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoBlack/sm.png"
+            },
+            "match_time_utc": "2025-11-15 17:30:00"
+          },
+          "team": {
+            "team_id": "88bff512-55bd-11f0-aa84-8366061a4b55",
+            "external_id": 1796,
+            "team_name": "Strasbourg",
+            "team_nickname": "Strasbourg",
+            "team_code": "STR",
+            "logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoWhite/or.png"
+            },
+            "logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoBlack/or.png"
+            }
+          }
+        },
+        {
+          "rank": 4,
+          "s_wins_average": 71.43,
+          "s_games": 7,
+          "s_wins": 5,
+          "s_losses": 2,
+          "penalty": 0,
+          "penalty_note": "",
+          "s_points": 629,
+          "s_points_against": 536,
+          "plus_minus": 93,
+          "s_home_wins": 2,
+          "s_home_losses": 2,
+          "s_away_wins": 3,
+          "s_away_losses": 0,
+          "s_results": "1010111",
+          "s_points_average": "89.86",
+          "is_home_game": false,
+          "last_five_details": [
+            {
+              "notes": "Gravelines-Dunkerque 62 - Lyon-Villeurbanne 83",
+              "match_id": "0cbb07ab-6715-11f0-b691-27e6e78614e1",
+              "match_external_id": 28900,
+              "result_placing": 1,
+              "match_time": "2025-11-08 19:30:00"
+            },
+            {
+              "notes": "Lyon-Villeurbanne 85 - Chalon/Saône 86",
+              "match_id": "0c7eb77a-6715-11f0-9424-27e6e78614e1",
+              "match_external_id": 28892,
+              "result_placing": 0,
+              "match_time": "2025-11-01 19:30:00"
+            },
+            {
+              "notes": "Nanterre 73 - Lyon-Villeurbanne 76",
+              "match_id": "0c6cb54d-6715-11f0-940b-27e6e78614e1",
+              "match_external_id": 28890,
+              "result_placing": 1,
+              "match_time": "2025-10-25 18:30:00"
+            },
+            {
+              "notes": "Lyon-Villeurbanne 98 - Monaco 102",
+              "match_id": "0bfe4c54-6715-11f0-847a-27e6e78614e1",
+              "match_external_id": 28876,
+              "result_placing": 0,
+              "match_time": "2025-10-19 17:00:00"
+            },
+            {
+              "notes": "Lyon-Villeurbanne 91 - Le Mans 66",
+              "match_id": "0bc2e243-6715-11f0-8b5b-27e6e78614e1",
+              "match_external_id": 28869,
+              "result_placing": 1,
+              "match_time": "2025-10-11 18:30:00"
+            }
+          ],
+          "away_team": {
+            "team_id": "ca771ea2-55bb-11f0-a0bc-85c4b9894a07",
+            "external_id": 1789,
+            "team_name": "Limoges",
+            "team_nickname": "Limoges",
+            "team_code": "LIM",
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoBlack/sm.png"
+            },
+            "match_time_utc": "2025-11-16 15:30:00"
+          },
+          "team": {
+            "team_id": "25bcb29d-55bc-11f0-8037-fb553c4eab1b",
+            "external_id": 1790,
+            "team_name": "Lyon-Villeurbanne",
+            "team_nickname": "Lyon-Villeurbanne",
+            "team_code": "VIL",
+            "logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoWhite/or.png"
+            },
+            "logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoBlack/or.png"
+            }
+          }
+        },
+        {
+          "rank": 5,
+          "s_wins_average": 71.43,
+          "s_games": 7,
+          "s_wins": 5,
+          "s_losses": 2,
+          "penalty": 0,
+          "penalty_note": "",
+          "s_points": 599,
+          "s_points_against": 583,
+          "plus_minus": 16,
+          "s_home_wins": 3,
+          "s_home_losses": 1,
+          "s_away_wins": 2,
+          "s_away_losses": 1,
+          "s_results": "0111011",
+          "s_points_average": "85.57",
+          "is_home_game": true,
+          "last_five_details": [
+            {
+              "notes": "Le Mans 72 - Strasbourg 84",
+              "match_id": "0cc9a08e-6715-11f0-bdfa-27e6e78614e1",
+              "match_external_id": 28902,
+              "result_placing": 0,
+              "match_time": "2025-11-08 17:00:00"
+            },
+            {
+              "notes": "Cholet 80 - Le Mans 84",
+              "match_id": "0c8f110b-6715-11f0-afd9-27e6e78614e1",
+              "match_external_id": 28894,
+              "result_placing": 1,
+              "match_time": "2025-11-01 17:30:00"
+            },
+            {
+              "notes": "Le Mans 107 - Le Portel 68",
+              "match_id": "0c4d9879-6715-11f0-bd72-27e6e78614e1",
+              "match_external_id": 28886,
+              "result_placing": 1,
+              "match_time": "2025-10-25 16:00:00"
+            },
+            {
+              "notes": "Le Mans 84 - Bourg-en-Bresse 82",
+              "match_id": "0c2ba79c-6715-11f0-887a-27e6e78614e1",
+              "match_external_id": 28882,
+              "result_placing": 1,
+              "match_time": "2025-10-18 18:30:00"
+            },
+            {
+              "notes": "Lyon-Villeurbanne 91 - Le Mans 66",
+              "match_id": "0bc2e243-6715-11f0-8b5b-27e6e78614e1",
+              "match_external_id": 28869,
+              "result_placing": 0,
+              "match_time": "2025-10-11 18:30:00"
+            }
+          ],
+          "away_team": {
+            "team_id": "736b73ae-55bc-11f0-820e-2bf5ce89dac3",
+            "external_id": 1791,
+            "team_name": "Monaco",
+            "team_nickname": "Monaco",
+            "team_code": "MON",
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1791/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1791/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1791/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1791/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1791/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1791/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1791/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1791/logoBlack/sm.png"
+            },
+            "match_time_utc": "2025-11-16 18:00:00"
+          },
+          "team": {
+            "team_id": "7e9f3d8d-55bb-11f0-ae66-df8c8ac8c329",
+            "external_id": 1787,
+            "team_name": "Le Mans",
+            "team_nickname": "Le Mans",
+            "team_code": "LEM",
+            "logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1787/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1787/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1787/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1787/logoWhite/or.png"
+            },
+            "logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1787/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1787/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1787/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1787/logoBlack/or.png"
+            }
+          }
+        },
+        {
+          "rank": 6,
+          "s_wins_average": 71.43,
+          "s_games": 7,
+          "s_wins": 5,
+          "s_losses": 2,
+          "penalty": 0,
+          "penalty_note": "",
+          "s_points": 705,
+          "s_points_against": 585,
+          "plus_minus": 120,
+          "s_home_wins": 2,
+          "s_home_losses": 1,
+          "s_away_wins": 3,
+          "s_away_losses": 1,
+          "s_results": "1111001",
+          "s_points_average": "100.71",
+          "is_home_game": false,
+          "last_five_details": [
+            {
+              "notes": "Paris 115 - Limoges 93",
+              "match_id": "0cd8e889-6715-11f0-b88a-27e6e78614e1",
+              "match_external_id": 28904,
+              "result_placing": 1,
+              "match_time": "2025-11-09 18:00:00"
+            },
+            {
+              "notes": "Boulazac 73 - Paris 94",
+              "match_id": "0cb364a6-6715-11f0-a2fb-27e6e78614e1",
+              "match_external_id": 28899,
+              "result_placing": 1,
+              "match_time": "2025-11-02 15:30:00"
+            },
+            {
+              "notes": "Chalon/Saône 67 - Paris 107",
+              "match_id": "0c435d61-6715-11f0-b5b4-27e6e78614e1",
+              "match_external_id": 28885,
+              "result_placing": 1,
+              "match_time": "2025-10-26 18:00:00"
+            },
+            {
+              "notes": "Paris 97 - Dijon 92",
+              "match_id": "0c23a3de-6715-11f0-b3f9-27e6e78614e1",
+              "match_external_id": 28881,
+              "result_placing": 1,
+              "match_time": "2025-10-19 14:30:00"
+            },
+            {
+              "notes": "Paris 94 - Monaco 99",
+              "match_id": "0bf65e4f-6715-11f0-bfe1-27e6e78614e1",
+              "match_external_id": 28875,
+              "result_placing": 0,
+              "match_time": "2025-10-12 17:00:00"
+            }
+          ],
+          "away_team": {
+            "team_id": "703aa4cc-55b7-11f0-8fb8-35ef9dc7437a",
+            "external_id": 1782,
+            "team_name": "Bourg-en-Bresse",
+            "team_nickname": "Bourg-en-Bresse",
+            "team_code": "BOU",
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1782/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1782/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1782/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1782/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1782/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1782/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1782/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1782/logoBlack/sm.png"
+            },
+            "match_time_utc": "2025-11-15 19:30:00"
+          },
+          "team": {
+            "team_id": "f43b1b0f-55bc-11f0-84d9-01499d2f0a07",
+            "external_id": 1794,
+            "team_name": "Paris",
+            "team_nickname": "Paris",
+            "team_code": "PAB",
+            "logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoWhite/or.png"
+            },
+            "logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoBlack/or.png"
+            }
+          }
+        },
+        {
+          "rank": 7,
+          "s_wins_average": 57.14,
+          "s_games": 7,
+          "s_wins": 4,
+          "s_losses": 3,
+          "penalty": 0,
+          "penalty_note": "",
+          "s_points": 633,
+          "s_points_against": 581,
+          "plus_minus": 52,
+          "s_home_wins": 2,
+          "s_home_losses": 1,
+          "s_away_wins": 2,
+          "s_away_losses": 2,
+          "s_results": "1100110",
+          "s_points_average": "90.43",
+          "is_home_game": true,
+          "last_five_details": [
+            {
+              "notes": "Boulazac 68 - Bourg-en-Bresse 82",
+              "match_id": "0ceedd59-6715-11f0-a368-27e6e78614e1",
+              "match_external_id": 28907,
+              "result_placing": 1,
+              "match_time": "2025-11-08 17:10:00"
+            },
+            {
+              "notes": "Bourg-en-Bresse 101 - Dijon 81",
+              "match_id": "0c96c493-6715-11f0-aab9-27e6e78614e1",
+              "match_external_id": 28895,
+              "result_placing": 1,
+              "match_time": "2025-11-01 17:00:00"
+            },
+            {
+              "notes": "Bourg-en-Bresse 87 - Cholet 93",
+              "match_id": "0c3c0409-6715-11f0-880a-27e6e78614e1",
+              "match_external_id": 28884,
+              "result_placing": 0,
+              "match_time": "2025-10-25 16:30:00"
+            },
+            {
+              "notes": "Le Mans 84 - Bourg-en-Bresse 82",
+              "match_id": "0c2ba79c-6715-11f0-887a-27e6e78614e1",
+              "match_external_id": 28882,
+              "result_placing": 0,
+              "match_time": "2025-10-18 18:30:00"
+            },
+            {
+              "notes": "Bourg-en-Bresse 109 - Le Portel 79",
+              "match_id": "0bca8ce0-6715-11f0-956e-27e6e78614e1",
+              "match_external_id": 28870,
+              "result_placing": 1,
+              "match_time": "2025-10-11 16:00:00"
+            }
+          ],
+          "away_team": {
+            "team_id": "f43b1b0f-55bc-11f0-84d9-01499d2f0a07",
+            "external_id": 1794,
+            "team_name": "Paris",
+            "team_nickname": "Paris",
+            "team_code": "PAB",
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoBlack/sm.png"
+            },
+            "match_time_utc": "2025-11-15 19:30:00"
+          },
+          "team": {
+            "team_id": "703aa4cc-55b7-11f0-8fb8-35ef9dc7437a",
+            "external_id": 1782,
+            "team_name": "Bourg-en-Bresse",
+            "team_nickname": "Bourg-en-Bresse",
+            "team_code": "BOU",
+            "logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1782/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1782/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1782/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1782/logoWhite/or.png"
+            },
+            "logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1782/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1782/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1782/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1782/logoBlack/or.png"
+            }
+          }
+        },
+        {
+          "rank": 8,
+          "s_wins_average": 57.14,
+          "s_games": 7,
+          "s_wins": 4,
+          "s_losses": 3,
+          "penalty": 0,
+          "penalty_note": "",
+          "s_points": 588,
+          "s_points_against": 631,
+          "plus_minus": -43,
+          "s_home_wins": 2,
+          "s_home_losses": 2,
+          "s_away_wins": 2,
+          "s_away_losses": 1,
+          "s_results": "1100110",
+          "s_points_average": "84.00",
+          "is_home_game": false,
+          "last_five_details": [
+            {
+              "notes": "Chalon/Saône 90 - Dijon 74",
+              "match_id": "0cc220af-6715-11f0-8302-27e6e78614e1",
+              "match_external_id": 28901,
+              "result_placing": 1,
+              "match_time": "2025-11-08 17:30:00"
+            },
+            {
+              "notes": "Lyon-Villeurbanne 85 - Chalon/Saône 86",
+              "match_id": "0c7eb77a-6715-11f0-9424-27e6e78614e1",
+              "match_external_id": 28892,
+              "result_placing": 1,
+              "match_time": "2025-11-01 19:30:00"
+            },
+            {
+              "notes": "Chalon/Saône 67 - Paris 107",
+              "match_id": "0c435d61-6715-11f0-b5b4-27e6e78614e1",
+              "match_external_id": 28885,
+              "result_placing": 0,
+              "match_time": "2025-10-26 18:00:00"
+            },
+            {
+              "notes": "Cholet 98 - Chalon/Saône 79",
+              "match_id": "0c05ec96-6715-11f0-88e1-27e6e78614e1",
+              "match_external_id": 28877,
+              "result_placing": 0,
+              "match_time": "2025-10-18 16:30:00"
+            },
+            {
+              "notes": "Chalon/Saône 84 - Saint-Quentin 82",
+              "match_id": "0bbaf1d4-6715-11f0-82a2-27e6e78614e1",
+              "match_external_id": 28868,
+              "result_placing": 1,
+              "match_time": "2025-10-11 16:10:00"
+            }
+          ],
+          "away_team": {
+            "team_id": "9ebf8651-55bb-11f0-b6ad-2f4a48ae850a",
+            "external_id": 1788,
+            "team_name": "Le Portel",
+            "team_nickname": "Le Portel",
+            "team_code": "LEP",
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1788/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1788/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1788/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1788/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1788/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1788/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1788/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1788/logoBlack/sm.png"
+            },
+            "match_time_utc": "2025-11-15 17:20:00"
+          },
+          "team": {
+            "team_id": "989c44aa-55b7-11f0-990a-abf64778d398",
+            "external_id": 1783,
+            "team_name": "Chalon/Saône",
+            "team_nickname": "Chalon/Saône",
+            "team_code": "CHA",
+            "logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoWhite/or.png"
+            },
+            "logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoBlack/or.png"
+            }
+          }
+        },
+        {
+          "rank": 9,
+          "s_wins_average": 50,
+          "s_games": 8,
+          "s_wins": 4,
+          "s_losses": 4,
+          "penalty": 0,
+          "penalty_note": "",
+          "s_points": 682,
+          "s_points_against": 650,
+          "plus_minus": 32,
+          "s_home_wins": 3,
+          "s_home_losses": 2,
+          "s_away_wins": 1,
+          "s_away_losses": 2,
+          "s_results": "00011011",
+          "s_points_average": "85.25",
+          "is_home_game": false,
+          "last_five_details": [
+            {
+              "notes": "Cholet 76 - Nanterre 78",
+              "match_id": "0d0504a0-6715-11f0-98ab-27e6e78614e1",
+              "match_external_id": 28910,
+              "result_placing": 0,
+              "match_time": "2025-11-14 19:30:00"
+            },
+            {
+              "notes": "Nancy 91 - Cholet 87",
+              "match_id": "0ce79e46-6715-11f0-9095-27e6e78614e1",
+              "match_external_id": 28906,
+              "result_placing": 0,
+              "match_time": "2025-11-07 19:30:00"
+            },
+            {
+              "notes": "Cholet 80 - Le Mans 84",
+              "match_id": "0c8f110b-6715-11f0-afd9-27e6e78614e1",
+              "match_external_id": 28894,
+              "result_placing": 0,
+              "match_time": "2025-11-01 17:30:00"
+            },
+            {
+              "notes": "Bourg-en-Bresse 87 - Cholet 93",
+              "match_id": "0c3c0409-6715-11f0-880a-27e6e78614e1",
+              "match_external_id": 28884,
+              "result_placing": 1,
+              "match_time": "2025-10-25 16:30:00"
+            },
+            {
+              "notes": "Cholet 98 - Chalon/Saône 79",
+              "match_id": "0c05ec96-6715-11f0-88e1-27e6e78614e1",
+              "match_external_id": 28877,
+              "result_placing": 1,
+              "match_time": "2025-10-18 16:30:00"
+            }
+          ],
+          "away_team": {
+            "team_id": "689d1a0a-55bd-11f0-920c-f5c62c2828ba",
+            "external_id": 1795,
+            "team_name": "Saint-Quentin",
+            "team_nickname": "Saint-Quentin",
+            "team_code": "STQ",
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/sm.png"
+            },
+            "match_time_utc": "2025-11-22 17:30:00"
+          },
+          "team": {
+            "team_id": "c281453b-55b7-11f0-a6ef-350ae152a495",
+            "external_id": 1784,
+            "team_name": "Cholet",
+            "team_nickname": "Cholet",
+            "team_code": "CHO",
+            "logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1784/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1784/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1784/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1784/logoWhite/or.png"
+            },
+            "logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1784/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1784/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1784/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1784/logoBlack/or.png"
+            }
+          }
+        },
+        {
+          "rank": 10,
+          "s_wins_average": 42.86,
+          "s_games": 7,
+          "s_wins": 3,
+          "s_losses": 4,
+          "penalty": 0,
+          "penalty_note": "",
+          "s_points": 607,
+          "s_points_against": 633,
+          "plus_minus": -26,
+          "s_home_wins": 2,
+          "s_home_losses": 1,
+          "s_away_wins": 1,
+          "s_away_losses": 3,
+          "s_results": "1001100",
+          "s_points_average": "86.71",
+          "is_home_game": false,
+          "last_five_details": [
+            {
+              "notes": "Nancy 91 - Cholet 87",
+              "match_id": "0ce79e46-6715-11f0-9095-27e6e78614e1",
+              "match_external_id": 28906,
+              "result_placing": 1,
+              "match_time": "2025-11-07 19:30:00"
+            },
+            {
+              "notes": "Strasbourg 86 - Nancy 82",
+              "match_id": "0c86e7dd-6715-11f0-ac7c-27e6e78614e1",
+              "match_external_id": 28893,
+              "result_placing": 0,
+              "match_time": "2025-11-01 17:10:00"
+            },
+            {
+              "notes": "Gravelines-Dunkerque 107 - Nancy 79",
+              "match_id": "0c54f4fe-6715-11f0-8fcf-27e6e78614e1",
+              "match_external_id": 28887,
+              "result_placing": 0,
+              "match_time": "2025-10-25 16:10:00"
+            },
+            {
+              "notes": "Nancy 117 - Limoges 85",
+              "match_id": "0c1ca8d7-6715-11f0-aa83-27e6e78614e1",
+              "match_external_id": 28880,
+              "result_placing": 1,
+              "match_time": "2025-10-18 16:20:00"
+            },
+            {
+              "notes": "Boulazac 65 - Nancy 87",
+              "match_id": "0bedf92c-6715-11f0-9c10-27e6e78614e1",
+              "match_external_id": 28874,
+              "result_placing": 1,
+              "match_time": "2025-10-11 16:20:00"
+            }
+          ],
+          "away_team": {
+            "team_id": "689d1a0a-55bd-11f0-920c-f5c62c2828ba",
+            "external_id": 1795,
+            "team_name": "Saint-Quentin",
+            "team_nickname": "Saint-Quentin",
+            "team_code": "STQ",
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/sm.png"
+            },
+            "match_time_utc": "2025-11-15 17:00:00"
+          },
+          "team": {
+            "team_id": "da0b634d-55bc-11f0-99f8-2dd52d4792f3",
+            "external_id": 1792,
+            "team_name": "Nancy",
+            "team_nickname": "Nancy",
+            "team_code": "NAN",
+            "logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/or.png"
+            },
+            "logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/or.png"
+            }
+          }
+        },
+        {
+          "rank": 11,
+          "s_wins_average": 37.5,
+          "s_games": 8,
+          "s_wins": 3,
+          "s_losses": 5,
+          "penalty": 0,
+          "penalty_note": "",
+          "s_points": 638,
+          "s_points_against": 658,
+          "plus_minus": -20,
+          "s_home_wins": 2,
+          "s_home_losses": 3,
+          "s_away_wins": 1,
+          "s_away_losses": 2,
+          "s_results": "10001001",
+          "s_points_average": "79.75",
+          "is_home_game": false,
+          "last_five_details": [
+            {
+              "notes": "Boulazac 97 - Gravelines-Dunkerque 67",
+              "match_id": "0daf5704-6715-11f0-bfac-27e6e78614e1",
+              "match_external_id": 28931,
+              "result_placing": 1,
+              "match_time": "2025-11-11 18:00:00"
+            },
+            {
+              "notes": "Boulazac 68 - Bourg-en-Bresse 82",
+              "match_id": "0ceedd59-6715-11f0-a368-27e6e78614e1",
+              "match_external_id": 28907,
+              "result_placing": 0,
+              "match_time": "2025-11-08 17:10:00"
+            },
+            {
+              "notes": "Boulazac 73 - Paris 94",
+              "match_id": "0cb364a6-6715-11f0-a2fb-27e6e78614e1",
+              "match_external_id": 28899,
+              "result_placing": 0,
+              "match_time": "2025-11-02 15:30:00"
+            },
+            {
+              "notes": "Monaco 92 - Boulazac 85",
+              "match_id": "0c767f2a-6715-11f0-93e6-27e6e78614e1",
+              "match_external_id": 28891,
+              "result_placing": 0,
+              "match_time": "2025-10-26 15:30:00"
+            },
+            {
+              "notes": "Le Portel 68 - Boulazac 75",
+              "match_id": "0c3324ee-6715-11f0-ab98-27e6e78614e1",
+              "match_external_id": 28883,
+              "result_placing": 1,
+              "match_time": "2025-10-18 16:10:00"
+            }
+          ],
+          "away_team": {
+            "team_id": "88bff512-55bd-11f0-aa84-8366061a4b55",
+            "external_id": 1796,
+            "team_name": "Strasbourg",
+            "team_nickname": "Strasbourg",
+            "team_code": "STR",
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoBlack/sm.png"
+            },
+            "match_time_utc": "2025-11-15 17:30:00"
+          },
+          "team": {
+            "team_id": "c3b5d870-55b5-11f0-9d0f-171bcde6f181",
+            "external_id": 1781,
+            "team_name": "Boulazac",
+            "team_nickname": "Boulazac",
+            "team_code": "BLZ",
+            "logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoWhite/or.png"
+            },
+            "logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoBlack/or.png"
+            }
+          }
+        },
+        {
+          "rank": 12,
+          "s_wins_average": 37.5,
+          "s_games": 8,
+          "s_wins": 3,
+          "s_losses": 5,
+          "penalty": 0,
+          "penalty_note": "",
+          "s_points": 674,
+          "s_points_against": 718,
+          "plus_minus": -44,
+          "s_home_wins": 3,
+          "s_home_losses": 2,
+          "s_away_wins": 0,
+          "s_away_losses": 3,
+          "s_results": "00010011",
+          "s_points_average": "84.25",
+          "is_home_game": true,
+          "last_five_details": [
+            {
+              "notes": "Paris 115 - Limoges 93",
+              "match_id": "0cd8e889-6715-11f0-b88a-27e6e78614e1",
+              "match_external_id": 28904,
+              "result_placing": 0,
+              "match_time": "2025-11-09 18:00:00"
+            },
+            {
+              "notes": "Limoges 77 - Monaco 94",
+              "match_id": "0ca54c63-6715-11f0-9d8c-27e6e78614e1",
+              "match_external_id": 28897,
+              "result_placing": 0,
+              "match_time": "2025-11-02 18:00:00"
+            },
+            {
+              "notes": "Limoges 74 - Le Portel 79",
+              "match_id": "2d899ed2-6715-11f0-973d-3deba12f98c8",
+              "match_external_id": 28937,
+              "result_placing": 0,
+              "match_time": "2025-10-28 19:30:00"
+            },
+            {
+              "notes": "Limoges 80 - Saint-Quentin 62",
+              "match_id": "0c63bb5e-6715-11f0-bc0c-27e6e78614e1",
+              "match_external_id": 28889,
+              "result_placing": 1,
+              "match_time": "2025-10-24 18:30:00"
+            },
+            {
+              "notes": "Nancy 117 - Limoges 85",
+              "match_id": "0c1ca8d7-6715-11f0-aa83-27e6e78614e1",
+              "match_external_id": 28880,
+              "result_placing": 0,
+              "match_time": "2025-10-18 16:20:00"
+            }
+          ],
+          "away_team": {
+            "team_id": "25bcb29d-55bc-11f0-8037-fb553c4eab1b",
+            "external_id": 1790,
+            "team_name": "Lyon-Villeurbanne",
+            "team_nickname": "Lyon-Villeurbanne",
+            "team_code": "VIL",
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1790/logoBlack/sm.png"
+            },
+            "match_time_utc": "2025-11-16 15:30:00"
+          },
+          "team": {
+            "team_id": "ca771ea2-55bb-11f0-a0bc-85c4b9894a07",
+            "external_id": 1789,
+            "team_name": "Limoges",
+            "team_nickname": "Limoges",
+            "team_code": "LIM",
+            "logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoWhite/or.png"
+            },
+            "logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1789/logoBlack/or.png"
+            }
+          }
+        },
+        {
+          "rank": 13,
+          "s_wins_average": 28.57,
+          "s_games": 7,
+          "s_wins": 2,
+          "s_losses": 5,
+          "penalty": 0,
+          "penalty_note": "",
+          "s_points": 583,
+          "s_points_against": 612,
+          "plus_minus": -29,
+          "s_home_wins": 2,
+          "s_home_losses": 1,
+          "s_away_wins": 0,
+          "s_away_losses": 4,
+          "s_results": "0010100",
+          "s_points_average": "83.29",
+          "is_home_game": true,
+          "last_five_details": [
+            {
+              "notes": "Chalon/Saône 90 - Dijon 74",
+              "match_id": "0cc220af-6715-11f0-8302-27e6e78614e1",
+              "match_external_id": 28901,
+              "result_placing": 0,
+              "match_time": "2025-11-08 17:30:00"
+            },
+            {
+              "notes": "Bourg-en-Bresse 101 - Dijon 81",
+              "match_id": "0c96c493-6715-11f0-aab9-27e6e78614e1",
+              "match_external_id": 28895,
+              "result_placing": 0,
+              "match_time": "2025-11-01 17:00:00"
+            },
+            {
+              "notes": "Dijon 95 - Strasbourg 89",
+              "match_id": "0c5c2d35-6715-11f0-bc54-27e6e78614e1",
+              "match_external_id": 28888,
+              "result_placing": 1,
+              "match_time": "2025-10-25 16:20:00"
+            },
+            {
+              "notes": "Paris 97 - Dijon 92",
+              "match_id": "0c23a3de-6715-11f0-b3f9-27e6e78614e1",
+              "match_external_id": 28881,
+              "result_placing": 0,
+              "match_time": "2025-10-19 14:30:00"
+            },
+            {
+              "notes": "Dijon 76 - Cholet 64",
+              "match_id": "0be4d30c-6715-11f0-b6e1-27e6e78614e1",
+              "match_external_id": 28873,
+              "result_placing": 1,
+              "match_time": "2025-10-11 16:30:00"
+            }
+          ],
+          "away_team": {
+            "team_id": "506c2d71-55bb-11f0-bf0b-8b5d06fe51cf",
+            "external_id": 1786,
+            "team_name": "Gravelines-Dunkerque",
+            "team_nickname": "Gravelines-Dunkerque",
+            "team_code": "GRA",
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoBlack/sm.png"
+            },
+            "match_time_utc": "2025-11-15 17:10:00"
+          },
+          "team": {
+            "team_id": "238ad480-55b8-11f0-ada9-1b2b39c0d600",
+            "external_id": 1785,
+            "team_name": "Dijon",
+            "team_nickname": "Dijon",
+            "team_code": "DIJ",
+            "logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1785/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1785/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1785/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1785/logoWhite/or.png"
+            },
+            "logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1785/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1785/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1785/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1785/logoBlack/or.png"
+            }
+          }
+        },
+        {
+          "rank": 14,
+          "s_wins_average": 25,
+          "s_games": 8,
+          "s_wins": 2,
+          "s_losses": 6,
+          "penalty": 0,
+          "penalty_note": "",
+          "s_points": 628,
+          "s_points_against": 729,
+          "plus_minus": -101,
+          "s_home_wins": 1,
+          "s_home_losses": 3,
+          "s_away_wins": 1,
+          "s_away_losses": 3,
+          "s_results": "00110000",
+          "s_points_average": "78.50",
+          "is_home_game": false,
+          "last_five_details": [
+            {
+              "notes": "Boulazac 97 - Gravelines-Dunkerque 67",
+              "match_id": "0daf5704-6715-11f0-bfac-27e6e78614e1",
+              "match_external_id": 28931,
+              "result_placing": 0,
+              "match_time": "2025-11-11 18:00:00"
+            },
+            {
+              "notes": "Gravelines-Dunkerque 62 - Lyon-Villeurbanne 83",
+              "match_id": "0cbb07ab-6715-11f0-b691-27e6e78614e1",
+              "match_external_id": 28900,
+              "result_placing": 0,
+              "match_time": "2025-11-08 19:30:00"
+            },
+            {
+              "notes": "Le Portel 87 - Gravelines-Dunkerque 92",
+              "match_id": "0c9e4842-6715-11f0-81b7-27e6e78614e1",
+              "match_external_id": 28896,
+              "result_placing": 1,
+              "match_time": "2025-11-01 17:20:00"
+            },
+            {
+              "notes": "Gravelines-Dunkerque 107 - Nancy 79",
+              "match_id": "0c54f4fe-6715-11f0-8fcf-27e6e78614e1",
+              "match_external_id": 28887,
+              "result_placing": 1,
+              "match_time": "2025-10-25 16:10:00"
+            },
+            {
+              "notes": "Saint-Quentin 86 - Gravelines-Dunkerque 74",
+              "match_id": "0c0d2399-6715-11f0-b612-27e6e78614e1",
+              "match_external_id": 28878,
+              "result_placing": 0,
+              "match_time": "2025-10-17 18:30:00"
+            }
+          ],
+          "away_team": {
+            "team_id": "238ad480-55b8-11f0-ada9-1b2b39c0d600",
+            "external_id": 1785,
+            "team_name": "Dijon",
+            "team_nickname": "Dijon",
+            "team_code": "DIJ",
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1785/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1785/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1785/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1785/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1785/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1785/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1785/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1785/logoBlack/sm.png"
+            },
+            "match_time_utc": "2025-11-15 17:10:00"
+          },
+          "team": {
+            "team_id": "506c2d71-55bb-11f0-bf0b-8b5d06fe51cf",
+            "external_id": 1786,
+            "team_name": "Gravelines-Dunkerque",
+            "team_nickname": "Gravelines-Dunkerque",
+            "team_code": "GRA",
+            "logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoWhite/or.png"
+            },
+            "logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoBlack/or.png"
+            }
+          }
+        },
+        {
+          "rank": 15,
+          "s_wins_average": 14.29,
+          "s_games": 7,
+          "s_wins": 1,
+          "s_losses": 6,
+          "penalty": 0,
+          "penalty_note": "",
+          "s_points": 531,
+          "s_points_against": 594,
+          "plus_minus": -63,
+          "s_home_wins": 1,
+          "s_home_losses": 2,
+          "s_away_wins": 0,
+          "s_away_losses": 4,
+          "s_results": "0001000",
+          "s_points_average": "75.86",
+          "is_home_game": true,
+          "last_five_details": [
+            {
+              "notes": "Monaco 92 - Saint-Quentin 84",
+              "match_id": "0ce02919-6715-11f0-9d01-27e6e78614e1",
+              "match_external_id": 28905,
+              "result_placing": 0,
+              "match_time": "2025-11-09 15:30:00"
+            },
+            {
+              "notes": "Saint-Quentin 65 - Nanterre 89",
+              "match_id": "0cac6e1b-6715-11f0-a9f3-27e6e78614e1",
+              "match_external_id": 28898,
+              "result_placing": 0,
+              "match_time": "2025-10-31 19:30:00"
+            },
+            {
+              "notes": "Limoges 80 - Saint-Quentin 62",
+              "match_id": "0c63bb5e-6715-11f0-bc0c-27e6e78614e1",
+              "match_external_id": 28889,
+              "result_placing": 0,
+              "match_time": "2025-10-24 18:30:00"
+            },
+            {
+              "notes": "Saint-Quentin 86 - Gravelines-Dunkerque 74",
+              "match_id": "0c0d2399-6715-11f0-b612-27e6e78614e1",
+              "match_external_id": 28878,
+              "result_placing": 1,
+              "match_time": "2025-10-17 18:30:00"
+            },
+            {
+              "notes": "Chalon/Saône 84 - Saint-Quentin 82",
+              "match_id": "0bbaf1d4-6715-11f0-82a2-27e6e78614e1",
+              "match_external_id": 28868,
+              "result_placing": 0,
+              "match_time": "2025-10-11 16:10:00"
+            }
+          ],
+          "away_team": {
+            "team_id": "da0b634d-55bc-11f0-99f8-2dd52d4792f3",
+            "external_id": 1792,
+            "team_name": "Nancy",
+            "team_nickname": "Nancy",
+            "team_code": "NAN",
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/sm.png"
+            },
+            "match_time_utc": "2025-11-15 17:00:00"
+          },
+          "team": {
+            "team_id": "689d1a0a-55bd-11f0-920c-f5c62c2828ba",
+            "external_id": 1795,
+            "team_name": "Saint-Quentin",
+            "team_nickname": "Saint-Quentin",
+            "team_code": "STQ",
+            "logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/or.png"
+            },
+            "logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/or.png"
+            }
+          }
+        },
+        {
+          "rank": 16,
+          "s_wins_average": 12.5,
+          "s_games": 8,
+          "s_wins": 1,
+          "s_losses": 7,
+          "penalty": 0,
+          "penalty_note": "",
+          "s_points": 593,
+          "s_points_against": 702,
+          "plus_minus": -109,
+          "s_home_wins": 0,
+          "s_home_losses": 3,
+          "s_away_wins": 1,
+          "s_away_losses": 4,
+          "s_results": "10000000",
+          "s_points_average": "74.13",
+          "is_home_game": true,
+          "last_five_details": [
+            {
+              "notes": "Nanterre 81 - Le Portel 74",
+              "match_id": "0cd1323f-6715-11f0-86f4-27e6e78614e1",
+              "match_external_id": 28903,
+              "result_placing": 0,
+              "match_time": "2025-11-08 17:20:00"
+            },
+            {
+              "notes": "Le Portel 87 - Gravelines-Dunkerque 92",
+              "match_id": "0c9e4842-6715-11f0-81b7-27e6e78614e1",
+              "match_external_id": 28896,
+              "result_placing": 0,
+              "match_time": "2025-11-01 17:20:00"
+            },
+            {
+              "notes": "Limoges 74 - Le Portel 79",
+              "match_id": "2d899ed2-6715-11f0-973d-3deba12f98c8",
+              "match_external_id": 28937,
+              "result_placing": 1,
+              "match_time": "2025-10-28 19:30:00"
+            },
+            {
+              "notes": "Le Mans 107 - Le Portel 68",
+              "match_id": "0c4d9879-6715-11f0-bd72-27e6e78614e1",
+              "match_external_id": 28886,
+              "result_placing": 0,
+              "match_time": "2025-10-25 16:00:00"
+            },
+            {
+              "notes": "Le Portel 68 - Boulazac 75",
+              "match_id": "0c3324ee-6715-11f0-ab98-27e6e78614e1",
+              "match_external_id": 28883,
+              "result_placing": 0,
+              "match_time": "2025-10-18 16:10:00"
+            }
+          ],
+          "away_team": {
+            "team_id": "989c44aa-55b7-11f0-990a-abf64778d398",
+            "external_id": 1783,
+            "team_name": "Chalon/Saône",
+            "team_nickname": "Chalon/Saône",
+            "team_code": "CHA",
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoBlack/sm.png"
+            },
+            "match_time_utc": "2025-11-15 17:20:00"
+          },
+          "team": {
+            "team_id": "9ebf8651-55bb-11f0-b6ad-2f4a48ae850a",
+            "external_id": 1788,
+            "team_name": "Le Portel",
+            "team_nickname": "Le Portel",
+            "team_code": "LEP",
+            "logo_white": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1788/logoWhite/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1788/logoWhite/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1788/logoWhite/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1788/logoWhite/or.png"
+            },
+            "logo_black": {
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1788/logoBlack/sm.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1788/logoBlack/md.png",
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1788/logoBlack/lg.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1788/logoBlack/or.png"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
