@@ -40,6 +40,7 @@ from ..fetchers import (
     cebl,  # Canadian Elite Basketball League
     domestic_euro,  # European domestic leagues (BBL, BSL, LBA)
     gleague,  # G League integration
+    lnb_official,  # LNB Pro A (France) via Parquet files
     nbl_official,  # NBL Australia (official via nblR R package)
     ote,  # Overtime Elite
     prestosports,  # PrestoSports platform (NJCAA, NAIA, U-SPORTS)
@@ -809,6 +810,13 @@ def _fetch_schedule(compiled: dict[str, Any]) -> pd.DataFrame:
 
         df = nbl_official.fetch_nbl_schedule(season=season_str, season_type=season_type)
 
+    elif league == "LNB_PROA":
+        # LNB Pro A (France) - Parquet-based data
+        season_str = params.get("Season", "2025-26")
+        season_type = params.get("SeasonType", "Regular Season")
+
+        df = lnb_official.fetch_lnb_schedule(season=season_str, season_type=season_type)
+
     elif league in ["ACB", "LNB", "BBL", "BSL", "LBA"]:
         # European domestic leagues
         season_str = params.get("Season", "2024-25")
@@ -1285,6 +1293,11 @@ def _fetch_play_by_play(compiled: dict[str, Any]) -> pd.DataFrame:
             elif league == "NBL":
                 # NBL play-by-play
                 pbp = nbl_official.fetch_nbl_pbp(season=season_str, game_id=game_id)
+                frames.append(pbp)
+
+            elif league == "LNB_PROA":
+                # LNB Pro A play-by-play (Parquet-based data)
+                pbp = lnb_official.fetch_lnb_pbp(season=season_str, game_id=game_id)
                 frames.append(pbp)
 
             elif league in ["ACB", "LNB", "BBL", "BSL", "LBA"]:

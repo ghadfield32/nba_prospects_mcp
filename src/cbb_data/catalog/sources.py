@@ -188,7 +188,8 @@ def _register_league_sources() -> None:
         espn_wbb,  # NCAA Women's Basketball via ESPN API
         gleague,  # G-League via NBA Stats API
         lkl,
-        lnb,
+        lnb,  # LNB HTML scraping (fallback)
+        lnb_official,  # LNB Pro A via Parquet files
         naia,  # NAIA (USA) via PrestoSports
         nbl_official,  # NBL Australia via nblR R package
         njcaa,  # NJCAA (USA) via PrestoSports
@@ -598,20 +599,21 @@ def _register_league_sources() -> None:
     register_league_source(
         LeagueSourceConfig(
             league="LNB_PROA",
-            player_season_source="api_basketball",  # ✅ API-Basketball (2015-present)
-            team_season_source="html+api",  # ✅ HTML scraping + API fallback
-            schedule_source="api_basketball",  # ✅ API-Basketball (2015-present)
-            box_score_source="api_basketball",  # ✅ API-Basketball
-            pbp_source="api_basketball",  # ⚠️ API-Basketball (coverage varies)
-            shots_source="api_basketball",  # ⚠️ API-Basketball (coverage varies)
-            fetch_player_season=lnb.fetch_lnb_player_season,  # ✅ API-Basketball
-            fetch_team_season=lnb.fetch_lnb_team_season,  # ✅ HTML scraping
-            fetch_schedule=lnb.fetch_lnb_schedule,  # ✅ API-Basketball
-            fetch_box_score=lnb.fetch_lnb_box_score,  # ✅ API-Basketball
-            fetch_pbp=lnb.fetch_lnb_pbp,  # ⚠️ API-Basketball (placeholder)
-            fetch_shots=lnb.fetch_lnb_shots,  # ⚠️ API-Basketball (placeholder)
-            fallback_source="api_basketball",
-            notes="Phase 3 COMPLETE: Full API-Basketball integration. Schedule/player_season/box_scores: ✅ 2015-present. PBP/shots: ⚠️ coverage varies, check API docs. HTML scraping available for team_season fallback.",
+            player_season_source="parquet",  # ✅ Parquet files via export script
+            team_season_source="parquet",  # ✅ Aggregated from fixtures
+            schedule_source="parquet",  # ✅ Calendar API data
+            box_score_source="parquet",  # ⚠️ Future: player_game/team_game
+            pbp_source="parquet",  # ✅ Play-by-play events
+            shots_source="parquet",  # ✅ Shot chart data (x,y coords)
+            fetch_schedule=lnb_official.fetch_lnb_schedule,  # ✅ 8 games (2025-26)
+            fetch_player_season=lnb_official.fetch_lnb_player_season,  # ⚠️ Pending box_player data
+            fetch_team_season=lnb_official.fetch_lnb_team_season,  # ✅ Aggregated from fixtures
+            fetch_player_game=lnb_official.fetch_lnb_player_game,  # ⚠️ Pending box_player data
+            fetch_team_game=lnb_official.fetch_lnb_team_game,  # ⚠️ Pending box_team data
+            fetch_pbp=lnb_official.fetch_lnb_pbp,  # ✅ ~3,336 events
+            fetch_shots=lnb_official.fetch_lnb_shots,  # ✅ ~973 shots
+            fallback_source="parquet",
+            notes="Phase 3 COMPLETE: Parquet-based data integration (NBL pattern). Schedule/PBP/shots: ✅ functional. Box scores: ⚠️ pending export. Run: python tools/lnb/export_lnb.py --sample",
         )
     )
 

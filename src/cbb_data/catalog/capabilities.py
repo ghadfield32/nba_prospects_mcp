@@ -90,10 +90,13 @@ CAPABILITY_OVERRIDES: dict[str, dict[str, CapabilityLevel]] = {
     "ABA": {  # ABA Adriatic League - FIBA HTML
         "shots": CapabilityLevel.UNAVAILABLE,  # FIBA HTML doesn't provide x,y coordinates
     },
-    # ========== EUROPEAN DOMESTIC LEAGUES (API-BASKETBALL + HTML) ==========
-    "LNB_PROA": {  # LNB Pro A France - API-Basketball + HTML scraping
-        "shots": CapabilityLevel.LIMITED,  # API-Basketball (coverage varies by season)
-        "pbp": CapabilityLevel.LIMITED,  # API-Basketball (coverage varies by season)
+    # ========== EUROPEAN DOMESTIC LEAGUES (PARQUET FILES) ==========
+    "LNB_PROA": {  # LNB Pro A France - Parquet-based data (NBL pattern)
+        "shots": CapabilityLevel.FULL,  # ✅ Shot coordinates via Parquet export (~973 shots)
+        "pbp": CapabilityLevel.FULL,  # ✅ Play-by-play events via Parquet (~3,336 events)
+        "player_season": CapabilityLevel.LIMITED,  # ⚠️ Pending box_player data aggregation
+        "player_game": CapabilityLevel.LIMITED,  # ⚠️ Pending box_player data export
+        "team_game": CapabilityLevel.LIMITED,  # ⚠️ Pending box_team data export
     },
     "ACB": {  # Liga Endesa Spain - Official stats site
         "shots": CapabilityLevel.UNAVAILABLE,  # Official site doesn't provide shot coordinates
