@@ -62,12 +62,12 @@ curl -X POST http://localhost:8000/datasets/player_game \
 
 ### Supported Leagues & Scope
 
-**Default Scope (pre_only=True)**: 18 leagues accessible (6 college + 12 prepro)
-**Full Scope (pre_only=False)**: 19 leagues accessible (adds WNBA)
+**Default Scope (pre_only=True)**: 19 leagues accessible (6 college + 13 prepro)
+**Full Scope (pre_only=False)**: 20 leagues accessible (adds WNBA)
 
 This library focuses on **pre-NBA/WNBA prospects** and includes:
-- **College Basketball**: NCAA, NJCAA, NAIA, U-SPORTS, CCAA
-- **Pre-Professional/Development**: OTE, EuroLeague, EuroCup, G-League, CEBL, NBL (Australia), ACB (Spain), LKL (Lithuania), ABA (Adriatic), BAL (Africa), BCL (Champions League), LNB Pro A (France)
+- **College Basketball** (6 leagues): NCAA-MBB, NCAA-WBB, NJCAA, NAIA, USPORTS, CCAA
+- **Pre-Professional/Development** (13 leagues): OTE, EuroLeague, EuroCup, G-League, CEBL, NBL (Australia), NZ-NBL (New Zealand), LKL (Lithuania), ABA (Adriatic), BAL (Africa), BCL (Champions League), LNB Pro A (France), ACB (Spain)
 - **Professional** (excluded by default): WNBA only
 
 #### League × Dataset Availability Matrix
@@ -78,20 +78,21 @@ This library focuses on **pre-NBA/WNBA prospects** and includes:
 | **NCAA-WBB** | COLLEGE | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
 | **NJCAA** | COLLEGE | Yes | Yes | Yes | No | No | Yes | Yes |
 | **NAIA** | COLLEGE | Yes | Yes | Yes | No | No | Yes | Yes |
-| **U-SPORTS** | COLLEGE | Yes | Yes | Yes | Limited | No | Yes | Yes |
-| **CCAA** | COLLEGE | Yes | Yes | Yes | Limited | No | Yes | Yes |
+| **USPORTS** | COLLEGE | Yes | Yes | Yes | No | No | Yes | Yes |
+| **CCAA** | COLLEGE | Yes | Yes | Yes | No | No | Yes | Yes |
 | **EuroLeague** | PREPRO | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
 | **EuroCup** | PREPRO | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
 | **G-League** | PREPRO | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
 | **CEBL** | PREPRO | Yes | Yes | Yes | No | No | Yes | Yes |
-| **OTE** | PREPRO | Yes | Yes | Yes | Yes | Limited | Yes | Yes |
-| **NBL** (Australia) | PREPRO | Scaffold | Scaffold | Scaffold | No | No | Scaffold | Scaffold |
-| **ACB** (Spain) | PREPRO | Scaffold | Scaffold | Scaffold | No | No | Scaffold | Scaffold |
-| **LKL** (Lithuania) | PREPRO | Scaffold | Scaffold | Scaffold | No | No | Scaffold | Scaffold |
-| **ABA** (Adriatic) | PREPRO | Scaffold | Scaffold | Scaffold | No | No | Scaffold | Scaffold |
-| **BAL** (Africa) | PREPRO | Scaffold | Scaffold | Scaffold | No | No | Scaffold | Scaffold |
-| **BCL** (Champions) | PREPRO | Scaffold | Scaffold | Scaffold | No | No | Scaffold | Scaffold |
-| **LNB Pro A** (France) | PREPRO | Scaffold | Scaffold | Scaffold | No | No | Scaffold | Yes (16 teams) |
+| **OTE** | PREPRO | Yes | Yes | Yes | No | No | Yes | Yes |
+| **NBL** (Australia) | PREPRO | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
+| **NZ-NBL** (New Zealand) | PREPRO | Scaffold | Scaffold | Scaffold | Scaffold | No | Yes | Yes |
+| **LKL** (Lithuania) | PREPRO | Yes | Yes | Yes | Yes | No | Yes | Yes |
+| **ABA** (Adriatic) | PREPRO | Yes | Yes | Yes | Yes | No | Yes | Yes |
+| **BAL** (Africa) | PREPRO | Yes | Yes | Yes | Yes | No | Yes | Yes |
+| **BCL** (Champions) | PREPRO | Yes | Yes | Yes | Yes | No | Yes | Yes |
+| **LNB Pro A** (France) | PREPRO | Yes | Limited | No | No | No | Yes | Yes |
+| **ACB** (Spain) | PREPRO | No | No | No | No | No | Scaffold | Scaffold |
 | **WNBA** | PRO | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
 
 **Legend**:
@@ -114,23 +115,29 @@ This library focuses on **pre-NBA/WNBA prospects** and includes:
 | **WNBA** | 1997-present | Real-time (15-min delay) | NBA Stats API |
 | **NJCAA** | Current season | Daily updates | PrestoSports Scraping |
 | **NAIA** | Current season | Daily updates | PrestoSports Scraping |
-| **U-SPORTS** | Current season | Post-game | TBD (Fetcher in development) |
-| **CCAA** | Current season | Post-game | TBD (Fetcher in development) |
-| **NBL** (Australia) | Current season | Scaffold only | HTML Scraping (JS-rendered) |
-| **ACB** (Spain) | Current season | Scaffold only | HTML Scraping (JS-rendered) |
-| **LKL** (Lithuania) | Current season | Scaffold only | HTML Scraping (JS-rendered) |
-| **ABA** (Adriatic) | Current season | Scaffold only | HTML Scraping (JS-rendered) |
-| **BAL** (Africa) | Current season | Scaffold only | HTML Scraping (JS-rendered) |
-| **BCL** (Champions) | Current season | Scaffold only | HTML Scraping (JS-rendered) |
-| **LNB Pro A** (France) | Current season | Post-game (standings only) | HTML Scraping (Static HTML) |
+| **USPORTS** | Current season | Post-game | PrestoSports Scraping |
+| **CCAA** | Current season | Post-game | PrestoSports Scraping |
+| **NBL** (Australia) | 1979-present (schedule), 2015-present (detailed) | Post-game | nblR R Package |
+| **NZ-NBL** (New Zealand) | Current season (requires index) | Post-game (manual index) | FIBA LiveStats HTML |
+| **LKL** (Lithuania) | Current season | Post-game | FIBA LiveStats HTML |
+| **ABA** (Adriatic) | Current season | Post-game | FIBA LiveStats HTML |
+| **BAL** (Africa) | Current season | Post-game | FIBA LiveStats HTML |
+| **BCL** (Champions) | Current season | Post-game | FIBA LiveStats HTML |
+| **LNB Pro A** (France) | 2023-present (partial) | Post-game | LNB Official API |
+| **ACB** (Spain) | Scaffold only | Scaffold only | HTML Scraping (JS-rendered) |
 
 #### Integration Status
 
-**Fully Integrated (19 leagues)**: All leagues accessible via Python API, REST API, and MCP Server
+**Fully Integrated (20 leagues)**: All leagues accessible via Python API, REST API, and MCP Server
 - Access via: `get_dataset()`, REST API `/datasets/*`, MCP tools
-- Default scope (pre_only=True): 18 leagues (excludes WNBA)
-- Full scope (pre_only=False): All 19 leagues
-- **Note**: 7 international leagues (NBL, ACB, LKL, ABA, BAL, BCL, LNB Pro A) return scaffold/empty data due to JavaScript-rendered websites; Selenium/Playwright required for actual data extraction
+- Default scope (pre_only=True): 19 leagues (excludes WNBA)
+- Full scope (pre_only=False): All 20 leagues
+
+**Data Availability Notes**:
+- **Full Data**: 15 leagues with comprehensive datasets (NCAA, EuroLeague, G-League, NBL, FIBA Cluster, etc.)
+- **LNB Pro A**: Schedule, player_season, and team_season fully functional via LNB Official API (2023-present); player_game data limited; pbp/shots not yet available
+- **NZ-NBL**: Scaffold only (requires manual game index creation)
+- **ACB**: Scaffold only (JavaScript-rendered site, requires Selenium/Playwright)
 
 **Scope Control**:
 ```python
