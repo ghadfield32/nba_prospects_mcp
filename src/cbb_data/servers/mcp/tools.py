@@ -13,6 +13,17 @@ import pandas as pd
 # Import existing library functions - NO modifications needed!
 from cbb_data.api.datasets import get_dataset, get_recent_games, list_datasets
 
+# Import LNB historical data functions
+from cbb_data.api.lnb_historical import (
+    get_lnb_historical_fixtures,
+    get_lnb_historical_pbp,
+    get_lnb_player_season_stats,
+    get_lnb_team_season_stats,
+)
+from cbb_data.api.lnb_historical import (
+    list_available_seasons as list_lnb_historical_seasons,
+)
+
 # Import natural language parser for LLM-friendly inputs
 from cbb_data.utils.natural_language import normalize_filters_for_llm, parse_days_parameter
 
@@ -594,6 +605,235 @@ def tool_get_recent_games(
 
 
 # ============================================================================
+# LNB Historical Data Tools
+# ============================================================================
+
+
+def tool_get_lnb_historical_schedule(
+    season: str,
+    team: list[str] | None = None,
+    date_from: str | None = None,
+    date_to: str | None = None,
+    limit: int | None = 100,
+    compact: bool = False,
+) -> dict[str, Any]:
+    """
+    Get LNB (French Pro A) historical game schedules and results.
+
+    Accesses ingested historical data from the LNB data pipeline.
+    Available seasons: 2015-2016 through 2025-2026 (depending on ingestion status).
+
+    LLM Usage Examples:
+        • "LNB games in 2024-2025 season"
+          → get_lnb_historical_schedule(season="2024-2025")
+
+        • "Monaco's fixtures in 2024-2025"
+          → get_lnb_historical_schedule(season="2024-2025", team=["Monaco"])
+
+        • "LNB games in November 2024"
+          → get_lnb_historical_schedule(season="2024-2025", date_from="2024-11-01", date_to="2024-11-30")
+
+    Args:
+        season: Season string in YYYY-YYYY format (e.g., "2024-2025", "2025-2026")
+        team: List of team names to filter (optional)
+        date_from: Filter games from this date (YYYY-MM-DD format, optional)
+        date_to: Filter games to this date (YYYY-MM-DD format, optional)
+        limit: Maximum rows to return (default: 100)
+        compact: Return arrays instead of markdown (saves ~70% tokens)
+
+    Returns:
+        Structured result with game fixtures and results
+
+    Examples:
+        >>> tool_get_lnb_historical_schedule("2024-2025")
+        >>> tool_get_lnb_historical_schedule("2024-2025", team=["Monaco", "ASVEL"])
+        >>> tool_get_lnb_historical_schedule("2025-2026", date_from="2025-11-01", compact=True)
+    """
+    return _safe_execute(
+        "get_lnb_historical_schedule",
+        get_lnb_historical_fixtures,
+        compact=compact,
+        season=season,
+        division=1,  # Pro A only for now
+        team=team,
+        date_from=date_from,
+        date_to=date_to,
+        limit=limit,
+    )
+
+
+def tool_get_lnb_historical_pbp(
+    season: str,
+    fixture_uuid: list[str] | None = None,
+    team: list[str] | None = None,
+    player: list[str] | None = None,
+    event_type: list[str] | None = None,
+    limit: int | None = 500,
+    compact: bool = True,
+) -> dict[str, Any]:
+    """
+    Get LNB (French Pro A) historical play-by-play events.
+
+    Accesses detailed event-level data from ingested historical games.
+
+    LLM Usage Examples:
+        • "Play-by-play for a specific LNB game"
+          → get_lnb_historical_pbp(season="2024-2025", fixture_uuid=["abc-123..."])
+
+        • "All Monaco shot events in 2024-2025"
+          → get_lnb_historical_pbp(season="2024-2025", team=["Monaco"], event_type=["SHOT_MADE", "SHOT_MISSED"])
+
+    Args:
+        season: Season string (e.g., "2024-2025")
+        fixture_uuid: List of game UUIDs to filter (optional)
+        team: List of team names to filter (optional)
+        player: List of player names to filter (optional)
+        event_type: List of event types to filter (optional)
+        limit: Maximum rows to return (default: 500)
+        compact: Return arrays instead of markdown (default: True for PBP)
+
+    Returns:
+        Structured result with play-by-play events
+
+    Examples:
+        >>> tool_get_lnb_historical_pbp("2024-2025", fixture_uuid=["abc-123"])
+        >>> tool_get_lnb_historical_pbp("2024-2025", team=["Monaco"], limit=1000)
+    """
+    return _safe_execute(
+        "get_lnb_historical_pbp",
+        get_lnb_historical_pbp,
+        compact=compact,
+        season=season,
+        fixture_uuid=fixture_uuid[0] if fixture_uuid and len(fixture_uuid) == 1 else fixture_uuid,
+        team=team,
+        player=player,
+        event_type=event_type,
+        limit=limit,
+    )
+
+
+def tool_get_lnb_historical_player_stats(
+    season: str,
+    per_mode: str = "Totals",
+    team: list[str] | None = None,
+    player: list[str] | None = None,
+    min_games: int = 1,
+    limit: int | None = 100,
+    compact: bool = False,
+) -> dict[str, Any]:
+    """
+    Get LNB (French Pro A) historical player season statistics.
+
+    Aggregated from play-by-play data into season totals and averages.
+
+    LLM Usage Examples:
+        • "Top LNB scorers in 2024-2025"
+          → get_lnb_historical_player_stats(season="2024-2025", per_mode="PerGame", limit=20)
+
+        • "Monaco players stats for 2024-2025"
+          → get_lnb_historical_player_stats(season="2024-2025", team=["Monaco"])
+
+        • "LNB players with 15+ games in 2023-2024"
+          → get_lnb_historical_player_stats(season="2023-2024", min_games=15, per_mode="PerGame")
+
+    Args:
+        season: Season string (e.g., "2024-2025")
+        per_mode: Aggregation mode - "Totals", "PerGame", or "Per40" (default: "Totals")
+        team: List of team names to filter (optional)
+        player: List of player names to filter (optional)
+        min_games: Minimum games played to include (default: 1)
+        limit: Maximum rows to return (default: 100)
+        compact: Return arrays instead of markdown (saves ~70% tokens)
+
+    Returns:
+        Structured result with player season statistics
+
+    Examples:
+        >>> tool_get_lnb_historical_player_stats("2024-2025", per_mode="PerGame", limit=20)
+        >>> tool_get_lnb_historical_player_stats("2024-2025", team=["Monaco"], compact=True)
+    """
+    return _safe_execute(
+        "get_lnb_historical_player_stats",
+        get_lnb_player_season_stats,
+        compact=compact,
+        season=season,
+        per_mode=per_mode,  # type: ignore[arg-type]
+        team=team,
+        player=player,
+        min_games=min_games,
+        limit=limit,
+    )
+
+
+def tool_get_lnb_historical_team_stats(
+    season: str,
+    team: list[str] | None = None,
+    limit: int | None = 20,
+    compact: bool = False,
+) -> dict[str, Any]:
+    """
+    Get LNB (French Pro A) historical team season statistics and standings.
+
+    Aggregated from fixtures and play-by-play data.
+
+    LLM Usage Examples:
+        • "LNB standings for 2024-2025"
+          → get_lnb_historical_team_stats(season="2024-2025")
+
+        • "Monaco's season stats for 2024-2025"
+          → get_lnb_historical_team_stats(season="2024-2025", team=["Monaco"])
+
+    Args:
+        season: Season string (e.g., "2024-2025")
+        team: List of team names to filter (optional)
+        limit: Maximum rows to return (default: 20)
+        compact: Return arrays instead of markdown
+
+    Returns:
+        Structured result with team season statistics and standings
+
+    Examples:
+        >>> tool_get_lnb_historical_team_stats("2024-2025")
+        >>> tool_get_lnb_historical_team_stats("2024-2025", team=["Monaco", "ASVEL"])
+    """
+    return _safe_execute(
+        "get_lnb_historical_team_stats",
+        get_lnb_team_season_stats,
+        compact=compact,
+        season=season,
+        team=team,
+        limit=limit,
+    )
+
+
+def tool_list_lnb_historical_seasons() -> dict[str, Any]:
+    """
+    List all LNB (French Pro A) seasons with available historical data.
+
+    Returns:
+        List of season strings with ingested historical data
+
+    Examples:
+        >>> tool_list_lnb_historical_seasons()
+        {'success': True, 'data': ['2025-2026', '2024-2025', '2023-2024', ...]}
+    """
+    try:
+        seasons = list_lnb_historical_seasons()
+        return {
+            "success": True,
+            "data": seasons,
+            "count": len(seasons),
+        }
+    except Exception as e:
+        logger.error(f"Error listing LNB historical seasons: {e}", exc_info=True)
+        return {
+            "success": False,
+            "error": str(e),
+            "error_type": type(e).__name__,
+        }
+
+
+# ============================================================================
 # Tool Registry for MCP Server
 # ============================================================================
 
@@ -981,5 +1221,220 @@ Tips: Use compact=True for large result sets.""",
             "required": ["league"],
         },
         "handler": tool_get_recent_games,
+    },
+    # ==========================================================================
+    # LNB Historical Data Tools (French Pro A)
+    # ==========================================================================
+    {
+        "name": "get_lnb_historical_schedule",
+        "description": """Get LNB (French Pro A) historical game schedules and results.
+
+LLM Usage Examples:
+  • "LNB games in 2024-2025 season" → get_lnb_historical_schedule(season="2024-2025")
+  • "Monaco's fixtures in 2024-2025" → get_lnb_historical_schedule(season="2024-2025", team=["Monaco"])
+  • "LNB games in November 2024" → get_lnb_historical_schedule(season="2024-2025", date_from="2024-11-01", date_to="2024-11-30")
+
+Accesses ingested historical data from 2015-2016 through 2025-2026 seasons.
+Returns: Game dates, teams, scores, status, PBP availability.
+
+Tips: Use compact=True for large result sets.""",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "season": {
+                    "type": "string",
+                    "description": "Season string in YYYY-YYYY format (e.g., '2024-2025', '2025-2026')",
+                },
+                "team": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "List of team names to filter (e.g., ['Monaco', 'ASVEL'])",
+                },
+                "date_from": {
+                    "type": "string",
+                    "description": "Filter games from this date (YYYY-MM-DD format)",
+                },
+                "date_to": {
+                    "type": "string",
+                    "description": "Filter games to this date (YYYY-MM-DD format)",
+                },
+                "limit": {
+                    "type": "integer",
+                    "description": "Maximum rows to return",
+                    "default": 100,
+                },
+                "compact": {
+                    "type": "boolean",
+                    "description": "Return arrays instead of markdown (saves ~70% tokens)",
+                    "default": False,
+                },
+            },
+            "required": ["season"],
+        },
+        "handler": tool_get_lnb_historical_schedule,
+    },
+    {
+        "name": "get_lnb_historical_pbp",
+        "description": """Get LNB (French Pro A) historical play-by-play events.
+
+LLM Usage Examples:
+  • "Play-by-play for a specific LNB game" → get_lnb_historical_pbp(season="2024-2025", fixture_uuid=["abc-123..."])
+  • "All Monaco shot events in 2024-2025" → get_lnb_historical_pbp(season="2024-2025", team=["Monaco"], event_type=["SHOT_MADE", "SHOT_MISSED"])
+
+Accesses detailed event-level data from ingested historical games.
+Returns: Event type, time, team, player, score, coordinates.
+
+Tips: PBP data is large - use compact=True (default) and filter by fixture_uuid or team.""",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "season": {
+                    "type": "string",
+                    "description": "Season string (e.g., '2024-2025')",
+                },
+                "fixture_uuid": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "List of game UUIDs to filter",
+                },
+                "team": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "List of team names to filter",
+                },
+                "player": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "List of player names to filter",
+                },
+                "event_type": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "List of event types to filter (e.g., ['SHOT_MADE', 'REBOUND'])",
+                },
+                "limit": {
+                    "type": "integer",
+                    "description": "Maximum rows to return",
+                    "default": 500,
+                },
+                "compact": {
+                    "type": "boolean",
+                    "description": "Return arrays instead of markdown (recommended for PBP)",
+                    "default": True,
+                },
+            },
+            "required": ["season"],
+        },
+        "handler": tool_get_lnb_historical_pbp,
+    },
+    {
+        "name": "get_lnb_historical_player_stats",
+        "description": """Get LNB (French Pro A) historical player season statistics.
+
+LLM Usage Examples:
+  • "Top LNB scorers in 2024-2025" → get_lnb_historical_player_stats(season="2024-2025", per_mode="PerGame", limit=20)
+  • "Monaco players stats for 2024-2025" → get_lnb_historical_player_stats(season="2024-2025", team=["Monaco"])
+  • "LNB players with 15+ games" → get_lnb_historical_player_stats(season="2023-2024", min_games=15, per_mode="PerGame")
+
+Aggregated from play-by-play data into season totals and averages.
+Returns: Points, rebounds, assists, shooting percentages, minutes, and more.
+
+Per-modes: "Totals" (cumulative), "PerGame" (averages), "Per40" (per 40 min)
+Tips: Use per_mode="PerGame" for fair comparisons, compact=True for large result sets.""",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "season": {
+                    "type": "string",
+                    "description": "Season string (e.g., '2024-2025')",
+                },
+                "per_mode": {
+                    "type": "string",
+                    "enum": ["Totals", "PerGame", "Per40"],
+                    "description": "Aggregation mode: Totals (cumulative), PerGame (averages), Per40 (per 40 minutes)",
+                    "default": "Totals",
+                },
+                "team": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "List of team names to filter",
+                },
+                "player": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "List of player names to filter",
+                },
+                "min_games": {
+                    "type": "integer",
+                    "description": "Minimum games played to include",
+                    "default": 1,
+                },
+                "limit": {
+                    "type": "integer",
+                    "description": "Maximum rows to return",
+                    "default": 100,
+                },
+                "compact": {
+                    "type": "boolean",
+                    "description": "Return arrays instead of markdown",
+                    "default": False,
+                },
+            },
+            "required": ["season"],
+        },
+        "handler": tool_get_lnb_historical_player_stats,
+    },
+    {
+        "name": "get_lnb_historical_team_stats",
+        "description": """Get LNB (French Pro A) historical team season statistics and standings.
+
+LLM Usage Examples:
+  • "LNB standings for 2024-2025" → get_lnb_historical_team_stats(season="2024-2025")
+  • "Monaco's season stats for 2024-2025" → get_lnb_historical_team_stats(season="2024-2025", team=["Monaco"])
+
+Aggregated from fixtures and play-by-play data.
+Returns: Wins, losses, win%, points for/against, point differential, PPG, etc.
+
+Tips: Great for viewing league standings and team performance.""",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "season": {
+                    "type": "string",
+                    "description": "Season string (e.g., '2024-2025')",
+                },
+                "team": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "List of team names to filter",
+                },
+                "limit": {
+                    "type": "integer",
+                    "description": "Maximum rows to return",
+                    "default": 20,
+                },
+                "compact": {
+                    "type": "boolean",
+                    "description": "Return arrays instead of markdown",
+                    "default": False,
+                },
+            },
+            "required": ["season"],
+        },
+        "handler": tool_get_lnb_historical_team_stats,
+    },
+    {
+        "name": "list_lnb_historical_seasons",
+        "description": """List all LNB (French Pro A) seasons with available historical data.
+
+Use this to discover which seasons have been ingested and are available for querying.
+Returns: List of season strings (e.g., ['2025-2026', '2024-2025', '2023-2024', ...])
+
+LLM Usage: Call this first to discover available LNB seasons before querying data.""",
+        "inputSchema": {
+            "type": "object",
+            "properties": {},
+        },
+        "handler": tool_list_lnb_historical_seasons,
     },
 ]

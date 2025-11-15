@@ -1,0 +1,119 @@
+{
+  "status": true,
+  "message": "Match fetched successfully from cache",
+  "data": {
+    "id": 501,
+    "match_time_utc": "2025-11-14T19:30:00.000Z",
+    "match_id": "0d0504a0-6715-11f0-98ab-27e6e78614e1",
+    "ticket_url": "",
+    "match_date": "2025-11-14",
+    "match_status": "COMPLETE",
+    "moment_image": null,
+    "timezone": "Europe/Paris",
+    "external_id": 28910,
+    "phase_name": "Aller",
+    "points": "4 : 4",
+    "round_description": "8ème journée",
+    "display_address_mobile": "La Meilleraie (Cholet)",
+    "score_description": "Aller | 8ème journée",
+    "venue_name": "La Meilleraie (Cholet)",
+    "latitude": "47.055744",
+    "longitude": "-0.897577",
+    "sponser_title": "Vis ton match avec",
+    "sponser_logo": "uploads/content-library/b74f597cff9ff5fc159d21eca75fa950865b876f8dc947c50271ee6531b7631d.png",
+    "sponser_url": "https://betclic.onelink.me/2887093520/wdiag3mg",
+    "watch_now_url": "",
+    "highlight_url": "",
+    "competition_external_id": 302,
+    "competition_logo_black": {
+      "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/lg.png",
+      "md": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/md.png",
+      "or": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/or.png",
+      "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/sm.png"
+    },
+    "competition_logo_white": {
+      "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/lg.png",
+      "md": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/md.png",
+      "or": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/or.png",
+      "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/sm.png"
+    },
+    "division_external_id": 1,
+    "competition_abbrev": "PROA",
+    "address1": "Parc des Exposition - Av Marcel Prat",
+    "broadcast_provider_external_id": 34,
+    "broadcast_provider_url": "https://www.dazn.com/fr-fr/p/basketball?utm_medium=display&utm_source=solus&utm_campaign=lnb&utm_content=static&utm_term=website",
+    "broadcast_type": "TV",
+    "broadcast_logo": {
+      "lg": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/lg.png",
+      "md": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/md.png",
+      "or": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/or.png",
+      "sm": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/sm.png"
+    },
+    "broadcast": [
+      {
+        "id": 59,
+        "broadcast_id": null,
+        "external_id": 4606,
+        "broadcast_provider_external_id": 34,
+        "broadcast_type": "TV",
+        "content_id": null,
+        "content_url": null,
+        "replay_id": null,
+        "replay_url": null,
+        "broadcast_time_zone": "Europe/Paris",
+        "broadcast_time": "2025-11-14 20:25:00",
+        "broadcast_provider": {
+          "id": 1,
+          "external_id": 34,
+          "broadcast_provider_url": "https://www.dazn.com/fr-fr/p/basketball?utm_medium=display&utm_source=solus&utm_campaign=lnb&utm_content=static&utm_term=website",
+          "logo": {
+            "lg": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/lg.png",
+            "md": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/md.png",
+            "or": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/or.png",
+            "sm": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/sm.png"
+          }
+        }
+      }
+    ],
+    "teams": [
+      {
+        "id": 1781,
+        "external_id": 1784,
+        "logo_white": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1784/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Team/1784/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Team/1784/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1784/logoWhite/sm.png"
+        },
+        "logo_black": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1784/logoBlack/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Team/1784/logoBlack/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Team/1784/logoBlack/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1784/logoBlack/sm.png"
+        },
+        "team_name": "Cholet",
+        "team_code": "CHO",
+        "score_string": "76"
+      },
+      {
+        "id": 1790,
+        "external_id": 1793,
+        "logo_white": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoWhite/sm.png"
+        },
+        "logo_black": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoBlack/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoBlack/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoBlack/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1793/logoBlack/sm.png"
+        },
+        "team_name": "Nanterre",
+        "team_code": "NTR",
+        "score_string": "78"
+      }
+    ]
+  }
+}

@@ -72,3 +72,4 @@ dump.rdb
 tools/lnb/lnb_headers.json
 src/cbb_data/fetchers/lnb_headers.json
 **/lnb_headers.json
+tools/lnb/**/*.png

@@ -1,0 +1,24 @@
+{
+  "url": "https://api-prod.lnb.fr/altrstats/getMatchOfficialsPreGame?match_external_id=28914",
+  "page_type": "pre_match",
+  "response_type": "unknown",
+  "timestamp": "051616",
+  "data": {
+    "status": true,
+    "message": "Match officials fetched",
+    "data": [
+      {
+        "external_id": 5654,
+        "person_id": "7173ff1c-f5c1-11eb-a219-9a556ec2037c",
+        "first_name": "Jérôme",
+        "family_name": "Navier",
+        "photo": {
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Person/5654/photo/sm.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Person/5654/photo/md.png",
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Person/5654/photo/lg.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Person/5654/photo/or.png"
+        }
+      }
+    ]
+  }
+}

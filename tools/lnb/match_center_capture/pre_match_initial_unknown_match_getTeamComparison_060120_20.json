@@ -1,0 +1,181 @@
+{
+  "url": "https://api-prod.lnb.fr/match/getTeamComparison",
+  "host": "api-prod.lnb.fr",
+  "path": "/match/getTeamComparison",
+  "page_type": "pre_match",
+  "section": "initial",
+  "response_type": "unknown",
+  "timestamp": "060120",
+  "data": {
+    "status": true,
+    "message": "Team comparison found",
+    "data": {
+      "home_team": {
+        "team_external_id": 1795,
+        "team_name": "Saint-Quentin",
+        "logo_white": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/sm.png"
+        },
+        "logo_black": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/sm.png"
+        },
+        "person_data": [
+          {
+            "title": "Points",
+            "type": "sPointsAverage",
+            "items": [
+              {
+                "value": 16,
+                "person": {
+                  "first_name": "Nick",
+                  "family_name": "Johnson",
+                  "photo": {
+                    "sm": "https://assets.altrstat.xyz/images/Basketball/Person/3914/photo/sm.png",
+                    "md": "https://assets.altrstat.xyz/images/Basketball/Person/3914/photo/md.png",
+                    "lg": "https://assets.altrstat.xyz/images/Basketball/Person/3914/photo/lg.png",
+                    "or": "https://assets.altrstat.xyz/images/Basketball/Person/3914/photo/or.png"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "title": "Rebonds",
+            "type": "sReboundsTotalAverage",
+            "items": [
+              {
+                "value": 6.71,
+                "person": {
+                  "first_name": "Jordan",
+                  "family_name": "Caroline",
+                  "photo": {
+                    "sm": "https://assets.altrstat.xyz/images/Basketball/Person/10447/photo/sm.png",
+                    "md": "https://assets.altrstat.xyz/images/Basketball/Person/10447/photo/md.png",
+                    "lg": "https://assets.altrstat.xyz/images/Basketball/Person/10447/photo/lg.png",
+                    "or": "https://assets.altrstat.xyz/images/Basketball/Person/10447/photo/or.png"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "title": "Passes décisives",
+            "type": "sAssistsAverage",
+            "items": [
+              {
+                "value": 4.71,
+                "person": {
+                  "first_name": "Nick",
+                  "family_name": "Johnson",
+                  "photo": {
+                    "sm": "https://assets.altrstat.xyz/images/Basketball/Person/3914/photo/sm.png",
+                    "md": "https://assets.altrstat.xyz/images/Basketball/Person/3914/photo/md.png",
+                    "lg": "https://assets.altrstat.xyz/images/Basketball/Person/3914/photo/lg.png",
+                    "or": "https://assets.altrstat.xyz/images/Basketball/Person/3914/photo/or.png"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "stats": {
+          "ppg": 75.86,
+          "rpg": 30.86,
+          "apg": 15.57,
+          "spg": 7.71,
+          "bpg": 1.86,
+          "pir": 70.45
+        }
+      },
+      "away_team": {
+        "team_external_id": 1792,
+        "team_name": "Nancy",
+        "logo_white": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/sm.png"
+        },
+        "logo_black": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/sm.png"
+        },
+        "person_data": [
+          {
+            "title": "Points",
+            "type": "sPointsAverage",
+            "items": [
+              {
+                "value": 21.29,
+                "person": {
+                  "first_name": "Landers",
+                  "family_name": "Nolley II",
+                  "photo": {
+                    "sm": "https://assets.altrstat.xyz/images/Basketball/Person/10448/photo/sm.png",
+                    "md": "https://assets.altrstat.xyz/images/Basketball/Person/10448/photo/md.png",
+                    "lg": "https://assets.altrstat.xyz/images/Basketball/Person/10448/photo/lg.png",
+                    "or": "https://assets.altrstat.xyz/images/Basketball/Person/10448/photo/or.png"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "title": "Rebonds",
+            "type": "sReboundsTotalAverage",
+            "items": [
+              {
+                "value": 6.29,
+                "person": {
+                  "first_name": "Isaiah",
+                  "family_name": "Cozart",
+                  "photo": {
+                    "sm": "https://assets.altrstat.xyz/images/Basketball/Person/10451/photo/sm.png",
+                    "md": "https://assets.altrstat.xyz/images/Basketball/Person/10451/photo/md.png",
+                    "lg": "https://assets.altrstat.xyz/images/Basketball/Person/10451/photo/lg.png",
+                    "or": "https://assets.altrstat.xyz/images/Basketball/Person/10451/photo/or.png"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "title": "Passes décisives",
+            "type": "sAssistsAverage",
+            "items": [
+              {
+                "value": 4.71,
+                "person": {
+                  "first_name": "Phlandrous",
+                  "family_name": "Fleming Jr",
+                  "photo": {
+                    "sm": "https://assets.altrstat.xyz/images/Basketball/Person/9567/photo/sm.png",
+                    "md": "https://assets.altrstat.xyz/images/Basketball/Person/9567/photo/md.png",
+                    "lg": "https://assets.altrstat.xyz/images/Basketball/Person/9567/photo/lg.png",
+                    "or": "https://assets.altrstat.xyz/images/Basketball/Person/9567/photo/or.png"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "stats": {
+          "ppg": 86.71,
+          "rpg": 33.43,
+          "apg": 17,
+          "spg": 6.71,
+          "bpg": 3.14,
+          "pir": 75.27
+        }
+      }
+    }
+  }
+}

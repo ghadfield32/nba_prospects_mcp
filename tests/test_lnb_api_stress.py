@@ -40,11 +40,11 @@ from __future__ import annotations
 
 import logging
 from datetime import date, datetime, timedelta
-from typing import Any, Dict, List
+from typing import Any
 
 import pytest
 
-from src.cbb_data.fetchers.lnb_api import LNBClient, LNBAPIError, stress_test_lnb
+from src.cbb_data.fetchers.lnb_api import LNBAPIError, LNBClient, stress_test_lnb
 
 # Configure logging for tests
 logging.basicConfig(
@@ -72,7 +72,7 @@ def test_year() -> int:
 
 
 @pytest.fixture(scope="module")
-def test_years(client: LNBClient, test_year: int) -> List[int]:
+def test_years(client: LNBClient, test_year: int) -> list[int]:
     """Discover available years for testing."""
     try:
         years_data = client.get_all_years(end_year=test_year)
@@ -88,11 +88,12 @@ def test_years(client: LNBClient, test_year: int) -> List[int]:
 
 
 @pytest.fixture(scope="module")
-def test_competition(client: LNBClient, test_years: List[int]) -> Dict[str, Any]:
+def test_competition(client: LNBClient, test_years: list[int]) -> dict[str, Any]:
     """Get a test competition for detailed testing."""
     for year in reversed(test_years):
         try:
-            comps = client.get_main_competitions(year)
+            # Use working replacement for deprecated get_main_competitions (2025-11-15)
+            comps = client.get_division_competitions_by_year(year, division_external_id=1)
             if comps:
                 return {"year": year, "competition": comps[0]}
         except Exception:
@@ -101,9 +102,9 @@ def test_competition(client: LNBClient, test_years: List[int]) -> Dict[str, Any]
 
 
 @pytest.fixture(scope="module")
-def test_match_id(client: LNBClient, test_competition: Dict[str, Any]) -> int:
+def test_match_id(client: LNBClient, test_competition: dict[str, Any]) -> int:
     """Get a test match ID for match-level endpoint testing."""
-    year = test_competition["year"]
+    # year = test_competition["year"]  # Not currently needed
     # Try to get a recent match
     try:
         # Look for matches in the last 6 months
@@ -141,51 +142,18 @@ class TestLNBStructure:
         for year_obj in years:
             assert isinstance(year_obj, dict), "Each year should be a dict"
             # Should have some year-related field
-            has_year = any(
-                k in year_obj
-                for k in ["year", "end_year", "season", "season_year"]
-            )
+            has_year = any(k in year_obj for k in ["year", "end_year", "season", "season_year"])
             assert has_year, f"Year object missing year field: {year_obj}"
 
         logger.info(f"✅ getAllYears: Found {len(years)} seasons")
 
-    def test_get_main_competitions(
-        self, client: LNBClient, test_years: List[int]
-    ):
-        """Test GET /common/getMainCompetition for multiple years"""
-        logger.info("\n[TEST] getMainCompetition")
-
-        for year in test_years:
-            comps = client.get_main_competitions(year)
-
-            assert isinstance(comps, list), f"Should return list for year {year}"
-
-            if comps:  # May be empty for future years
-                for comp in comps:
-                    assert isinstance(comp, dict), "Each competition should be dict"
-                    # Should have key fields
-                    assert "external_id" in comp, f"Missing external_id: {comp}"
-                    assert isinstance(
-                        comp["external_id"], int
-                    ), "external_id should be int"
-
-                logger.info(
-                    f"✅ getMainCompetition({year}): {len(comps)} competitions"
-                )
-            else:
-                logger.info(f"⚠️  getMainCompetition({year}): No competitions (may be future year)")
-
-    def test_get_division_competitions(
-        self, client: LNBClient, test_years: List[int]
-    ):
+    def test_get_division_competitions(self, client: LNBClient, test_years: list[int]):
         """Test GET /common/getDivisionCompetitionByYear"""
         logger.info("\n[TEST] getDivisionCompetitionByYear")
 
         division_id = 1  # Betclic ÉLITE
         for year in test_years:
-            comps = client.get_division_competitions_by_year(
-                year, division_external_id=division_id
-            )
+            comps = client.get_division_competitions_by_year(year, division_external_id=division_id)
 
             assert isinstance(comps, list), f"Should return list for year {year}"
 
@@ -203,9 +171,7 @@ class TestLNBStructure:
                     f"No competitions"
                 )
 
-    def test_get_competition_teams(
-        self, client: LNBClient, test_competition: Dict[str, Any]
-    ):
+    def test_get_competition_teams(self, client: LNBClient, test_competition: dict[str, Any]):
         """Test GET /stats/getCompetitionTeams"""
         logger.info("\n[TEST] getCompetitionTeams")
 
@@ -224,9 +190,7 @@ class TestLNBStructure:
             has_id = "team_id" in team or "external_id" in team or "id" in team
             assert has_id, f"Team missing ID field: {team}"
 
-        logger.info(
-            f"✅ getCompetitionTeams(comp={comp_ext_id}): {len(teams)} teams"
-        )
+        logger.info(f"✅ getCompetitionTeams(comp={comp_ext_id}): {len(teams)} teams")
 
         # Log sample team
         if teams:
@@ -257,9 +221,7 @@ class TestLNBCalendar:
 
         assert isinstance(games, list), "Should return list"
         # May be empty if off-season, but should not error
-        logger.info(
-            f"✅ getCalendar({from_date} to {to_date}): {len(games)} games"
-        )
+        logger.info(f"✅ getCalendar({from_date} to {to_date}): {len(games)} games")
 
         if games:
             # Validate game structure
@@ -288,9 +250,7 @@ class TestLNBCalendar:
             assert isinstance(games, list), f"Should return list for {label}"
             logger.info(f"✅ getCalendar {label}: {len(games)} games")
 
-    def test_iter_full_season_calendar(
-        self, client: LNBClient, test_competition: Dict[str, Any]
-    ):
+    def test_iter_full_season_calendar(self, client: LNBClient, test_competition: dict[str, Any]):
         """Test full season calendar with chunking"""
         logger.info("\n[TEST] iter_full_season_calendar")
 
@@ -298,15 +258,10 @@ class TestLNBCalendar:
         season_start = date(year, 8, 1)
         season_end = date(year + 1, 7, 31)
 
-        games = client.iter_full_season_calendar(
-            season_start, season_end, step_days=31
-        )
+        games = client.iter_full_season_calendar(season_start, season_end, step_days=31)
 
         assert isinstance(games, list), "Should return list"
-        logger.info(
-            f"✅ iter_full_season_calendar({year}-{year+1}): "
-            f"{len(games)} total games"
-        )
+        logger.info(f"✅ iter_full_season_calendar({year}-{year+1}): " f"{len(games)} total games")
 
         if games:
             # Validate deduplication (no duplicate match_external_ids)
@@ -317,9 +272,7 @@ class TestLNBCalendar:
                     match_ids.append(mid)
 
             unique_ids = set(match_ids)
-            assert len(match_ids) == len(
-                unique_ids
-            ), "Should deduplicate match IDs"
+            assert len(match_ids) == len(unique_ids), "Should deduplicate match IDs"
             logger.info(f"   ✅ Deduplication verified: {len(unique_ids)} unique games")
 
 
@@ -361,9 +314,7 @@ class TestLNBMatchContext:
         logger.info(f"✅ getLastFiveMatchesHeadToHead(match={test_match_id})")
         logger.info(f"   Keys: {list(h2h.keys())[:10]}...")
 
-    def test_get_match_officials_pregame(
-        self, client: LNBClient, test_match_id: int
-    ):
+    def test_get_match_officials_pregame(self, client: LNBClient, test_match_id: int):
         """Test GET /stats/getMatchOfficialsPreGame"""
         logger.info("\n[TEST] getMatchOfficialsPreGame")
 
@@ -392,9 +343,7 @@ class TestLNBMatchContext:
 class TestLNBSeasonStats:
     """Test season statistics endpoints."""
 
-    def test_get_persons_leaders_minimal(
-        self, client: LNBClient, test_competition: Dict[str, Any]
-    ):
+    def test_get_persons_leaders_minimal(self, client: LNBClient, test_competition: dict[str, Any]):
         """Test GET /stats/getPersonsLeaders (may fail without extra params)"""
         logger.info("\n[TEST] getPersonsLeaders (minimal params)")
 
@@ -409,15 +358,11 @@ class TestLNBSeasonStats:
                 year=year,
             )
             assert isinstance(leaders, dict), "Should return dict"
-            logger.info(
-                f"✅ getPersonsLeaders(comp={comp_ext_id}, year={year})"
-            )
+            logger.info(f"✅ getPersonsLeaders(comp={comp_ext_id}, year={year})")
             logger.info(f"   Keys: {list(leaders.keys())[:10]}...")
 
         except LNBAPIError as e:
-            logger.warning(
-                f"⚠️  getPersonsLeaders failed (expected - needs extra_params): {e}"
-            )
+            logger.warning(f"⚠️  getPersonsLeaders failed (expected - needs extra_params): {e}")
             pytest.skip("getPersonsLeaders requires extra_params (category, page, etc.)")
 
     @pytest.mark.parametrize(
@@ -428,7 +373,7 @@ class TestLNBSeasonStats:
     def test_get_persons_leaders_with_category(
         self,
         client: LNBClient,
-        test_competition: Dict[str, Any],
+        test_competition: dict[str, Any],
         category: str,
     ):
         """Test GET /stats/getPersonsLeaders with category parameter"""
@@ -446,14 +391,11 @@ class TestLNBSeasonStats:
             )
             assert isinstance(leaders, dict), "Should return dict"
             logger.info(
-                f"✅ getPersonsLeaders(comp={comp_ext_id}, year={year}, "
-                f"category={category})"
+                f"✅ getPersonsLeaders(comp={comp_ext_id}, year={year}, " f"category={category})"
             )
 
         except LNBAPIError as e:
-            logger.warning(
-                f"⚠️  getPersonsLeaders({category}) failed: {e}"
-            )
+            logger.warning(f"⚠️  getPersonsLeaders({category}) failed: {e}")
             pytest.skip(f"getPersonsLeaders category={category} not working")
 
 
@@ -491,44 +433,32 @@ class TestLNBLive:
 class TestLNBPlaceholders:
     """Test placeholder endpoints (boxscore, PBP, shots) - expected to fail."""
 
-    def test_get_match_boxscore_placeholder(
-        self, client: LNBClient, test_match_id: int
-    ):
+    def test_get_match_boxscore_placeholder(self, client: LNBClient, test_match_id: int):
         """Test boxscore placeholder (expected to fail)"""
         logger.info("\n[TEST] getMatchBoxScore (PLACEHOLDER - expected to fail)")
 
         with pytest.raises(LNBAPIError):
             _ = client.get_match_boxscore(test_match_id)
 
-        logger.info(
-            "❌ getMatchBoxScore failed as expected (placeholder, needs DevTools path)"
-        )
+        logger.info("❌ getMatchBoxScore failed as expected (placeholder, needs DevTools path)")
 
-    def test_get_match_play_by_play_placeholder(
-        self, client: LNBClient, test_match_id: int
-    ):
+    def test_get_match_play_by_play_placeholder(self, client: LNBClient, test_match_id: int):
         """Test play-by-play placeholder (expected to fail)"""
         logger.info("\n[TEST] getMatchPlayByPlay (PLACEHOLDER - expected to fail)")
 
         with pytest.raises(LNBAPIError):
             _ = client.get_match_play_by_play(test_match_id)
 
-        logger.info(
-            "❌ getMatchPlayByPlay failed as expected (placeholder, needs DevTools path)"
-        )
+        logger.info("❌ getMatchPlayByPlay failed as expected (placeholder, needs DevTools path)")
 
-    def test_get_match_shot_chart_placeholder(
-        self, client: LNBClient, test_match_id: int
-    ):
+    def test_get_match_shot_chart_placeholder(self, client: LNBClient, test_match_id: int):
         """Test shot chart placeholder (expected to fail)"""
         logger.info("\n[TEST] getMatchShots (PLACEHOLDER - expected to fail)")
 
         with pytest.raises(LNBAPIError):
             _ = client.get_match_shot_chart(test_match_id)
 
-        logger.info(
-            "❌ getMatchShots failed as expected (placeholder, needs DevTools path)"
-        )
+        logger.info("❌ getMatchShots failed as expected (placeholder, needs DevTools path)")
 
 
 # ========================================
@@ -565,8 +495,7 @@ class TestLNBStressHarness:
             total = ok + failed
             status = "✅" if failed == 0 else "⚠️" if ok > 0 else "❌"
             logger.info(
-                f"{status} {endpoint:40s} {ok:3d} OK / {failed:3d} FAIL "
-                f"({total:3d} total)"
+                f"{status} {endpoint:40s} {ok:3d} OK / {failed:3d} FAIL " f"({total:3d} total)"
             )
 
         logger.info("=" * 60)
@@ -638,9 +567,7 @@ class TestLNBErrorHandling:
         try:
             games = client.get_calendar(from_date, to_date)
             assert isinstance(games, list), "Should return list"
-            logger.info(
-                f"✅ Invalid date range handled gracefully: {len(games)} games"
-            )
+            logger.info(f"✅ Invalid date range handled gracefully: {len(games)} games")
         except LNBAPIError:
             logger.info("✅ Invalid date range raised LNBAPIError as expected")
 
@@ -675,9 +602,7 @@ class TestLNBPerformance:
             f"({len(games)/elapsed:.1f} games/sec)"
         )
 
-    def test_match_context_batch_performance(
-        self, client: LNBClient, test_match_id: int
-    ):
+    def test_match_context_batch_performance(self, client: LNBClient, test_match_id: int):
         """Benchmark batch match context fetches"""
         logger.info("\n[BENCHMARK] Match context batch")
 

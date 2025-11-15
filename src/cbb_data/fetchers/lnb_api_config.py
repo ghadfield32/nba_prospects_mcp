@@ -37,7 +37,6 @@ import json
 import logging
 import os
 from pathlib import Path
-from typing import Dict
 
 logger = logging.getLogger(__name__)
 
@@ -87,7 +86,7 @@ def _find_config_file() -> Path | None:
     return None
 
 
-def load_lnb_headers() -> Dict[str, str]:
+def load_lnb_headers() -> dict[str, str]:
     """Load authentication headers from configuration file.
 
     Searches for lnb_headers.json in multiple locations and loads
@@ -119,7 +118,7 @@ def load_lnb_headers() -> Dict[str, str]:
         return {}
 
     try:
-        with open(config_path, "r", encoding="utf-8") as f:
+        with open(config_path, encoding="utf-8") as f:
             headers = json.load(f)
 
         if not isinstance(headers, dict):
@@ -140,14 +139,11 @@ def load_lnb_headers() -> Dict[str, str]:
 
     except json.JSONDecodeError as e:
         logger.warning(
-            f"Failed to parse {config_path}: {e}. "
-            "Using default headers only. Check JSON syntax."
+            f"Failed to parse {config_path}: {e}. " "Using default headers only. Check JSON syntax."
         )
         return {}
     except Exception as e:
-        logger.warning(
-            f"Error loading {config_path}: {e}. Using default headers only."
-        )
+        logger.warning(f"Error loading {config_path}: {e}. Using default headers only.")
         return {}
 
 
@@ -223,5 +219,6 @@ if __name__ == "__main__":
 
     # Optionally create template
     import sys
+
     if "--create-template" in sys.argv:
         save_headers_template()

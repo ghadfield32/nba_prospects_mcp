@@ -1,0 +1,125 @@
+{
+  "url": "https://api-prod.lnb.fr/match/getMatchDetails/3522345e-3362-11f0-b97d-7be2bdc7a840",
+  "page_type": "match_center_shots",
+  "response_type": "match_details",
+  "timestamp": "051702",
+  "data": {
+    "status": true,
+    "message": "Match fetched successfully from cache",
+    "data": {
+      "id": 3261,
+      "match_time_utc": "2025-05-20T18:30:00.000Z",
+      "match_id": "3522345e-3362-11f0-b97d-7be2bdc7a840",
+      "ticket_url": "",
+      "match_date": "2025-05-20",
+      "match_status": "COMPLETE",
+      "moment_image": null,
+      "timezone": "Europe/Paris",
+      "external_id": 28808,
+      "phase_name": "Play-in B",
+      "points": "4 : 4",
+      "round_description": "Play-in B",
+      "display_address_mobile": "Palais des Sports J. Weille-Espace J.J. Eisenbach (Nancy)",
+      "score_description": "Play-in B | Play-in B",
+      "venue_name": "Palais des Sports J. Weille-Espace J.J. Eisenbach (Nancy)",
+      "latitude": "48.699806",
+      "longitude": "6.139969",
+      "sponser_title": "",
+      "sponser_logo": "",
+      "sponser_url": "",
+      "watch_now_url": "",
+      "highlight_url": "",
+      "competition_external_id": 297,
+      "competition_logo_black": {
+        "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/297/logoBlack/lg.png",
+        "md": "https://assets.altrstat.xyz/images/Basketball/Competition/297/logoBlack/md.png",
+        "or": "https://assets.altrstat.xyz/images/Basketball/Competition/297/logoBlack/or.png",
+        "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/297/logoBlack/sm.png"
+      },
+      "competition_logo_white": {
+        "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/297/logoWhite/lg.png",
+        "md": "https://assets.altrstat.xyz/images/Basketball/Competition/297/logoWhite/md.png",
+        "or": "https://assets.altrstat.xyz/images/Basketball/Competition/297/logoWhite/or.png",
+        "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/297/logoWhite/sm.png"
+      },
+      "division_external_id": 1,
+      "competition_abbrev": "PROA PIN",
+      "address1": "14 Rue Capitaine Guynemer",
+      "broadcast_provider_external_id": 34,
+      "broadcast_provider_url": "https://www.dazn.com/fr-fr/p/basketball?utm_medium=display&utm_source=solus&utm_campaign=lnb&utm_content=static&utm_term=website",
+      "broadcast_type": "TV",
+      "broadcast_logo": {
+        "lg": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/lg.png",
+        "md": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/md.png",
+        "or": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/or.png",
+        "sm": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/sm.png"
+      },
+      "broadcast": [
+        {
+          "id": 1940,
+          "broadcast_id": null,
+          "external_id": 4506,
+          "broadcast_provider_external_id": 34,
+          "broadcast_type": "TV",
+          "content_id": null,
+          "content_url": null,
+          "replay_id": null,
+          "replay_url": null,
+          "broadcast_time_zone": "Europe/Paris",
+          "broadcast_time": "2025-05-20 14:55:00",
+          "broadcast_provider": {
+            "id": 1,
+            "external_id": 34,
+            "broadcast_provider_url": "https://www.dazn.com/fr-fr/p/basketball?utm_medium=display&utm_source=solus&utm_campaign=lnb&utm_content=static&utm_term=website",
+            "logo": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/sm.png"
+            }
+          }
+        }
+      ],
+      "teams": [
+        {
+          "id": 1711,
+          "external_id": 1714,
+          "logo_white": {
+            "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1714/logoWhite/lg.png",
+            "md": "https://assets.altrstat.xyz/images/Basketball/Team/1714/logoWhite/md.png",
+            "or": "https://assets.altrstat.xyz/images/Basketball/Team/1714/logoWhite/or.png",
+            "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1714/logoWhite/sm.png"
+          },
+          "logo_black": {
+            "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1714/logoBlack/lg.png",
+            "md": "https://assets.altrstat.xyz/images/Basketball/Team/1714/logoBlack/md.png",
+            "or": "https://assets.altrstat.xyz/images/Basketball/Team/1714/logoBlack/or.png",
+            "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1714/logoBlack/sm.png"
+          },
+          "team_name": "Nancy",
+          "team_code": "NAN",
+          "score_string": "81"
+        },
+        {
+          "id": 1714,
+          "external_id": 1717,
+          "logo_white": {
+            "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1717/logoWhite/lg.png",
+            "md": "https://assets.altrstat.xyz/images/Basketball/Team/1717/logoWhite/md.png",
+            "or": "https://assets.altrstat.xyz/images/Basketball/Team/1717/logoWhite/or.png",
+            "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1717/logoWhite/sm.png"
+          },
+          "logo_black": {
+            "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1717/logoBlack/lg.png",
+            "md": "https://assets.altrstat.xyz/images/Basketball/Team/1717/logoBlack/md.png",
+            "or": "https://assets.altrstat.xyz/images/Basketball/Team/1717/logoBlack/or.png",
+            "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1717/logoBlack/sm.png"
+          },
+          "team_name": "Saint-Quentin",
+          "team_code": "STQ",
+          "score_string": "88"
+        }
+      ]
+    }
+  }
+}

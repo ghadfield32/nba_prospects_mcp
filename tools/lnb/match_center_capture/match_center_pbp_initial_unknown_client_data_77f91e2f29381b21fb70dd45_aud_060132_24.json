@@ -1,0 +1,214 @@
+{
+  "url": "https://cdn-cookieyes.com/client_data/77f91e2f29381b21fb70dd45/audit-table/9Iakq53u.json",
+  "host": "cdn-cookieyes.com",
+  "path": "/client_data/77f91e2f29381b21fb70dd45/audit-table/9Iakq53u.json",
+  "page_type": "match_center_pbp",
+  "section": "initial",
+  "response_type": "unknown",
+  "timestamp": "060132",
+  "data": {
+    "cookies": {
+      "cmplz_policy_id": {
+        "cookie_id": "cmplz_policy_id",
+        "duration": "1 an",
+        "description": "Complianz sets this cookie to keep track of accepted cookie policy IDs."
+      },
+      "cmplz_functional": {
+        "cookie_id": "cmplz_functional",
+        "duration": "1 an",
+        "description": "Complianz sets this cookie to store cookie consent preferences."
+      },
+      "cmplz_statistics-anonymous": {
+        "cookie_id": "cmplz_statistics-anonymous",
+        "duration": "1 an",
+        "description": "Complianz sets this cookie is used to keep track of whether anonymized statistics are allowed to be set. This cookie is just used by the plugin to keep track of cookie consent options; it does not collect any statistics data on its own."
+      },
+      "spuid": {
+        "cookie_id": "spuid",
+        "duration": "5 an",
+        "description": "No description available."
+      },
+      "spnus": {
+        "cookie_id": "spnus",
+        "duration": "1 mois",
+        "description": "Description is currently not available."
+      },
+      "__Secure-ROLLOUT_TOKEN": {
+        "cookie_id": "__Secure-ROLLOUT_TOKEN",
+        "duration": "6 mois",
+        "description": "Description is currently not available."
+      },
+      "__Secure-YEC": {
+        "cookie_id": "__Secure-YEC",
+        "duration": "passé(e)",
+        "description": "Description is currently not available."
+      },
+      "__Secure-YNID": {
+        "cookie_id": "__Secure-YNID",
+        "duration": "6 mois",
+        "description": "Description is currently not available."
+      },
+      "AWSALBCORS": {
+        "cookie_id": "AWSALBCORS",
+        "duration": "7 jour",
+        "description": "Amazon web Services utilise ce témoin pour l’équilibrage des charges."
+      },
+      "__cf_bm": {
+        "cookie_id": "__cf_bm",
+        "duration": "1 heure",
+        "description": "Cloudflare a placé ce témoin pour prendre en charge la gestion des robots Cloudflare."
+      },
+      "csrftoken": {
+        "cookie_id": "csrftoken",
+        "duration": "1 an 1 mois 4 jour",
+        "description": "This cookie is associated with Django web development platform for python. Used to help protect the website against Cross-Site Request Forgery attacks"
+      },
+      "VISITOR_PRIVACY_METADATA": {
+        "cookie_id": "VISITOR_PRIVACY_METADATA",
+        "duration": "6 mois",
+        "description": "YouTube sets this cookie to store the user's cookie consent state for the current domain.\t"
+      },
+      "cmplz_choice": {
+        "cookie_id": "cmplz_choice",
+        "duration": "1 an",
+        "description": "Complianz sets this cookie, which is used by visitors and tells if the user has made a choice or not."
+      },
+      "mid": {
+        "cookie_id": "mid",
+        "duration": "1 an 1 mois 4 jour",
+        "description": "The mid cookie is set by Instagram to personalise user experience by remembering user preferences and settings."
+      },
+      "VISITOR_INFO1_LIVE": {
+        "cookie_id": "VISITOR_INFO1_LIVE",
+        "duration": "6 mois",
+        "description": "YouTube utilise ce témoin pour mesurer la bande passante et déterminer si l’utilisateur obtient la nouvelle ou l’ancienne interface du lecteur."
+      },
+      "ytidb::LAST_RESULT_ENTRY_KEY": {
+        "cookie_id": "ytidb::LAST_RESULT_ENTRY_KEY",
+        "duration": "N'expire jamais",
+        "description": "The cookie ytidb::LAST_RESULT_ENTRY_KEY is used by YouTube to store the last search result entry that was clicked by the user. This information is used to improve the user experience by providing more relevant search results in the future."
+      },
+      "yt-remote-connected-devices": {
+        "cookie_id": "yt-remote-connected-devices",
+        "duration": "N'expire jamais",
+        "description": "YouTube utilise ce témoin pour enregistrer les préférences de l’utilisateur en matière de vidéo lorsque des vidéos YouTube sont intégrées."
+      },
+      "yt-remote-device-id": {
+        "cookie_id": "yt-remote-device-id",
+        "duration": "N'expire jamais",
+        "description": "YouTube utilise ce témoin pour enregistrer les préférences de l’utilisateur en matière de vidéo lorsque des vidéos YouTube sont intégrées."
+      },
+      "yt-remote-session-name": {
+        "cookie_id": "yt-remote-session-name",
+        "duration": "session",
+        "description": "The yt-remote-session-name cookie is used by YouTube to store the user's video player preferences using embedded YouTube video."
+      },
+      "yt-remote-fast-check-period": {
+        "cookie_id": "yt-remote-fast-check-period",
+        "duration": "session",
+        "description": "The yt-remote-fast-check-period cookie is used by YouTube to store the user's video player preferences for embedded YouTube videos."
+      },
+      "yt-remote-session-app": {
+        "cookie_id": "yt-remote-session-app",
+        "duration": "session",
+        "description": "The yt-remote-session-app cookie is used by YouTube to store user preferences and information about the interface of the embedded YouTube video player."
+      },
+      "yt-remote-cast-available": {
+        "cookie_id": "yt-remote-cast-available",
+        "duration": "session",
+        "description": "The yt-remote-cast-available cookie is used to store the user's preferences regarding whether casting is available on their YouTube video player."
+      },
+      "yt-remote-cast-installed": {
+        "cookie_id": "yt-remote-cast-installed",
+        "duration": "session",
+        "description": "The yt-remote-cast-installed cookie is used to store the user's video player preferences using embedded YouTube video."
+      },
+      "_ga_*": {
+        "cookie_id": "_ga_*",
+        "duration": "1 an 1 mois 4 jour",
+        "description": "Google Analytics sets this cookie to store and count page views."
+      },
+      "_ga": {
+        "cookie_id": "_ga",
+        "duration": "1 an 1 mois 4 jour",
+        "description": "Google Analytics utilise ce témoin pour calculer les données relatives aux visiteurs, aux sessions et aux campagnes et suivre l’utilisation du site pour le rapport d’analyse du site. Le témoin stocke les informations de manière anonyme et attribue un numéro généré de manière aléatoire pour reconnaître les visiteurs uniques."
+      },
+      "ai_session": {
+        "cookie_id": "ai_session",
+        "duration": "1 heure",
+        "description": "This is a unique anonymous session identifier cookie set by Microsoft Application Insights software to gather statistical usage and telemetry data for apps built on the Azure cloud platform."
+      },
+      "_gid": {
+        "cookie_id": "_gid",
+        "duration": "1 jour",
+        "description": "Google Analytics utilise ce témoin pour stocker des informations sur la façon dont les visiteurs utilisent un site Internet tout en créant un rapport d’analyse des performances du site. Certaines des données collectées comprennent le nombre de visiteurs, leur source et les pages qu’ils visitent de manière anonyme."
+      },
+      "_gat_UA-*": {
+        "cookie_id": "_gat_UA-*",
+        "duration": "1 minute",
+        "description": "Google Analytics sets this cookie for user behaviour tracking.\n"
+      },
+      "UID": {
+        "cookie_id": "UID",
+        "duration": "session",
+        "description": "Scorecard Research sets this cookie for browser behaviour research."
+      },
+      "YSC": {
+        "cookie_id": "YSC",
+        "duration": "session",
+        "description": "YouTube place ce témoin pour suivre les vues des vidéos intégrées dans les pages YouTube."
+      },
+      "AWSALB": {
+        "cookie_id": "AWSALB",
+        "duration": "7 jour",
+        "description": "AWSALB est un cookie d'équilibreur de charge d'application défini par Amazon Web Services pour faire correspondre la session à la cible."
+      },
+      "ai_user": {
+        "cookie_id": "ai_user",
+        "duration": "1 an",
+        "description": "Microsoft Azure sets this cookie as a unique user identifier cookie, enabling counting of the number of users accessing the application over time."
+      },
+      "_gcl_au": {
+        "cookie_id": "_gcl_au",
+        "duration": "3 mois",
+        "description": "Google Tag Manager place le témoin pour expérimenter l’efficacité publicitaire des sites web utilisant leurs services."
+      },
+      "test_cookie": {
+        "cookie_id": "test_cookie",
+        "duration": "15 minute",
+        "description": "doubleclick.net place ce témoin pour déterminer si le navigateur de l’utilisateur accepte les témoins."
+      },
+      "_fbp": {
+        "cookie_id": "_fbp",
+        "duration": "3 mois",
+        "description": "Facebook définit ce témoin pour afficher des publicités lorsque vous êtes sur Facebook ou sur une plateforme numérique alimentée par la publicité de Facebook après avoir visité le site Internet."
+      },
+      "yt.innertube::nextId": {
+        "cookie_id": "yt.innertube::nextId",
+        "duration": "N'expire jamais",
+        "description": "YouTube utilise ce témoin pour enregistrer un identifiant unique afin de stocker des données sur les vidéos de YouTube que l’utilisateur a vues."
+      },
+      "yt.innertube::requests": {
+        "cookie_id": "yt.innertube::requests",
+        "duration": "N'expire jamais",
+        "description": "YouTube utilise ce témoin pour enregistrer un identifiant unique afin de stocker des données sur les vidéos de YouTube que l’utilisateur a vues."
+      }
+    },
+    "cky_audit_table_empty_text": "Aucun cookie à afficher.",
+    "cky_audit_table_header_id": "Cookie",
+    "cky_audit_table_header_duration": "durée",
+    "cky_audit_table_header_description": "la description",
+    "cky_preference_necessary_title": "Nécessaire",
+    "cky_preference_necessary_description": "<p>Les cookies nécessaires sont cruciaux pour les fonctions de base du site Web et celui-ci ne fonctionnera pas comme prévu sans eux.Ces cookies ne stockent aucune donnée personnellement identifiable.</p>",
+    "cky_preference_functional_title": "Fonctionnelle",
+    "cky_preference_functional_description": "<p>Les cookies fonctionnels permettent d'exécuter certaines fonctionnalités telles que le partage du contenu du site Web sur des plateformes de médias sociaux, la collecte de commentaires et d'autres fonctionnalités tierces.</p>",
+    "cky_preference_analytics_title": "Analytique",
+    "cky_preference_analytics_description": "<p>Les cookies analytiques sont utilisés pour comprendre comment les visiteurs interagissent avec le site Web. Ces cookies aident à fournir des informations sur le nombre de visiteurs, le taux de rebond, la source de trafic, etc.</p>",
+    "cky_preference_performance_title": "Performance",
+    "cky_preference_performance_description": "<p>Les cookies de performance sont utilisés pour comprendre et analyser les indices de performance clés du site Web, ce qui permet de fournir une meilleure expérience utilisateur aux visiteurs.</p>",
+    "cky_preference_advertisement_title": "Publicité",
+    "cky_preference_advertisement_description": "<p>Les cookies de publicité sont utilisés pour fournir aux visiteurs des publicités personnalisées basées sur les pages visitées précédemment et analyser l'efficacité de la campagne publicitaire.</p>",
+    "cky_preference_other_title": "Non classé",
+    "cky_preference_other_description": "<p>Les autres cookies non classés sont ceux qui sont en cours d'analyse et qui n'ont pas encore été classés dans une catégorie.</p>"
+  }
+}

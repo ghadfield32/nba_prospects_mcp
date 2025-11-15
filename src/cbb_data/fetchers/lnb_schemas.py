@@ -31,9 +31,6 @@ Created: 2025-11-14
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
-from typing import Any, Dict, List, Optional
-
 
 # ==============================================================================
 # Schedule Schema
@@ -61,7 +58,7 @@ class LNBSchedule:
     # Date/Time
     GAME_DATE: str  # ISO 8601 date: "2024-11-14"
     GAME_TIME_UTC: str  # ISO 8601 datetime: "2024-11-14T19:00:00Z"
-    GAME_TIME_LOCAL: Optional[str]  # Local time if available
+    GAME_TIME_LOCAL: str | None  # Local time if available
 
     # Teams
     HOME_TEAM_ID: int  # team_external_id
@@ -70,13 +67,13 @@ class LNBSchedule:
     AWAY_TEAM: str
 
     # Scores
-    HOME_SCORE: Optional[int]  # None if game not played yet
-    AWAY_SCORE: Optional[int]
+    HOME_SCORE: int | None  # None if game not played yet
+    AWAY_SCORE: int | None
 
     # Metadata
-    VENUE: Optional[str]  # Arena name
-    ROUND: Optional[int]  # Round number
-    PHASE: Optional[str]  # "Regular Season", "Playoffs", etc.
+    VENUE: str | None  # Arena name
+    ROUND: int | None  # Round number
+    PHASE: str | None  # "Regular Season", "Playoffs", etc.
     STATUS: str  # "scheduled", "finished", "live", "postponed"
 
 
@@ -180,13 +177,13 @@ class LNBPlayerGame:
     PTS: int
     FGM: int
     FGA: int
-    FG_PCT: Optional[float]  # None if FGA=0
+    FG_PCT: float | None  # None if FGA=0
     FG3M: int
     FG3A: int
-    FG3_PCT: Optional[float]
+    FG3_PCT: float | None
     FTM: int
     FTA: int
-    FT_PCT: Optional[float]
+    FT_PCT: float | None
 
     # Rebounds
     OREB: int
@@ -202,8 +199,8 @@ class LNBPlayerGame:
 
     # Derived
     PLUS_MINUS: int
-    EFG_PCT: Optional[float]
-    TS_PCT: Optional[float]
+    EFG_PCT: float | None
+    TS_PCT: float | None
 
 
 # ==============================================================================
@@ -222,7 +219,7 @@ class LNBPlayByPlayEvent:
 
     # Primary keys
     GAME_ID: int
-    EVENT_ID: Optional[int]  # If API provides unique event ID
+    EVENT_ID: int | None  # If API provides unique event ID
     PERIOD: int  # Quarter (1-4, 5+ for OT)
     CLOCK_TIME: str  # Game clock: "10:25" or "MM:SS"
     SEQUENCE: int  # Event order within game (for deterministic sorting)
@@ -233,30 +230,30 @@ class LNBPlayByPlayEvent:
 
     # Event type
     EVENT_TYPE: str  # "SHOT", "FOUL", "TURNOVER", "REBOUND", "SUB", etc.
-    EVENT_SUBTYPE: Optional[str]  # "3PT_JUMP", "OFFENSIVE_FOUL", "BAD_PASS", etc.
+    EVENT_SUBTYPE: str | None  # "3PT_JUMP", "OFFENSIVE_FOUL", "BAD_PASS", etc.
     DESCRIPTION: str  # Human-readable description (French or English)
 
     # Actors
-    TEAM_ID: Optional[int]  # Team performing action
-    PLAYER1_ID: Optional[int]  # Primary player (shooter, fouler, etc.)
-    PLAYER1_NAME: Optional[str]
-    PLAYER2_ID: Optional[int]  # Secondary player (assist, fouled, etc.)
-    PLAYER2_NAME: Optional[str]
+    TEAM_ID: int | None  # Team performing action
+    PLAYER1_ID: int | None  # Primary player (shooter, fouler, etc.)
+    PLAYER1_NAME: str | None
+    PLAYER2_ID: int | None  # Secondary player (assist, fouled, etc.)
+    PLAYER2_NAME: str | None
 
     # Score
     SCORE_HOME: int
     SCORE_AWAY: int
 
     # Shot details (if event_type = "SHOT")
-    SHOT_MADE: Optional[bool]
-    SHOT_VALUE: Optional[int]  # 2 or 3
-    SHOT_TYPE: Optional[str]  # "LAYUP", "DUNK", "JUMP", etc.
+    SHOT_MADE: bool | None
+    SHOT_VALUE: int | None  # 2 or 3
+    SHOT_TYPE: str | None  # "LAYUP", "DUNK", "JUMP", etc.
 
     # Foul details (if event_type = "FOUL")
-    FOUL_TYPE: Optional[str]  # "PERSONAL", "OFFENSIVE", "TECHNICAL", etc.
+    FOUL_TYPE: str | None  # "PERSONAL", "OFFENSIVE", "TECHNICAL", etc.
 
     # Turnover details (if event_type = "TURNOVER")
-    TURNOVER_TYPE: Optional[str]  # "BAD_PASS", "LOST_BALL", "TRAVEL", etc.
+    TURNOVER_TYPE: str | None  # "BAD_PASS", "LOST_BALL", "TRAVEL", etc.
 
 
 # ==============================================================================
@@ -275,7 +272,7 @@ class LNBShotEvent:
 
     # Primary keys
     GAME_ID: int
-    SHOT_ID: Optional[int]  # If API provides
+    SHOT_ID: int | None  # If API provides
     PERIOD: int
     CLOCK_TIME: str
     SEQUENCE: int
@@ -292,19 +289,19 @@ class LNBShotEvent:
     # Shot details
     SHOT_MADE: bool
     SHOT_VALUE: int  # 2 or 3
-    SHOT_TYPE: Optional[str]  # "LAYUP", "DUNK", "JUMP", "HOOK", etc.
+    SHOT_TYPE: str | None  # "LAYUP", "DUNK", "JUMP", "HOOK", etc.
 
     # Court location
     X_COORD: float  # X coordinate (court positioning)
     Y_COORD: float  # Y coordinate
-    DISTANCE: Optional[float]  # Distance from basket (feet or meters)
-    ZONE: Optional[str]  # Shot zone: "PAINT", "MID_RANGE", "3PT", etc.
+    DISTANCE: float | None  # Distance from basket (feet or meters)
+    ZONE: str | None  # Shot zone: "PAINT", "MID_RANGE", "3PT", etc.
 
     # Context
     SCORE_BEFORE: int  # Shooting team's score before shot
     SCORE_AFTER: int  # After shot (increases if made)
-    ASSIST_PLAYER_ID: Optional[int]
-    ASSIST_PLAYER_NAME: Optional[str]
+    ASSIST_PLAYER_ID: int | None
+    ASSIST_PLAYER_NAME: str | None
 
 
 # ==============================================================================
@@ -335,7 +332,7 @@ class LNBPlayerSeason:
 
     # Player info
     PLAYER_NAME: str
-    POSITION: Optional[str]  # If API provides
+    POSITION: str | None  # If API provides
 
     # Games
     GP: int  # Games played
@@ -360,14 +357,14 @@ class LNBPlayerSeason:
     PF: int
 
     # Percentages (per_mode="PerGame" or derived)
-    FG_PCT: Optional[float]
-    FG3_PCT: Optional[float]
-    FT_PCT: Optional[float]
+    FG_PCT: float | None
+    FG3_PCT: float | None
+    FT_PCT: float | None
     PTS_PG: float  # Points per game
     REB_PG: float
     AST_PG: float
-    EFG_PCT: Optional[float]
-    TS_PCT: Optional[float]
+    EFG_PCT: float | None
+    TS_PCT: float | None
 
 
 # ==============================================================================
@@ -418,8 +415,8 @@ class LNBTeamSeason:
     AWAY_L: int
 
     # Streaks/Form
-    STREAK: Optional[str]  # "W3", "L2", etc.
-    LAST_10: Optional[str]  # "7-3", etc.
+    STREAK: str | None  # "W3", "L2", etc.
+    LAST_10: str | None  # "7-3", etc.
 
 
 # ==============================================================================
@@ -427,7 +424,7 @@ class LNBTeamSeason:
 # ==============================================================================
 
 
-def calculate_efg(fgm: int, fg3m: int, fga: int) -> Optional[float]:
+def calculate_efg(fgm: int, fg3m: int, fga: int) -> float | None:
     """Calculate Effective Field Goal Percentage.
 
     eFG% = (FGM + 0.5 * FG3M) / FGA
@@ -440,7 +437,7 @@ def calculate_efg(fgm: int, fg3m: int, fga: int) -> Optional[float]:
     return (fgm + 0.5 * fg3m) / fga
 
 
-def calculate_ts(pts: int, fga: int, fta: int) -> Optional[float]:
+def calculate_ts(pts: int, fga: int, fta: int) -> float | None:
     """Calculate True Shooting Percentage.
 
     TS% = PTS / (2 * (FGA + 0.44 * FTA))
@@ -454,9 +451,7 @@ def calculate_ts(pts: int, fga: int, fta: int) -> Optional[float]:
     return pts / divisor
 
 
-def estimate_possessions(
-    fga: int, fta: int, oreb: int, tov: int
-) -> float:
+def estimate_possessions(fga: int, fta: int, oreb: int, tov: int) -> float:
     """Estimate team possessions using basic formula.
 
     Poss ≈ FGA - OREB + TOV + 0.44 * FTA
@@ -469,7 +464,7 @@ def estimate_possessions(
     return fga - oreb + tov + 0.44 * fta
 
 
-def calculate_rating(points: int, possessions: float) -> Optional[float]:
+def calculate_rating(points: int, possessions: float) -> float | None:
     """Calculate offensive or defensive rating.
 
     Rating = (Points / Possessions) * 100
@@ -487,7 +482,7 @@ def calculate_rating(points: int, possessions: float) -> Optional[float]:
 # ==============================================================================
 
 
-def get_schedule_columns() -> List[str]:
+def get_schedule_columns() -> list[str]:
     """Get column order for LNBSchedule DataFrame."""
     return [
         "GAME_ID",
@@ -511,7 +506,7 @@ def get_schedule_columns() -> List[str]:
     ]
 
 
-def get_team_game_columns() -> List[str]:
+def get_team_game_columns() -> list[str]:
     """Get column order for LNBTeamGame DataFrame."""
     return [
         "GAME_ID",
@@ -550,7 +545,7 @@ def get_team_game_columns() -> List[str]:
     ]
 
 
-def get_player_game_columns() -> List[str]:
+def get_player_game_columns() -> list[str]:
     """Get column order for LNBPlayerGame DataFrame."""
     return [
         "GAME_ID",
@@ -589,7 +584,7 @@ def get_player_game_columns() -> List[str]:
     ]
 
 
-def get_pbp_columns() -> List[str]:
+def get_pbp_columns() -> list[str]:
     """Get column order for LNBPlayByPlayEvent DataFrame."""
     return [
         "GAME_ID",
@@ -617,7 +612,7 @@ def get_pbp_columns() -> List[str]:
     ]
 
 
-def get_shots_columns() -> List[str]:
+def get_shots_columns() -> list[str]:
     """Get column order for LNBShotEvent DataFrame."""
     return [
         "GAME_ID",
@@ -644,7 +639,7 @@ def get_shots_columns() -> List[str]:
     ]
 
 
-def get_player_season_columns() -> List[str]:
+def get_player_season_columns() -> list[str]:
     """Get column order for LNBPlayerSeason DataFrame."""
     return [
         "PLAYER_ID",
@@ -684,7 +679,7 @@ def get_player_season_columns() -> List[str]:
     ]
 
 
-def get_team_season_columns() -> List[str]:
+def get_team_season_columns() -> list[str]:
     """Get column order for LNBTeamSeason DataFrame."""
     return [
         "TEAM_ID",

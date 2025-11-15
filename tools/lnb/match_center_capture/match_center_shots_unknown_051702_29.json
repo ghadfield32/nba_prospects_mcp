@@ -1,0 +1,119 @@
+{
+  "url": "https://api-prod.lnb.fr/getPartnersData",
+  "page_type": "match_center_shots",
+  "response_type": "unknown",
+  "timestamp": "051702",
+  "data": {
+    "status": true,
+    "message": "Page fetched successfully",
+    "data": {
+      "id": 54,
+      "slug": "partners",
+      "parent_id": null,
+      "status": "published",
+      "published_at": "2025-07-25T06:50:45.000Z",
+      "publish_platforms": [],
+      "metadata": {
+        "seo_tag": "",
+        "seo_title": "",
+        "seo_description": ""
+      },
+      "created_at": "2025-07-21T13:20:00.000Z",
+      "sort_order": 17,
+      "title": "Partenaires",
+      "common_info": null,
+      "description": "LNB Partners",
+      "sponsor_name": null,
+      "sponsor_url": null,
+      "sponsor_logo_url": null,
+      "hero_media": [],
+      "blocks": [
+        {
+          "block_id": 20,
+          "block_type": "partners",
+          "title": null,
+          "block_schema": null,
+          "content": {
+            "tiers": [
+              {
+                "partners": [
+                  {
+                    "linkUrl": "https://betclic.onelink.me/2887093520/wdiag3mg",
+                    "imageUrl": "uploads/content-library/f01fc11712f2d802a53cbba3ae632f84c1986bbf19d4fe7ea21bb5cdb5cf0042.png",
+                    "partnerText": "Namer de la Betclic ELITE, Betclic est la plateforme de paris sportifs en ligne qui connaît la croissance la plus rapide en Europe. Avec comme signature « Quand on est joueur, on joue », sa mission est de faire grandir la passion du sport en offrant l'expérience de pari la plus divertissante."
+                  }
+                ],
+                "tierName": "PARTENAIRE TITRE"
+              },
+              {
+                "partners": [
+                  {
+                    "linkUrl": "https://www.garance.com/",
+                    "imageUrl": "uploads/content-library/020ef20e61480cd58f89deb2606434f68e6a52874236fc0b829699cc0c3377fc.png",
+                    "partnerText": "Un partenariat qui vise juste avec Garance ! Véritable trublion du secteur assurantiel/mutualiste, Garance souhaite démocratiser l’accès à l’épargne, la rendre lisible et accessible pour tous grâce à un partenariat scellé atour de valeurs communes : le sens du collectif, la quête de performance et la proximité avec tous les français."
+                  },
+                  {
+                    "linkUrl": "https://greeproducts.fr/",
+                    "imageUrl": "uploads/content-library/352019c51a61dc667a8425ad1a7b6134b3c2aea6c6e6b6d4256defa6d79dbd5e.png",
+                    "partnerText": "Leader mondial de la climatisation et du chauffage, Gree profite du partenariat avec la LNB pour sensibiliser le grand public aux atouts de ses technologies, tout en s’appuyant sur la force sociale et médiatique d’une institution majeure du sport national. Hiver ? Été ? Confort toute l’année."
+                  },
+                  {
+                    "linkUrl": "https://www.gedibois.fr/",
+                    "imageUrl": "uploads/content-library/6c937c3efbb0f1b45b2dc698cb2423d0616bdc5a6125f10be371ba419766a804.png",
+                    "partnerText": "Depuis 2023, Gedibois et la LNB partagent une aventure commune : celle de mettre en lumière le talent, la passion et l’engagement du basket français. « Experts par passion », telle est la devise de Gedibois, et elle résonne à chaque rebond sur les parquets de Betclic ELITE et d’ELITE 2."
+                  },
+                  {
+                    "linkUrl": "https://www.rentacar.fr/",
+                    "imageUrl": "uploads/content-library/efe9b336271e1a89488b021841b471404b3709303e9fe285a97068bfd9e02451.png",
+                    "partnerText": "Le groupe français Rent A Car est le leader de la location de proximité de courte durée dans l’Hexagone. Avec 36 clubs LNB et 500 agences Rent A Car réparties dans l’Hexagone, le maillaCge territorial commun fait tout à la fois vivre le basket et la notoriété de Rent A Car auprès du grand public, pour le plus grand bonheur des membres du réseau."
+                  },
+                  {
+                    "linkUrl": "https://lotus-watches.com/fr-FR",
+                    "imageUrl": "uploads/content-library/6bb13e335436fd419775971969b940e258c7f6d2060b840f48a40bf1ef84e830.png",
+                    "partnerText": "Style, énergie, audace, esprit sportif et innovation : autant de valeurs qui incarnent parfaitement l’univers de LOTUS, chronométreur officiel de la LNB. Au travers de ce partenariat, LOTUS s’associe à l’intensité, l’énergie et l’émotion vécue sur les parquets français."
+                  },
+                  {
+                    "linkUrl": "https://www.spalding-basketball.com/fr/",
+                    "imageUrl": "uploads/content-library/3e6423a274f1bec94d7f6c238fd014a305abe78fb57ddf4019f53152592f23b3.png",
+                    "partnerText": "Ballon officiel de la LNB, Spalding est un leader dans le domaine des vêtements de basket-ball et de sport, connu pour son engagement en faveur de la qualité et son héritage de longue date dans le monde du basket-ball."
+                  }
+                ],
+                "tierName": "PARTENAIRES OFFICIELS"
+              },
+              {
+                "id": 1758698479361,
+                "partners": [
+                  {
+                    "linkUrl": "https://www.dazn.com/fr-FR/competition/Competition:7cgvnfocmjdg2yy8znp9235uk",
+                    "imageUrl": "uploads/page-service/partner/b1df3e2923fa8d6dbe874141c99b16611aa41f1dcd1328a554197a554a410727.png",
+                    "partnerText": "DAZN est la plateforme de streaming sportif qui diffuse l’intégralité de la saison Betclic Élite en France. \nGrâce à DAZN, les fans peuvent suivre les matchs en direct ou en replay, sur tous leurs appareils (TV connectée, smartphone, tablette). Avec une couverture renforcée et des offres flexibles, DAZN permet d’accéder au basket français tout au long de l’année. "
+                  },
+                  {
+                    "linkUrl": "https://www.lequipe.fr/tv/",
+                    "imageUrl": "uploads/content-library/d3a73ea5d4386e8496f068150984c89ef10664a8386d25c214f6a76955119e76.png",
+                    "partnerText": "Partenaire diffuseur de la LNB, La Chaine L’Équipe propose une affiche par journée de Betclic ÉLITE en clair, dont des rencontres phares de saison régulière, des affiches de playoffs, de Leaders Cup et le All Star Game.\nCe partenariat contribue à promouvoir les clubs, les joueurs et l’intensité du championnat, tout en rapprochant les fans du spectacle du haut niveau."
+                  },
+                  {
+                    "linkUrl": " https://www.france.tv/france-3/nouvelle-aquitaine/noa-basket/toutes-les-videos/",
+                    "imageUrl": "uploads/content-library/07259fdbd678d6aba4b2f3c8b4566c05061ef34e7b542c324e7adbb8a9ce9e2e.png",
+                    "partnerText": "Partenaire diffuseur de la LNB, France 3 NoA propose la retransmission d’affiches sélectionnées d'Élite 2 sur ses antennes régionales.\nGrâce à France 3 et son maillage territorial unique, les fans peuvent suivre en clair des rencontres majeures et vivre les émotions du championnat au plus près de leur région."
+                  },
+                  {
+                    "linkUrl": "https://lnb.tv/",
+                    "imageUrl": "uploads/content-library/15e6fd35400e71229afbc7fb473180775a6c835fc38dd7377439409248df66b6.png",
+                    "partnerText": "LNB TV est la plateforme officielle de diffusion en streaming du basket professionnel français.\nAccessible gratuitement, elle permet aux fans de suivre en direct ou en replay l’ensemble des matchs d'Élite 2."
+                  }
+                ],
+                "tierName": "Diffuseurs"
+              }
+            ],
+            "active": true
+          },
+          "sort_order": 1
+        }
+      ],
+      "parent": null,
+      "children": []
+    }
+  }
+}

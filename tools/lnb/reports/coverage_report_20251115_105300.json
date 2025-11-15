@@ -1,0 +1,52 @@
+{
+  "2022-2023": {
+    "season": "2022-2023",
+    "total_games": 10,
+    "have_pbp": 1,
+    "have_shots": 1,
+    "coverage_pbp": 10.0,
+    "coverage_shots": 10.0,
+    "missing_pbp": [
+      "1515cca4-67e6-11f0-908d-9d1d3a927139",
+      "0d346b41-6715-11f0-b247-27e6e78614e1",
+      "0d2989af-6715-11f0-b609-27e6e78614e1",
+      "0d0c88fe-6715-11f0-9d9c-27e6e78614e1",
+      "14fa0584-67e6-11f0-8cb3-9d1d3a927139",
+      "0d225fad-6715-11f0-810f-27e6e78614e1",
+      "0cfdeaf9-6715-11f0-87bc-27e6e78614e1",
+      "0cf637f3-6715-11f0-b9ed-27e6e78614e1",
+      "0d141f9e-6715-11f0-bf7e-27e6e78614e1"
+    ],
+    "missing_shots": [
+      "1515cca4-67e6-11f0-908d-9d1d3a927139",
+      "0d346b41-6715-11f0-b247-27e6e78614e1",
+      "0d2989af-6715-11f0-b609-27e6e78614e1",
+      "0d0c88fe-6715-11f0-9d9c-27e6e78614e1",
+      "14fa0584-67e6-11f0-8cb3-9d1d3a927139",
+      "0d225fad-6715-11f0-810f-27e6e78614e1",
+      "0cfdeaf9-6715-11f0-87bc-27e6e78614e1",
+      "0cf637f3-6715-11f0-b9ed-27e6e78614e1",
+      "0d141f9e-6715-11f0-bf7e-27e6e78614e1"
+    ]
+  },
+  "2023-2024": {
+    "season": "2023-2024",
+    "total_games": 5,
+    "have_pbp": 5,
+    "have_shots": 5,
+    "coverage_pbp": 100.0,
+    "coverage_shots": 100.0,
+    "missing_pbp": [],
+    "missing_shots": []
+  },
+  "2024-2025": {
+    "season": "2024-2025",
+    "total_games": 4,
+    "have_pbp": 4,
+    "have_shots": 4,
+    "coverage_pbp": 100.0,
+    "coverage_shots": 100.0,
+    "missing_pbp": [],
+    "missing_shots": []
+  }
+}

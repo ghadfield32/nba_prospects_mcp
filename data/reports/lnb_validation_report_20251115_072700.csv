@@ -1,0 +1,4 @@
+game_id,season,shots_total,shots_2pt,shots_3pt,shots_2pt_made,shots_3pt_made,pbp_shots_total,pbp_2pt_events,pbp_3pt_events,pbp_2pt_made,pbp_3pt_made,delta_total_shots,delta_2pt_attempts,delta_3pt_attempts,delta_2pt_made,delta_3pt_made,coords_valid,has_nulls,has_discrepancy,is_valid,validated_at
+0cac6e1b-6715-11f0-a9f3-27e6e78614e1,2024-2025,123,76,47,40,12,123,76,47,40,12,0,0,0,0,0,True,False,False,True,2025-11-15T07:27:00.765013
+0cd1323f-6715-11f0-86f4-27e6e78614e1,2024-2025,123,76,47,40,12,123,76,47,40,12,0,0,0,0,0,True,False,False,True,2025-11-15T07:27:00.786830
+0d0504a0-6715-11f0-98ab-27e6e78614e1,2024-2025,123,76,47,40,12,123,76,47,40,12,0,0,0,0,0,True,False,False,True,2025-11-15T07:27:00.810710

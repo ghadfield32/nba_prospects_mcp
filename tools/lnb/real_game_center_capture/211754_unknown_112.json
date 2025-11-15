@@ -1,0 +1,174 @@
+{
+  "url": "https://api-prod.lnb.fr/news/getNewsList?page=1&limit=1&type=division&external_id=0",
+  "type": "unknown",
+  "timestamp": "211754",
+  "data": {
+    "status": true,
+    "message": "News fetched",
+    "data": {
+      "latestNews": [
+        {
+          "id": 424,
+          "slug": "bourg-vs-paris-ekinox-face-a-lattaque-flamboyante-parisienne-un-test-xxl-pour-la-jl",
+          "status": "published",
+          "scheduled_at": null,
+          "published_at": "2025-11-14T17:30:12.000Z",
+          "read_time": null,
+          "publish_platforms": [
+            "web",
+            "app"
+          ],
+          "metadata": {
+            "seo_tag": "J8, Betclic ELITE, LNB, Bourg en Bresse, Paris Basketball",
+            "seo_title": "Bourg vs Paris : Ekinox face à l'attaque flamboyante parisienne, un test XXL pour la JL",
+            "seo_description": "La JL Bourg-en-Bresse (8e) reçoit un adversaire redoutable et en pleine confiance : le Paris Basketball (5e). Ce duel entre deux équipes aux bilans presque similaires est un véritable test de solidité pour la Jeu face à une équipe parisienne qui exerce une domination statistique collective historique. "
+          },
+          "created_at": "2025-11-14T17:29:29.000Z",
+          "updated_at": "2025-11-14T17:30:14.000Z",
+          "title": "Bourg vs Paris : Ekinox face à l'attaque flamboyante parisienne, un test XXL pour la JL",
+          "common_info": null,
+          "description": "La JL Bourg-en-Bresse (8e) reçoit un adversaire redoutable et en pleine confiance : le Paris Basketball (5e). Ce duel entre deux équipes aux bilans presque similaires est un véritable test de solidité pour la Jeu face à une équipe parisienne qui exerce une domination statistique collective historique. ",
+          "sponsor_name": null,
+          "sponsor_url": null,
+          "sponsor_logo_url": null,
+          "hero_title": null,
+          "hero_description": null,
+          "hero_image_url": "uploads/page-service/hero/ab8ee4ecd05f03c61fdff787ccff88211f70103e7623d3889c31338d84bf679a.JPG",
+          "hero_video_url": null,
+          "hero_media_type": "image",
+          "tags": []
+        },
+        {
+          "id": 418,
+          "slug": "dijon-gravelines-sur-lnb-tv",
+          "status": "published",
+          "scheduled_at": "2025-11-14T12:00:00.000Z",
+          "published_at": "2025-11-14T12:00:00.000Z",
+          "read_time": null,
+          "publish_platforms": [
+            "web",
+            "app"
+          ],
+          "metadata": {
+            "seo_tag": "Dijon, Gravelines, LNB TV, championnat Espoirs Élite, basket, JDA Dijon, BCM Gravelines-Dunkerque, Axel Villain, Tom Audry, match espoirs, basketball français, diffusion basket, match en direct, LNB",
+            "seo_title": "Dijon vs Gravelines : le choc Espoirs Élite sur LNB TV",
+            "seo_description": "Assistez au duel Dijon - Gravelines, deux équipes en forme du championnat Espoirs Élite, ce samedi 15 novembre à 14h15 en direct sur LNB TV."
+          },
+          "created_at": "2025-11-13T15:46:35.000Z",
+          "updated_at": "2025-11-14T12:00:00.000Z",
+          "title": "Espoirs Elite : Dijon - Gravelines sur LNB TV",
+          "common_info": null,
+          "description": "Pour la troisième année consécutive, des rencontres du championnat espoirs élite sont diffusées sur LNB TV. Cette semaine, retrouvez le choc entre Gravelines, l’équipe en forme de ces dernières semaines et Dijon, l’éloge au collectif !",
+          "sponsor_name": null,
+          "sponsor_url": null,
+          "sponsor_logo_url": null,
+          "hero_title": null,
+          "hero_description": null,
+          "hero_image_url": "uploads/page-service/hero/aabee11f6ef01c205795e6bd28cb0d444018e5759f16729ad736eaace1fe7e95.jpg",
+          "hero_video_url": null,
+          "hero_media_type": "image",
+          "tags": []
+        },
+        {
+          "id": 423,
+          "slug": "la-sig-defend-lalsace-strasbourg-leader-invaincu-dans-sa-forteresse-face-au-defi-de-boulazac",
+          "status": "published",
+          "scheduled_at": null,
+          "published_at": "2025-11-14T10:24:49.000Z",
+          "read_time": null,
+          "publish_platforms": [
+            "web",
+            "app"
+          ],
+          "metadata": {
+            "seo_tag": "Betclic ELITE, J8, LNB, Strasbourg, Boulazac",
+            "seo_title": "La SIG défend l'Alsace : Strasbourg, leader invaincu dans sa forteresse face au défi de Boulazac",
+            "seo_description": "Le leader de la Betclic ÉLITE, la SIG Strasbourg (1er), reçoit à domicile le Boulazac Basket Dordogne (11e). Au Rhénus Sport, véritable forteresse, la SIG est encore invaincue et son bilan de 5 victoires pour 2 défaites lui assure la première place du championnat. Strasbourg compte bien maintenir son statut. Face à ce mur, Boulazac devra réaliser un exploit pour marquer les esprits en faisant tomber le leader."
+          },
+          "created_at": "2025-11-14T10:24:06.000Z",
+          "updated_at": "2025-11-14T10:24:52.000Z",
+          "title": "La SIG défend l'Alsace : Strasbourg, leader invaincu dans sa forteresse face au défi de Boulazac",
+          "common_info": null,
+          "description": "Le leader de la Betclic ÉLITE, la SIG Strasbourg (1er), reçoit à domicile le Boulazac Basket Dordogne (11e). Au Rhénus Sport, véritable forteresse, la SIG est encore invaincue et son bilan de 5 victoires pour 2 défaites lui assure la première place du championnat. Strasbourg compte bien maintenir son statut. Face à ce mur, Boulazac devra réaliser un exploit pour marquer les esprits en faisant tomber le leader.",
+          "sponsor_name": null,
+          "sponsor_url": null,
+          "sponsor_logo_url": null,
+          "hero_title": null,
+          "hero_description": null,
+          "hero_image_url": "uploads/page-service/hero/ff4cd2806fa6c35342899ded44aca518e0ccc58972e07f38036b965c34edf982.jpg",
+          "hero_video_url": null,
+          "hero_media_type": "image",
+          "tags": []
+        },
+        {
+          "id": 422,
+          "slug": "la-lanterne-rouge-le-portel-defie-chalon-lheure-du-sursaut-pour-lessm-face-aux-bourguignons",
+          "status": "published",
+          "scheduled_at": null,
+          "published_at": "2025-11-14T09:35:49.000Z",
+          "read_time": null,
+          "publish_platforms": [
+            "web",
+            "app"
+          ],
+          "metadata": {
+            "seo_tag": "Betclic ELITE, J8, Le Portel, Chalon-sur-Saône, LNB",
+            "seo_title": "La lanterne rouge Le Portel défie Chalon : L'heure du sursaut pour l'ESSM face aux Bourguignons ? ",
+            "seo_description": "Le Portel, lanterne rouge de Betclic ÉLITE (16e), est au pied du mur et reçoit l'Élan Chalon (9e), une équipe en pleine ascension, pour un match aux enjeux diamétralement opposés. Tandis que l'ESSM cherche désespérément un second souffle pour sortir de la zone rouge, l'Élan Chalon veut conforter sa place dans le top 10."
+          },
+          "created_at": "2025-11-14T09:35:03.000Z",
+          "updated_at": "2025-11-14T09:35:52.000Z",
+          "title": "La lanterne rouge Le Portel défie Chalon : L'heure du sursaut pour l'ESSM face aux Bourguignons ? ",
+          "common_info": null,
+          "description": "Le Portel, lanterne rouge de Betclic ÉLITE (16e), est au pied du mur et reçoit l'Élan Chalon (9e), une équipe en pleine ascension, pour un match aux enjeux diamétralement opposés. Tandis que l'ESSM cherche désespérément un second souffle pour sortir de la zone rouge, l'Élan Chalon veut conforter sa place dans le top 10.",
+          "sponsor_name": null,
+          "sponsor_url": null,
+          "sponsor_logo_url": null,
+          "hero_title": null,
+          "hero_description": null,
+          "hero_image_url": "uploads/page-service/hero/1e9967bbc0e5439a9aa2122d1df3df831e27070796f0ad0f6d4deb501f5f0994.JPG",
+          "hero_video_url": null,
+          "hero_media_type": "image",
+          "tags": []
+        }
+      ],
+      "otherNews": [
+        {
+          "id": 421,
+          "slug": "bataille-des-mal-classes-dijon-gravelines-un-duel-dimpact-et-de-survie",
+          "status": "published",
+          "scheduled_at": null,
+          "published_at": "2025-11-14T08:57:17.000Z",
+          "read_time": null,
+          "publish_platforms": [
+            "web",
+            "app"
+          ],
+          "metadata": {
+            "seo_tag": "Betclic ELITE, LNB, J8, Dijon, Gravelines-Dunkerque ",
+            "seo_title": "Bataille des mal classés : Dijon-Gravelines, un duel d'impact et de survie",
+            "seo_description": "Le Palais des Sports Jean-Michel Geoffroy s'apprête à accueillir un duel sous haute tension entre deux formations en bas de tableau : la JDA Dijon (13e) reçoit le BCM Gravelines-Dunkerque (14e) pour un véritable \"match de la peur\" entre mal classés de Betclic ÉLITE. Ce choc des bas-fonds promet d'être serré, l'enjeu étant simple : s'éloigner de la zone de relégation."
+          },
+          "created_at": "2025-11-14T08:56:18.000Z",
+          "updated_at": "2025-11-14T08:57:19.000Z",
+          "title": "Bataille des mal classés : Dijon-Gravelines, un duel d'impact et de survie",
+          "common_info": null,
+          "description": "Le Palais des Sports Jean-Michel Geoffroy s'apprête à accueillir un duel sous haute tension entre deux formations en bas de tableau : la JDA Dijon (13e) reçoit le BCM Gravelines-Dunkerque (14e) pour un véritable \"match de la peur\" entre mal classés de Betclic ÉLITE. Ce choc des bas-fonds promet d'être serré, l'enjeu étant simple : s'éloigner de la zone de relégation.",
+          "sponsor_name": null,
+          "sponsor_url": null,
+          "sponsor_logo_url": null,
+          "hero_title": null,
+          "hero_description": null,
+          "hero_image_url": "uploads/page-service/hero/0d772f8f23de1098e65a5b781f43e51306f12f9cd413e35123bd3da5e625431f.jpg",
+          "hero_video_url": null,
+          "hero_media_type": "image",
+          "tags": []
+        }
+      ],
+      "page": 1,
+      "limit": 1,
+      "totalPages": 144,
+      "totalDocs": 144
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "url": "https://api-prod.lnb.fr/common/getSettings",
+  "host": "api-prod.lnb.fr",
+  "path": "/common/getSettings",
+  "page_type": "match_center_pbp",
+  "section": "initial",
+  "response_type": "unknown",
+  "timestamp": "060132",
+  "data": {
+    "status": true,
+    "message": "Settings fetched",
+    "data": {
+      "terms_and_condition": "https://lnb.fr/fr/terms-conditions",
+      "privacy_policy": "https://lnb.fr/fr/privacy-policy",
+      "stat_center": "https://lnb.fr/fr/block/stats-centre",
+      "match_center": "https://lnb.fr/fr/block/match-center/",
+      "poll_sponsor_logo": "",
+      "fixture_sponsor_logo": "https://cdn.lnb.fr/dummy_image/LOGO%20LOTUS%20Blanco.png",
+      "ticket": "https://linktr.ee/lnb_officiel",
+      "twitter": "https://x.com/Betclic_ELITE",
+      "facebook": "https://www.facebook.com/BetclicELITE",
+      "youtube": "https://www.youtube.com/c/LNBOfficiel",
+      "instagram": "https://www.instagram.com/betclic_elite/?hl=fr",
+      "linkedIn": "https://www.linkedin.com/company/ligue-nationale-de-basket",
+      "shop": "",
+      "mobile_app_css": "https://cdn.lnb.fr/dummy_image/mobile_app.css",
+      "share_text": "Check out this awesome app",
+      "ticket_url": "https://linktr.ee/lnb_officiel",
+      "lnb_tv": "https://www.lnb.tv/",
+      "hide_gallery": "Yes",
+      "performance_face_of_person": "[{competitionExternalId:302,personExternalId:3586},{competitionExternalId:302, personExternalId:9931}]",
+      "standings_rules": "{\"PROA\":{\"GENERAL\":{\"qualification_key\":[{\"key\":\"Qualifiés pour les Playoffs\",\"value\":\"#B28730\"},{\"key\":\"Qualifiés pour le Play-In\",\"value\":\"#48c2ff\"},{\"key\":\"Intègre les Playoffs Accession Betclic ÉLITE\",\"value\":\"#FD3313\"},{\"key\":\"Relégué en ÉLITE 2\",\"value\":\"#E93325\"}],\"range_selection\":[{\"range\":[0,5],\"color\":\"#B28730\"},{\"range\":[6,9],\"color\":\"#48c2ff\"},{\"range\":[10,13],\"color\":\"\"},{\"range\":[14,14],\"color\":\"#FD3313\"},{\"range\":[15,15],\"color\":\"#E93325\"}]},\"LEADERS CUP\":{\"qualification_key\":[{\"key\":\"Qualifiés pour la Leaders Cup\",\"value\":\"#B28730\"}],\"range_selection\":[{\"range\":[0,7],\"color\":\"#B28730\"}]}},\"PROB\":{\"GENERAL\":{\"qualification_key\":[{\"key\":\"Champion d'ÉLITE 2 et promu en Betclic ÉLITE\",\"value\":\"#B28730\"},{\"key\":\"Qualifiés pour les Playoffs Accession Betclic ÉLITE\",\"value\":\"#48c2ff\"},{\"key\":\"Qualifiés pour le Play-In\",\"value\":\"#0000B6\"},{\"key\":\"Relégués en NM1\",\"value\":\"#E83323\"}],\"range_selection\":[{\"range\":[0,0],\"color\":\"#B28730\"},{\"range\":[1,5],\"color\":\"#48c2ff\"},{\"range\":[6,9],\"color\":\"#0000B6\"},{\"range\":[10,17],\"color\":\"\"},{\"range\":[18,19],\"color\":\"#E83323\"}]},\"LEADERS CUP\":{\"qualification_key\":[{\"key\":\"Qualifiés pour la Leaders Cup ÉLITE 2\",\"value\":\"#9C273F\"}],\"range_selection\":[{\"range\":[0,3],\"color\":\"#9C273F\"}]}},\"ESPA\":{\"GENERAL\":{\"qualification_key\":[{\"key\":\"Champion de France Espoirs ELITE et Qualifiés pour le Trophée du Futur\",\"value\":\"#B08E50\"},{\"key\":\"Qualifiés pour le Trophée du Futur\",\"value\":\"#0000B6\"}],\"range_selection\":[{\"range\":[0,0],\"color\":\"#B08E50\"},{\"range\":[1,6],\"color\":\"#0000B6\"}]}},\"ESPB\":{}}",
+      "match_center_en": "https://lnb.fr/en/block/match-center/",
+      "match_center_fr": "https://lnb.fr/fr/block/match-center/",
+      "stat_center_en": "https://lnb.fr/en/block/stats-centre/",
+      "stat_center_fr": "https://lnb.fr/fr/block/stats-centre/"
+    }
+  }
+}

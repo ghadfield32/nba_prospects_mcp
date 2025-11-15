@@ -1,0 +1,4 @@
+game_id,season,competition,home_team,away_team,pbp_ok,pbp_rows,pbp_missing_columns,pbp_error,pbp_event_types_count,pbp_has_nulls,shots_ok,shots_rows,shots_missing_columns,shots_error,shots_made,shots_missed,shots_fg_pct,shots_coords_valid,shots_has_nulls
+0d0504a0-6715-11f0-98ab-27e6e78614e1,2024-2025,Unknown,,,True,629,,,12,False,True,123,,,52,71,0.42276422764227645,True,False
+0cd1323f-6715-11f0-86f4-27e6e78614e1,2024-2025,Unknown,,,True,629,,,12,False,True,123,,,52,71,0.42276422764227645,True,False
+0ce02919-6715-11f0-9d01-27e6e78614e1,2024-2025,Unknown,,,True,629,,,12,False,True,123,,,52,71,0.42276422764227645,True,False

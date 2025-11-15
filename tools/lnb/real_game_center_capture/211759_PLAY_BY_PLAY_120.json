@@ -1,0 +1,157 @@
+{
+  "url": "https://api-prod.lnb.fr/event/getEventList",
+  "type": "PLAY_BY_PLAY",
+  "timestamp": "211759",
+  "data": {
+    "status": true,
+    "message": "Events fetched (from cache)",
+    "data": {
+      "events": [
+        {
+          "id": 1,
+          "slug": "all-star-game",
+          "metadata": {
+            "seo_tag": "basket, LNB, All Star Game, concours, match des étoiles",
+            "seo_title": "All Star Game LNB - Le show du basket français",
+            "seo_description": "Le All Star Game LNB réunit chaque année les stars du championnat pour un spectacle unique mêlant sport, concours spectaculaires et ambiance festive."
+          },
+          "title": "ALL STAR GAME",
+          "common_info": {},
+          "sponsor_name": null,
+          "sponsor_url": null,
+          "sponsor_logo_url": "https://staging-cdn.lnb.ypstagingserver.com/uploads/content-library/72cb0492a24398b7f7a1183f9c5c6734b49a1d557a689cddcb542d2524f587b2.png",
+          "hero_media": [
+            {
+              "id": 131,
+              "media_type": "image",
+              "media_source": "native",
+              "media_url": "uploads/content-library/210217499ef7f9dc432862093f673e01fac1f13bcb6617c371144a34a7ecb6bb.png",
+              "title": "ALL STAR GAME",
+              "description": "Le All Star Game est le plus grand spectacle du basket français. Il réunit chaque année les meilleurs joueurs de la LNB dans une expérience unique, entre compétition, divertissement et fête du sport.",
+              "link_text": "ACHETEZ VOS BILLETS",
+              "link_url": "https://billetterie.accorarena.com/fr/manifestation/all-star-game-lnb-2025-billet/idmanif/629138/codtypadh/FTT/numadh/01/codeconf/FTMS01?_gl=1%2A1sqqyx2%2A_gcl_au%2AMTE4Njg3MDI5My4xNzU3MDc0NDkx",
+              "sponsor_image_url": "uploads/page-service/sponsor/72cb0492a24398b7f7a1183f9c5c6734b49a1d557a689cddcb542d2524f587b2.png",
+              "sponsor_text": "",
+              "sponsor_link_url": "",
+              "sort_order": 1
+            }
+          ],
+          "languages": [
+            "fr",
+            "en"
+          ],
+          "parent": null
+        },
+        {
+          "id": 49,
+          "slug": "supercoupe-lnb-2025",
+          "metadata": {
+            "seo_tag": "basket, LNB, supercoupe, saison 2025-2026,",
+            "seo_title": "Supercoupe LNB 2025 - Tournoi d’ouverture de la saison",
+            "seo_description": "La Supercoupe réunit les quatre meilleures équipes de la saison précédente pour décrocher le premier titre de la saison. Un événement qui mêle compétition et célébration, marquant le coup d’envoi du basket français"
+          },
+          "title": "Supercoupe",
+          "common_info": {},
+          "sponsor_name": null,
+          "sponsor_url": null,
+          "sponsor_logo_url": null,
+          "hero_media": [
+            {
+              "id": 122,
+              "media_type": "image",
+              "media_source": "native",
+              "media_url": "uploads/content-library/556f4f2e372d60296d8ef938ac9c415b5f17996a7522648289355e47c1bb8189.png",
+              "title": "Supercoupe",
+              "description": "La Supercoupe réunit les quatre meilleures équipes de la saison précédente pour décrocher le premier titre de la saison. Un événement qui mêle compétition et célébration, marquant le coup d’envoi du basket français",
+              "link_text": "",
+              "link_url": "",
+              "sponsor_image_url": "uploads/content-library/dbfafdb79c0cac472be05242a345559e3c728deb419c727d357e9139046722d0.png",
+              "sponsor_text": "",
+              "sponsor_link_url": "",
+              "sort_order": 1
+            }
+          ],
+          "languages": [
+            "fr",
+            "en"
+          ],
+          "parent": null
+        },
+        {
+          "id": 73,
+          "slug": "leaders-cup",
+          "metadata": {
+            "seo_tag": "basket, LNB, Leaders Cup, trophée, top 8",
+            "seo_title": "Leaders Cup LNB – 8 équipes, 1 trophée",
+            "seo_description": "La Leaders Cup LNB oppose les 8 meilleures équipes de la phase aller pour décrocher le deuxième trophée de la saison. Un week-end de basket intense, festif et décisif."
+          },
+          "title": "Leaders Cup",
+          "common_info": {},
+          "sponsor_name": null,
+          "sponsor_url": null,
+          "sponsor_logo_url": null,
+          "hero_media": [
+            {
+              "id": 137,
+              "media_type": "image",
+              "media_source": "native",
+              "media_url": "uploads/content-library/69aef5f38d1ac6563787c530faae9f11b77d2756af753cc66d33c36b93ff0af8.jpg",
+              "title": "Leaders Cup",
+              "description": "La Leaders Cup réunit les 8 meilleures équipes de la phase aller pour le deuxième trophée de la saison. Deux jours intenses de compétitivité, de partage et de célébration, où chaque match est décisif et où le public vit une expérience unique de proximité.",
+              "link_text": "RÉSERVEZ VOS BILLETS",
+              "link_url": "https://billetterie.leaderscup.fr/fr",
+              "sponsor_image_url": "uploads/content-library/f451218f30e987ea8a92119c47523eceb720949177436051738c75d4bc1d1723.jpg",
+              "sponsor_text": "",
+              "sponsor_link_url": "",
+              "sort_order": 1
+            }
+          ],
+          "languages": [
+            "en",
+            "fr"
+          ],
+          "parent": null
+        },
+        {
+          "id": 79,
+          "slug": "young-star-game",
+          "metadata": {
+            "seo_tag": "basket, LNB, Young Star Game, jeunes talents, futurs stars",
+            "seo_title": "Young Star Game - Les talents de demain",
+            "seo_description": "Le Young Star Game LNB réunit les meilleurs jeunes joueurs des centres de formation pour un match à haute intensité, vitrine des futurs talents du basket français et européen."
+          },
+          "title": "Ledger Young Star Game",
+          "common_info": {},
+          "sponsor_name": null,
+          "sponsor_url": null,
+          "sponsor_logo_url": null,
+          "hero_media": [
+            {
+              "id": 136,
+              "media_type": "image",
+              "media_source": "native",
+              "media_url": "uploads/content-library/6f7814d6ec413fe73c88a711338bd6a935a4a496f6726c8fde8bb7d9c85ef2c9.png",
+              "title": "Ledger Young Star Game",
+              "description": "Le Ledger Young Star Game met en lumière les talents d’aujourd’hui et de demain. Ce match compétitif valorise le meilleur centre de formation d’Europe, la LNB, et permet à ses jeunes joueurs de briller sur un match à haute intensité pour se faire remarquer.",
+              "link_text": "RÉSERVEZ VOS BILLETS",
+              "link_url": "https://billetterie.youngstargame.lnb.fr/fr",
+              "sponsor_image_url": "uploads/content-library/fa061e53003d9280edc907851e64c5d523159649f4e412f5dc657f495d7deb8a.png",
+              "sponsor_text": "",
+              "sponsor_link_url": "",
+              "sort_order": 1
+            }
+          ],
+          "languages": [
+            "fr",
+            "en"
+          ],
+          "parent": null
+        }
+      ],
+      "totalDocs": 4,
+      "totalPages": 1,
+      "page": 1,
+      "limit": 10
+    }
+  }
+}

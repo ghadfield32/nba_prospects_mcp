@@ -1,0 +1,949 @@
+{
+  "url": "https://api-prod.lnb.fr/match/getLiveMatch",
+  "type": "live_match",
+  "timestamp": "211745",
+  "data": {
+    "status": true,
+    "message": "Get live match",
+    "data": [
+      {
+        "id": 1,
+        "match_time_utc": "2025-11-15T17:00:00.000Z",
+        "match_date": "2025-11-15",
+        "match_status": "SCHEDULED",
+        "match_id": "0d2989af-6715-11f0-b609-27e6e78614e1",
+        "moment_image": null,
+        "timezone": "Europe/Paris",
+        "external_id": 28914,
+        "division_external_id": 1,
+        "phase_name": "Aller",
+        "points": "0 : 0",
+        "round_description": "8ème journée",
+        "score_description": "Aller | 8ème journée",
+        "venue_name": "Palais des Sports Pierre Ratte",
+        "latitude": "49.849371",
+        "longitude": "3.294246",
+        "address1": "Avenue de Remicourt",
+        "sponser_title": "Vis ton match avec",
+        "sponser_logo": "uploads/content-library/b74f597cff9ff5fc159d21eca75fa950865b876f8dc947c50271ee6531b7631d.png",
+        "sponser_url": "https://betclic.onelink.me/2887093520/wdiag3mg",
+        "watch_now_url": "",
+        "highlight_url": "",
+        "broadcast_provider_external_id": 34,
+        "broadcast_provider_url": "https://www.dazn.com/fr-fr/p/basketball?utm_medium=display&utm_source=solus&utm_campaign=lnb&utm_content=static&utm_term=website",
+        "broadcast_type": "TV",
+        "broadcast_logo": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/sm.png"
+        },
+        "broadcast": [
+          {
+            "id": 63,
+            "broadcast_id": null,
+            "external_id": 4610,
+            "broadcast_provider_external_id": 34,
+            "broadcast_type": "TV",
+            "content_id": null,
+            "content_url": null,
+            "replay_id": null,
+            "replay_url": null,
+            "broadcast_time_zone": "Europe/Paris",
+            "broadcast_time": "2025-11-15 17:55:00",
+            "broadcast_provider": {
+              "id": 1,
+              "external_id": 34,
+              "broadcast_provider_url": "https://www.dazn.com/fr-fr/p/basketball?utm_medium=display&utm_source=solus&utm_campaign=lnb&utm_content=static&utm_term=website",
+              "logo": {
+                "lg": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/lg.png",
+                "md": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/md.png",
+                "or": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/or.png",
+                "sm": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/sm.png"
+              }
+            }
+          }
+        ],
+        "competition_logo_black": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/sm.png"
+        },
+        "competition_logo_white": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/sm.png"
+        },
+        "teams": [
+          {
+            "id": 1792,
+            "external_id": 1795,
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/sm.png"
+            },
+            "team_name": "Saint-Quentin",
+            "team_code": "STQ",
+            "score_string": "0"
+          },
+          {
+            "id": 1789,
+            "external_id": 1792,
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/sm.png"
+            },
+            "team_name": "Nancy",
+            "team_code": "NAN",
+            "score_string": "0"
+          }
+        ],
+        "poll": [
+          {
+            "poll_id": 518,
+            "match_id": 28914,
+            "question": "Qui va gagner le match ?",
+            "options": [
+              {
+                "option_id": 1523,
+                "option_text": "Saint-Quentin",
+                "votes": 11,
+                "percentage": 52.38
+              },
+              {
+                "option_id": 1532,
+                "option_text": "Nancy",
+                "votes": 10,
+                "percentage": 47.62
+              }
+            ],
+            "total_votes": 21,
+            "user_answer": null
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "match_time_utc": "2025-11-15T17:10:00.000Z",
+        "match_date": "2025-11-15",
+        "match_status": "SCHEDULED",
+        "match_id": "0d0c88fe-6715-11f0-9d9c-27e6e78614e1",
+        "moment_image": null,
+        "timezone": "Europe/Paris",
+        "external_id": 28911,
+        "division_external_id": 1,
+        "phase_name": "Aller",
+        "points": "0 : 0",
+        "round_description": "8ème journée",
+        "score_description": "Aller | 8ème journée",
+        "venue_name": "Palais des Sports J.M. Geoffroy",
+        "latitude": "47.331251",
+        "longitude": "5.056556",
+        "address1": "17, rue Léon Mauris",
+        "sponser_title": "Vis ton match avec",
+        "sponser_logo": "uploads/content-library/b74f597cff9ff5fc159d21eca75fa950865b876f8dc947c50271ee6531b7631d.png",
+        "sponser_url": "https://betclic.onelink.me/2887093520/wdiag3mg",
+        "watch_now_url": "",
+        "highlight_url": "",
+        "broadcast_provider_external_id": 34,
+        "broadcast_provider_url": "https://www.dazn.com/fr-fr/p/basketball?utm_medium=display&utm_source=solus&utm_campaign=lnb&utm_content=static&utm_term=website",
+        "broadcast_type": "TV",
+        "broadcast_logo": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/sm.png"
+        },
+        "broadcast": [
+          {
+            "id": 60,
+            "broadcast_id": null,
+            "external_id": 4607,
+            "broadcast_provider_external_id": 34,
+            "broadcast_type": "TV",
+            "content_id": null,
+            "content_url": null,
+            "replay_id": null,
+            "replay_url": null,
+            "broadcast_time_zone": "Europe/Paris",
+            "broadcast_time": "2025-11-15 18:05:00",
+            "broadcast_provider": {
+              "id": 1,
+              "external_id": 34,
+              "broadcast_provider_url": "https://www.dazn.com/fr-fr/p/basketball?utm_medium=display&utm_source=solus&utm_campaign=lnb&utm_content=static&utm_term=website",
+              "logo": {
+                "lg": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/lg.png",
+                "md": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/md.png",
+                "or": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/or.png",
+                "sm": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/sm.png"
+              }
+            }
+          }
+        ],
+        "competition_logo_black": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/sm.png"
+        },
+        "competition_logo_white": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/sm.png"
+        },
+        "teams": [
+          {
+            "id": 1782,
+            "external_id": 1785,
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1785/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1785/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1785/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1785/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1785/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1785/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1785/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1785/logoBlack/sm.png"
+            },
+            "team_name": "Dijon",
+            "team_code": "DIJ",
+            "score_string": "0"
+          },
+          {
+            "id": 1783,
+            "external_id": 1786,
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1786/logoBlack/sm.png"
+            },
+            "team_name": "Gravelines-Dunkerque",
+            "team_code": "GRA",
+            "score_string": "0"
+          }
+        ],
+        "poll": [
+          {
+            "poll_id": 517,
+            "match_id": 28911,
+            "question": "Qui va gagner le match ?",
+            "options": [
+              {
+                "option_id": 1521,
+                "option_text": "Dijon",
+                "votes": 6,
+                "percentage": 66.67
+              },
+              {
+                "option_id": 1531,
+                "option_text": "Gravelines-Dunkerque",
+                "votes": 3,
+                "percentage": 33.33
+              }
+            ],
+            "total_votes": 9,
+            "user_answer": null
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "match_time_utc": "2025-11-15T17:20:00.000Z",
+        "match_date": "2025-11-15",
+        "match_status": "SCHEDULED",
+        "match_id": "0d141f9e-6715-11f0-bf7e-27e6e78614e1",
+        "moment_image": null,
+        "timezone": "Europe/Paris",
+        "external_id": 28912,
+        "division_external_id": 1,
+        "phase_name": "Aller",
+        "points": "0 : 0",
+        "round_description": "8ème journée",
+        "score_description": "Aller | 8ème journée",
+        "venue_name": "Le Chaudron",
+        "latitude": "50.716404",
+        "longitude": "1.5848012",
+        "address1": "Rue Charles Lamarre",
+        "sponser_title": "Vis ton match avec",
+        "sponser_logo": "uploads/content-library/b74f597cff9ff5fc159d21eca75fa950865b876f8dc947c50271ee6531b7631d.png",
+        "sponser_url": "https://betclic.onelink.me/2887093520/wdiag3mg",
+        "watch_now_url": "",
+        "highlight_url": "",
+        "broadcast_provider_external_id": 34,
+        "broadcast_provider_url": "https://www.dazn.com/fr-fr/p/basketball?utm_medium=display&utm_source=solus&utm_campaign=lnb&utm_content=static&utm_term=website",
+        "broadcast_type": "TV",
+        "broadcast_logo": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/sm.png"
+        },
+        "broadcast": [
+          {
+            "id": 61,
+            "broadcast_id": null,
+            "external_id": 4608,
+            "broadcast_provider_external_id": 34,
+            "broadcast_type": "TV",
+            "content_id": null,
+            "content_url": null,
+            "replay_id": null,
+            "replay_url": null,
+            "broadcast_time_zone": "Europe/Paris",
+            "broadcast_time": "2025-11-15 18:15:00",
+            "broadcast_provider": {
+              "id": 1,
+              "external_id": 34,
+              "broadcast_provider_url": "https://www.dazn.com/fr-fr/p/basketball?utm_medium=display&utm_source=solus&utm_campaign=lnb&utm_content=static&utm_term=website",
+              "logo": {
+                "lg": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/lg.png",
+                "md": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/md.png",
+                "or": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/or.png",
+                "sm": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/sm.png"
+              }
+            }
+          }
+        ],
+        "competition_logo_black": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/sm.png"
+        },
+        "competition_logo_white": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/sm.png"
+        },
+        "teams": [
+          {
+            "id": 1785,
+            "external_id": 1788,
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1788/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1788/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1788/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1788/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1788/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1788/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1788/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1788/logoBlack/sm.png"
+            },
+            "team_name": "Le Portel",
+            "team_code": "LEP",
+            "score_string": "0"
+          },
+          {
+            "id": 1780,
+            "external_id": 1783,
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1783/logoBlack/sm.png"
+            },
+            "team_name": "Chalon/Saône",
+            "team_code": "CHA",
+            "score_string": "0"
+          }
+        ],
+        "poll": [
+          {
+            "poll_id": 521,
+            "match_id": 28912,
+            "question": "Qui va gagner le match ?",
+            "options": [
+              {
+                "option_id": 1526,
+                "option_text": "Le Portel",
+                "votes": 0,
+                "percentage": 0
+              },
+              {
+                "option_id": 1529,
+                "option_text": "Chalon/Saône",
+                "votes": 11,
+                "percentage": 100
+              }
+            ],
+            "total_votes": 11,
+            "user_answer": null
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "match_time_utc": "2025-11-15T17:30:00.000Z",
+        "match_date": "2025-11-15",
+        "match_status": "SCHEDULED",
+        "match_id": "0d346b41-6715-11f0-b247-27e6e78614e1",
+        "moment_image": null,
+        "timezone": "Europe/Paris",
+        "external_id": 28915,
+        "division_external_id": 1,
+        "phase_name": "Aller",
+        "points": "0 : 0",
+        "round_description": "8ème journée",
+        "score_description": "Aller | 8ème journée",
+        "venue_name": "Rhénus Sport",
+        "latitude": "48.598309",
+        "longitude": "7.764491",
+        "address1": "Place de la Foire Exposition - Wacken",
+        "sponser_title": "Vis ton match avec",
+        "sponser_logo": "uploads/content-library/b74f597cff9ff5fc159d21eca75fa950865b876f8dc947c50271ee6531b7631d.png",
+        "sponser_url": "https://betclic.onelink.me/2887093520/wdiag3mg",
+        "watch_now_url": "",
+        "highlight_url": "",
+        "broadcast_provider_external_id": 34,
+        "broadcast_provider_url": "https://www.dazn.com/fr-fr/p/basketball?utm_medium=display&utm_source=solus&utm_campaign=lnb&utm_content=static&utm_term=website",
+        "broadcast_type": "TV",
+        "broadcast_logo": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/sm.png"
+        },
+        "broadcast": [
+          {
+            "id": 64,
+            "broadcast_id": null,
+            "external_id": 4611,
+            "broadcast_provider_external_id": 34,
+            "broadcast_type": "TV",
+            "content_id": null,
+            "content_url": null,
+            "replay_id": null,
+            "replay_url": null,
+            "broadcast_time_zone": "Europe/Paris",
+            "broadcast_time": "2025-11-15 18:25:00",
+            "broadcast_provider": {
+              "id": 1,
+              "external_id": 34,
+              "broadcast_provider_url": "https://www.dazn.com/fr-fr/p/basketball?utm_medium=display&utm_source=solus&utm_campaign=lnb&utm_content=static&utm_term=website",
+              "logo": {
+                "lg": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/lg.png",
+                "md": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/md.png",
+                "or": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/or.png",
+                "sm": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/sm.png"
+              }
+            }
+          }
+        ],
+        "competition_logo_black": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/sm.png"
+        },
+        "competition_logo_white": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/sm.png"
+        },
+        "teams": [
+          {
+            "id": 1793,
+            "external_id": 1796,
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1796/logoBlack/sm.png"
+            },
+            "team_name": "Strasbourg",
+            "team_code": "STR",
+            "score_string": "0"
+          },
+          {
+            "id": 1778,
+            "external_id": 1781,
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1781/logoBlack/sm.png"
+            },
+            "team_name": "Boulazac",
+            "team_code": "BLZ",
+            "score_string": "0"
+          }
+        ],
+        "poll": [
+          {
+            "poll_id": 520,
+            "match_id": 28915,
+            "question": "Qui va gagner le match ?",
+            "options": [
+              {
+                "option_id": 1524,
+                "option_text": "Strasbourg",
+                "votes": 9,
+                "percentage": 90
+              },
+              {
+                "option_id": 1533,
+                "option_text": "Boulazac",
+                "votes": 1,
+                "percentage": 10
+              }
+            ],
+            "total_votes": 10,
+            "user_answer": null
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "match_time_utc": "2025-11-15T19:00:00.000Z",
+        "match_date": "2025-11-15",
+        "match_status": "SCHEDULED",
+        "match_id": "14fa0584-67e6-11f0-8cb3-9d1d3a927139",
+        "moment_image": null,
+        "timezone": "Europe/Paris",
+        "external_id": 29436,
+        "division_external_id": 2,
+        "phase_name": "Aller",
+        "points": "0 : 0",
+        "round_description": "11ème journée",
+        "score_description": "Aller | 11ème journée",
+        "venue_name": "CO'Met",
+        "latitude": "",
+        "longitude": "",
+        "address1": "Rue du Président Robert Schuman",
+        "sponser_title": "Vis ton match avec",
+        "sponser_logo": "uploads/content-library/b74f597cff9ff5fc159d21eca75fa950865b876f8dc947c50271ee6531b7631d.png",
+        "sponser_url": "https://betclic.onelink.me/2887093520/wdiag3mg",
+        "watch_now_url": "",
+        "highlight_url": "",
+        "broadcast_provider_external_id": 10,
+        "broadcast_provider_url": "https://www.lnb.tv/fr-int/page/home",
+        "broadcast_type": "VIDEO_STREAM",
+        "broadcast_logo": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/10/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/10/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/10/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/10/logoWhite/sm.png"
+        },
+        "broadcast": [
+          {
+            "id": 345,
+            "broadcast_id": null,
+            "external_id": 5063,
+            "broadcast_provider_external_id": 10,
+            "broadcast_type": "VIDEO_STREAM",
+            "content_id": "2003898",
+            "content_url": null,
+            "replay_id": null,
+            "replay_url": null,
+            "broadcast_time_zone": "Europe/Paris",
+            "broadcast_time": "2025-11-15 19:55:00",
+            "broadcast_provider": {
+              "id": 241,
+              "external_id": 10,
+              "broadcast_provider_url": "https://www.lnb.tv/fr-int/page/home",
+              "logo": {
+                "lg": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/10/logoWhite/lg.png",
+                "md": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/10/logoWhite/md.png",
+                "or": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/10/logoWhite/or.png",
+                "sm": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/10/logoWhite/sm.png"
+              }
+            }
+          }
+        ],
+        "competition_logo_black": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/303/logoBlack/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/303/logoBlack/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/303/logoBlack/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/303/logoBlack/sm.png"
+        },
+        "competition_logo_white": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/303/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/303/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/303/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/303/logoWhite/sm.png"
+        },
+        "teams": [
+          {
+            "id": 1806,
+            "external_id": 1809,
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1809/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1809/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1809/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1809/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1809/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1809/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1809/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1809/logoBlack/sm.png"
+            },
+            "team_name": "Orléans",
+            "team_code": "ORL",
+            "score_string": "0"
+          },
+          {
+            "id": 1813,
+            "external_id": 1816,
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1816/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1816/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1816/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1816/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1816/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1816/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1816/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1816/logoBlack/sm.png"
+            },
+            "team_name": "Vichy",
+            "team_code": "VIC",
+            "score_string": "0"
+          }
+        ],
+        "poll": [
+          {
+            "poll_id": 519,
+            "match_id": 29436,
+            "question": "Qui va gagner le match ?",
+            "options": [
+              {
+                "option_id": 1525,
+                "option_text": "Orléans",
+                "votes": 5,
+                "percentage": 62.5
+              },
+              {
+                "option_id": 1528,
+                "option_text": "Vichy",
+                "votes": 3,
+                "percentage": 37.5
+              }
+            ],
+            "total_votes": 8,
+            "user_answer": null
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "match_time_utc": "2025-11-15T19:00:00.000Z",
+        "match_date": "2025-11-15",
+        "match_status": "SCHEDULED",
+        "match_id": "1515cca4-67e6-11f0-908d-9d1d3a927139",
+        "moment_image": null,
+        "timezone": "Europe/Paris",
+        "external_id": 29440,
+        "division_external_id": 2,
+        "phase_name": "Aller",
+        "points": "0 : 0",
+        "round_description": "11ème journée",
+        "score_description": "Aller | 11ème journée",
+        "venue_name": "Le Jeu de Paume",
+        "latitude": "47.6014623",
+        "longitude": "1.3275355",
+        "address1": "64 Av. de Châteaudun",
+        "sponser_title": "Vis ton match avec",
+        "sponser_logo": "uploads/content-library/b74f597cff9ff5fc159d21eca75fa950865b876f8dc947c50271ee6531b7631d.png",
+        "sponser_url": "https://betclic.onelink.me/2887093520/wdiag3mg",
+        "watch_now_url": "",
+        "highlight_url": "",
+        "broadcast_provider_external_id": 10,
+        "broadcast_provider_url": "https://www.lnb.tv/fr-int/page/home",
+        "broadcast_type": "VIDEO_STREAM",
+        "broadcast_logo": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/10/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/10/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/10/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/10/logoWhite/sm.png"
+        },
+        "broadcast": [
+          {
+            "id": 349,
+            "broadcast_id": null,
+            "external_id": 5059,
+            "broadcast_provider_external_id": 10,
+            "broadcast_type": "VIDEO_STREAM",
+            "content_id": "2003896",
+            "content_url": null,
+            "replay_id": null,
+            "replay_url": null,
+            "broadcast_time_zone": "Europe/Paris",
+            "broadcast_time": "2025-11-15 19:55:00",
+            "broadcast_provider": {
+              "id": 241,
+              "external_id": 10,
+              "broadcast_provider_url": "https://www.lnb.tv/fr-int/page/home",
+              "logo": {
+                "lg": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/10/logoWhite/lg.png",
+                "md": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/10/logoWhite/md.png",
+                "or": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/10/logoWhite/or.png",
+                "sm": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/10/logoWhite/sm.png"
+              }
+            }
+          }
+        ],
+        "competition_logo_black": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/303/logoBlack/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/303/logoBlack/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/303/logoBlack/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/303/logoBlack/sm.png"
+        },
+        "competition_logo_white": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/303/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/303/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/303/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/303/logoWhite/sm.png"
+        },
+        "teams": [
+          {
+            "id": 1796,
+            "external_id": 1799,
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1799/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1799/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1799/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1799/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1799/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1799/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1799/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1799/logoBlack/sm.png"
+            },
+            "team_name": "Blois",
+            "team_code": "BLO",
+            "score_string": "0"
+          },
+          {
+            "id": 1800,
+            "external_id": 1803,
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1803/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1803/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1803/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1803/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1803/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1803/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1803/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1803/logoBlack/sm.png"
+            },
+            "team_name": "Denain",
+            "team_code": "DEN",
+            "score_string": "0"
+          }
+        ],
+        "poll": [
+          {
+            "poll_id": 522,
+            "match_id": 29440,
+            "question": "Qui va gagner le match ?",
+            "options": [
+              {
+                "option_id": 1527,
+                "option_text": "Blois",
+                "votes": 7,
+                "percentage": 87.5
+              },
+              {
+                "option_id": 1534,
+                "option_text": "Denain",
+                "votes": 1,
+                "percentage": 12.5
+              }
+            ],
+            "total_votes": 8,
+            "user_answer": null
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "match_time_utc": "2025-11-15T19:30:00.000Z",
+        "match_date": "2025-11-15",
+        "match_status": "SCHEDULED",
+        "match_id": "0cfdeaf9-6715-11f0-87bc-27e6e78614e1",
+        "moment_image": null,
+        "timezone": "Europe/Paris",
+        "external_id": 28909,
+        "division_external_id": 1,
+        "phase_name": "Aller",
+        "points": "0 : 0",
+        "round_description": "8ème journée",
+        "score_description": "Aller | 8ème journée",
+        "venue_name": "Ekinox",
+        "latitude": "46.187428",
+        "longitude": "5.246629",
+        "address1": "25 avenue du Maréchal Juin",
+        "sponser_title": "Vis ton match avec",
+        "sponser_logo": "uploads/content-library/b74f597cff9ff5fc159d21eca75fa950865b876f8dc947c50271ee6531b7631d.png",
+        "sponser_url": "https://betclic.onelink.me/2887093520/wdiag3mg",
+        "watch_now_url": "",
+        "highlight_url": "",
+        "broadcast_provider_external_id": 34,
+        "broadcast_provider_url": "https://www.dazn.com/fr-fr/p/basketball?utm_medium=display&utm_source=solus&utm_campaign=lnb&utm_content=static&utm_term=website",
+        "broadcast_type": "TV",
+        "broadcast_logo": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/sm.png"
+        },
+        "broadcast": [
+          {
+            "id": 58,
+            "broadcast_id": null,
+            "external_id": 4605,
+            "broadcast_provider_external_id": 34,
+            "broadcast_type": "TV",
+            "content_id": null,
+            "content_url": null,
+            "replay_id": null,
+            "replay_url": null,
+            "broadcast_time_zone": "Europe/Paris",
+            "broadcast_time": "2025-11-15 20:25:00",
+            "broadcast_provider": {
+              "id": 1,
+              "external_id": 34,
+              "broadcast_provider_url": "https://www.dazn.com/fr-fr/p/basketball?utm_medium=display&utm_source=solus&utm_campaign=lnb&utm_content=static&utm_term=website",
+              "logo": {
+                "lg": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/lg.png",
+                "md": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/md.png",
+                "or": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/or.png",
+                "sm": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/34/logoWhite/sm.png"
+              }
+            }
+          }
+        ],
+        "competition_logo_black": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/sm.png"
+        },
+        "competition_logo_white": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/sm.png"
+        },
+        "teams": [
+          {
+            "id": 1779,
+            "external_id": 1782,
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1782/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1782/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1782/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1782/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1782/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1782/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1782/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1782/logoBlack/sm.png"
+            },
+            "team_name": "Bourg-en-Bresse",
+            "team_code": "BOU",
+            "score_string": "0"
+          },
+          {
+            "id": 1791,
+            "external_id": 1794,
+            "logo_white": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoWhite/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoWhite/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoWhite/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoWhite/sm.png"
+            },
+            "logo_black": {
+              "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoBlack/lg.png",
+              "md": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoBlack/md.png",
+              "or": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoBlack/or.png",
+              "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1794/logoBlack/sm.png"
+            },
+            "team_name": "Paris",
+            "team_code": "PAB",
+            "score_string": "0"
+          }
+        ],
+        "poll": [
+          {
+            "poll_id": 516,
+            "match_id": 28909,
+            "question": "Qui va gagner le match ?",
+            "options": [
+              {
+                "option_id": 1522,
+                "option_text": "Bourg-en-Bresse",
+                "votes": 3,
+                "percentage": 30
+              },
+              {
+                "option_id": 1530,
+                "option_text": "Paris",
+                "votes": 7,
+                "percentage": 70
+              }
+            ],
+            "total_votes": 10,
+            "user_answer": null
+          }
+        ]
+      }
+    ]
+  }
+}

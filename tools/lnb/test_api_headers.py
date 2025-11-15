@@ -40,7 +40,7 @@ import argparse
 import json
 import logging
 import sys
-from typing import Any, Dict, Optional
+from typing import Any
 
 import requests
 
@@ -72,7 +72,7 @@ TEST_ENDPOINTS = {
 }
 
 
-def parse_curl_command(curl_text: str) -> Dict[str, Any]:
+def parse_curl_command(curl_text: str) -> dict[str, Any]:
     """Parse a cURL command copied from DevTools.
 
     Extracts:
@@ -126,9 +126,9 @@ def parse_curl_command(curl_text: str) -> Dict[str, Any]:
 
 def test_endpoint(
     endpoint_name: str,
-    headers: Dict[str, str],
-    cookies: Optional[Dict[str, str]] = None,
-) -> Dict[str, Any]:
+    headers: dict[str, str],
+    cookies: dict[str, str] | None = None,
+) -> dict[str, Any]:
     """Test a single endpoint with given headers and cookies.
 
     Returns:
@@ -273,12 +273,14 @@ def main():
     if args.curl_file:
         print(f"\n[INFO] Loading headers from cURL file: {args.curl_file}")
         try:
-            with open(args.curl_file, "r") as f:
+            with open(args.curl_file) as f:
                 curl_text = f.read()
             parsed = parse_curl_command(curl_text)
             headers.update(parsed["headers"])
             cookies.update(parsed["cookies"])
-            print(f"✅ Parsed {len(parsed['headers'])} headers and {len(parsed['cookies'])} cookies")
+            print(
+                f"✅ Parsed {len(parsed['headers'])} headers and {len(parsed['cookies'])} cookies"
+            )
         except Exception as e:
             print(f"❌ Failed to parse cURL file: {e}")
             sys.exit(1)
@@ -287,7 +289,7 @@ def main():
     if args.headers_file:
         print(f"\n[INFO] Loading headers from JSON file: {args.headers_file}")
         try:
-            with open(args.headers_file, "r") as f:
+            with open(args.headers_file) as f:
                 file_headers = json.load(f)
             headers.update(file_headers)
             print(f"✅ Loaded {len(file_headers)} headers")
@@ -297,7 +299,7 @@ def main():
 
     # Parse cookies string if provided
     if args.cookies:
-        print(f"\n[INFO] Parsing cookie string")
+        print("\n[INFO] Parsing cookie string")
         for cookie_pair in args.cookies.split(";"):
             if "=" in cookie_pair:
                 key, value = cookie_pair.strip().split("=", 1)
@@ -321,7 +323,7 @@ def main():
     if result["success"]:
         print("✅ SUCCESS!")
         print(f"\nStatus: {result['status_code']}")
-        print(f"\nData preview:")
+        print("\nData preview:")
         data = result["data"]
         if isinstance(data, dict):
             print(json.dumps(data, indent=2)[:1000])

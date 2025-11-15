@@ -1,0 +1,392 @@
+{
+  "timestamp": "2025-11-15T10:59:58.488812",
+  "valid_baseline": {
+    "uuid": "0d0504a0-6715-11f0-98ab-27e6e78614e1",
+    "status_code": 200,
+    "response_type": "pbp",
+    "top_level_keys": [
+      "data",
+      "links",
+      "meta"
+    ],
+    "has_data_key": true,
+    "data_keys": [
+      "banner",
+      "broadcastsLabels",
+      "captainLabel",
+      "config",
+      "fixture",
+      "fixtureDetailText",
+      "gameStageLabels",
+      "locale",
+      "pbp",
+      "periodData",
+      "reverseTeamOrder",
+      "seasonId",
+      "sub",
+      "summary",
+      "tabs"
+    ],
+    "has_pbp": true,
+    "pbp_keys": [
+      "1",
+      "2",
+      "3",
+      "4"
+    ],
+    "num_periods": 0,
+    "total_events": 0,
+    "pbp_data_structure": "{'1': {'durationMinutes': 10, 'elapsedMinutesBeforePeriod': 0, 'ended': True, 'events': [{'bib': '8', 'clock': 'PT10M0S', 'desc': 'Entre-deux remport\u00e9', 'entityId': 'c281453b-55b7-11f0-a6ef-350ae152a4"
+  },
+  "invalid_sample": {
+    "uuid": "1515cca4-67e6-11f0-908d-9d1d3a927139",
+    "status_code": 200,
+    "response_type": "pbp",
+    "top_level_keys": [
+      "data",
+      "links",
+      "meta"
+    ],
+    "has_data_key": true,
+    "data_keys": [
+      "banner",
+      "broadcastsLabels",
+      "captainLabel",
+      "config",
+      "fixture",
+      "fixtureDetailText",
+      "gameStageLabels",
+      "locale",
+      "pbp",
+      "periodData",
+      "reverseTeamOrder",
+      "seasonId",
+      "sub",
+      "summary",
+      "tabs"
+    ],
+    "has_pbp": false,
+    "pbp_keys": [],
+    "num_periods": 0,
+    "total_events": 0,
+    "pbp_data_structure": "{}"
+  },
+  "all_invalid_results": [
+    {
+      "uuid": "1515cca4-67e6-11f0-908d-9d1d3a927139",
+      "status_code": 200,
+      "response_type": "pbp",
+      "top_level_keys": [
+        "data",
+        "links",
+        "meta"
+      ],
+      "has_data_key": true,
+      "data_keys": [
+        "banner",
+        "broadcastsLabels",
+        "captainLabel",
+        "config",
+        "fixture",
+        "fixtureDetailText",
+        "gameStageLabels",
+        "locale",
+        "pbp",
+        "periodData",
+        "reverseTeamOrder",
+        "seasonId",
+        "sub",
+        "summary",
+        "tabs"
+      ],
+      "has_pbp": false,
+      "pbp_keys": [],
+      "num_periods": 0,
+      "total_events": 0,
+      "pbp_data_structure": "{}"
+    },
+    {
+      "uuid": "0d346b41-6715-11f0-b247-27e6e78614e1",
+      "status_code": 200,
+      "response_type": "pbp",
+      "top_level_keys": [
+        "data",
+        "links",
+        "meta"
+      ],
+      "has_data_key": true,
+      "data_keys": [
+        "banner",
+        "broadcastsLabels",
+        "captainLabel",
+        "config",
+        "fixture",
+        "fixtureDetailText",
+        "gameStageLabels",
+        "locale",
+        "pbp",
+        "periodData",
+        "reverseTeamOrder",
+        "seasonId",
+        "sub",
+        "summary",
+        "tabs"
+      ],
+      "has_pbp": false,
+      "pbp_keys": [],
+      "num_periods": 0,
+      "total_events": 0,
+      "pbp_data_structure": "{}"
+    },
+    {
+      "uuid": "0d2989af-6715-11f0-b609-27e6e78614e1",
+      "status_code": 200,
+      "response_type": "pbp",
+      "top_level_keys": [
+        "data",
+        "links",
+        "meta"
+      ],
+      "has_data_key": true,
+      "data_keys": [
+        "banner",
+        "broadcastsLabels",
+        "captainLabel",
+        "config",
+        "fixture",
+        "fixtureDetailText",
+        "gameStageLabels",
+        "locale",
+        "pbp",
+        "periodData",
+        "reverseTeamOrder",
+        "seasonId",
+        "sub",
+        "summary",
+        "tabs"
+      ],
+      "has_pbp": false,
+      "pbp_keys": [],
+      "num_periods": 0,
+      "total_events": 0,
+      "pbp_data_structure": "{}"
+    },
+    {
+      "uuid": "0d0c88fe-6715-11f0-9d9c-27e6e78614e1",
+      "status_code": 200,
+      "response_type": "pbp",
+      "top_level_keys": [
+        "data",
+        "links",
+        "meta"
+      ],
+      "has_data_key": true,
+      "data_keys": [
+        "banner",
+        "broadcastsLabels",
+        "captainLabel",
+        "config",
+        "fixture",
+        "fixtureDetailText",
+        "gameStageLabels",
+        "locale",
+        "pbp",
+        "periodData",
+        "reverseTeamOrder",
+        "seasonId",
+        "sub",
+        "summary",
+        "tabs"
+      ],
+      "has_pbp": false,
+      "pbp_keys": [],
+      "num_periods": 0,
+      "total_events": 0,
+      "pbp_data_structure": "{}"
+    },
+    {
+      "uuid": "14fa0584-67e6-11f0-8cb3-9d1d3a927139",
+      "status_code": 200,
+      "response_type": "pbp",
+      "top_level_keys": [
+        "data",
+        "links",
+        "meta"
+      ],
+      "has_data_key": true,
+      "data_keys": [
+        "banner",
+        "broadcastsLabels",
+        "captainLabel",
+        "config",
+        "fixture",
+        "fixtureDetailText",
+        "gameStageLabels",
+        "locale",
+        "pbp",
+        "periodData",
+        "reverseTeamOrder",
+        "seasonId",
+        "sub",
+        "summary",
+        "tabs"
+      ],
+      "has_pbp": false,
+      "pbp_keys": [],
+      "num_periods": 0,
+      "total_events": 0,
+      "pbp_data_structure": "{}"
+    },
+    {
+      "uuid": "0d225fad-6715-11f0-810f-27e6e78614e1",
+      "status_code": 200,
+      "response_type": "pbp",
+      "top_level_keys": [
+        "data",
+        "links",
+        "meta"
+      ],
+      "has_data_key": true,
+      "data_keys": [
+        "banner",
+        "broadcastsLabels",
+        "captainLabel",
+        "config",
+        "fixture",
+        "fixtureDetailText",
+        "gameStageLabels",
+        "locale",
+        "pbp",
+        "periodData",
+        "reverseTeamOrder",
+        "seasonId",
+        "sub",
+        "summary",
+        "tabs"
+      ],
+      "has_pbp": false,
+      "pbp_keys": [],
+      "num_periods": 0,
+      "total_events": 0,
+      "pbp_data_structure": "{}"
+    },
+    {
+      "uuid": "0cfdeaf9-6715-11f0-87bc-27e6e78614e1",
+      "status_code": 200,
+      "response_type": "pbp",
+      "top_level_keys": [
+        "data",
+        "links",
+        "meta"
+      ],
+      "has_data_key": true,
+      "data_keys": [
+        "banner",
+        "broadcastsLabels",
+        "captainLabel",
+        "config",
+        "fixture",
+        "fixtureDetailText",
+        "gameStageLabels",
+        "locale",
+        "pbp",
+        "periodData",
+        "reverseTeamOrder",
+        "seasonId",
+        "sub",
+        "summary",
+        "tabs"
+      ],
+      "has_pbp": false,
+      "pbp_keys": [],
+      "num_periods": 0,
+      "total_events": 0,
+      "pbp_data_structure": "{}"
+    },
+    {
+      "uuid": "0cf637f3-6715-11f0-b9ed-27e6e78614e1",
+      "status_code": 200,
+      "response_type": "pbp",
+      "top_level_keys": [
+        "data",
+        "links",
+        "meta"
+      ],
+      "has_data_key": true,
+      "data_keys": [
+        "banner",
+        "broadcastsLabels",
+        "captainLabel",
+        "config",
+        "fixture",
+        "fixtureDetailText",
+        "gameStageLabels",
+        "locale",
+        "pbp",
+        "periodData",
+        "reverseTeamOrder",
+        "seasonId",
+        "sub",
+        "summary",
+        "tabs"
+      ],
+      "has_pbp": false,
+      "pbp_keys": [],
+      "num_periods": 0,
+      "total_events": 0,
+      "pbp_data_structure": "{}"
+    },
+    {
+      "uuid": "0d141f9e-6715-11f0-bf7e-27e6e78614e1",
+      "status_code": 200,
+      "response_type": "pbp",
+      "top_level_keys": [
+        "data",
+        "links",
+        "meta"
+      ],
+      "has_data_key": true,
+      "data_keys": [
+        "banner",
+        "broadcastsLabels",
+        "captainLabel",
+        "config",
+        "fixture",
+        "fixtureDetailText",
+        "gameStageLabels",
+        "locale",
+        "pbp",
+        "periodData",
+        "reverseTeamOrder",
+        "seasonId",
+        "sub",
+        "summary",
+        "tabs"
+      ],
+      "has_pbp": false,
+      "pbp_keys": [],
+      "num_periods": 0,
+      "total_events": 0,
+      "pbp_data_structure": "{}"
+    }
+  ],
+  "pattern_analysis": {
+    "valid_part2": [
+      "6715",
+      "11a0",
+      "1f10"
+    ],
+    "invalid_part2": [
+      "6715",
+      "67e6"
+    ],
+    "valid_part3": [
+      "11ee",
+      "11f0",
+      "11ed"
+    ],
+    "invalid_part3": [
+      "11f0"
+    ]
+  }
+}

@@ -809,8 +809,21 @@ def _fetch_schedule(compiled: dict[str, Any]) -> pd.DataFrame:
 
         df = nbl_official.fetch_nbl_schedule(season=season_str, season_type=season_type)
 
-    elif league in ["ACB", "LNB", "BBL", "BSL", "LBA"]:
-        # European domestic leagues
+    elif league == "LNB":
+        # LNB Pro A (France) - API-based
+        season_str = params.get("Season", "2024-25")
+        # Parse season: "2024-25" -> 2025 (second year), or "2025" -> 2025
+        if "-" in season_str:
+            season_year = int(season_str.split("-")[1]) + 2000  # "24-25" -> 25 -> 2025
+        else:
+            season_year = int(season_str)
+
+        division = params.get("Division", 1)  # Default to division 1 (Betclic ÉLITE)
+
+        df = fetchers.lnb.fetch_lnb_schedule_v2(season=season_year, division=division)
+
+    elif league in ["ACB", "BBL", "BSL", "LBA"]:
+        # European domestic leagues (excluding LNB)
         season_str = params.get("Season", "2024-25")
         season_type = params.get("SeasonType", "Regular Season")
 

@@ -1,0 +1,15 @@
+{
+  "url": "https://cdn-cookieyes.com/client_data/77f91e2f29381b21fb70dd45/yuf8y_wy.json",
+  "host": "cdn-cookieyes.com",
+  "path": "/client_data/77f91e2f29381b21fb70dd45/yuf8y_wy.json",
+  "page_type": "match_center_pbp",
+  "section": "initial",
+  "response_type": "unknown",
+  "timestamp": "060132",
+  "data": [
+    {
+      "targetBanner": 3411686,
+      "condition": "all"
+    }
+  ]
+}

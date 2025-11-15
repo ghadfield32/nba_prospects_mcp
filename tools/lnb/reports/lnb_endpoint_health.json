@@ -1,0 +1,155 @@
+{
+  "timestamp": "2025-11-15T13:12:18.130181",
+  "summary": {
+    "total_endpoints": 10,
+    "passed": 5,
+    "failed": 5,
+    "critical_failed": 2,
+    "success_rate": 50.0,
+    "health_status": "DEGRADED"
+  },
+  "endpoints": [
+    {
+      "name": "getAllYears",
+      "path": "/common/getAllYears",
+      "method": "GET",
+      "expected_status": 200,
+      "actual_status": 200,
+      "success": true,
+      "critical": true,
+      "response_size": 64,
+      "timestamp": "2025-11-15T13:12:18.912279"
+    },
+    {
+      "name": "getEventList",
+      "path": "/event/getEventList",
+      "method": "GET",
+      "expected_status": 200,
+      "actual_status": 200,
+      "success": true,
+      "critical": true,
+      "response_size": 5229,
+      "timestamp": "2025-11-15T13:12:19.509182"
+    },
+    {
+      "name": "getDivisionCompetitionByYear",
+      "path": "/common/getDivisionCompetitionByYear",
+      "method": "GET",
+      "expected_status": 200,
+      "actual_status": 404,
+      "success": false,
+      "critical": true,
+      "response_size": 34,
+      "timestamp": "2025-11-15T13:12:20.373616",
+      "error": {
+        "message": "Expected 200, got 404",
+        "response": "{\"code\":404,\"message\":\"Not found\"}"
+      }
+    },
+    {
+      "name": "getLiveMatch",
+      "path": "/match/getLiveMatch",
+      "method": "GET",
+      "expected_status": 200,
+      "actual_status": 200,
+      "success": true,
+      "critical": true,
+      "response_size": 32814,
+      "timestamp": "2025-11-15T13:12:21.349245"
+    },
+    {
+      "name": "getCalenderByDivision",
+      "path": "/match/getCalenderByDivision",
+      "method": "GET",
+      "expected_status": 200,
+      "actual_status": 200,
+      "success": true,
+      "critical": true,
+      "response_size": 37484,
+      "timestamp": "2025-11-15T13:12:22.589966"
+    },
+    {
+      "name": "getCalendar",
+      "path": "/stats/getCalendar",
+      "method": "POST",
+      "expected_status": 200,
+      "actual_status": 404,
+      "success": false,
+      "critical": true,
+      "response_size": 34,
+      "timestamp": "2025-11-15T13:12:23.358313",
+      "error": {
+        "message": "Expected 200, got 404",
+        "response": "{\"code\":404,\"message\":\"Not found\"}"
+      }
+    },
+    {
+      "name": "getMainCompetition (DEPRECATED)",
+      "path": "/common/getMainCompetition",
+      "method": "GET",
+      "expected_status": 404,
+      "actual_status": 404,
+      "success": true,
+      "critical": false,
+      "response_size": 34,
+      "timestamp": "2025-11-15T13:12:24.332492"
+    },
+    {
+      "name": "getCompetitionTeams",
+      "path": "/stats/getCompetitionTeams",
+      "method": "GET",
+      "expected_status": 200,
+      "actual_status": 404,
+      "success": false,
+      "critical": false,
+      "response_size": 34,
+      "timestamp": "2025-11-15T13:12:25.117979",
+      "error": {
+        "message": "Expected 200, got 404",
+        "response": "{\"code\":404,\"message\":\"Not found\"}"
+      }
+    },
+    {
+      "name": "getStanding",
+      "path": "/stats/getStanding",
+      "method": "POST",
+      "expected_status": 200,
+      "actual_status": 404,
+      "success": false,
+      "critical": false,
+      "response_size": 34,
+      "timestamp": "2025-11-15T13:12:25.964260",
+      "error": {
+        "message": "Expected 200, got 404",
+        "response": "{\"code\":404,\"message\":\"Not found\"}"
+      }
+    },
+    {
+      "name": "getTeamComparison",
+      "path": "/stats/getTeamComparison",
+      "method": "POST",
+      "expected_status": 200,
+      "actual_status": 404,
+      "success": false,
+      "critical": false,
+      "response_size": 34,
+      "timestamp": "2025-11-15T13:12:26.686511",
+      "error": {
+        "message": "Expected 200, got 404",
+        "response": "{\"code\":404,\"message\":\"Not found\"}"
+      }
+    }
+  ],
+  "recommendations": [
+    {
+      "endpoint": "getDivisionCompetitionByYear",
+      "issue": "Critical endpoint getDivisionCompetitionByYear is down",
+      "action": "Investigate immediately - core functionality may be affected"
+    },
+    {
+      "endpoint": "getCalendar",
+      "issue": "Critical endpoint getCalendar is down",
+      "action": "Investigate immediately - core functionality may be affected"
+    }
+  ]
+}

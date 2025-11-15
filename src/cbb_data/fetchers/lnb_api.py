@@ -120,7 +120,7 @@ import logging
 import time
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import requests
 
@@ -178,7 +178,7 @@ class LNBRequestStats:
         """Record a failed request."""
         self.failed += 1
 
-    def as_dict(self) -> Dict[str, int]:
+    def as_dict(self) -> dict[str, int]:
         """Convert to dictionary for JSON serialization."""
         return {"ok": self.ok, "failed": self.failed}
 
@@ -245,8 +245,8 @@ class LNBClient:
         method: str,
         path: str,
         *,
-        params: Optional[Dict[str, Any]] = None,
-        json: Optional[Dict[str, Any]] = None,
+        params: dict[str, Any] | None = None,
+        json: dict[str, Any] | None = None,
     ) -> Any:
         """Execute HTTP request with retry logic and envelope unwrapping.
 
@@ -263,7 +263,7 @@ class LNBClient:
             LNBAPIError: If request fails after all retries or API returns error
         """
         url = f"{self.base_url}{path}"
-        last_exc: Optional[BaseException] = None
+        last_exc: BaseException | None = None
 
         for attempt in range(1, self.max_retries + 1):
             try:
@@ -306,9 +306,7 @@ class LNBClient:
                 )
 
                 if attempt >= self.max_retries:
-                    logger.error(
-                        f"Request exhausted retries: {method} {path} - {exc!r}"
-                    )
+                    logger.error(f"Request exhausted retries: {method} {path} - {exc!r}")
                     raise LNBAPIError(f"Request failed for {path}: {exc!r}") from exc
 
                 # Exponential backoff
@@ -323,7 +321,7 @@ class LNBClient:
         self,
         path: str,
         *,
-        params: Optional[Dict[str, Any]] = None,
+        params: dict[str, Any] | None = None,
     ) -> Any:
         """Execute GET request.
 
@@ -340,7 +338,7 @@ class LNBClient:
         self,
         path: str,
         *,
-        json: Optional[Dict[str, Any]] = None,
+        json: dict[str, Any] | None = None,
     ) -> Any:
         """Execute POST request.
 
@@ -357,7 +355,58 @@ class LNBClient:
     # Global / Season Structure Endpoints
     # ========================================
 
-    def get_all_years(self, end_year: Optional[int] = None) -> List[Dict[str, Any]]:
+    def get_event_list(
+        self,
+        extra_params: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Get list of event types from LNB API.
+
+        Endpoint: GET /event/getEventList
+
+        **Note**: This endpoint returns event **types** (e.g., "All Star Game"),
+        NOT individual game instances. For game lists, use get_calendar_by_division()
+        or get_calendar() instead.
+
+        Confirmed working (2025-11-15), returns paginated response with event
+        metadata for special events, competitions, etc.
+
+        Args:
+            extra_params: Optional query parameters for filtering
+                (e.g., {"page": 1, "limit": 10})
+
+        Returns:
+            Paginated response dictionary:
+            {
+                "events": [List of event type objects],
+                "totalDocs": Total number of events,
+                "totalPages": Number of pages,
+                "page": Current page,
+                "limit": Items per page
+            }
+
+            Each event object contains:
+            - id: Event type ID
+            - slug: URL slug (e.g., "all-star-game")
+            - title: Event name
+            - metadata: SEO metadata
+            - sponsor info, media, etc.
+
+        Example:
+            >>> # Get all event types
+            >>> response = client.get_event_list()
+            >>> event_types = response.get("events", [])
+            >>> for event in event_types:
+            ...     print(f"{event['title']}: {event['slug']}")
+
+        See Also:
+            get_calendar_by_division(): Get actual game instances
+            get_calendar(): Get games by date range
+        """
+        params = extra_params or {}
+        logger.info(f"Fetching event list (params={params})")
+        return self._get("/event/getEventList", params=params)
+
+    def get_all_years(self, end_year: int | None = None) -> list[dict[str, Any]]:
         """Get all available seasons/years.
 
         Endpoint: GET /common/getAllYears?end_year=YYYY
@@ -380,37 +429,45 @@ class LNBClient:
         logger.info(f"Fetching all years (end_year={end_year})")
         return self._get("/common/getAllYears", params={"end_year": end_year})
 
-    def get_main_competitions(self, year: int) -> List[Dict[str, Any]]:
+    def get_main_competitions(self, year: int) -> list[dict[str, Any]]:
         """Get main competitions for a given year.
 
-        Endpoint: GET /common/getMainCompetition?year=YYYY
+        ⚠️  **DEPRECATED**: This endpoint was removed from LNB API (returns 404).
+        This method now automatically falls back to get_division_competitions_by_year().
+
+        **Migration Guide**:
+        Old (deprecated):
+            >>> comps = client.get_main_competitions(year=2024)
+
+        New (recommended):
+            >>> comps = client.get_division_competitions_by_year(
+            ...     year=2024,
+            ...     division_external_id=1  # 1 = Betclic ÉLITE
+            ... )
 
         Args:
             year: Season year (e.g., 2024 for 2024-25 season)
 
         Returns:
-            List of competition objects with fields:
-            - id: Internal database ID
-            - competition_id: UUID
-            - external_id: Integer ID (e.g., 302, 303)
-            - name: Competition name
-            - division: Division details
-            - etc.
+            List of competition objects (automatically uses fallback endpoint)
 
-        Example:
-            >>> comps = client.get_main_competitions(year=2024)
-            >>> for c in comps:
-            ...     print(f"{c['name']}: external_id={c['external_id']}")
-            Betclic ÉLITE: external_id=302
+        Note:
+            The original endpoint GET /common/getMainCompetition no longer exists.
+            Verified with systematic testing on 2025-11-15 (all path variations returned 404).
         """
-        logger.info(f"Fetching main competitions for year={year}")
-        return self._get("/common/getMainCompetition", params={"year": year})
+        logger.warning(
+            "get_main_competitions() is deprecated - endpoint removed from LNB API. "
+            "Automatically using get_division_competitions_by_year() instead. "
+            "Please update your code to call get_division_competitions_by_year() directly."
+        )
+        # Fallback to working alternative (division_external_id=1 = Betclic ÉLITE)
+        return self.get_division_competitions_by_year(year=year, division_external_id=1)
 
     def get_division_competitions_by_year(
         self,
         year: int,
         division_external_id: int = 1,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Get competitions for a specific division and year.
 
         Endpoint: GET /common/getDivisionCompetitionByYear
@@ -444,7 +501,7 @@ class LNBClient:
     def get_competition_teams(
         self,
         competition_external_id: int,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Get team roster for a competition.
 
         Endpoint: GET /stats/getCompetitionTeams?competition_external_id=N
@@ -468,16 +525,14 @@ class LNBClient:
             ...     print(f"{t['name']} (ID: {t['external_id']})")
         """
         params = {"competition_external_id": competition_external_id}
-        logger.info(
-            f"Fetching teams for competition_external_id={competition_external_id}"
-        )
+        logger.info(f"Fetching teams for competition_external_id={competition_external_id}")
         return self._get("/stats/getCompetitionTeams", params=params)
 
     def get_competitions_by_player(
         self,
         year: int,
         person_external_id: int,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Get all competitions a player participated in for a given year.
 
         Endpoint: POST /competition/getCompetitionByPlayer
@@ -528,7 +583,7 @@ class LNBClient:
         self,
         from_date: date,
         to_date: date,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Get game schedule for a date range.
 
         Endpoint: POST /stats/getCalendar
@@ -567,7 +622,7 @@ class LNBClient:
         season_start: date,
         season_end: date,
         step_days: int = 31,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Get full season schedule by chunking date ranges.
 
         Convenience method that repeatedly calls get_calendar() over the
@@ -595,7 +650,7 @@ class LNBClient:
             f"(chunk_size={step_days} days)"
         )
 
-        games_by_id: Dict[Any, Dict[str, Any]] = {}
+        games_by_id: dict[Any, dict[str, Any]] = {}
         cursor = season_start
 
         while cursor <= season_end:
@@ -603,9 +658,7 @@ class LNBClient:
 
             try:
                 chunk = self.get_calendar(cursor, chunk_end)
-                logger.debug(
-                    f"Calendar chunk: {cursor} to {chunk_end} → {len(chunk)} games"
-                )
+                logger.debug(f"Calendar chunk: {cursor} to {chunk_end} → {len(chunk)} games")
 
                 for g in chunk:
                     # Use match_external_id as primary key for deduplication
@@ -639,7 +692,7 @@ class LNBClient:
         self,
         division_external_id: int,
         year: int,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Get full season calendar filtered by division.
 
         Endpoint: GET /match/getCalenderByDivision?division_external_id=N&year=YYYY
@@ -679,9 +732,7 @@ class LNBClient:
             "division_external_id": division_external_id,
             "year": year,
         }
-        logger.info(
-            f"Fetching calendar by division: division={division_external_id}, year={year}"
-        )
+        logger.info(f"Fetching calendar by division: division={division_external_id}, year={year}")
         return self._get("/match/getCalenderByDivision", params=params)
 
     # ========================================
@@ -691,8 +742,8 @@ class LNBClient:
     def get_team_comparison(
         self,
         match_external_id: int,
-        extra_params: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        extra_params: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """Get pre-match team comparison stats.
 
         Endpoint: GET /stats/getTeamComparison?match_external_id=N
@@ -711,7 +762,7 @@ class LNBClient:
             >>> comp = client.get_team_comparison(match_external_id=28910)
             >>> print(comp['home_team']['offensive_rating'])
         """
-        params: Dict[str, Any] = {"match_external_id": match_external_id}
+        params: dict[str, Any] = {"match_external_id": match_external_id}
         if extra_params:
             params.update(extra_params)
 
@@ -721,8 +772,8 @@ class LNBClient:
     def get_last_five_home_away(
         self,
         match_external_id: int,
-        extra_params: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        extra_params: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """Get last 5 home/away games for each team.
 
         Endpoint: GET /stats/getLastFiveMatchesHomeAway?match_external_id=N
@@ -738,20 +789,18 @@ class LNBClient:
             >>> form = client.get_last_five_home_away(match_external_id=28910)
             >>> print(form['home_team_last_five_home'])
         """
-        params: Dict[str, Any] = {"match_external_id": match_external_id}
+        params: dict[str, Any] = {"match_external_id": match_external_id}
         if extra_params:
             params.update(extra_params)
 
-        logger.info(
-            f"Fetching last five home/away for match_external_id={match_external_id}"
-        )
+        logger.info(f"Fetching last five home/away for match_external_id={match_external_id}")
         return self._get("/stats/getLastFiveMatchesHomeAway", params=params)
 
     def get_last_five_h2h(
         self,
         match_external_id: int,
-        extra_params: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        extra_params: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """Get head-to-head history between two teams.
 
         Endpoint: GET /stats/getLastFiveMatchesHeadToHead?match_external_id=N
@@ -767,7 +816,7 @@ class LNBClient:
             >>> h2h = client.get_last_five_h2h(match_external_id=28910)
             >>> print(h2h['matches'])
         """
-        params: Dict[str, Any] = {"match_external_id": match_external_id}
+        params: dict[str, Any] = {"match_external_id": match_external_id}
         if extra_params:
             params.update(extra_params)
 
@@ -777,8 +826,8 @@ class LNBClient:
     def get_match_officials_pregame(
         self,
         match_external_id: int,
-        extra_params: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        extra_params: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """Get referee crew and officials for a match.
 
         Endpoint: GET /stats/getMatchOfficialsPreGame?match_external_id=N
@@ -797,7 +846,7 @@ class LNBClient:
             >>> for ref in officials.get('referees', []):
             ...     print(f"{ref['name']}: {ref['role']}")
         """
-        params: Dict[str, Any] = {"match_external_id": match_external_id}
+        params: dict[str, Any] = {"match_external_id": match_external_id}
         if extra_params:
             params.update(extra_params)
 
@@ -812,8 +861,8 @@ class LNBClient:
         self,
         competition_external_id: int,
         year: int,
-        extra_params: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        extra_params: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """Get season leaders by stat category.
 
         Endpoint: GET /stats/getPersonsLeaders
@@ -841,7 +890,7 @@ class LNBClient:
             >>> for p in leaders.get('leaders', []):
             ...     print(f"{p['name']}: {p['points']}")
         """
-        params: Dict[str, Any] = {
+        params: dict[str, Any] = {
             "competition_external_id": competition_external_id,
             "year": year,
         }
@@ -862,7 +911,7 @@ class LNBClient:
         self,
         competition_external_id: int,
         person_external_id: int,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Get detailed player performance stats for a competition.
 
         Endpoint: POST /altrstats/getPerformancePersonV2
@@ -909,7 +958,7 @@ class LNBClient:
     def get_standing(
         self,
         competition_external_id: int,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Get team standings/rankings for a competition.
 
         Endpoint: POST /altrstats/getStanding
@@ -953,8 +1002,8 @@ class LNBClient:
 
     def get_live_match(
         self,
-        extra_params: Optional[Dict[str, Any]] = None,
-    ) -> List[Dict[str, Any]]:
+        extra_params: dict[str, Any] | None = None,
+    ) -> list[dict[str, Any]]:
         """Get current and upcoming live matches.
 
         Endpoint: GET /match/getLiveMatch (discovered from DevTools)
@@ -986,8 +1035,8 @@ class LNBClient:
         self,
         match_external_id: int,
         path: str = "/stats/getMatchBoxScore",
-        extra_params: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        extra_params: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """Get match boxscore (player_game and team_game stats).
 
         ⚠️  PLACEHOLDER: Real path unknown until DevTools discovery.
@@ -1007,7 +1056,7 @@ class LNBClient:
             - Capture real path from DevTools
             - Map response to player_game and team_game schemas
         """
-        params: Dict[str, Any] = {"match_external_id": match_external_id}
+        params: dict[str, Any] = {"match_external_id": match_external_id}
         if extra_params:
             params.update(extra_params)
 
@@ -1021,8 +1070,8 @@ class LNBClient:
         self,
         match_external_id: int,
         path: str = "/stats/getMatchPlayByPlay",
-        extra_params: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        extra_params: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """Get match play-by-play event stream.
 
         ⚠️  PLACEHOLDER: Real path unknown until DevTools discovery.
@@ -1042,7 +1091,7 @@ class LNBClient:
             - Capture real path from DevTools
             - Map response to pbp_event schema
         """
-        params: Dict[str, Any] = {"match_external_id": match_external_id}
+        params: dict[str, Any] = {"match_external_id": match_external_id}
         if extra_params:
             params.update(extra_params)
 
@@ -1056,8 +1105,8 @@ class LNBClient:
         self,
         match_external_id: int,
         path: str = "/stats/getMatchShots",
-        extra_params: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        extra_params: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """Get match shot chart (shot-level x,y coordinates).
 
         ⚠️  PLACEHOLDER: Real path unknown until DevTools discovery.
@@ -1077,7 +1126,7 @@ class LNBClient:
             - Capture real path from DevTools
             - Map response to shot_event schema
         """
-        params: Dict[str, Any] = {"match_external_id": match_external_id}
+        params: dict[str, Any] = {"match_external_id": match_external_id}
         if extra_params:
             params.update(extra_params)
 
@@ -1095,12 +1144,12 @@ class LNBClient:
 
 def stress_test_lnb(
     *,
-    end_year: Optional[int] = None,
+    end_year: int | None = None,
     seasons_back: int = 3,
     division_external_id: int = 1,
     max_matches_per_season: int = 10,
-    persons_leaders_extra_params: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    persons_leaders_extra_params: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """Comprehensive stress test for all LNB API endpoints.
 
     Validates data availability and discovers granularities by:
@@ -1153,7 +1202,7 @@ def stress_test_lnb(
     logger.info("=" * 60)
 
     client = LNBClient()
-    stats: Dict[str, LNBRequestStats] = {}
+    stats: dict[str, LNBRequestStats] = {}
 
     def record(endpoint: str, success: bool) -> None:
         """Record endpoint success/failure."""
@@ -1178,7 +1227,7 @@ def stress_test_lnb(
         logger.error(f"❌ getAllYears failed: {e}")
 
     # Extract integer years
-    discovered_years: List[int] = []
+    discovered_years: list[int] = []
     for y in years_raw:
         val = y.get("year") or y.get("end_year") or y.get("season")
         if isinstance(val, int):
@@ -1192,7 +1241,7 @@ def stress_test_lnb(
     discovered_years = sorted(set(discovered_years))
     target_years = [y for y in discovered_years if y <= end_year][-seasons_back:]
 
-    results: Dict[str, Any] = {
+    results: dict[str, Any] = {
         "target_years": target_years,
         "per_year": {},
         "endpoint_stats": {},
@@ -1201,11 +1250,11 @@ def stress_test_lnb(
     logger.info(f"Target years for testing: {target_years}")
 
     # 2) Loop through years → competitions → teams → games
-    logger.info(f"\n[2/4] Testing competitions, teams, and games...")
+    logger.info("\n[2/4] Testing competitions, teams, and games...")
     for year_idx, year in enumerate(target_years, 1):
         logger.info(f"\n--- Year {year} ({year_idx}/{len(target_years)}) ---")
 
-        year_summary: Dict[str, Any] = {
+        year_summary: dict[str, Any] = {
             "competitions": [],
             "teams_per_competition": {},
             "matches_sampled": 0,
@@ -1227,9 +1276,7 @@ def stress_test_lnb(
                 year, division_external_id=division_external_id
             )
             record("getDivisionCompetitionByYear", True)
-            logger.info(
-                f"✅ getDivisionCompetitionByYear: {len(div_comps)} competitions"
-            )
+            logger.info(f"✅ getDivisionCompetitionByYear: {len(div_comps)} competitions")
         except Exception as e:
             div_comps = []
             record("getDivisionCompetitionByYear", False)
@@ -1288,9 +1335,7 @@ def stress_test_lnb(
             )
             year_summary["matches_sampled"] += len(sample_games)
 
-            logger.info(
-                f"  Testing match-level endpoints on {len(sample_games)} sample games..."
-            )
+            logger.info(f"  Testing match-level endpoints on {len(sample_games)} sample games...")
 
             for game_idx, g in enumerate(sample_games, 1):
                 match_external_id = g.get("match_external_id") or g.get("external_id")
@@ -1354,17 +1399,14 @@ def stress_test_lnb(
                 except Exception:
                     record("getMatchShots", False)
 
-            logger.info(
-                f"  Completed {len(sample_games)} sample games for {comp_name}"
-            )
+            logger.info(f"  Completed {len(sample_games)} sample games for {comp_name}")
 
         # 2D) Person leaders (once per year)
         if persons_leaders_extra_params is not None and main_comps:
             comp_ext = main_comps[0].get("external_id")
             if comp_ext is not None:
                 logger.info(
-                    f"\n  Testing getPersonsLeaders for year={year}, "
-                    f"competition={comp_ext}..."
+                    f"\n  Testing getPersonsLeaders for year={year}, " f"competition={comp_ext}..."
                 )
                 try:
                     _ = client.get_persons_leaders(
@@ -1373,7 +1415,7 @@ def stress_test_lnb(
                         extra_params=persons_leaders_extra_params,
                     )
                     record("getPersonsLeaders", True)
-                    logger.info(f"  ✅ getPersonsLeaders")
+                    logger.info("  ✅ getPersonsLeaders")
                 except Exception as e:
                     record("getPersonsLeaders", False)
                     logger.error(f"  ❌ getPersonsLeaders failed: {e}")
@@ -1382,7 +1424,7 @@ def stress_test_lnb(
         logger.info(f"--- Year {year} complete ---")
 
     # 3) Live matches
-    logger.info(f"\n[3/4] Testing live matches...")
+    logger.info("\n[3/4] Testing live matches...")
     try:
         live = client.get_live_match()
         results["live_matches_sample"] = live[:5]
@@ -1394,7 +1436,7 @@ def stress_test_lnb(
         logger.error(f"❌ getLiveMatch failed: {e}")
 
     # 4) Finalize stats
-    logger.info(f"\n[4/4] Finalizing results...")
+    logger.info("\n[4/4] Finalizing results...")
     results["endpoint_stats"] = {name: s.as_dict() for name, s in stats.items()}
 
     # Summary
@@ -1413,7 +1455,9 @@ def stress_test_lnb(
 
     logger.info("-" * 60)
     logger.info(f"Target years tested: {results['target_years']}")
-    logger.info(f"Total matches sampled: {sum(y.get('matches_sampled', 0) for y in results['per_year'].values())}")
+    logger.info(
+        f"Total matches sampled: {sum(y.get('matches_sampled', 0) for y in results['per_year'].values())}"
+    )
     logger.info("=" * 60)
 
     return results
@@ -1451,7 +1495,7 @@ if __name__ == "__main__":
     print("=" * 60)
 
     print(f"\nTarget years: {summary['target_years']}")
-    print(f"\nEndpoint statistics:")
+    print("\nEndpoint statistics:")
     for endpoint, counts in sorted(summary["endpoint_stats"].items()):
         print(f"  {endpoint}: {counts}")
 

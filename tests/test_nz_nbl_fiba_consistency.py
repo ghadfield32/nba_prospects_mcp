@@ -27,7 +27,9 @@ def test_nz_nbl_game_index_exists():
     game_index = nz_nbl_fiba.load_game_index()
 
     # Should have sample games
-    assert not game_index.empty, "Game index is empty. Expected sample games in data/nz_nbl_game_index.csv"
+    assert (
+        not game_index.empty
+    ), "Game index is empty. Expected sample games in data/nz_nbl_game_index.csv"
 
 
 def test_nz_nbl_game_index_schema():
@@ -64,7 +66,9 @@ def test_nz_nbl_player_vs_team_points_consistent():
     player_pts_by_game.rename(columns={"PTS": "PLAYER_PTS"}, inplace=True)
 
     # Merge with team stats
-    merged = team_game[["GAME_ID", "TEAM", "PTS"]].merge(player_pts_by_game, on=["GAME_ID", "TEAM"], how="left")
+    merged = team_game[["GAME_ID", "TEAM", "PTS"]].merge(
+        player_pts_by_game, on=["GAME_ID", "TEAM"], how="left"
+    )
 
     # Calculate differences
     merged["PTS_DIFF"] = (merged["PTS"] - merged["PLAYER_PTS"]).abs()
@@ -92,7 +96,9 @@ def test_nz_nbl_player_vs_team_rebounds_consistent():
     player_reb_by_game.rename(columns={"REB": "PLAYER_REB"}, inplace=True)
 
     # Merge with team stats
-    merged = team_game[["GAME_ID", "TEAM", "REB"]].merge(player_reb_by_game, on=["GAME_ID", "TEAM"], how="left")
+    merged = team_game[["GAME_ID", "TEAM", "REB"]].merge(
+        player_reb_by_game, on=["GAME_ID", "TEAM"], how="left"
+    )
 
     # Calculate differences
     merged["REB_DIFF"] = (merged["REB"] - merged["PLAYER_REB"]).abs()
@@ -219,8 +225,14 @@ def test_nz_nbl_fiba_urls_format():
     expected_bs_url = f"{base_url}/u/{league_code}/{game_id}/bs.html"
     expected_pbp_url = f"{base_url}/u/{league_code}/{game_id}/pbp.html"
 
-    assert expected_bs_url == f"https://fibalivestats.dcd.shared.geniussports.com/u/NZN/{game_id}/bs.html"
-    assert expected_pbp_url == f"https://fibalivestats.dcd.shared.geniussports.com/u/NZN/{game_id}/pbp.html"
+    assert (
+        expected_bs_url
+        == f"https://fibalivestats.dcd.shared.geniussports.com/u/NZN/{game_id}/bs.html"
+    )
+    assert (
+        expected_pbp_url
+        == f"https://fibalivestats.dcd.shared.geniussports.com/u/NZN/{game_id}/pbp.html"
+    )
 
 
 def test_nz_nbl_html_parsing_dependencies():

@@ -1,0 +1,119 @@
+{
+  "status": true,
+  "message": "Match fetched successfully",
+  "data": {
+    "id": 23106,
+    "match_time_utc": "2023-11-15T19:00:00.000Z",
+    "match_id": "3fcea9a1-1f10-11ee-a687-db190750bdda",
+    "ticket_url": "",
+    "match_date": "2023-11-15",
+    "match_status": "COMPLETE",
+    "moment_image": null,
+    "timezone": "Europe/Paris",
+    "external_id": 26386,
+    "phase_name": "Aller",
+    "points": "4 : 4",
+    "round_description": "4ème journée",
+    "display_address_mobile": "La Meilleraie (Cholet)",
+    "score_description": "Aller | 4ème journée",
+    "venue_name": "La Meilleraie (Cholet)",
+    "latitude": "47.055744",
+    "longitude": "-0.897577",
+    "sponser_title": "",
+    "sponser_logo": "",
+    "sponser_url": "",
+    "watch_now_url": "",
+    "highlight_url": "",
+    "competition_external_id": 276,
+    "competition_logo_black": {
+      "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/276/logoBlack/lg.png",
+      "md": "https://assets.altrstat.xyz/images/Basketball/Competition/276/logoBlack/md.png",
+      "or": "https://assets.altrstat.xyz/images/Basketball/Competition/276/logoBlack/or.png",
+      "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/276/logoBlack/sm.png"
+    },
+    "competition_logo_white": {
+      "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/276/logoWhite/lg.png",
+      "md": "https://assets.altrstat.xyz/images/Basketball/Competition/276/logoWhite/md.png",
+      "or": "https://assets.altrstat.xyz/images/Basketball/Competition/276/logoWhite/or.png",
+      "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/276/logoWhite/sm.png"
+    },
+    "division_external_id": 1,
+    "competition_abbrev": "PROA",
+    "address1": "Parc des Exposition - Av Marcel Prat",
+    "broadcast_provider_external_id": 29,
+    "broadcast_provider_url": "",
+    "broadcast_type": "VIDEO_STREAM",
+    "broadcast_logo": {
+      "lg": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/29/logo/lg.png",
+      "md": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/29/logo/md.png",
+      "or": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/29/logo/or.png",
+      "sm": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/29/logo/sm.png"
+    },
+    "broadcast": [
+      {
+        "id": 3424,
+        "broadcast_id": null,
+        "external_id": 3386,
+        "broadcast_provider_external_id": 29,
+        "broadcast_type": "VIDEO_STREAM",
+        "content_id": null,
+        "content_url": null,
+        "replay_id": null,
+        "replay_url": null,
+        "broadcast_time_zone": "Europe/Paris",
+        "broadcast_time": "2023-11-15 14:25:00",
+        "broadcast_provider": {
+          "id": 3326,
+          "external_id": 29,
+          "broadcast_provider_url": null,
+          "logo": {
+            "lg": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/29/logo/lg.png",
+            "md": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/29/logo/md.png",
+            "or": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/29/logo/or.png",
+            "sm": "https://assets.altrstat.xyz/images/Basketball/BroadcastProvider/29/logo/sm.png"
+          }
+        }
+      }
+    ],
+    "teams": [
+      {
+        "id": 1630,
+        "external_id": 1632,
+        "logo_white": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1632/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Team/1632/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Team/1632/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1632/logoWhite/sm.png"
+        },
+        "logo_black": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1632/logoBlack/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Team/1632/logoBlack/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Team/1632/logoBlack/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1632/logoBlack/sm.png"
+        },
+        "team_name": "Cholet",
+        "team_code": "CHO",
+        "score_string": "67"
+      },
+      {
+        "id": 1638,
+        "external_id": 1641,
+        "logo_white": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1641/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Team/1641/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Team/1641/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1641/logoWhite/sm.png"
+        },
+        "logo_black": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1641/logoBlack/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Team/1641/logoBlack/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Team/1641/logoBlack/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1641/logoBlack/sm.png"
+        },
+        "team_name": "Nancy",
+        "team_code": "NAN",
+        "score_string": "76"
+      }
+    ]
+  }
+}

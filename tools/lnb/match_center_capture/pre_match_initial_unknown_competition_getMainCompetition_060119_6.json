@@ -1,0 +1,148 @@
+{
+  "url": "https://api-prod.lnb.fr/competition/getMainCompetition?year=2025",
+  "host": "api-prod.lnb.fr",
+  "path": "/competition/getMainCompetition",
+  "page_type": "pre_match",
+  "section": "initial",
+  "response_type": "unknown",
+  "timestamp": "060119",
+  "data": {
+    "status": true,
+    "message": "Main Competition fetched (from cache)",
+    "data": [
+      {
+        "id": 300,
+        "competition_id": "3f4064bb-51ad-11f0-aaaf-2923c944b404",
+        "external_id": 302,
+        "division_external_id": 1,
+        "season_id": "df310a05-51ad-11f0-bd89-c735508e1e09",
+        "league_id": "9e75699e-f524-11eb-803a-969e9eebd316",
+        "start_date": "2025-01-07T00:00:00.000Z",
+        "end_date": "2026-06-30T00:00:00.000Z",
+        "competition_name": "Betclic ÉLITE",
+        "competition_name_international": "LNB - Betclic ÉLITE",
+        "competition_abbrev": "PROA",
+        "year": "2025",
+        "gender": "MALE",
+        "rules": [
+          {
+            "label": "Format",
+            "description": "<p data-pasted=\"true\" fr-original-style=\"\" style=\"line-height: 1.5; margin: 0px; box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235);\">Chaque club dispute 1 rencontre &agrave; domicile et 1 rencontre &agrave; l&rsquo;ext&eacute;rieur contre chaque club de Betclic ELITE A l&rsquo;issue de toutes les rencontres (30 journ&eacute;es), les &eacute;quipes class&eacute;es de 1 &agrave; 6 sont qualifi&eacute;s pour les Playoffs de Betclic ELITE.</p><p fr-original-style=\"\" style=\"line-height: 1.5; margin: 0px; box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235);\"><br fr-original-style=\"\" style=\"box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235);\"></p><p fr-original-style=\"\" style=\"line-height: 1.5; margin: 0px; box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235);\">Les &eacute;quipes class&eacute;es de 7 &agrave; 10 sont qualifi&eacute;es pour le Play-In de Betclic ELITE. &nbsp;L&rsquo;&eacute;quipe class&eacute;e 15&egrave;me est int&eacute;gr&eacute;e aux Playoffs Accession Betclic &Eacute;LITE L&rsquo;&eacute;quipe class&eacute;e 16&egrave;me est rel&eacute;gu&eacute;e en ELITE 2.</p>"
+          },
+          {
+            "label": "Classement",
+            "description": "<p fr-original-style=\"\" style=\"line-height: 1.5; margin: 0px; box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235);\">Les &eacute;quipes sont class&eacute;es en fonction de leur ratio victoires / nombre de matchs jou&eacute;s.</p>"
+          },
+          {
+            "label": "Cas d’égalité",
+            "description": "<p data-pasted=\"true\" fr-original-style=\"\" style=\"line-height: 1.5; margin: 0px; box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235);\">En cas d&rsquo;&eacute;galit&eacute; entre plusieurs &eacute;quipes : Un mini-championnat est cr&eacute;&eacute; avec uniquement les confrontations directes entre les &eacute;quipes concern&eacute;es.&nbsp;</p><p fr-original-style=\"\" style=\"line-height: 1.5; margin: 0px; box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235);\"><br fr-original-style=\"\" style=\"box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235);\"></p><p fr-original-style=\"\" style=\"line-height: 1.5; margin: 0px; box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235);\">Les &eacute;quipes sont d&eacute;partag&eacute;es selon les crit&egrave;res suivants : Ratio victoires/d&eacute;faites Plus grande diff&eacute;rence de points (points marqu&eacute;s &ndash; points encaiss&eacute;s)&nbsp;</p><p fr-original-style=\"\" style=\"line-height: 1.5; margin: 0px; box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235);\"><br fr-original-style=\"\" style=\"box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235);\"></p><p fr-original-style=\"\" style=\"line-height: 1.5; margin: 0px; box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235);\">Plus grand nombre de points marqu&eacute;s Si l&rsquo;&eacute;galit&eacute; subsiste apr&egrave;s cette proc&eacute;dure, on utilise les crit&egrave;res suivants au classement g&eacute;n&eacute;ral : Plus grande diff&eacute;rence de points (points marqu&eacute;s &ndash; points encaiss&eacute;s)</p><p fr-original-style=\"\" style=\"line-height: 1.5; margin: 0px; box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235);\"><br fr-original-style=\"\" style=\"box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235);\"></p><p fr-original-style=\"\" style=\"line-height: 1.5; margin: 0px; box-sizing: border-box; border-width: 0px; border-style: solid; border-color: rgb(229, 231, 235);\">Plus grand nombre de points marqu&eacute;s Si l&rsquo;&eacute;galit&eacute; persiste encore, un tirage au sort d&eacute;partagera les &eacute;quipes.</p>"
+          }
+        ],
+        "logo_white": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoWhite/sm.png"
+        },
+        "logo_black": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/302/logoBlack/sm.png"
+        },
+        "competition_filter_name": "GENERAL",
+        "competition_filter_value": "GENERAL"
+      },
+      {
+        "id": 301,
+        "competition_id": "4c27df72-51ae-11f0-ab8c-73390bbc2fc6",
+        "external_id": 303,
+        "division_external_id": 2,
+        "season_id": "5e31a852-51ae-11f0-b5bf-5988dba0fcf9",
+        "league_id": "9e75699e-f524-11eb-803a-969e9eebd316",
+        "start_date": "2025-07-01T00:00:00.000Z",
+        "end_date": "2026-06-30T00:00:00.000Z",
+        "competition_name": "ÉLITE 2",
+        "competition_name_international": "LNB - ÉLITE 2",
+        "competition_abbrev": "PROB",
+        "year": "2025",
+        "gender": "MALE",
+        "rules": [],
+        "logo_white": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/303/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/303/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/303/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/303/logoWhite/sm.png"
+        },
+        "logo_black": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/303/logoBlack/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/303/logoBlack/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/303/logoBlack/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/303/logoBlack/sm.png"
+        },
+        "competition_filter_name": "GENERAL",
+        "competition_filter_value": "GENERAL"
+      },
+      {
+        "id": 302,
+        "competition_id": "a355be55-51ae-11f0-baaa-958a1408092e",
+        "external_id": 304,
+        "division_external_id": 3,
+        "season_id": "c8514e7e-51ae-11f0-9446-a5c0bb403783",
+        "league_id": "9e75699e-f524-11eb-803a-969e9eebd316",
+        "start_date": "2025-07-01T00:00:00.000Z",
+        "end_date": "2026-06-30T00:00:00.000Z",
+        "competition_name": "Espoirs ÉLITE",
+        "competition_name_international": "LNB - Espoirs ELITE",
+        "competition_abbrev": "ESPA",
+        "year": "2025",
+        "gender": "MALE",
+        "rules": [],
+        "logo_white": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/304/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/304/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/304/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/304/logoWhite/sm.png"
+        },
+        "logo_black": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/304/logoBlack/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/304/logoBlack/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/304/logoBlack/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/304/logoBlack/sm.png"
+        },
+        "competition_filter_name": "GENERAL",
+        "competition_filter_value": "GENERAL"
+      },
+      {
+        "id": 303,
+        "competition_id": "15125466-51af-11f0-8ef1-7544e947355a",
+        "external_id": 305,
+        "division_external_id": 4,
+        "season_id": "24c01fe6-51af-11f0-9ad6-a91b9036e765",
+        "league_id": "9e75699e-f524-11eb-803a-969e9eebd316",
+        "start_date": "2025-07-01T00:00:00.000Z",
+        "end_date": "2026-06-30T00:00:00.000Z",
+        "competition_name": "Espoirs ÉLITE 2",
+        "competition_name_international": "LNB - Espoirs ÉLITE 2",
+        "competition_abbrev": "ESPB",
+        "year": "2025",
+        "gender": "MALE",
+        "rules": [],
+        "logo_white": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/305/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/305/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/305/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/305/logoWhite/sm.png"
+        },
+        "logo_black": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Competition/305/logoBlack/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Competition/305/logoBlack/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Competition/305/logoBlack/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Competition/305/logoBlack/sm.png"
+        },
+        "competition_filter_name": "",
+        "competition_filter_value": ""
+      }
+    ]
+  }
+}

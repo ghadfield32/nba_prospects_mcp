@@ -1,0 +1,33 @@
+{
+  "url": "https://cdn-cookieyes.com/client_data/77f91e2f29381b21fb70dd45/translations/96Upj9dc.json",
+  "host": "cdn-cookieyes.com",
+  "path": "/client_data/77f91e2f29381b21fb70dd45/translations/96Upj9dc.json",
+  "page_type": "match_center_pbp",
+  "section": "initial",
+  "response_type": "unknown",
+  "timestamp": "060132",
+  "data": {
+    "cky_notice_title": "Nous respectons votre vie privée.",
+    "cky_notice_description": "<p>Nous utilisons des cookies pour améliorer votre expérience de navigation, diffuser des publicités ou des contenus personnalisés et analyser notre trafic. En cliquant sur « Tout accepter », vous consentez à notre utilisation des cookies.</p>",
+    "cky_notice_close_label": "Fermer",
+    "cky_readmore_text": "Politique relative aux cookies",
+    "cky_readmore_privacyLink": "",
+    "cky_revisit_title": "Préférences de consentement",
+    "cky_video_placeholder_title": "Veuillez accepter le consentement des cookies",
+    "cky_accept_text": "Accepter tout",
+    "cky_reject_text": "Tout rejeter",
+    "cky_settings_text": "Personnaliser",
+    "cky_preference_title": "Personnaliser les préférences en matière de consentement",
+    "cky_preference_description": "<p>Nous utilisons des cookies pour vous aider à naviguer efficacement et à exécuter certaines fonctionnalités. Vous trouverez des informations détaillées sur tous les cookies sous chaque catégorie de consentement ci-dessous.</p><p>Les cookies qui sont catégorisés comme « nécessaires » sont stockés sur votre navigateur car ils sont essentiels pour permettre les fonctionnalités de base du site. </p><p>Nous utilisons également des cookies tiers qui nous aident à analyser la façon dont vous utilisez ce site web, à enregistrer vos préférences et à vous fournir le contenu et les publicités qui vous sont pertinents. Ces cookies ne seront stockés dans votre navigateur qu'avec votre consentement préalable.</p><p>Vous pouvez choisir d'activer ou de désactiver tout ou partie de ces cookies, mais la désactivation de certains d'entre eux peut affecter votre expérience de navigation.</p>",
+    "cky_preference_always_enabled": "Toujours actif",
+    "cky_preference_save_text": "Enregistrer mes préférences",
+    "cky_preference_accept_text": "Accepter tout",
+    "cky_preference_reject_text": "Tout rejeter",
+    "cky_preview_save_text": "Enregistrer mes préférences",
+    "cky_enable_category_label": "Activer",
+    "cky_disable_category_label": "Désactiver",
+    "cky_preference_close_label": "Fermer",
+    "cky_showmore_text": "Afficher plus",
+    "cky_showless_text": "Afficher moins"
+  }
+}

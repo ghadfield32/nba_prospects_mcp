@@ -1,0 +1,21 @@
+{
+  "metadata": {
+    "generated_at": "2025-11-15T11:05:04.987202",
+    "total_seasons": 1,
+    "total_games": 9,
+    "note": "These are SCHEDULED games (not yet played). Check back after match dates for PBP data."
+  },
+  "mappings": {
+    "2024-2025": [
+      "1515cca4-67e6-11f0-908d-9d1d3a927139",
+      "0d346b41-6715-11f0-b247-27e6e78614e1",
+      "0d2989af-6715-11f0-b609-27e6e78614e1",
+      "0d0c88fe-6715-11f0-9d9c-27e6e78614e1",
+      "14fa0584-67e6-11f0-8cb3-9d1d3a927139",
+      "0d225fad-6715-11f0-810f-27e6e78614e1",
+      "0cfdeaf9-6715-11f0-87bc-27e6e78614e1",
+      "0cf637f3-6715-11f0-b9ed-27e6e78614e1",
+      "0d141f9e-6715-11f0-bf7e-27e6e78614e1"
+    ]
+  }
+}

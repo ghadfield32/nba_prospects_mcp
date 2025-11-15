@@ -1,0 +1,91 @@
+{
+  "url": "https://api-prod.lnb.fr/match/getLastFiveMatchesHeadToHead?match_external_id=28914",
+  "page_type": "pre_match",
+  "response_type": "unknown",
+  "timestamp": "051616",
+  "data": {
+    "status": true,
+    "message": "Last Five Matches Head To Head found",
+    "data": {
+      "home_team": {
+        "team_name": "Saint-Quentin",
+        "logo_black": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoBlack/sm.png"
+        },
+        "logo_white": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1795/logoWhite/sm.png"
+        },
+        "win_count": 3
+      },
+      "away_team": {
+        "team_name": "Nancy",
+        "logo_black": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoBlack/sm.png"
+        },
+        "logo_white": {
+          "lg": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/lg.png",
+          "md": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/md.png",
+          "or": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/or.png",
+          "sm": "https://assets.altrstat.xyz/images/Basketball/Team/1792/logoWhite/sm.png"
+        },
+        "win_count": 2
+      },
+      "last_five_matches": [
+        {
+          "match_time": "2025-05-20T18:30:00",
+          "match_id": "3522345e-3362-11f0-b97d-7be2bdc7a840",
+          "team1_name": "Nancy",
+          "team1_score": "81",
+          "team2_name": "Saint-Quentin",
+          "team2_score": "88",
+          "score_description": "Play-in B | Play-in B"
+        },
+        {
+          "match_time": "2025-02-01T17:00:00",
+          "match_id": "33b7ea31-433a-11ef-98a3-71ef94574d49",
+          "team1_name": "Nancy",
+          "team1_score": "83",
+          "team2_name": "Saint-Quentin",
+          "team2_score": "74",
+          "score_description": "Retour | 18ème journée"
+        },
+        {
+          "match_time": "2024-10-06T14:30:00",
+          "match_id": "2553f530-433a-11ef-bf2f-7b2ecc558b87",
+          "team1_name": "Saint-Quentin",
+          "team1_score": "104",
+          "team2_name": "Nancy",
+          "team2_score": "96",
+          "score_description": "Aller | 3ème journée"
+        },
+        {
+          "match_time": "2024-01-28T18:00:00",
+          "match_id": "47ebdc77-1f10-11ee-a7e9-2dfe2ecd8c53",
+          "team1_name": "Nancy",
+          "team1_score": "69",
+          "team2_name": "Saint-Quentin",
+          "team2_score": "77",
+          "score_description": "Retour | 21ème journée"
+        },
+        {
+          "match_time": "2023-10-21T17:00:00",
+          "match_id": "4250614a-1f10-11ee-b0e9-e5b34c9599b5",
+          "team1_name": "Saint-Quentin",
+          "team1_score": "71",
+          "team2_name": "Nancy",
+          "team2_score": "78",
+          "score_description": "Aller | 8ème journée"
+        }
+      ]
+    }
+  }
+}
