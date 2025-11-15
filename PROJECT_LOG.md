@@ -1,3 +1,30 @@
+## 2025-11-15 (Session Current+24 Part 7) - Ruff-Lint Fixes: F401/F841/E402/B023 ✅ COMPLETE
+
+**Summary**: Fixed remaining 37 ruff-lint errors using Pythonic patterns: importlib for availability checks, per-directory E402 config, closure binding fix. All pre-commit hooks pass.
+
+**Errors Fixed (37 → 0)**:
+- **F401 (2)**: Replaced try/import with `importlib.util.find_spec()` (browser_scraper.py), added noqa for import test (test_web_scraping.py)
+- **F841 (2)**: Commented unused variables `banner_fixture`, `career_totals` with explanation
+- **E402 (31)**: Added `tools/**/*.py` to ruff per-file-ignores (pyproject.toml) - legitimate sys.path modification pattern
+- **B023 (1)**: Fixed late-binding closure with default argument `calls_list=api_calls_stats` (explore_lnb_website.py)
+
+**Key Improvements**:
+- **Pythonic availability check**: `importlib.util.find_spec("playwright")` instead of try/import (best practice per PEP 451)
+- **Proper closure binding**: Default arg captures value at definition time, prevents async handler bugs
+- **Clean config**: Per-directory ignores in pyproject.toml vs. 31 inline noqa comments
+
+**Files Modified**:
+- `src/cbb_data/fetchers/browser_scraper.py`: Replaced import-based check with importlib (2 functions)
+- `src/cbb_data/fetchers/lnb_atrium.py`: Commented unused `banner_fixture`
+- `src/cbb_data/fetchers/lnb_parsers.py`: Commented unused `career_totals`
+- `tools/lnb/test_web_scraping.py`: Added `# noqa: F401` for import test
+- `tools/lnb/explore_lnb_website.py`: Fixed closure binding with default argument
+- `pyproject.toml`: Added `[tool.ruff.lint.per-file-ignores]` for tools/
+
+**Pre-commit Results**: ✅ ALL PASSED (13/13 hooks)
+
+---
+
 ## 2025-11-15 (Session Current+24 Part 6) - Pre-commit Fixes: Mypy & Ruff Compliance ✅ COMPLETE
 
 **Summary**: Fixed all pre-commit hook failures blocking GitHub push: 61 mypy errors, 889 ruff errors (auto-fixed 815). Resolved type annotations, None arithmetic, missing returns, Playwright dynamic types, unused variables. All hooks now pass.
