@@ -1,0 +1,146 @@
+[
+  {
+    "league": "LKL",
+    "success": false,
+    "method": "json_api",
+    "error": "403 Forbidden"
+  },
+  {
+    "league": "LKL",
+    "success": false,
+    "method": "html_sc.html",
+    "error": "Status 403"
+  },
+  {
+    "league": "LKL",
+    "success": false,
+    "method": "html_shotchart.html",
+    "error": "Status 403"
+  },
+  {
+    "league": "LKL",
+    "success": false,
+    "method": "html_shots.html",
+    "error": "Status 403"
+  },
+  {
+    "league": "LKL",
+    "success": false,
+    "method": "embedded_pbp",
+    "error": "Status 403"
+  },
+  {
+    "league": "LKL",
+    "success": false,
+    "method": "embedded_bs",
+    "error": "Status 403"
+  },
+  {
+    "league": "ABA",
+    "success": false,
+    "method": "json_api",
+    "error": "403 Forbidden"
+  },
+  {
+    "league": "ABA",
+    "success": false,
+    "method": "html_sc.html",
+    "error": "Status 403"
+  },
+  {
+    "league": "ABA",
+    "success": false,
+    "method": "html_shotchart.html",
+    "error": "Status 403"
+  },
+  {
+    "league": "ABA",
+    "success": false,
+    "method": "html_shots.html",
+    "error": "Status 403"
+  },
+  {
+    "league": "ABA",
+    "success": false,
+    "method": "embedded_pbp",
+    "error": "Status 403"
+  },
+  {
+    "league": "ABA",
+    "success": false,
+    "method": "embedded_bs",
+    "error": "Status 403"
+  },
+  {
+    "league": "BAL",
+    "success": false,
+    "method": "json_api",
+    "error": "403 Forbidden"
+  },
+  {
+    "league": "BAL",
+    "success": false,
+    "method": "html_sc.html",
+    "error": "Status 403"
+  },
+  {
+    "league": "BAL",
+    "success": false,
+    "method": "html_shotchart.html",
+    "error": "Status 403"
+  },
+  {
+    "league": "BAL",
+    "success": false,
+    "method": "html_shots.html",
+    "error": "Status 403"
+  },
+  {
+    "league": "BAL",
+    "success": false,
+    "method": "embedded_pbp",
+    "error": "Status 403"
+  },
+  {
+    "league": "BAL",
+    "success": false,
+    "method": "embedded_bs",
+    "error": "Status 403"
+  },
+  {
+    "league": "BCL",
+    "success": false,
+    "method": "json_api",
+    "error": "403 Forbidden"
+  },
+  {
+    "league": "BCL",
+    "success": false,
+    "method": "html_sc.html",
+    "error": "Status 403"
+  },
+  {
+    "league": "BCL",
+    "success": false,
+    "method": "html_shotchart.html",
+    "error": "Status 403"
+  },
+  {
+    "league": "BCL",
+    "success": false,
+    "method": "html_shots.html",
+    "error": "Status 403"
+  },
+  {
+    "league": "BCL",
+    "success": false,
+    "method": "embedded_pbp",
+    "error": "Status 403"
+  },
+  {
+    "league": "BCL",
+    "success": false,
+    "method": "embedded_bs",
+    "error": "Status 403"
+  }
+]

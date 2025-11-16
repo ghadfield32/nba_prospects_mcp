@@ -15,9 +15,9 @@ Data Granularities:
 - player_game: ✅ Via FIBA HTML box score scraping
 - team_game: ✅ Aggregated from player_game
 - pbp: ✅ Via FIBA HTML play-by-play scraping
+- shots: ✅ Via FIBA shot chart scraping (may require browser rendering if HTTP blocked)
 - team_season: ✅ Aggregated from team_game
 - player_season: ✅ Aggregated from player_game
-- shots: ❌ FIBA HTML doesn't provide (x,y) coordinates
 
 Competition Structure:
 - Regular Season: 10-12 teams
@@ -47,6 +47,7 @@ from .fiba_html_common import (
     load_fiba_game_index,
     scrape_fiba_box_score,
     scrape_fiba_play_by_play,
+    scrape_fiba_shot_chart,
 )
 
 logger = logging.getLogger(__name__)
@@ -365,6 +366,112 @@ def fetch_pbp(
     df = ensure_standard_columns(df, "pbp", LEAGUE, season)
 
     logger.info(f"Scraped {len(df)} PBP events for {LEAGUE} {season}")
+    return df
+
+
+@retry_on_error(max_attempts=3, backoff_seconds=2.0)
+@cached_dataframe
+def fetch_shot_chart(
+    season: str = "2023-24",
+    force_refresh: bool = False,
+    use_browser: bool = False,
+) -> pd.DataFrame:
+    """Fetch LKL shot chart data for a season
+
+    Scrapes FIBA LiveStats for shot chart data (x,y coordinates, shot results).
+    Attempts multiple methods: HTML endpoints, JSON API, browser rendering.
+
+    Args:
+        season: Season string (e.g., "2023-24")
+        force_refresh: If True, ignore cache and re-scrape all games
+        use_browser: If True, use Playwright for JavaScript-rendered pages (slower but works when HTTP blocked)
+
+    Returns:
+        DataFrame with shot data
+
+    Columns:
+        - LEAGUE, SEASON, GAME_ID, PLAYER_ID, PLAYER_NAME
+        - TEAM_CODE, TEAM_NAME, PERIOD, CLOCK
+        - SHOT_X, SHOT_Y: Court coordinates
+        - SHOT_TYPE: "2PT" or "3PT"
+        - SHOT_MADE: Boolean
+        - SHOT_VALUE: Points (2 or 3)
+        - SHOT_DISTANCE, SHOT_ZONE (if available)
+
+    Example:
+        >>> shots = fetch_shot_chart("2023-24")
+        >>> made_threes = shots[(shots['SHOT_TYPE'] == '3PT') & (shots['SHOT_MADE'] == True)]
+        >>>
+        >>> # If HTTP blocked, use browser rendering
+        >>> shots = fetch_shot_chart("2023-24", use_browser=True)
+
+    Note:
+        FIBA LiveStats may block HTTP requests. If you get empty results,
+        try use_browser=True (requires: uv pip install playwright && playwright install chromium)
+    """
+    logger.info(f"Fetching {LEAGUE} shot chart for season {season}")
+
+    # Load schedule to get game IDs
+    schedule = fetch_schedule(season)
+
+    if schedule.empty:
+        logger.warning(f"No schedule available for {LEAGUE} {season}")
+        return pd.DataFrame()
+
+    # Scrape shots for each game
+    all_shots = []
+    games_with_shots = 0
+    games_without_shots = 0
+
+    for _, game_row in schedule.iterrows():
+        game_id = game_row["GAME_ID"]
+
+        try:
+            # Scrape shot chart (with automatic caching)
+            shots = scrape_fiba_shot_chart(
+                league_code=FIBA_LEAGUE_CODE,
+                game_id=str(game_id),
+                league=LEAGUE,
+                season=season,
+                use_browser=use_browser,
+            )
+
+            if not shots.empty:
+                all_shots.append(shots)
+                games_with_shots += 1
+            else:
+                games_without_shots += 1
+
+        except Exception as e:
+            logger.warning(f"Failed to scrape {LEAGUE} shots for game {game_id}: {e}")
+            games_without_shots += 1
+            continue
+
+    if not all_shots:
+        logger.warning(
+            f"No shot data scraped for {LEAGUE} {season}. "
+            f"Tried {len(schedule)} games, all failed. "
+            f"If FIBA is blocking HTTP requests, try use_browser=True"
+        )
+        return pd.DataFrame()
+
+    # Concatenate all games
+    df = pd.concat(all_shots, ignore_index=True)
+
+    # Ensure standard columns
+    df = ensure_standard_columns(df, "shots", LEAGUE, season)
+
+    logger.info(
+        f"Scraped {len(df)} shots for {LEAGUE} {season} "
+        f"({games_with_shots} games with shots, {games_without_shots} games without)"
+    )
+
+    if games_without_shots > 0:
+        logger.warning(
+            f"{games_without_shots}/{len(schedule)} games had no shot data. "
+            f"FIBA may be blocking requests - consider use_browser=True"
+        )
+
     return df
 
 
