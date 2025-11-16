@@ -1,0 +1,56 @@
+{
+  "run_at": "2025-11-16T21:30:12.803484",
+  "golden_fixtures_passed": true,
+  "golden_failures": 0,
+  "api_spotcheck_passed": false,
+  "api_discrepancies": 1,
+  "consistency_errors": 0,
+  "consistency_warnings": 0,
+  "seasons": [
+    {
+      "season": "2022-2023",
+      "ready_for_modeling": true,
+      "pbp_coverage": 306,
+      "pbp_expected": 306,
+      "pbp_pct": 100.0,
+      "shots_coverage": 306,
+      "shots_expected": 306,
+      "shots_pct": 100.0,
+      "num_critical_issues": 0
+    },
+    {
+      "season": "2023-2024",
+      "ready_for_modeling": true,
+      "pbp_coverage": 306,
+      "pbp_expected": 306,
+      "pbp_pct": 100.0,
+      "shots_coverage": 310,
+      "shots_expected": 306,
+      "shots_pct": 101.30718954248366,
+      "num_critical_issues": 0
+    },
+    {
+      "season": "2024-2025",
+      "ready_for_modeling": false,
+      "pbp_coverage": 120,
+      "pbp_expected": 240,
+      "pbp_pct": 50.0,
+      "shots_coverage": 120,
+      "shots_expected": 240,
+      "shots_pct": 50.0,
+      "num_critical_issues": 0
+    },
+    {
+      "season": "2025-2026",
+      "ready_for_modeling": false,
+      "pbp_coverage": 0,
+      "pbp_expected": 176,
+      "pbp_pct": 0.0,
+      "shots_coverage": 0,
+      "shots_expected": 176,
+      "shots_pct": 0.0,
+      "num_critical_issues": 0
+    }
+  ],
+  "ready_for_live": true
+}

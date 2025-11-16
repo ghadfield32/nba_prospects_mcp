@@ -42,6 +42,10 @@ from .models import (
     DatasetResponse,
     DatasetsListResponse,
     HealthResponse,
+    LNBErrorResponse,
+    LNBReadinessResponse,
+    LNBSeasonReadiness,
+    LNBValidationStatusResponse,
 )
 
 # Configure logging
@@ -795,6 +799,245 @@ async def get_tools_schema() -> dict[str, Any]:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to generate tools schema: {str(e)}",
+        ) from e
+
+
+# ============================================================================
+# LNB Data Readiness Endpoints
+# ============================================================================
+
+
+@router.get(
+    "/lnb/readiness",
+    response_model=LNBReadinessResponse,
+    tags=["LNB"],
+    summary="Check LNB data readiness",
+    description="Get readiness status for all LNB seasons (≥95% coverage + 0 errors = ready for modeling)",
+)
+async def lnb_readiness_check() -> LNBReadinessResponse:
+    """
+    Check LNB data readiness for all tracked seasons.
+
+    Returns readiness status including coverage percentages and error counts.
+    Seasons are considered "ready for modeling" when they meet:
+    - ≥95% coverage for both PBP and shots
+    - Zero critical errors
+
+    Returns:
+        Readiness status for all seasons
+
+    Examples:
+        GET /lnb/readiness
+    """
+    try:
+        # Import validation functions (lazy import to avoid startup overhead)
+        from pathlib import Path
+        import json
+
+        # Load cached validation status from disk
+        data_dir = Path(__file__).parents[4] / "data" / "raw" / "lnb"
+        status_file = data_dir / "lnb_last_validation.json"
+
+        if not status_file.exists():
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Validation has not been run yet. Please run validation first: "
+                "uv run python tools/lnb/validate_and_monitor_coverage.py",
+            )
+
+        with open(status_file) as f:
+            validation_data = json.load(f)
+
+        # Convert to response model
+        seasons = [
+            LNBSeasonReadiness(
+                season=s["season"],
+                ready_for_modeling=s["ready_for_modeling"],
+                pbp_coverage=s["pbp_coverage"],
+                pbp_expected=s["pbp_expected"],
+                pbp_pct=s["pbp_pct"],
+                shots_coverage=s["shots_coverage"],
+                shots_expected=s["shots_expected"],
+                shots_pct=s["shots_pct"],
+                num_critical_issues=s["num_critical_issues"],
+            )
+            for s in validation_data["seasons"]
+        ]
+
+        ready_seasons = [s.season for s in seasons if s.ready_for_modeling]
+
+        return LNBReadinessResponse(
+            checked_at=datetime.fromisoformat(validation_data["run_at"]),
+            seasons=seasons,
+            any_season_ready=len(ready_seasons) > 0,
+            ready_seasons=ready_seasons,
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error checking LNB readiness: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to check LNB readiness: {str(e)}",
+        ) from e
+
+
+@router.get(
+    "/lnb/validation-status",
+    response_model=LNBValidationStatusResponse,
+    tags=["LNB"],
+    summary="Get LNB validation status",
+    description="Get latest validation status including golden fixtures, API spot-checks, and quality metrics",
+)
+async def lnb_validation_status() -> LNBValidationStatusResponse:
+    """
+    Get latest LNB validation status.
+
+    Returns comprehensive validation results including:
+    - Golden fixtures regression testing (detects API schema changes)
+    - API spot-check results (random sampling for drift detection)
+    - Per-game consistency errors and warnings
+    - Season readiness for modeling
+
+    Returns:
+        Complete validation status
+
+    Examples:
+        GET /lnb/validation-status
+    """
+    try:
+        # Import validation functions (lazy import to avoid startup overhead)
+        from pathlib import Path
+        import json
+
+        # Load cached validation status from disk
+        data_dir = Path(__file__).parents[4] / "data" / "raw" / "lnb"
+        status_file = data_dir / "lnb_last_validation.json"
+
+        if not status_file.exists():
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Validation has not been run yet. Please run validation first: "
+                "uv run python tools/lnb/validate_and_monitor_coverage.py",
+            )
+
+        with open(status_file) as f:
+            validation_data = json.load(f)
+
+        # Convert to response model
+        seasons = [
+            LNBSeasonReadiness(
+                season=s["season"],
+                ready_for_modeling=s["ready_for_modeling"],
+                pbp_coverage=s["pbp_coverage"],
+                pbp_expected=s["pbp_expected"],
+                pbp_pct=s["pbp_pct"],
+                shots_coverage=s["shots_coverage"],
+                shots_expected=s["shots_expected"],
+                shots_pct=s["shots_pct"],
+                num_critical_issues=s["num_critical_issues"],
+            )
+            for s in validation_data["seasons"]
+        ]
+
+        return LNBValidationStatusResponse(
+            run_at=datetime.fromisoformat(validation_data["run_at"]),
+            golden_fixtures_passed=validation_data["golden_fixtures_passed"],
+            golden_failures=validation_data["golden_failures"],
+            api_spotcheck_passed=validation_data["api_spotcheck_passed"],
+            api_discrepancies=validation_data["api_discrepancies"],
+            consistency_errors=validation_data["consistency_errors"],
+            consistency_warnings=validation_data["consistency_warnings"],
+            ready_for_live=validation_data["ready_for_live"],
+            seasons=seasons,
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting LNB validation status: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get LNB validation status: {str(e)}",
+        ) from e
+
+
+# ============================================================================
+# LNB Season Readiness Guard (Decorator)
+# ============================================================================
+
+
+def require_lnb_season_ready(season: str) -> None:
+    """
+    Guard decorator/function to check if LNB season is ready for modeling.
+
+    Raises HTTPException with 409 Conflict if season is not ready.
+
+    Args:
+        season: Season to check (e.g., "2023-2024")
+
+    Raises:
+        HTTPException: 409 Conflict if season not ready
+        HTTPException: 503 Service Unavailable if validation not run
+        HTTPException: 404 Not Found if season not tracked
+    """
+    try:
+        from pathlib import Path
+        import json
+
+        # Load cached validation status from disk
+        data_dir = Path(__file__).parents[4] / "data" / "raw" / "lnb"
+        status_file = data_dir / "lnb_last_validation.json"
+
+        if not status_file.exists():
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Validation has not been run yet. Please run validation first: "
+                "uv run python tools/lnb/validate_and_monitor_coverage.py",
+            )
+
+        with open(status_file) as f:
+            validation_data = json.load(f)
+
+        # Find the requested season
+        season_data = next(
+            (s for s in validation_data["seasons"] if s["season"] == season), None
+        )
+
+        if not season_data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Season {season} is not tracked. Available seasons: "
+                f"{[s['season'] for s in validation_data['seasons']]}",
+            )
+
+        # Check if ready
+        if not season_data["ready_for_modeling"]:
+            error_response = LNBErrorResponse(
+                error_code="SEASON_NOT_READY",
+                message=f"Season {season} is NOT READY for modeling "
+                f"(Coverage: {season_data['pbp_pct']:.1f}%/{season_data['shots_pct']:.1f}%, "
+                f"Errors: {season_data['num_critical_issues']})",
+                season=season,
+                detail={
+                    "pbp_coverage": season_data["pbp_pct"],
+                    "shots_coverage": season_data["shots_pct"],
+                    "num_critical_issues": season_data["num_critical_issues"],
+                },
+            )
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=error_response.model_dump(),
+            )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error checking season readiness: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to check season readiness: {str(e)}",
         ) from e
 
 

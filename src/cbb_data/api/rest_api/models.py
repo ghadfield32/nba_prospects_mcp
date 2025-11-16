@@ -227,3 +227,154 @@ class RecentGamesRequest(BaseModel):
 
     class Config:
         json_schema_extra = {"example": {"days": 2, "include_scores": True}}
+
+
+# ============================================================================
+# LNB-specific models for data readiness and validation
+# ============================================================================
+
+
+class LNBSeasonReadiness(BaseModel):
+    """Readiness status for a single LNB season."""
+
+    season: str = Field(description="Season identifier (e.g., '2023-2024')")
+    ready_for_modeling: bool = Field(
+        description="Whether season meets criteria for modeling (≥95% coverage, 0 errors)"
+    )
+    pbp_coverage: int = Field(description="Number of PBP files on disk")
+    pbp_expected: int = Field(description="Expected number of PBP files")
+    pbp_pct: float = Field(description="PBP coverage percentage")
+    shots_coverage: int = Field(description="Number of shots files on disk")
+    shots_expected: int = Field(description="Expected number of shots files")
+    shots_pct: float = Field(description="Shots coverage percentage")
+    num_critical_issues: int = Field(description="Number of critical errors found")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "season": "2023-2024",
+                "ready_for_modeling": True,
+                "pbp_coverage": 306,
+                "pbp_expected": 306,
+                "pbp_pct": 100.0,
+                "shots_coverage": 306,
+                "shots_expected": 306,
+                "shots_pct": 100.0,
+                "num_critical_issues": 0,
+            }
+        }
+
+
+class LNBReadinessResponse(BaseModel):
+    """Response for LNB season readiness check."""
+
+    checked_at: datetime = Field(
+        default_factory=datetime.utcnow, description="Timestamp of readiness check (UTC)"
+    )
+    seasons: list[LNBSeasonReadiness] = Field(description="Readiness status per season")
+    any_season_ready: bool = Field(
+        description="Whether at least one season is ready for modeling"
+    )
+    ready_seasons: list[str] = Field(description="List of seasons ready for modeling")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "checked_at": "2025-11-16T12:00:00Z",
+                "seasons": [
+                    {
+                        "season": "2023-2024",
+                        "ready_for_modeling": True,
+                        "pbp_coverage": 306,
+                        "pbp_expected": 306,
+                        "pbp_pct": 100.0,
+                        "shots_coverage": 306,
+                        "shots_expected": 306,
+                        "shots_pct": 100.0,
+                        "num_critical_issues": 0,
+                    }
+                ],
+                "any_season_ready": True,
+                "ready_seasons": ["2023-2024"],
+            }
+        }
+
+
+class LNBValidationStatusResponse(BaseModel):
+    """Response for LNB validation status check."""
+
+    run_at: datetime = Field(description="Timestamp of last validation run (UTC)")
+    golden_fixtures_passed: bool = Field(
+        description="Whether golden fixtures regression testing passed"
+    )
+    golden_failures: int = Field(description="Number of golden fixture failures")
+    api_spotcheck_passed: bool = Field(
+        description="Whether API spot-check passed (sampled games match)"
+    )
+    api_discrepancies: int = Field(description="Number of API discrepancies found")
+    consistency_errors: int = Field(description="Number of per-game consistency errors")
+    consistency_warnings: int = Field(description="Number of per-game consistency warnings")
+    ready_for_live: bool = Field(
+        description="Whether system is ready for live game ingestion"
+    )
+    seasons: list[LNBSeasonReadiness] = Field(description="Readiness status per season")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "run_at": "2025-11-16T12:00:00Z",
+                "golden_fixtures_passed": True,
+                "golden_failures": 0,
+                "api_spotcheck_passed": True,
+                "api_discrepancies": 0,
+                "consistency_errors": 0,
+                "consistency_warnings": 2,
+                "ready_for_live": True,
+                "seasons": [
+                    {
+                        "season": "2023-2024",
+                        "ready_for_modeling": True,
+                        "pbp_coverage": 306,
+                        "pbp_expected": 306,
+                        "pbp_pct": 100.0,
+                        "shots_coverage": 306,
+                        "shots_expected": 306,
+                        "shots_pct": 100.0,
+                        "num_critical_issues": 0,
+                    }
+                ],
+            }
+        }
+
+
+class LNBErrorResponse(BaseModel):
+    """Standardized error response for LNB endpoints."""
+
+    error_code: Literal[
+        "SEASON_NOT_READY",
+        "INVALID_SEASON",
+        "GAME_NOT_FOUND",
+        "VALIDATION_FAILED",
+        "INTERNAL_ERROR",
+    ] = Field(description="Machine-readable error code")
+    message: str = Field(description="Human-readable error message")
+    season: str | None = Field(default=None, description="Season related to error (if applicable)")
+    detail: dict[str, Any] | None = Field(default=None, description="Additional error details")
+    timestamp: datetime = Field(
+        default_factory=datetime.utcnow, description="Timestamp of error (UTC)"
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "error_code": "SEASON_NOT_READY",
+                "message": "Season 2024-2025 is NOT READY for modeling (Coverage: 45.2%/42.8%, Errors: 3)",
+                "season": "2024-2025",
+                "detail": {
+                    "pbp_coverage": 45.2,
+                    "shots_coverage": 42.8,
+                    "num_critical_issues": 3,
+                },
+                "timestamp": "2025-11-16T12:00:00Z",
+            }
+        }

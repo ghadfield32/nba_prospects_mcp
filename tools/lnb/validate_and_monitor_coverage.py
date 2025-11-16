@@ -854,6 +854,58 @@ def record_validation_metrics(
     print(f"[INFO] Recorded validation metrics to {metrics_file}")
 
 
+def save_validation_status(
+    readiness_results: list[dict[str, Any]],
+    golden_failures: list[dict[str, Any]],
+    api_discrepancies: list[dict[str, Any]],
+    num_errors: int,
+    num_warnings: int
+) -> None:
+    """Save latest validation status to JSON for API consumption.
+
+    Args:
+        readiness_results: List of season readiness dicts
+        golden_failures: List of golden fixture failures
+        api_discrepancies: List of API spot-check discrepancies
+        num_errors: Total number of consistency errors
+        num_warnings: Total number of consistency warnings
+    """
+    status_file = DATA_DIR / "lnb_last_validation.json"
+
+    # Transform readiness results to match API schema
+    api_seasons = []
+    for r in readiness_results:
+        season_expected = EXPECTED_GAMES.get(r["season"], 0)
+        api_seasons.append({
+            "season": r["season"],
+            "ready_for_modeling": r["ready_for_modeling"],
+            "pbp_coverage": r["pbp_count"],
+            "pbp_expected": season_expected,
+            "pbp_pct": r["pbp_pct"],
+            "shots_coverage": r["shots_count"],
+            "shots_expected": season_expected,
+            "shots_pct": r["shots_pct"],
+            "num_critical_issues": r["num_critical_issues"],
+        })
+
+    status = {
+        "run_at": datetime.now().isoformat(),
+        "golden_fixtures_passed": len(golden_failures) == 0,
+        "golden_failures": len(golden_failures),
+        "api_spotcheck_passed": len(api_discrepancies) == 0,
+        "api_discrepancies": len(api_discrepancies),
+        "consistency_errors": num_errors,
+        "consistency_warnings": num_warnings,
+        "seasons": api_seasons,
+        "ready_for_live": any(r["ready_for_modeling"] for r in readiness_results),
+    }
+
+    with open(status_file, "w") as f:
+        json.dump(status, f, indent=2)
+
+    print(f"[INFO] Saved validation status to {status_file}")
+
+
 def require_season_ready(season: str, raise_on_not_ready: bool = True) -> dict[str, Any]:
     """Gate function for downstream code to check season readiness.
 
@@ -1113,6 +1165,9 @@ def main():
 
     # Record metrics for time-series monitoring
     record_validation_metrics(disk_data, readiness_results, num_errors, num_warnings)
+
+    # Persist validation status for API consumption
+    save_validation_status(readiness_results, golden_failures, api_discrepancies, num_errors, num_warnings)
 
     # Summary
     print(f"\n{'=' * 80}")
