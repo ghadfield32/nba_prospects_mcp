@@ -1,3 +1,27 @@
+## 2025-11-15 - LNB Coverage Validation & Documentation ✅ COMPLETE
+
+**Summary**: Validated LNB historical coverage, discovered API limitations, documented actual data availability. LNB Schedule API only provides current season; historical coverage (34 games 2021-2025) obtained via manual UUID discovery.
+
+**Key Findings**:
+- LNB API limitation: Schedule/player_season/team_season endpoints return current season only (2024-2025, 8 games). Tested 2015-2025 range - all historical seasons return empty.
+- Normalized box scores: 2021-2025 (34 games total, 617 player records, 68 team records). Limited coverage: 2021-2022 (1 game), 2022-2023 (1 game), 2023-2024 (16 games), 2024-2025 (16 games).
+- PBP/shots: 2025-2026 only (8 games, 3,336 events, 973 shots). No data quality issues detected.
+
+**Tools Created**:
+- `tools/lnb/discover_max_historical_coverage.py` - Tests LNB API for historical season availability (generates JSON/CSV reports)
+- `tools/lnb/validate_existing_coverage.py` - Validates parquet data integrity and generates validation reports
+
+**Documentation**:
+- Created `docs/LNB_COVERAGE.md` - Comprehensive 400-line coverage guide with API limitations, dataset details, extension options, usage examples
+- Updated README: Added coverage limitation warnings, updated dataset table with "Current season only" and "Limited: 34 games total" notes, added link to coverage docs
+
+**Reports Generated**: `tools/lnb/historical_coverage_report.json`, `tools/lnb/coverage_validation_report.json`, `tools/lnb/coverage_validation_report.txt`
+
+**Files Modified**: `README.md` (3 sections updated)
+**Files Created**: `docs/LNB_COVERAGE.md`, `tools/lnb/discover_max_historical_coverage.py`, `tools/lnb/validate_existing_coverage.py`
+
+---
+
 ## 2025-11-15 (Session Current+24 Part 7) - Ruff-Lint Fixes: F401/F841/E402/B023 ✅ COMPLETE
 
 **Summary**: Fixed remaining 37 ruff-lint errors using Pythonic patterns: importlib for availability checks, per-directory E402 config, closure binding fix. All pre-commit hooks pass.
@@ -11501,7 +11525,7 @@ Successfully merged LNB API integration branch into main and updated README with
    - Verified historical coverage and data sources for all leagues
 
 4. **README Updates**:
-   - Updated League � Dataset Availability Matrix (now showing all 20 leagues accurately)
+   - Updated League � Dataset Availability Matrix (now showing all 20 leagues accurately)
    - Updated Historical Coverage & Recency table
    - Updated Integration Status section (19 leagues in pre_only scope, 20 total)
    - Corrected league counts and scope descriptions

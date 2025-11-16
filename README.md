@@ -123,7 +123,7 @@ This library focuses on **pre-NBA/WNBA prospects** and includes:
 | **ABA** (Adriatic) | Current season | Post-game | FIBA LiveStats HTML |
 | **BAL** (Africa) | Current season | Post-game | FIBA LiveStats HTML |
 | **BCL** (Champions) | Current season | Post-game | FIBA LiveStats HTML |
-| **LNB Pro A** (France) | 2021-present (box scores), 2025-2026 (PBP/shots) | Post-game | LNB Official API |
+| **LNB Pro A** (France) | Limited (34 games 2021-2025 box scores), 2025-2026 (8 games PBP/shots), API current season only | Post-game | LNB Official API + Manual UUID discovery |
 | **ACB** (Spain) | Scaffold only | Scaffold only | HTML Scraping (JS-rendered) |
 
 #### Integration Status
@@ -135,7 +135,7 @@ This library focuses on **pre-NBA/WNBA prospects** and includes:
 
 **Data Availability Notes**:
 - **Full Data**: 16 leagues with comprehensive datasets (NCAA, EuroLeague, G-League, NBL, FIBA Cluster, LNB Pro A, etc.)
-- **LNB Pro A**: First international league with 7/7 datasets functional! Box scores (2021-2025: 4 seasons, 34 games), PBP/shots (2025-2026: 3,336 events, 973 shots), schedule/season stats via API
+- **LNB Pro A**: First international league with 7/7 datasets functional! **Limited coverage:** 34 games (2021-2025 box scores), 8 games (2025-2026 PBP/shots), current season only via API. See [docs/LNB_COVERAGE.md](docs/LNB_COVERAGE.md) for details
 - **NZ-NBL**: Scaffold only (requires manual game index creation)
 - **ACB**: Scaffold only (JavaScript-rendered site, requires Selenium/Playwright)
 
@@ -154,17 +154,19 @@ df = get_dataset("schedule", filters={"league": "WNBA", "season": "2024", "pre_o
 
 LNB Pro A (Betclic ÉLITE) is France's top professional basketball league and the **only international league** in this library with complete dataset coverage across all 7 types.
 
+**⚠️ Coverage Limitation:** Historical data is limited. LNB Schedule API only provides current season data. Historical box scores (2021-2025: 34 games) were obtained via manual UUID discovery. Full season coverage (~306 games/season) would require extensive manual work. See [docs/LNB_COVERAGE.md](docs/LNB_COVERAGE.md) for complete details.
+
 ##### Dataset Details
 
 | Dataset | Source | Coverage | Columns | Sample Size |
 |---------|--------|----------|---------|-------------|
-| **schedule** | LNB API | 2024-25 season | 15 | 8 games |
-| **player_season** | LNB API | Current season | 20+ | Individual lookups |
-| **team_season** | LNB API | Current season | 15 | 16 teams |
-| **player_game** | Normalized Parquet | 2021-2025 | 27 | 18+ per game |
-| **team_game** | Normalized Parquet | 2021-2025 | 26 | 2 per game |
-| **pbp** | Historical Parquet | 2025-2026 | 15+ | 3,336 events |
-| **shots** | Historical Parquet | 2025-2026 | 10+ | 973 shots |
+| **schedule** | LNB API | **Current season only** (2024-25) | 15 | 8 games |
+| **player_season** | LNB API | **Current season only** | 20+ | Individual lookups |
+| **team_season** | LNB API | **Current season only** | 15 | 16 teams |
+| **player_game** | Normalized Parquet | **Limited:** 2021-2025 (34 games total) | 27 | 617 records |
+| **team_game** | Normalized Parquet | **Limited:** 2021-2025 (34 games total) | 26 | 68 records |
+| **pbp** | Historical Parquet | **Limited:** 2025-2026 (8 games) | 15+ | 3,336 events |
+| **shots** | Historical Parquet | **Limited:** 2025-2026 (8 games) | 10+ | 973 shots |
 
 ##### Sample Queries
 

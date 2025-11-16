@@ -1,11 +1,12 @@
-season,schedule_available,schedule_games_found,schedule_error,sample_game_uuids,pbp_tested,pbp_available,pbp_games_tested,pbp_games_success,pbp_avg_events,pbp_error,shots_tested,shots_available,shots_games_tested,shots_games_success,shots_avg_shots,shots_error
-2024-2025,True,16,,"['LNB_2024-2025_1', 'LNB_2024-2025_2', 'LNB_2024-2025_3', 'LNB_2024-2025_4', 'LNB_2024-2025_5']",True,False,3,0,0.0,,True,False,3,0,0.0,
-2023-2024,True,16,,"['LNB_2023-2024_1', 'LNB_2023-2024_2', 'LNB_2023-2024_3', 'LNB_2023-2024_4', 'LNB_2023-2024_5']",True,False,3,0,0.0,,True,False,3,0,0.0,
-2022-2023,True,16,,"['LNB_2022-2023_1', 'LNB_2022-2023_2', 'LNB_2022-2023_3', 'LNB_2022-2023_4', 'LNB_2022-2023_5']",True,False,3,0,0.0,,True,False,3,0,0.0,
-2021-2022,True,16,,"['LNB_2021-2022_1', 'LNB_2021-2022_2', 'LNB_2021-2022_3', 'LNB_2021-2022_4', 'LNB_2021-2022_5']",True,False,3,0,0.0,,True,False,3,0,0.0,
-2020-2021,True,16,,"['LNB_2020-2021_1', 'LNB_2020-2021_2', 'LNB_2020-2021_3', 'LNB_2020-2021_4', 'LNB_2020-2021_5']",True,False,3,0,0.0,,True,False,3,0,0.0,
-2019-2020,True,16,,"['LNB_2019-2020_1', 'LNB_2019-2020_2', 'LNB_2019-2020_3', 'LNB_2019-2020_4', 'LNB_2019-2020_5']",True,False,3,0,0.0,,True,False,3,0,0.0,
-2018-2019,True,16,,"['LNB_2018-2019_1', 'LNB_2018-2019_2', 'LNB_2018-2019_3', 'LNB_2018-2019_4', 'LNB_2018-2019_5']",True,False,3,0,0.0,,True,False,3,0,0.0,
-2017-2018,True,16,,"['LNB_2017-2018_1', 'LNB_2017-2018_2', 'LNB_2017-2018_3', 'LNB_2017-2018_4', 'LNB_2017-2018_5']",True,False,3,0,0.0,,True,False,3,0,0.0,
-2016-2017,True,16,,"['LNB_2016-2017_1', 'LNB_2016-2017_2', 'LNB_2016-2017_3', 'LNB_2016-2017_4', 'LNB_2016-2017_5']",True,False,3,0,0.0,,True,False,3,0,0.0,
-2015-2016,True,16,,"['LNB_2015-2016_1', 'LNB_2015-2016_2', 'LNB_2015-2016_3', 'LNB_2015-2016_4', 'LNB_2015-2016_5']",True,False,3,0,0.0,,True,False,3,0,0.0,
+season,year,has_schedule,game_count,games_with_uuids,earliest_game_date,latest_game_date,tested_at,error
+2015-2016,2015,False,0,0,,,2025-11-15T20:35:37.305427,
+2016-2017,2016,False,0,0,,,2025-11-15T20:35:38.240913,
+2017-2018,2017,False,0,0,,,2025-11-15T20:35:39.045162,
+2018-2019,2018,False,0,0,,,2025-11-15T20:35:39.701313,
+2019-2020,2019,False,0,0,,,2025-11-15T20:35:40.506244,
+2020-2021,2020,False,0,0,,,2025-11-15T20:35:41.165104,
+2021-2022,2021,False,0,0,,,2025-11-15T20:35:42.178980,
+2022-2023,2022,False,0,0,,,2025-11-15T20:35:43.194543,
+2023-2024,2023,False,0,0,,,2025-11-15T20:35:44.040213,
+2024-2025,2024,True,8,8,2025-11-14T00:00:00,2025-11-16T00:00:00,2025-11-15T20:35:45.135401,
+2025-2026,2025,False,0,0,,,2025-11-15T20:35:46.549014,Request failed for /match/getCalenderByDivision: HTTPError('404 Client Error: Not Found for url: https://api-prod.lnb.fr/match/getCalenderByDivision?division_external_id=1&year=2026')
