@@ -1,3 +1,33 @@
+## 2025-11-16 - LNB Production Ready: Season Guards + Tests + Operational Runbook
+
+**Type:** Production Hardening - Guards + Tests + Operations
+**Status:** ✅ COMPLETE - All data access points protected, comprehensive tests, operational runbook
+
+**Summary**: Completed production hardening by enforcing season readiness guards across all LNB data access points (MCP tools + API), adding comprehensive test coverage, and creating operational runbook for daily pipeline management.
+
+**Implementation:**
+
+1. **MCP Season Guards** ([tools.py:33-105](src/cbb_data/servers/mcp/tools.py))
+   - Added `_ensure_lnb_season_ready(season)` helper - reads `lnb_last_validation.json`
+   - Enforced in all 4 LNB MCP tools: schedule, pbp, player stats, team stats
+   - Clear error messages with coverage% + remediation commands
+
+2. **Comprehensive Test Suite** ([test_lnb_production_readiness.py](tests/test_lnb_production_readiness.py))
+   - 8 unit tests: validation functions (is_game_played, has_parquet_for_game, score/shot counting, readiness checks)
+   - 7 integration tests: MCP guards + API endpoints (all error paths + status codes)
+
+3. **Operational Runbook** ([LNB_OPERATIONAL_RUNBOOK.md](tools/lnb/LNB_OPERATIONAL_RUNBOOK.md))
+   - Daily operations workflow, 3-tier health checks, troubleshooting guide
+   - Emergency procedures, maintenance windows, monitoring metrics
+
+**Guard Coverage:** 100% of LNB data access (2 API endpoints + 4 MCP tools + 2 guard functions)
+
+**Files:** [tools.py](src/cbb_data/servers/mcp/tools.py), [test_lnb_production_readiness.py](tests/test_lnb_production_readiness.py), [LNB_OPERATIONAL_RUNBOOK.md](tools/lnb/LNB_OPERATIONAL_RUNBOOK.md)
+
+**Impact:** LNB pipeline is production-ready with quality gates at every access point. Operators have clear runbook. All consumers automatically protected from incomplete/unvalidated data.
+
+---
+
 ## 2025-11-16 - LNB API-Ready: Health/Readiness Endpoints + Data Contracts
 
 **Type:** API Integration - Production Readiness Features

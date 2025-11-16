@@ -31,6 +31,81 @@ logger = logging.getLogger(__name__)
 
 
 # ============================================================================
+# LNB Season Readiness Guard
+# ============================================================================
+
+
+def _ensure_lnb_season_ready(season: str) -> None:
+    """
+    Guard function to ensure LNB season is ready for data access.
+
+    Checks season readiness status and raises clear error if season is not validated.
+    This prevents MCP tools from accessing incomplete or unvalidated data.
+
+    Args:
+        season: Season string (e.g., "2024-2025")
+
+    Raises:
+        ValueError: If season is not ready for modeling or validation hasn't run
+
+    Examples:
+        >>> _ensure_lnb_season_ready("2023-2024")  # Ready season - passes
+        >>> _ensure_lnb_season_ready("2025-2026")  # Not ready - raises ValueError
+    """
+    try:
+        from pathlib import Path
+        import json
+
+        # Load validation status from disk
+        # This is the same file the API reads - ensures consistency
+        validation_file = Path(__file__).parents[3] / "data" / "raw" / "lnb" / "lnb_last_validation.json"
+
+        if not validation_file.exists():
+            raise ValueError(
+                f"LNB validation status not found. Please run validation first:\n"
+                f"  uv run python tools/lnb/validate_and_monitor_coverage.py\n"
+                f"This ensures data quality before access."
+            )
+
+        with open(validation_file) as f:
+            validation_data = json.load(f)
+
+        # Find the requested season
+        season_data = next(
+            (s for s in validation_data["seasons"] if s["season"] == season),
+            None
+        )
+
+        if not season_data:
+            available = [s["season"] for s in validation_data["seasons"]]
+            raise ValueError(
+                f"Season '{season}' is not tracked in LNB pipeline.\n"
+                f"Available seasons: {', '.join(available)}"
+            )
+
+        # Check readiness
+        if not season_data["ready_for_modeling"]:
+            raise ValueError(
+                f"Season '{season}' is NOT READY for data access.\n"
+                f"  PBP Coverage: {season_data['pbp_pct']:.1f}% ({season_data['pbp_coverage']}/{season_data['pbp_expected']})\n"
+                f"  Shots Coverage: {season_data['shots_pct']:.1f}% ({season_data['shots_coverage']}/{season_data['shots_expected']})\n"
+                f"  Critical Issues: {season_data['num_critical_issues']}\n"
+                f"\n"
+                f"Season must have ≥95% coverage and 0 critical errors.\n"
+                f"Run ingestion to complete data: uv run python tools/lnb/bulk_ingest_pbp_shots.py --seasons {season}"
+            )
+
+        logger.info(f"LNB season {season} validated and ready (PBP: {season_data['pbp_pct']:.1f}%, Shots: {season_data['shots_pct']:.1f}%)")
+
+    except ValueError:
+        # Re-raise validation errors as-is
+        raise
+    except Exception as e:
+        # Wrap unexpected errors
+        raise ValueError(f"Failed to check LNB season readiness: {str(e)}") from e
+
+
+# ============================================================================
 # Helper Functions
 # ============================================================================
 
@@ -649,6 +724,9 @@ def tool_get_lnb_historical_schedule(
         >>> tool_get_lnb_historical_schedule("2024-2025", team=["Monaco", "ASVEL"])
         >>> tool_get_lnb_historical_schedule("2025-2026", date_from="2025-11-01", compact=True)
     """
+    # Enforce season readiness before accessing data
+    _ensure_lnb_season_ready(season)
+
     return _safe_execute(
         "get_lnb_historical_schedule",
         get_lnb_historical_fixtures,
@@ -699,6 +777,9 @@ def tool_get_lnb_historical_pbp(
         >>> tool_get_lnb_historical_pbp("2024-2025", fixture_uuid=["abc-123"])
         >>> tool_get_lnb_historical_pbp("2024-2025", team=["Monaco"], limit=1000)
     """
+    # Enforce season readiness before accessing data
+    _ensure_lnb_season_ready(season)
+
     return _safe_execute(
         "get_lnb_historical_pbp",
         get_lnb_historical_pbp,
@@ -752,6 +833,9 @@ def tool_get_lnb_historical_player_stats(
         >>> tool_get_lnb_historical_player_stats("2024-2025", per_mode="PerGame", limit=20)
         >>> tool_get_lnb_historical_player_stats("2024-2025", team=["Monaco"], compact=True)
     """
+    # Enforce season readiness before accessing data
+    _ensure_lnb_season_ready(season)
+
     return _safe_execute(
         "get_lnb_historical_player_stats",
         get_lnb_player_season_stats,
@@ -796,6 +880,9 @@ def tool_get_lnb_historical_team_stats(
         >>> tool_get_lnb_historical_team_stats("2024-2025")
         >>> tool_get_lnb_historical_team_stats("2024-2025", team=["Monaco", "ASVEL"])
     """
+    # Enforce season readiness before accessing data
+    _ensure_lnb_season_ready(season)
+
     return _safe_execute(
         "get_lnb_historical_team_stats",
         get_lnb_team_season_stats,
