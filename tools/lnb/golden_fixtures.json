@@ -1,0 +1,25 @@
+{
+  "description": "Golden fixture snapshots for LNB regression testing",
+  "purpose": "Detect silent API changes, schema drift, or data corruption",
+  "last_updated": "2025-11-16",
+  "fixtures": [
+    {
+      "season": "2023-2024",
+      "game_id": "42a5eccb-1f10-11ee-b375-e5b34c9599b5",
+      "description": "Normal regular season game",
+      "expected": {
+        "final_score_home": 70,
+        "final_score_away": 71,
+        "num_pbp_rows": 547,
+        "num_shots": 129,
+        "num_periods": 4,
+        "pbp_event_types": {
+          "2pt": 88,
+          "3pt": 41,
+          "freeThrow": 39,
+          "substitution": 127
+        }
+      }
+    }
+  ]
+}

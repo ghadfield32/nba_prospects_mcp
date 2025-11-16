@@ -209,11 +209,11 @@ def select_games_to_ingest(
 
 
 def save_partitioned_parquet(df: pd.DataFrame, data_type: str, season: str, game_id: str) -> None:
-    """Save DataFrame to partitioned Parquet file with UUID validation
+    """Save DataFrame to partitioned Parquet file with UUID validation and provenance metadata.
 
     This function validates that the game_id parameter matches the GAME_ID
-    column in the data before saving. This prevents UUID corruption where
-    files are saved with incorrect filenames.
+    column in the data before saving. It also adds provenance metadata columns
+    for tracking data lineage and debugging.
 
     Args:
         df: Data to save
@@ -223,6 +223,12 @@ def save_partitioned_parquet(df: pd.DataFrame, data_type: str, season: str, game
 
     Raises:
         ValueError: If data_type is invalid or UUID mismatch detected
+
+    Provenance columns added:
+        - _source_system: Always "LNB"
+        - _source_endpoint: Dataset type ('pbp' or 'shots')
+        - _fetched_at: ISO timestamp of ingestion
+        - _ingestion_version: Git SHA or "dev" if not in git repo
     """
     if data_type == "pbp":
         base_dir = PBP_DIR
@@ -242,11 +248,34 @@ def save_partitioned_parquet(df: pd.DataFrame, data_type: str, season: str, game
                 f"  This indicates a bug in the calling code. Fix the source of the UUID."
             )
 
+    # Add provenance metadata columns
+    df = df.copy()
+    df["_source_system"] = "LNB"
+    df["_source_endpoint"] = data_type
+    df["_fetched_at"] = datetime.now().isoformat()
+
+    # Try to get git SHA for ingestion version tracking
+    try:
+        import subprocess
+
+        result = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            capture_output=True,
+            text=True,
+            timeout=2,
+            cwd=Path(__file__).parent.parent.parent,
+        )
+        git_sha = result.stdout.strip() if result.returncode == 0 else "dev"
+    except Exception:
+        git_sha = "dev"
+
+    df["_ingestion_version"] = git_sha
+
     # Create season partition directory
     season_dir = base_dir / f"season={season}"
     season_dir.mkdir(parents=True, exist_ok=True)
 
-    # Save file with validated UUID
+    # Save file with validated UUID and provenance
     file_path = season_dir / f"game_id={game_id}.parquet"
     df.to_parquet(file_path, index=False)
 

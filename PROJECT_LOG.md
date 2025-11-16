@@ -12404,3 +12404,82 @@ Successfully merged LNB API integration branch into main and updated README with
 - Use season readiness flags to gate Bayesian training and MCP tools
 
 ---
+
+## 2025-11-16: LNB Production-Grade Validation Polish (Final 20%)
+
+**Enhancement**: Added regression testing, API drift detection, metrics tracking, and provenance metadata to achieve production-grade data quality assurance for LNB datasets.
+
+**Problem Solved**:
+- No protection against silent API schema changes or data corruption
+- No detection of upstream data drift or corrections
+- No historical tracking of data quality metrics over time
+- No provenance/lineage metadata for debugging data issues
+- No standardized readiness gate for downstream modeling
+
+**Changes**:
+
+**1. Golden Fixtures Regression Suite:**
+- `tools/lnb/golden_fixtures.json`: Reference snapshots for 1 game (expandable to 5-10)
+- `tools/lnb/validate_and_monitor_coverage.py:562`: Added `validate_golden_fixtures()` checking row counts, final scores, periods, event distributions with ±5% tolerance
+- Catches: API schema changes, data corruption, incomplete fetches
+
+**2. API Spot-Check Validation:**
+- `tools/lnb/validate_and_monitor_coverage.py:708`: Added `audit_sampled_games_against_api()` randomly sampling 5 games from READY seasons
+- Compares disk vs live API: row counts, final scores
+- Detects: Upstream corrections, API drift, stale data
+
+**3. Time-Series Metrics Tracking:**
+- `tools/lnb/validate_and_monitor_coverage.py:815`: Added `record_validation_metrics()` appending daily metrics to parquet
+- `data/raw/lnb/lnb_metrics_daily.parquet`: Time-series of coverage%, errors, warnings, readiness per season
+- Enables: Trend analysis, coverage stagnation detection, quality monitoring over time
+
+**4. Provenance Metadata:**
+- `tools/lnb/bulk_ingest_pbp_shots.py:211-280`: Enhanced `save_partitioned_parquet()` to add metadata columns:
+  - `_source_system`: "LNB"
+  - `_source_endpoint`: "pbp" or "shots"
+  - `_fetched_at`: ISO timestamp
+  - `_ingestion_version`: Git SHA or "dev"
+- Enables: Data lineage tracking, debugging, audit trails
+
+**5. Readiness Gate for Downstream Code:**
+- `tools/lnb/validate_and_monitor_coverage.py:857`: Added `require_season_ready()` helper for modeling/MCP tools
+- Raises ValueError with actionable message if season not ready
+- Example: `require_season_ready("2023-2024")` prevents using incomplete data
+
+**6. Enhanced Validation Flow:**
+- Updated main() to 9-step validation (was 7)
+- Step 7: Golden fixtures regression testing
+- Step 8: API spot-check (random sampling)
+- Step 9: Live data readiness + metrics recording
+- Enhanced summary with regression testing and API spot-check status
+
+**7. Documentation:**
+- `tools/lnb/README_VALIDATION.md`: Complete usage guide for all validation features, monitoring, troubleshooting
+
+**Validation Results** (2025-11-16):
+- ✓ Golden fixtures: 1/1 passed (70-71 final score, 547 PBP rows, 129 shots)
+- ✓ API spot-check: 0 discrepancies (sampled 5 games)
+- Ready seasons: 2022-2023 (100%), 2023-2024 (100%)
+- Not ready: 2024-2025 (50%), 2025-2026 (0%)
+
+**Impact**:
+- **Accuracy**: Regression tests catch silent API changes before they affect modeling
+- **Reliability**: API spot-checks detect upstream data drift automatically
+- **Observability**: Time-series metrics enable proactive quality monitoring
+- **Debuggability**: Provenance metadata traces data lineage per game
+- **Safety**: Readiness gates prevent accidental use of incomplete data
+- **Automation**: All checks run in single command, no manual inspection needed
+
+**Files Modified**:
+- `tools/lnb/validate_and_monitor_coverage.py`: 4 new functions (validate_golden_fixtures, audit_sampled_games_against_api, record_validation_metrics, require_season_ready), enhanced main flow
+- `tools/lnb/bulk_ingest_pbp_shots.py`: Enhanced save_partitioned_parquet with provenance metadata
+- `tools/lnb/golden_fixtures.json`: New golden fixture reference data
+- `tools/lnb/README_VALIDATION.md`: New comprehensive validation guide
+
+**Next Steps**:
+- Add 4-9 more golden fixtures (OT games, playoffs, edge cases)
+- Monitor metrics_daily.parquet for trends and stagnation
+- Add Prometheus/Grafana integration for alerting (future)
+- Use require_season_ready() in all downstream modeling/MCP tools
+
+---

@@ -15,6 +15,7 @@ Following 10-step methodology for production-ready system
 
 from __future__ import annotations
 
+import json
 import sys
 from datetime import date, datetime
 from pathlib import Path
@@ -558,6 +559,332 @@ def check_season_readiness(
     }
 
 
+def validate_golden_fixtures() -> list[dict[str, Any]]:
+    """Validate golden fixture snapshots for regression testing.
+
+    Loads reference games from golden_fixtures.json and compares actual
+    data on disk against expected values to catch API changes, schema drift,
+    or data corruption.
+
+    Returns:
+        List of regression failures with keys:
+            - 'game_id': game UUID
+            - 'season': season string
+            - 'field': which field failed
+            - 'expected': expected value
+            - 'actual': actual value
+            - 'message': descriptive message
+    """
+    golden_file = Path(__file__).parent / "golden_fixtures.json"
+    if not golden_file.exists():
+        return []
+
+    try:
+        with open(golden_file) as f:
+            golden_data = json.load(f)
+    except Exception as e:
+        return [{"game_id": "N/A", "season": "N/A", "field": "json_load", "expected": None, "actual": None, "message": f"Failed to load golden fixtures: {e}"}]
+
+    failures = []
+
+    for fixture in golden_data.get("fixtures", []):
+        game_id = fixture["game_id"]
+        season = fixture["season"]
+        expected = fixture["expected"]
+
+        pbp_path = PBP_DIR / f"season={season}" / f"game_id={game_id}.parquet"
+        shots_path = SHOTS_DIR / f"season={season}" / f"game_id={game_id}.parquet"
+
+        if not pbp_path.exists():
+            failures.append({
+                "game_id": game_id,
+                "season": season,
+                "field": "pbp_file",
+                "expected": "exists",
+                "actual": "missing",
+                "message": f"PBP file missing for golden fixture"
+            })
+            continue
+
+        if not shots_path.exists():
+            failures.append({
+                "game_id": game_id,
+                "season": season,
+                "field": "shots_file",
+                "expected": "exists",
+                "actual": "missing",
+                "message": f"Shots file missing for golden fixture"
+            })
+            continue
+
+        # Load data
+        pbp_df = pd.read_parquet(pbp_path)
+        shots_df = pd.read_parquet(shots_path)
+
+        # Check PBP row count
+        if "num_pbp_rows" in expected:
+            actual_rows = len(pbp_df)
+            expected_rows = expected["num_pbp_rows"]
+            if actual_rows != expected_rows:
+                failures.append({
+                    "game_id": game_id,
+                    "season": season,
+                    "field": "num_pbp_rows",
+                    "expected": expected_rows,
+                    "actual": actual_rows,
+                    "message": f"PBP row count mismatch"
+                })
+
+        # Check shots row count
+        if "num_shots" in expected:
+            actual_shots = len(shots_df)
+            expected_shots = expected["num_shots"]
+            if actual_shots != expected_shots:
+                failures.append({
+                    "game_id": game_id,
+                    "season": season,
+                    "field": "num_shots",
+                    "expected": expected_shots,
+                    "actual": actual_shots,
+                    "message": f"Shots row count mismatch"
+                })
+
+        # Check final score
+        if "final_score_home" in expected and "final_score_away" in expected:
+            home_score, away_score = compute_per_game_score_from_pbp(pbp_df)
+            if home_score != expected["final_score_home"]:
+                failures.append({
+                    "game_id": game_id,
+                    "season": season,
+                    "field": "final_score_home",
+                    "expected": expected["final_score_home"],
+                    "actual": home_score,
+                    "message": f"Home final score mismatch"
+                })
+            if away_score != expected["final_score_away"]:
+                failures.append({
+                    "game_id": game_id,
+                    "season": season,
+                    "field": "final_score_away",
+                    "expected": expected["final_score_away"],
+                    "actual": away_score,
+                    "message": f"Away final score mismatch"
+                })
+
+        # Check number of periods
+        if "num_periods" in expected and "PERIOD_ID" in pbp_df.columns:
+            actual_periods = pbp_df["PERIOD_ID"].max()
+            expected_periods = expected["num_periods"]
+            if actual_periods != expected_periods:
+                failures.append({
+                    "game_id": game_id,
+                    "season": season,
+                    "field": "num_periods",
+                    "expected": expected_periods,
+                    "actual": actual_periods,
+                    "message": f"Number of periods mismatch"
+                })
+
+        # Check event type distribution (if specified)
+        if "pbp_event_types" in expected and "EVENT_TYPE" in pbp_df.columns:
+            actual_counts = pbp_df["EVENT_TYPE"].value_counts().to_dict()
+            for event_type, expected_count in expected["pbp_event_types"].items():
+                actual_count = actual_counts.get(event_type, 0)
+                # Allow small variance (±5%) for non-deterministic events
+                tolerance = max(1, int(expected_count * 0.05))
+                if abs(actual_count - expected_count) > tolerance:
+                    failures.append({
+                        "game_id": game_id,
+                        "season": season,
+                        "field": f"pbp_event_type_{event_type}",
+                        "expected": expected_count,
+                        "actual": actual_count,
+                        "message": f"Event type '{event_type}' count outside tolerance"
+                    })
+
+    return failures
+
+
+def audit_sampled_games_against_api(
+    index_df: pd.DataFrame,
+    sample_size: int = 5,
+    seasons: list[str] | None = None
+) -> list[dict[str, Any]]:
+    """Randomly sample games and compare disk data against live API.
+
+    Args:
+        index_df: Game index DataFrame
+        sample_size: Number of games to sample (default 5)
+        seasons: Optional list of seasons to sample from (default: READY seasons)
+
+    Returns:
+        List of discrepancies with keys:
+            - 'game_id': game UUID
+            - 'season': season string
+            - 'metric': which metric differs
+            - 'disk_value': value from disk
+            - 'api_value': value from API
+            - 'message': descriptive message
+    """
+    try:
+        from src.cbb_data.fetchers.lnb import fetch_lnb_play_by_play, fetch_lnb_shots
+    except ImportError:
+        return [{"game_id": "N/A", "season": "N/A", "metric": "import", "disk_value": None, "api_value": None, "message": "Failed to import LNB fetchers"}]
+
+    discrepancies = []
+
+    # Filter to games with both PBP and shots
+    df = index_df[index_df["has_pbp"] & index_df["has_shots"]].copy()
+
+    if seasons:
+        df = df[df["season"].isin(seasons)]
+
+    if len(df) == 0:
+        return []
+
+    # Random sample
+    sample = df.sample(n=min(sample_size, len(df)), random_state=42)
+
+    for row in sample.itertuples():
+        game_id = row.game_id
+        season = row.season
+
+        # Load disk data
+        pbp_path = PBP_DIR / f"season={season}" / f"game_id={game_id}.parquet"
+        shots_path = SHOTS_DIR / f"season={season}" / f"game_id={game_id}.parquet"
+
+        if not pbp_path.exists() or not shots_path.exists():
+            continue
+
+        disk_pbp = pd.read_parquet(pbp_path)
+        disk_shots = pd.read_parquet(shots_path)
+
+        # Fetch from API
+        try:
+            api_pbp = fetch_lnb_play_by_play(game_id)
+            api_shots = fetch_lnb_shots(game_id)
+        except Exception as e:
+            discrepancies.append({
+                "game_id": game_id,
+                "season": season,
+                "metric": "api_fetch",
+                "disk_value": None,
+                "api_value": None,
+                "message": f"API fetch failed: {str(e)[:100]}"
+            })
+            continue
+
+        # Compare row counts
+        if len(disk_pbp) != len(api_pbp):
+            discrepancies.append({
+                "game_id": game_id,
+                "season": season,
+                "metric": "pbp_row_count",
+                "disk_value": len(disk_pbp),
+                "api_value": len(api_pbp),
+                "message": "PBP row count mismatch between disk and API"
+            })
+
+        if len(disk_shots) != len(api_shots):
+            discrepancies.append({
+                "game_id": game_id,
+                "season": season,
+                "metric": "shots_row_count",
+                "disk_value": len(disk_shots),
+                "api_value": len(api_shots),
+                "message": "Shots row count mismatch between disk and API"
+            })
+
+        # Compare final scores
+        disk_home, disk_away = compute_per_game_score_from_pbp(disk_pbp)
+        api_home, api_away = compute_per_game_score_from_pbp(api_pbp)
+
+        if disk_home != api_home or disk_away != api_away:
+            discrepancies.append({
+                "game_id": game_id,
+                "season": season,
+                "metric": "final_score",
+                "disk_value": f"{disk_home}-{disk_away}",
+                "api_value": f"{api_home}-{api_away}",
+                "message": "Final score mismatch between disk and API"
+            })
+
+    return discrepancies
+
+
+def record_validation_metrics(
+    disk_data: dict[str, dict[str, int]],
+    readiness_results: list[dict[str, Any]],
+    num_errors: int,
+    num_warnings: int
+) -> None:
+    """Record validation metrics to time-series parquet for monitoring.
+
+    Args:
+        disk_data: Dict with 'pbp' and 'shots' counts per season
+        readiness_results: List of season readiness dicts
+        num_errors: Total number of errors found
+        num_warnings: Total number of warnings found
+    """
+    metrics_file = DATA_DIR / "lnb_metrics_daily.parquet"
+
+    # Build metrics row
+    metrics = {
+        "run_date": datetime.now().isoformat(),
+        "total_errors": num_errors,
+        "total_warnings": num_warnings,
+    }
+
+    # Add per-season metrics
+    for readiness in readiness_results:
+        season = readiness["season"]
+        prefix = season.replace("-", "_")
+        metrics[f"{prefix}_pbp_pct"] = readiness["pbp_pct"]
+        metrics[f"{prefix}_shots_pct"] = readiness["shots_pct"]
+        metrics[f"{prefix}_ready"] = readiness["ready_for_modeling"]
+
+    metrics_df = pd.DataFrame([metrics])
+
+    # Append to existing metrics or create new
+    if metrics_file.exists():
+        existing = pd.read_parquet(metrics_file)
+        metrics_df = pd.concat([existing, metrics_df], ignore_index=True)
+
+    metrics_df.to_parquet(metrics_file, index=False)
+    print(f"[INFO] Recorded validation metrics to {metrics_file}")
+
+
+def require_season_ready(season: str, raise_on_not_ready: bool = True) -> dict[str, Any]:
+    """Gate function for downstream code to check season readiness.
+
+    Args:
+        season: Season to check (e.g., "2023-2024")
+        raise_on_not_ready: If True, raise ValueError when not ready
+
+    Returns:
+        Readiness status dict
+
+    Raises:
+        ValueError: If season is not ready and raise_on_not_ready=True
+    """
+    # Load current state
+    index_df = load_or_rebuild_index()
+    disk_data = validate_data_on_disk()
+    issues = validate_per_game_consistency(index_df, seasons=[season])
+
+    readiness = check_season_readiness(season, disk_data, issues)
+
+    if not readiness["ready_for_modeling"] and raise_on_not_ready:
+        raise ValueError(
+            f"Season {season} is NOT READY for modeling:\n"
+            f"  Coverage: PBP {readiness['pbp_pct']:.1f}%, Shots {readiness['shots_pct']:.1f}%\n"
+            f"  Critical issues: {readiness['num_critical_issues']}\n"
+            f"  Run validation: uv run python tools/lnb/validate_and_monitor_coverage.py"
+        )
+
+    return readiness
+
+
 def check_live_data_readiness() -> dict[str, Any]:
     """Check if system is ready for live data ingestion
 
@@ -755,9 +1082,37 @@ def main():
         peak_season = max(future_analysis.items(), key=lambda item: item[1].get("future", 0))[0]
         print(f"      Heaviest backlog season: {peak_season}")
 
-    # Step 7: Check live data readiness (system-wide)
-    print("\n[7/7] Checking live data readiness (system-wide)...")
+    # Step 7: Validate golden fixtures (regression testing)
+    print("\n[7/9] Validating golden fixtures (regression testing)...")
+    golden_failures = validate_golden_fixtures()
+    if golden_failures:
+        print(f"      Found {len(golden_failures)} regression failures:")
+        for failure in golden_failures[:5]:
+            print(f"        - {failure['field']}: expected={failure['expected']}, actual={failure['actual']}")
+        if len(golden_failures) > 5:
+            print(f"        ... and {len(golden_failures) - 5} more failures")
+    else:
+        print("      ✓ All golden fixtures passed")
+
+    # Step 8: API spot-check (random sampling)
+    print("\n[8/9] Running API spot-check (sampling 5 random games)...")
+    ready_seasons = [r["season"] for r in readiness_results if r["ready_for_modeling"]]
+    api_discrepancies = audit_sampled_games_against_api(index_df, sample_size=5, seasons=ready_seasons if ready_seasons else None)
+    if api_discrepancies:
+        print(f"      Found {len(api_discrepancies)} API discrepancies:")
+        for disc in api_discrepancies[:5]:
+            print(f"        - {disc['metric']}: disk={disc['disk_value']}, api={disc['api_value']}")
+        if len(api_discrepancies) > 5:
+            print(f"        ... and {len(api_discrepancies) - 5} more discrepancies")
+    else:
+        print("      ✓ API spot-check passed (sampled games match)")
+
+    # Step 9: Check live data readiness (system-wide)
+    print("\n[9/9] Checking live data readiness (system-wide)...")
     readiness = check_live_data_readiness()
+
+    # Record metrics for time-series monitoring
+    record_validation_metrics(disk_data, readiness_results, num_errors, num_warnings)
 
     # Summary
     print(f"\n{'=' * 80}")
@@ -781,10 +1136,14 @@ def main():
 
     print(f"\nPer-Game Consistency: {num_errors} errors, {num_warnings} warnings")
 
+    print(f"\nRegression Testing:")
+    print(f"  Golden fixtures: {'[PASS]' if not golden_failures else f'[FAIL] {len(golden_failures)} failures'}")
+    print(f"  API spot-check: {'[PASS]' if not api_discrepancies else f'[WARN] {len(api_discrepancies)} discrepancies'}")
+
     print(f"\nSeason Readiness:")
-    ready_seasons = [r for r in readiness_results if r["ready_for_modeling"]]
+    ready_seasons_list = [r for r in readiness_results if r["ready_for_modeling"]]
     not_ready_seasons = [r for r in readiness_results if not r["ready_for_modeling"]]
-    print(f"  Ready for modeling: {len(ready_seasons)}/{len(readiness_results)} seasons")
+    print(f"  Ready for modeling: {len(ready_seasons_list)}/{len(readiness_results)} seasons")
     if not_ready_seasons:
         print("  Not ready:")
         for r in not_ready_seasons:
