@@ -303,6 +303,261 @@ def summarize_dataset_completeness(disk_data: dict[str, dict[str, int]]) -> None
         )
 
 
+def compute_per_game_score_from_pbp(pbp_df: pd.DataFrame) -> tuple[int, int]:
+    """Compute final home/away score from a single game's PBP DataFrame.
+
+    Args:
+        pbp_df: PBP DataFrame for a single game
+
+    Returns:
+        Tuple of (home_score, away_score) from final event
+
+    Note:
+        Assumes HOME_SCORE and AWAY_SCORE columns exist.
+        Returns (0, 0) if DataFrame is empty.
+    """
+    if pbp_df.empty:
+        return 0, 0
+
+    last_row = pbp_df.iloc[-1]
+    home_score = int(last_row.get("HOME_SCORE", 0))
+    away_score = int(last_row.get("AWAY_SCORE", 0))
+    return home_score, away_score
+
+
+def compute_per_game_shot_counts_from_pbp(pbp_df: pd.DataFrame) -> int:
+    """Compute the number of field goal attempts from a single game's PBP DataFrame.
+
+    Args:
+        pbp_df: PBP DataFrame for a single game
+
+    Returns:
+        Count of field goal attempts (2pt, 3pt)
+
+    Note:
+        LNB shots table only contains field goals, not free throws.
+        This function matches that by counting only '2pt' and '3pt' events.
+    """
+    if pbp_df.empty:
+        return 0
+
+    if "EVENT_TYPE" in pbp_df.columns:
+        # Count field goals only (exclude freeThrow to match shots table)
+        field_goals = pbp_df["EVENT_TYPE"].isin(["2pt", "3pt"])
+        return int(field_goals.sum())
+
+    return 0
+
+
+def validate_per_game_consistency(
+    index_df: pd.DataFrame,
+    seasons: list[str] | None = None,
+    max_games: int | None = None,
+) -> list[dict[str, Any]]:
+    """Run per-game consistency checks across PBP, shots, and fixture metadata.
+
+    Args:
+        index_df: Game index DataFrame
+        seasons: Optional list of seasons to validate
+        max_games: Optional limit on number of games to check
+
+    Returns:
+        List of issue dicts with keys:
+            - 'season': season string
+            - 'game_id': game UUID
+            - 'level': 'warning' | 'error'
+            - 'code': short error code
+            - 'message': descriptive message
+    """
+    issues: list[dict[str, Any]] = []
+
+    df = index_df
+    if seasons:
+        df = df[df["season"].isin(seasons)]
+
+    if max_games is not None:
+        df = df.head(max_games)
+
+    for row in df.itertuples():
+        season = row.season
+        game_id = row.game_id
+
+        # Only check games that should have data
+        if not getattr(row, "has_pbp", False) and not getattr(row, "has_shots", False):
+            continue
+
+        pbp_path = PBP_DIR / f"season={season}" / f"game_id={game_id}.parquet"
+        shots_path = SHOTS_DIR / f"season={season}" / f"game_id={game_id}.parquet"
+
+        pbp_df: pd.DataFrame | None = None
+        shots_df: pd.DataFrame | None = None
+
+        # Validate PBP
+        if pbp_path.exists():
+            pbp_df = pd.read_parquet(pbp_path)
+
+            # Check for required columns
+            required_pbp_cols = {"HOME_SCORE", "AWAY_SCORE", "PERIOD_ID", "EVENT_TYPE"}
+            missing_cols = required_pbp_cols - set(pbp_df.columns)
+            if missing_cols:
+                issues.append(
+                    {
+                        "season": season,
+                        "game_id": game_id,
+                        "level": "error",
+                        "code": "PBP_MISSING_COLUMNS",
+                        "message": f"Missing required columns: {missing_cols}",
+                    }
+                )
+
+            # Score monotonicity check
+            if {"HOME_SCORE", "AWAY_SCORE"}.issubset(pbp_df.columns):
+                for col in ("HOME_SCORE", "AWAY_SCORE"):
+                    score_diff = pbp_df[col].diff().fillna(0)
+                    if (score_diff < 0).any():
+                        issues.append(
+                            {
+                                "season": season,
+                                "game_id": game_id,
+                                "level": "error",
+                                "code": "PBP_SCORE_DECREASE",
+                                "message": f"{col} decreases within game",
+                            }
+                        )
+
+            # Period monotonicity check
+            if "PERIOD_ID" in pbp_df.columns:
+                period_diff = pbp_df["PERIOD_ID"].diff().fillna(0)
+                if (period_diff < 0).any():
+                    issues.append(
+                        {
+                            "season": season,
+                            "game_id": game_id,
+                            "level": "warning",
+                            "code": "PBP_PERIOD_NON_MONOTONIC",
+                            "message": "PERIOD_ID decreases within game",
+                        }
+                    )
+
+        # Validate Shots
+        if shots_path.exists():
+            shots_df = pd.read_parquet(shots_path)
+
+            # Check for required columns
+            required_shots_cols = {"SHOT_TYPE", "SUCCESS", "TEAM_ID"}
+            missing_cols = required_shots_cols - set(shots_df.columns)
+            if missing_cols:
+                issues.append(
+                    {
+                        "season": season,
+                        "game_id": game_id,
+                        "level": "error",
+                        "code": "SHOTS_MISSING_COLUMNS",
+                        "message": f"Missing required columns: {missing_cols}",
+                    }
+                )
+
+            # Shot type validation
+            if "SHOT_TYPE" in shots_df.columns:
+                valid_shot_types = {"2pt", "3pt"}
+                invalid_shots = ~shots_df["SHOT_TYPE"].isin(valid_shot_types)
+                if invalid_shots.any():
+                    invalid_types = shots_df.loc[invalid_shots, "SHOT_TYPE"].unique()
+                    issues.append(
+                        {
+                            "season": season,
+                            "game_id": game_id,
+                            "level": "warning",
+                            "code": "SHOTS_INVALID_TYPE",
+                            "message": f"Found invalid SHOT_TYPE values: {list(invalid_types)}",
+                        }
+                    )
+
+            # Success flag validation
+            if "SUCCESS" in shots_df.columns:
+                valid_success = {True, False, 0, 1}
+                invalid_success = ~shots_df["SUCCESS"].isin(valid_success)
+                if invalid_success.any():
+                    issues.append(
+                        {
+                            "season": season,
+                            "game_id": game_id,
+                            "level": "error",
+                            "code": "SHOTS_INVALID_SUCCESS_FLAG",
+                            "message": "Found SUCCESS values outside {True, False, 0, 1}",
+                        }
+                    )
+
+        # Cross-check PBP vs shots counts
+        if pbp_df is not None and shots_df is not None:
+            pbp_field_goals = compute_per_game_shot_counts_from_pbp(pbp_df)
+            shots_count = len(shots_df)
+
+            # Should match exactly (both are field goal attempts only)
+            if pbp_field_goals != shots_count:
+                issues.append(
+                    {
+                        "season": season,
+                        "game_id": game_id,
+                        "level": "warning",
+                        "code": "PBP_SHOTS_COUNT_MISMATCH",
+                        "message": f"PBP field goals={pbp_field_goals}, shots table={shots_count}",
+                    }
+                )
+
+    return issues
+
+
+def check_season_readiness(
+    season: str, disk_data: dict[str, dict[str, int]], issues: list[dict[str, Any]]
+) -> dict[str, Any]:
+    """Check if a season is ready for modeling/live ingestion.
+
+    Args:
+        season: Season string (e.g., "2023-2024")
+        disk_data: Dict with 'pbp' and 'shots' counts per season
+        issues: List of validation issues from validate_per_game_consistency
+
+    Returns:
+        Dict with readiness status:
+            - 'season': season string
+            - 'pbp_count': actual PBP files
+            - 'shots_count': actual shots files
+            - 'pbp_pct': percentage complete
+            - 'shots_pct': percentage complete
+            - 'num_critical_issues': count of errors
+            - 'num_warnings': count of warnings
+            - 'ready_for_modeling': boolean flag
+    """
+    expected = EXPECTED_GAMES.get(season, 0)
+    pbp_count = disk_data["pbp"].get(season, 0)
+    shots_count = disk_data["shots"].get(season, 0)
+
+    pbp_pct = (pbp_count / expected * 100) if expected else 0
+    shots_pct = (shots_count / expected * 100) if expected else 0
+
+    # Count issues for this season
+    season_issues = [i for i in issues if i["season"] == season]
+    num_errors = sum(1 for i in season_issues if i["level"] == "error")
+    num_warnings = sum(1 for i in season_issues if i["level"] == "warning")
+
+    # Readiness criteria:
+    # - Coverage at least 95% for both PBP and shots
+    # - No critical errors
+    ready = pbp_pct >= 95.0 and shots_pct >= 95.0 and num_errors == 0
+
+    return {
+        "season": season,
+        "pbp_count": pbp_count,
+        "shots_count": shots_count,
+        "pbp_pct": pbp_pct,
+        "shots_pct": shots_pct,
+        "num_critical_issues": num_errors,
+        "num_warnings": num_warnings,
+        "ready_for_modeling": ready,
+    }
+
+
 def check_live_data_readiness() -> dict[str, Any]:
     """Check if system is ready for live data ingestion
 
@@ -459,8 +714,40 @@ def main():
     print("\n[3/7] Validating index accuracy...")
     accuracy = validate_index_accuracy(index_df, disk_data)
 
-    # Step 4: Analyze future vs played games
-    print("\n[4/7] Analyzing future vs played games...")
+    # Step 4: Run per-game consistency checks
+    print("\n[4/7] Running per-game consistency checks...")
+    issues = validate_per_game_consistency(index_df)
+    num_errors = sum(1 for x in issues if x["level"] == "error")
+    num_warnings = sum(1 for x in issues if x["level"] == "warning")
+    print(f"      Found {num_errors} errors, {num_warnings} warnings")
+
+    # Print sample issues (first 10)
+    if issues:
+        print("\n      Sample Issues:")
+        for issue in issues[:10]:
+            level_tag = "[ERROR]" if issue["level"] == "error" else "[WARN]"
+            print(
+                f"        {level_tag} {issue['season']} {issue['game_id'][:16]}: "
+                f"{issue['code']}"
+            )
+        if len(issues) > 10:
+            print(f"        ... and {len(issues) - 10} more issues")
+
+    # Step 5: Check season readiness
+    print("\n[5/7] Checking season readiness...")
+    readiness_results = []
+    for season in EXPECTED_GAMES.keys():
+        readiness = check_season_readiness(season, disk_data, issues)
+        readiness_results.append(readiness)
+        status = "✓ READY" if readiness["ready_for_modeling"] else "✗ NOT READY"
+        print(
+            f"      {season}: {status} "
+            f"(Coverage: {readiness['pbp_pct']:.1f}%/{readiness['shots_pct']:.1f}%, "
+            f"Errors: {readiness['num_critical_issues']})"
+        )
+
+    # Step 6: Analyze future vs played games
+    print("\n[6/7] Analyzing future vs played games...")
     future_analysis = analyze_future_games(index_df)
     if future_analysis:
         total_future = sum(info.get("future", 0) for info in future_analysis.values())
@@ -468,15 +755,11 @@ def main():
         peak_season = max(future_analysis.items(), key=lambda item: item[1].get("future", 0))[0]
         print(f"      Heaviest backlog season: {peak_season}")
 
-    # Step 5: Check live data readiness
-    print("\n[5/7] Checking live data readiness...")
+    # Step 7: Check live data readiness (system-wide)
+    print("\n[7/7] Checking live data readiness (system-wide)...")
     readiness = check_live_data_readiness()
 
-    # Step 6: Generate ingestion plan
-    print("\n[6/7] Generating ingestion completion plan...")
-    plan = generate_ingestion_plan()
-
-    # Step 7: Summary
+    # Summary
     print(f"\n{'=' * 80}")
     print("  VALIDATION SUMMARY")
     print(f"{'=' * 80}\n")
@@ -496,12 +779,21 @@ def main():
         for issue in accuracy["issues"]:
             print(f"    - {issue}")
 
-    print(f"\nLive Data Ready: {'[YES]' if readiness['ready_for_live'] else '[NO]'}")
+    print(f"\nPer-Game Consistency: {num_errors} errors, {num_warnings} warnings")
 
-    if plan:
-        print(f"\nRemaining Work: {len(plan)} seasons need attention")
-    else:
-        print("\n[OK] All seasons complete!")
+    print(f"\nSeason Readiness:")
+    ready_seasons = [r for r in readiness_results if r["ready_for_modeling"]]
+    not_ready_seasons = [r for r in readiness_results if not r["ready_for_modeling"]]
+    print(f"  Ready for modeling: {len(ready_seasons)}/{len(readiness_results)} seasons")
+    if not_ready_seasons:
+        print("  Not ready:")
+        for r in not_ready_seasons:
+            print(
+                f"    - {r['season']}: {r['pbp_pct']:.1f}%/{r['shots_pct']:.1f}% coverage, "
+                f"{r['num_critical_issues']} errors"
+            )
+
+    print(f"\nLive Data Ready: {'[YES]' if readiness['ready_for_live'] else '[NO]'}")
 
     print(f"\n{'=' * 80}\n")
 

@@ -12354,3 +12354,53 @@ Successfully merged LNB API integration branch into main and updated README with
 **Next Steps**: Deploy updated ingestion, rerun to backfill remaining games, verify 100% coverage for 2022-23 and 2023-24 seasons
 
 ---
+
+## 2025-11-16: LNB Per-Game Consistency & Season Readiness Validation
+
+**Enhancement**: Added comprehensive per-game validation and season readiness checks to ensure data quality and modeling readiness for LNB PBP and shots datasets.
+
+**Problem Solved**:
+- No validation of per-game internal consistency (score monotonicity, schema compliance)
+- No cross-dataset validation between PBP and shots tables
+- No clear "ready for modeling" signal for each season
+- Potential silent failures in data quality going undetected
+
+**Changes**:
+- `tools/lnb/validate_and_monitor_coverage.py:306`: Added `compute_per_game_score_from_pbp()` to reconstruct final scores from PBP (uses HOME_SCORE, AWAY_SCORE from last row)
+- `tools/lnb/validate_and_monitor_coverage.py:328`: Added `compute_per_game_shot_counts_from_pbp()` to count field goal attempts (2pt, 3pt only, excludes freeThrow to match shots table)
+- `tools/lnb/validate_and_monitor_coverage.py:352`: Added `validate_per_game_consistency()` to check:
+  - PBP required columns (HOME_SCORE, AWAY_SCORE, PERIOD_ID, EVENT_TYPE)
+  - Score monotonicity (neither HOME_SCORE nor AWAY_SCORE can decrease)
+  - Period monotonicity (PERIOD_ID should not decrease)
+  - Shots required columns (SHOT_TYPE, SUCCESS, TEAM_ID)
+  - Valid SHOT_TYPE values ('2pt', '3pt')
+  - Valid SUCCESS flags (True, False, 0, 1)
+  - PBP field goal count vs shots table count (should match exactly)
+- `tools/lnb/validate_and_monitor_coverage.py:511`: Added `check_season_readiness()` to determine modeling readiness:
+  - Criteria: ≥95% coverage for both PBP and shots AND zero critical errors
+  - Returns detailed readiness status per season
+- `tools/lnb/validate_and_monitor_coverage.py:717-747`: Integrated consistency checks and readiness reporting into main validation flow (steps 4-5 of 7)
+- `tools/lnb/validate_and_monitor_coverage.py:782-794`: Enhanced summary with per-game consistency metrics and season readiness breakdown
+
+**Validation Results** (as of 2025-11-16):
+- 2022-2023: ✓ READY (306/306 PBP, 306/306 shots, 0 errors)
+- 2023-2024: ✓ READY (306/306 PBP, 310/306 shots, 0 errors)
+- 2024-2025: ✗ NOT READY (120/240 PBP, 120/240 shots, 50% coverage)
+- 2025-2026: ✗ NOT READY (0/176 PBP, 0/176 shots, future season)
+
+**Impact**:
+- Catches partial/truncated PBP files via score monotonicity checks
+- Detects schema changes or missing columns immediately
+- Validates PBP-to-shots consistency for every game
+- Provides clear go/no-go signal for Bayesian modeling and live ingestion
+- Enables defensive programming: "only use seasons marked READY"
+
+**Files Modified**:
+- `tools/lnb/validate_and_monitor_coverage.py` (4 new validation functions, integrated into main flow, enhanced summary)
+
+**Next Steps**:
+- Backfill remaining 2024-2025 games to reach 100% coverage
+- Add optional API-based random audit for sample validation against source
+- Use season readiness flags to gate Bayesian training and MCP tools
+
+---
