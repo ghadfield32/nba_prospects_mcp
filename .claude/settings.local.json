@@ -133,7 +133,19 @@
       "Bash(Select-Object -First 30)",
       "Bash(.venvScriptspython -m pytest tests/test_lnb_health.py -v --tb=short)",
       "Bash(league_coverage_output.txt)",
-      "Bash(.venvScriptspython tools/generate_league_coverage_matrix.py)"
+      "Bash(.venvScriptspython tools/generate_league_coverage_matrix.py)",
+      "Bash(tools/lnb/full_data_scan.txt)",
+      "Bash(Select-String -Pattern \"FILTERING|games need|Processing|SUCCESS|ERROR|SUMMARY|PBP success|Shots success\" -CaseSensitive:$false)",
+      "Bash(Select-Object -First 50)",
+      "Bash(Select-String -Pattern \"FETCHING|Processing|SUCCESS|ERROR|SUMMARY|games processed|PBP success|Shots success|Both PBP\" -Context 0,0)",
+      "Bash(timeout 300 uv run python:*)",
+      "Bash(if [ -f \"data/raw/lnb/ingestion_errors.csv\" ])",
+      "Bash(then wc -l data/raw/lnb/ingestion_errors.csv)",
+      "Bash(else echo \"No errors file yet\")",
+      "Bash(fi)",
+      "Bash(timeout 60 sleep:*)",
+      "Bash(Select-String -Pattern \"standings\" -Context 10,10)",
+      "Bash(timeout 30 sleep:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,0 +1,245 @@
+################################################################################
+# COMPLETE UUID AUDIT - ALL 34 FILES
+# Started: 2025-11-16T05:31:56.458791
+################################################################################
+
+
+================================================================================
+PHASE 1: AUDITING ALL NORMALIZED FILES
+================================================================================
+
+
+================================================================================
+Auditing: player_game
+================================================================================
+
+Season 2021-2022: 1 files
+  ✓ game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet: UUID=7d414bce-f5da-11..., Season=2021-2022, Rows=18
+Season 2022-2023: 1 files
+  ✓ game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet: UUID=cc7e470e-11a0-11..., Season=2022-2023, Rows=17
+Season 2023-2024: 16 files
+  ✓ game_id=0cac6e1b-6715-11f0-a9f3-27e6e78614e1.parquet: UUID=0cac6e1b-6715-11..., Season=2023-2024, Rows=18
+  ✓ game_id=0cd1323f-6715-11f0-86f4-27e6e78614e1.parquet: UUID=0cd1323f-6715-11..., Season=2023-2024, Rows=18
+  ✓ game_id=3fcea9a1-1f10-11ee-a687-db190750bdda.parquet: UUID=3fcea9a1-1f10-11..., Season=2023-2024, Rows=18
+  ✓ game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet: UUID=7d414bce-f5da-11..., Season=2023-2024, Rows=18
+  ✓ game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet: UUID=cc7e470e-11a0-11..., Season=2023-2024, Rows=18
+  ✓ game_id=LNB_2023-2024_10.parquet: UUID=LNB_2023-2024_10..., Season=2023-2024, Rows=18
+  ✓ game_id=LNB_2023-2024_11.parquet: UUID=LNB_2023-2024_11..., Season=2023-2024, Rows=18
+  ✓ game_id=LNB_2023-2024_12.parquet: UUID=LNB_2023-2024_12..., Season=2023-2024, Rows=18
+  ✓ game_id=LNB_2023-2024_13.parquet: UUID=LNB_2023-2024_13..., Season=2023-2024, Rows=18
+  ✓ game_id=LNB_2023-2024_14.parquet: UUID=LNB_2023-2024_14..., Season=2023-2024, Rows=18
+  ✓ game_id=LNB_2023-2024_15.parquet: UUID=LNB_2023-2024_15..., Season=2023-2024, Rows=18
+  ✓ game_id=LNB_2023-2024_16.parquet: UUID=LNB_2023-2024_16..., Season=2023-2024, Rows=18
+  ✓ game_id=LNB_2023-2024_6.parquet: UUID=LNB_2023-2024_6..., Season=2023-2024, Rows=18
+  ✓ game_id=LNB_2023-2024_7.parquet: UUID=LNB_2023-2024_7..., Season=2023-2024, Rows=18
+  ✓ game_id=LNB_2023-2024_8.parquet: UUID=LNB_2023-2024_8..., Season=2023-2024, Rows=18
+  ✓ game_id=LNB_2023-2024_9.parquet: UUID=LNB_2023-2024_9..., Season=2023-2024, Rows=18
+Season 2024-2025: 16 files
+  ✓ game_id=0cac6e1b-6715-11f0-a9f3-27e6e78614e1.parquet: UUID=0cac6e1b-6715-11..., Season=2024-2025, Rows=20
+  ✓ game_id=0cd1323f-6715-11f0-86f4-27e6e78614e1.parquet: UUID=0cd1323f-6715-11..., Season=2024-2025, Rows=20
+  ✓ game_id=0ce02919-6715-11f0-9d01-27e6e78614e1.parquet: UUID=0ce02919-6715-11..., Season=2024-2025, Rows=18
+  ✓ game_id=0d0504a0-6715-11f0-98ab-27e6e78614e1.parquet: UUID=0d0504a0-6715-11..., Season=2024-2025, Rows=20
+  ✓ game_id=LNB_2024-2025_10.parquet: UUID=LNB_2024-2025_10..., Season=2024-2025, Rows=18
+  ✓ game_id=LNB_2024-2025_11.parquet: UUID=LNB_2024-2025_11..., Season=2024-2025, Rows=18
+  ✓ game_id=LNB_2024-2025_12.parquet: UUID=LNB_2024-2025_12..., Season=2024-2025, Rows=18
+  ✓ game_id=LNB_2024-2025_13.parquet: UUID=LNB_2024-2025_13..., Season=2024-2025, Rows=18
+  ✓ game_id=LNB_2024-2025_14.parquet: UUID=LNB_2024-2025_14..., Season=2024-2025, Rows=18
+  ✓ game_id=LNB_2024-2025_15.parquet: UUID=LNB_2024-2025_15..., Season=2024-2025, Rows=18
+  ✓ game_id=LNB_2024-2025_16.parquet: UUID=LNB_2024-2025_16..., Season=2024-2025, Rows=18
+  ✓ game_id=LNB_2024-2025_5.parquet: UUID=LNB_2024-2025_5..., Season=2024-2025, Rows=18
+  ✓ game_id=LNB_2024-2025_6.parquet: UUID=LNB_2024-2025_6..., Season=2024-2025, Rows=18
+  ✓ game_id=LNB_2024-2025_7.parquet: UUID=LNB_2024-2025_7..., Season=2024-2025, Rows=18
+  ✓ game_id=LNB_2024-2025_8.parquet: UUID=LNB_2024-2025_8..., Season=2024-2025, Rows=18
+  ✓ game_id=LNB_2024-2025_9.parquet: UUID=LNB_2024-2025_9..., Season=2024-2025, Rows=18
+
+================================================================================
+Auditing: team_game
+================================================================================
+
+Season 2021-2022: 1 files
+  ✓ game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet: UUID=7d414bce-f5da-11..., Season=2021-2022, Rows=2
+Season 2022-2023: 1 files
+  ✓ game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet: UUID=cc7e470e-11a0-11..., Season=2022-2023, Rows=2
+Season 2023-2024: 16 files
+  ✓ game_id=0cac6e1b-6715-11f0-a9f3-27e6e78614e1.parquet: UUID=0cac6e1b-6715-11..., Season=2023-2024, Rows=2
+  ✓ game_id=0cd1323f-6715-11f0-86f4-27e6e78614e1.parquet: UUID=0cd1323f-6715-11..., Season=2023-2024, Rows=2
+  ✓ game_id=3fcea9a1-1f10-11ee-a687-db190750bdda.parquet: UUID=3fcea9a1-1f10-11..., Season=2023-2024, Rows=2
+  ✓ game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet: UUID=7d414bce-f5da-11..., Season=2023-2024, Rows=2
+  ✓ game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet: UUID=cc7e470e-11a0-11..., Season=2023-2024, Rows=2
+  ✓ game_id=LNB_2023-2024_10.parquet: UUID=LNB_2023-2024_10..., Season=2023-2024, Rows=2
+  ✓ game_id=LNB_2023-2024_11.parquet: UUID=LNB_2023-2024_11..., Season=2023-2024, Rows=2
+  ✓ game_id=LNB_2023-2024_12.parquet: UUID=LNB_2023-2024_12..., Season=2023-2024, Rows=2
+  ✓ game_id=LNB_2023-2024_13.parquet: UUID=LNB_2023-2024_13..., Season=2023-2024, Rows=2
+  ✓ game_id=LNB_2023-2024_14.parquet: UUID=LNB_2023-2024_14..., Season=2023-2024, Rows=2
+  ✓ game_id=LNB_2023-2024_15.parquet: UUID=LNB_2023-2024_15..., Season=2023-2024, Rows=2
+  ✓ game_id=LNB_2023-2024_16.parquet: UUID=LNB_2023-2024_16..., Season=2023-2024, Rows=2
+  ✓ game_id=LNB_2023-2024_6.parquet: UUID=LNB_2023-2024_6..., Season=2023-2024, Rows=2
+  ✓ game_id=LNB_2023-2024_7.parquet: UUID=LNB_2023-2024_7..., Season=2023-2024, Rows=2
+  ✓ game_id=LNB_2023-2024_8.parquet: UUID=LNB_2023-2024_8..., Season=2023-2024, Rows=2
+  ✓ game_id=LNB_2023-2024_9.parquet: UUID=LNB_2023-2024_9..., Season=2023-2024, Rows=2
+Season 2024-2025: 16 files
+  ✓ game_id=0cac6e1b-6715-11f0-a9f3-27e6e78614e1.parquet: UUID=0cac6e1b-6715-11..., Season=2024-2025, Rows=2
+  ✓ game_id=0cd1323f-6715-11f0-86f4-27e6e78614e1.parquet: UUID=0cd1323f-6715-11..., Season=2024-2025, Rows=2
+  ✓ game_id=0ce02919-6715-11f0-9d01-27e6e78614e1.parquet: UUID=0ce02919-6715-11..., Season=2024-2025, Rows=2
+  ✓ game_id=0d0504a0-6715-11f0-98ab-27e6e78614e1.parquet: UUID=0d0504a0-6715-11..., Season=2024-2025, Rows=2
+  ✓ game_id=LNB_2024-2025_10.parquet: UUID=LNB_2024-2025_10..., Season=2024-2025, Rows=2
+  ✓ game_id=LNB_2024-2025_11.parquet: UUID=LNB_2024-2025_11..., Season=2024-2025, Rows=2
+  ✓ game_id=LNB_2024-2025_12.parquet: UUID=LNB_2024-2025_12..., Season=2024-2025, Rows=2
+  ✓ game_id=LNB_2024-2025_13.parquet: UUID=LNB_2024-2025_13..., Season=2024-2025, Rows=2
+  ✓ game_id=LNB_2024-2025_14.parquet: UUID=LNB_2024-2025_14..., Season=2024-2025, Rows=2
+  ✓ game_id=LNB_2024-2025_15.parquet: UUID=LNB_2024-2025_15..., Season=2024-2025, Rows=2
+  ✓ game_id=LNB_2024-2025_16.parquet: UUID=LNB_2024-2025_16..., Season=2024-2025, Rows=2
+  ✓ game_id=LNB_2024-2025_5.parquet: UUID=LNB_2024-2025_5..., Season=2024-2025, Rows=2
+  ✓ game_id=LNB_2024-2025_6.parquet: UUID=LNB_2024-2025_6..., Season=2024-2025, Rows=2
+  ✓ game_id=LNB_2024-2025_7.parquet: UUID=LNB_2024-2025_7..., Season=2024-2025, Rows=2
+  ✓ game_id=LNB_2024-2025_8.parquet: UUID=LNB_2024-2025_8..., Season=2024-2025, Rows=2
+  ✓ game_id=LNB_2024-2025_9.parquet: UUID=LNB_2024-2025_9..., Season=2024-2025, Rows=2
+
+================================================================================
+AUDIT COMPLETE
+================================================================================
+Total files audited: 68
+Unique UUIDs found: 30
+Errors: 0
+
+================================================================================
+PHASE 2: DETECTING UUID COLLISIONS
+================================================================================
+
+
+🔴 COLLISION DETECTED: UUID 7d414bce-f5da-11...
+   Appears 2 times with DIFFERENT games:
+   [1] Folder: 2021-2022
+       Teams: d65120e6-f548-11... vs c35f6b14-f548-11...
+       Score: 80 - 69
+       Season in data: 2021-2022
+       Game Hash: f966f0f16629d619
+   [2] Folder: 2023-2024
+       Teams: 4b442c8e-19b4-11... vs 63b76e03-19b3-11...
+       Score: 76 - 67
+       Season in data: 2023-2024
+       Game Hash: 10e4ee163369b9fa
+
+🔴 COLLISION DETECTED: UUID cc7e470e-11a0-11...
+   Appears 2 times with DIFFERENT games:
+   [1] Folder: 2022-2023
+       Teams: caa1358f-0663-11... vs 74ecde61-0661-11...
+       Score: 84 - 80
+       Season in data: 2022-2023
+       Game Hash: 193ffa336d92aa9e
+   [2] Folder: 2023-2024
+       Teams: 4b442c8e-19b4-11... vs 63b76e03-19b3-11...
+       Score: 76 - 67
+       Season in data: 2023-2024
+       Game Hash: 10e4ee163369b9fa
+
+🔴 COLLISION DETECTED: UUID 0cac6e1b-6715-11...
+   Appears 2 times with DIFFERENT games:
+   [1] Folder: 2023-2024
+       Teams: 4b442c8e-19b4-11... vs 63b76e03-19b3-11...
+       Score: 76 - 67
+       Season in data: 2023-2024
+       Game Hash: 10e4ee163369b9fa
+   [2] Folder: 2024-2025
+       Teams: c281453b-55b7-11... vs e796c4fa-55bc-11...
+       Score: 76 - 78
+       Season in data: 2024-2025
+       Game Hash: 58dd69cde923dccd
+
+🔴 COLLISION DETECTED: UUID 0cd1323f-6715-11...
+   Appears 2 times with DIFFERENT games:
+   [1] Folder: 2023-2024
+       Teams: 4b442c8e-19b4-11... vs 63b76e03-19b3-11...
+       Score: 76 - 67
+       Season in data: 2023-2024
+       Game Hash: 10e4ee163369b9fa
+   [2] Folder: 2024-2025
+       Teams: c281453b-55b7-11... vs e796c4fa-55bc-11...
+       Score: 76 - 78
+       Season in data: 2024-2025
+       Game Hash: 58dd69cde923dccd
+
+================================================================================
+COLLISION DETECTION SUMMARY
+================================================================================
+Total UUIDs: 30
+UUIDs with collisions: 30
+UUIDs appearing only once: 0
+Estimated unique games: 8
+
+Breakdown:
+  True collisions (same UUID → different games): 4
+  True duplicates (same game in multiple folders): 26
+
+================================================================================
+PHASE 3: GENERATING CORRECTION MAPPING
+================================================================================
+
+Correction needed:
+  File: game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet
+  Old UUID: 7d414bce-f5da-11eb-b3fd-a23ac5ab90da
+  New UUID: LNB_20212022_f966f0f16629d619
+  Season: 2021-2022
+
+Correction needed:
+  File: game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet
+  Old UUID: 7d414bce-f5da-11eb-b3fd-a23ac5ab90da
+  New UUID: LNB_20232024_10e4ee163369b9fa
+  Season: 2023-2024
+
+Correction needed:
+  File: game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet
+  Old UUID: cc7e470e-11a0-11ed-8ef5-8d12cdc95909
+  New UUID: LNB_20222023_193ffa336d92aa9e
+  Season: 2022-2023
+
+Correction needed:
+  File: game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet
+  Old UUID: cc7e470e-11a0-11ed-8ef5-8d12cdc95909
+  New UUID: LNB_20232024_10e4ee163369b9fa
+  Season: 2023-2024
+
+Correction needed:
+  File: game_id=0cac6e1b-6715-11f0-a9f3-27e6e78614e1.parquet
+  Old UUID: 0cac6e1b-6715-11f0-a9f3-27e6e78614e1
+  New UUID: LNB_20232024_10e4ee163369b9fa
+  Season: 2023-2024
+
+Correction needed:
+  File: game_id=0cac6e1b-6715-11f0-a9f3-27e6e78614e1.parquet
+  Old UUID: 0cac6e1b-6715-11f0-a9f3-27e6e78614e1
+  New UUID: LNB_20242025_58dd69cde923dccd
+  Season: 2024-2025
+
+Correction needed:
+  File: game_id=0cd1323f-6715-11f0-86f4-27e6e78614e1.parquet
+  Old UUID: 0cd1323f-6715-11f0-86f4-27e6e78614e1
+  New UUID: LNB_20232024_10e4ee163369b9fa
+  Season: 2023-2024
+
+Correction needed:
+  File: game_id=0cd1323f-6715-11f0-86f4-27e6e78614e1.parquet
+  Old UUID: 0cd1323f-6715-11f0-86f4-27e6e78614e1
+  New UUID: LNB_20242025_58dd69cde923dccd
+  Season: 2024-2025
+
+Total corrections needed: 8
+
+================================================================================
+AUDIT COMPLETE
+================================================================================
+Report saved: tools\lnb\complete_uuid_audit.json
+
+################################################################################
+# FINAL SUMMARY
+################################################################################
+
+Files Audited: 68
+Unique UUIDs: 30
+Estimated Unique Games: 8
+
+UUID Collisions:
+  True collisions (same UUID → different games): 4
+  True duplicates (same game in multiple folders): 26
+
+Corrections Needed: 8 files

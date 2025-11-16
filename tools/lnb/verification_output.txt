@@ -1,0 +1,143 @@
+################################################################################
+# LNB DATA INVESTIGATION - COMPREHENSIVE VERIFICATION
+# Started: 2025-11-16T05:24:43.624052
+################################################################################
+
+
+================================================================================
+STEP 5.1: VERIFYING DUPLICATE FILES
+================================================================================
+
+Verifying: 7d414bce-f5da... (season: 2021-2022)
+  Original: game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet
+  Duplicate: game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet
+  ❌ NOT IDENTICAL: Files differ!
+     Differences: ['Data differs in 316 cells']
+
+Verifying: cc7e470e-11a0... (season: 2022-2023)
+  Original: game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet
+  Duplicate: game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet
+  ❌ NOT IDENTICAL: Files differ!
+     Differences: ['Shape mismatch: (17, 27) vs (18, 27)']
+
+Verifying: 0cac6e1b-6715... (season: 2023-2024)
+  Original: game_id=0cac6e1b-6715-11f0-a9f3-27e6e78614e1.parquet
+  Duplicate: game_id=0cac6e1b-6715-11f0-a9f3-27e6e78614e1.parquet
+  ❌ NOT IDENTICAL: Files differ!
+     Differences: ['Shape mismatch: (18, 27) vs (20, 27)']
+
+Verifying: 0cd1323f-6715... (season: 2023-2024)
+  Original: game_id=0cd1323f-6715-11f0-86f4-27e6e78614e1.parquet
+  Duplicate: game_id=0cd1323f-6715-11f0-86f4-27e6e78614e1.parquet
+  ❌ NOT IDENTICAL: Files differ!
+     Differences: ['Shape mismatch: (18, 27) vs (20, 27)']
+
+Verifying: 7d414bce-f5da... (season: 2021-2022)
+  Original: game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet
+  Duplicate: game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet
+  ❌ NOT IDENTICAL: Files differ!
+     Differences: ['Data differs in 44 cells']
+
+Verifying: cc7e470e-11a0... (season: 2022-2023)
+  Original: game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet
+  Duplicate: game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet
+  ❌ NOT IDENTICAL: Files differ!
+     Differences: ['Data differs in 41 cells']
+
+Verifying: 0cac6e1b-6715... (season: 2023-2024)
+  Original: game_id=0cac6e1b-6715-11f0-a9f3-27e6e78614e1.parquet
+  Duplicate: game_id=0cac6e1b-6715-11f0-a9f3-27e6e78614e1.parquet
+  ❌ NOT IDENTICAL: Files differ!
+     Differences: ['Data differs in 44 cells']
+
+Verifying: 0cd1323f-6715... (season: 2023-2024)
+  Original: game_id=0cd1323f-6715-11f0-86f4-27e6e78614e1.parquet
+  Duplicate: game_id=0cd1323f-6715-11f0-a9f3-27e6e78614e1.parquet
+  ❌ MISSING: Duplicate file not found!
+
+================================================================================
+VERIFICATION SUMMARY
+================================================================================
+Total pairs checked: 8
+Verified identical: 0
+Not identical: 7
+Missing files: 1
+
+
+================================================================================
+STEP 5.2: CHECKING FOR GAME_DATE IN RAW DATA
+================================================================================
+
+Fixtures columns: ['fixture_uuid', 'external_id', 'season', 'game_date', 'home_team', 'away_team', 'home_score', 'away_score', 'status', 'has_pbp', 'pbp_events_count', 'shots_count']
+✅ Found date columns: ['game_date']
+   game_date: ['2025-11-14', '2025-11-15', '2025-11-15']
+
+PBP events columns: ['fixture_uuid', 'event_id', 'quarter', 'clock', 'team', 'player', 'event_type', 'event_description', 'score_home', 'score_away', 'x', 'y']
+❌ No date columns found in PBP
+
+================================================================================
+Can recover GAME_DATE from raw data: True
+================================================================================
+
+
+================================================================================
+STEP 5.3: INVESTIGATING EARLY SEASONS (2021-2023)
+================================================================================
+
+
+2021-2022: Found 1 file(s)
+  File: game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet
+    Rows: 18
+    Game ID: 7d414bce-f5da-11eb-b3fd-a23ac5ab90da
+    Season in data: 2021-2022
+
+2022-2023: Found 1 file(s)
+  File: game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet
+    Rows: 17
+    Game ID: cc7e470e-11a0-11ed-8ef5-8d12cdc95909
+    Season in data: 2022-2023
+
+================================================================================
+CHECKING FOR EVIDENCE OF ADDITIONAL GAMES
+================================================================================
+
+❌ No game index found at data\lnb\game_index.parquet
+
+
+================================================================================
+STEP 5.4: CHECKING MISSING 2025-2026 PBP DATA
+================================================================================
+
+Total fixtures: 8
+Fixture columns: ['fixture_uuid', 'external_id', 'season', 'game_date', 'home_team', 'away_team', 'home_score', 'away_score', 'status', 'has_pbp', 'pbp_events_count', 'shots_count']
+
+Games with PBP: 6
+Missing PBP: 2
+Missing PBP for games:
+  0cf637f3-6715-11f0-b9ed-27e6e78614e1: {'fixture_uuid': '0cf637f3-6715-11f0-b9ed-27e6e78614e1', 'external_id': '28908', 'season': '2025-2026', 'game_date': '2025-11-16', 'home_team': 'Limoges', 'away_team': 'Lyon-Villeurbanne', 'home_score': 0, 'away_score': 0, 'status': 'SCHEDULED', 'has_pbp': True, 'pbp_events_count': 0, 'shots_count': 0}
+  0d225fad-6715-11f0-810f-27e6e78614e1: {'fixture_uuid': '0d225fad-6715-11f0-810f-27e6e78614e1', 'external_id': '28913', 'season': '2025-2026', 'game_date': '2025-11-16', 'home_team': 'Le Mans', 'away_team': 'Monaco', 'home_score': 0, 'away_score': 0, 'status': 'SCHEDULED', 'has_pbp': True, 'pbp_events_count': 0, 'shots_count': 0}
+
+Games with shots: 6
+Missing shots: 2
+
+
+================================================================================
+INVESTIGATION COMPLETE
+================================================================================
+Report saved: tools\lnb\comprehensive_investigation_report.json
+
+################################################################################
+# RECOMMENDATIONS
+################################################################################
+
+⚠️ WARNING: Not all duplicates verified!
+   Verified: 0/8
+   DO NOT DELETE until discrepancies resolved
+
+✅ GAME_DATE can be recovered from raw data
+   Recommend: Re-run normalization pipeline with GAME_DATE preservation
+
+⚠️ 2 fixtures missing PBP data
+   Recommend: Attempt to re-fetch from LNB API
+
+################################################################################

@@ -37,7 +37,7 @@ import argparse
 import io
 import sys
 import time
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 
@@ -75,6 +75,35 @@ SLEEP_BETWEEN_GAMES = 1.0  # seconds
 # ==============================================================================
 
 
+def is_game_played(game_date_str: str) -> bool:
+    """Check if a game has been played based on its date
+
+    Args:
+        game_date_str: Game date in ISO format (YYYY-MM-DD)
+
+    Returns:
+        True if game date is in the past or today (already played), False otherwise
+
+    Note:
+        Returns True for empty/missing dates to maintain backward compatibility
+        (allows ingestion attempts for games without populated dates)
+
+        Uses <= instead of < to include games scheduled for TODAY,
+        as they may have already been played earlier in the day.
+    """
+    if not game_date_str or game_date_str.strip() == "":
+        # Empty date - assume played (backward compatibility)
+        return True
+
+    try:
+        game_date = date.fromisoformat(game_date_str)
+        today = date.today()
+        return game_date <= today  # Include games from today!
+    except (ValueError, TypeError):
+        # Invalid date format - assume played to avoid skipping games
+        return True
+
+
 def load_game_index() -> pd.DataFrame:
     """Load game index from Parquet
 
@@ -108,13 +137,20 @@ def save_game_index(df: pd.DataFrame) -> None:
 
 
 def save_partitioned_parquet(df: pd.DataFrame, data_type: str, season: str, game_id: str) -> None:
-    """Save DataFrame to partitioned Parquet file
+    """Save DataFrame to partitioned Parquet file with UUID validation
+
+    This function validates that the game_id parameter matches the GAME_ID
+    column in the data before saving. This prevents UUID corruption where
+    files are saved with incorrect filenames.
 
     Args:
         df: Data to save
         data_type: 'pbp' or 'shots'
         season: Season string (e.g., "2024-2025")
         game_id: Game UUID
+
+    Raises:
+        ValueError: If data_type is invalid or UUID mismatch detected
     """
     if data_type == "pbp":
         base_dir = PBP_DIR
@@ -123,11 +159,22 @@ def save_partitioned_parquet(df: pd.DataFrame, data_type: str, season: str, game
     else:
         raise ValueError(f"Invalid data_type: {data_type}")
 
+    # VALIDATE: Ensure filename matches data UUID (prevent corruption)
+    if "GAME_ID" in df.columns and len(df) > 0:
+        data_game_id = str(df["GAME_ID"].iloc[0])
+        if data_game_id != game_id:
+            raise ValueError(
+                f"UUID mismatch when saving {data_type}:\n"
+                f"  Parameter game_id: {game_id}\n"
+                f"  Data GAME_ID:      {data_game_id}\n"
+                f"  This indicates a bug in the calling code. Fix the source of the UUID."
+            )
+
     # Create season partition directory
     season_dir = base_dir / f"season={season}"
     season_dir.mkdir(parents=True, exist_ok=True)
 
-    # Save file
+    # Save file with validated UUID
     file_path = season_dir / f"game_id={game_id}.parquet"
     df.to_parquet(file_path, index=False)
 
@@ -296,6 +343,27 @@ def bulk_ingest(
     if seasons:
         index_df = index_df[index_df["season"].isin(seasons)]
         print(f"[INFO] Filtered to {len(index_df)} games in selected seasons")
+
+    # NEW: Filter out future games (haven't been played yet)
+    # This prevents wasting API calls on games that don't have data yet
+    if "game_date" in index_df.columns:
+        # Check which games have been played
+        index_df["_is_played"] = index_df["game_date"].apply(is_game_played)
+
+        future_games = index_df[~index_df["_is_played"]]
+        index_df = index_df[index_df["_is_played"]]
+
+        if len(future_games) > 0:
+            print(f"[INFO] Skipped {len(future_games)} future games (not yet played)")
+            print(
+                f"       Future games date range: {future_games['game_date'].min()} to {future_games['game_date'].max()}"
+            )
+
+        # Drop temporary column
+        index_df = index_df.drop(columns=["_is_played"])
+    else:
+        print("[WARN] game_date column not found - cannot filter future games")
+        print("[WARN] Run: uv run python tools/lnb/build_game_index.py --force-rebuild")
 
     # Filter to games that need fetching
     if force_refetch:

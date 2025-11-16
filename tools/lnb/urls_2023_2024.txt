@@ -1,0 +1,48 @@
+# LNB Pro A - Season 2023-2024 Match-Center URLs
+# =================================================
+#
+# INSTRUCTIONS:
+# 1. Open each calendar URL below in your browser
+# 2. For each date, click through each game to open match-center
+# 3. Copy the match-center URL (format: https://lnb.fr/fr/match-center/<UUID>)
+# 4. Paste it below the corresponding calendar date section
+# 5. Remove the example comments and add your actual collected URLs
+#
+# After collecting all URLs, run:
+#   uv run python tools/lnb/discover_historical_fixture_uuids.py \
+#     --seasons 2023-2024 \
+#     --from-file tools/lnb/urls_2023_2024.txt
+#
+# =================================================
+
+# --- 2023-11-18 ---
+# Calendar anchor: https://lnb.fr/fr/calendar#2023-11-18
+# Match-center URLs for games on this date:
+
+
+
+# --- 2023-11-28 ---
+# Calendar anchor: https://lnb.fr/fr/calendar#2023-11-28
+# Match-center URLs for games on this date:
+
+
+
+# --- Additional Dates ---
+# Add more calendar dates and their match-center URLs below as you discover them
+# Follow the format above
+
+
+# =================================================
+# KNOWN FIXTURES (already in game index):
+# - 3fcea9a1-1f10-11ee-a687-db190750bdda (only confirmed 2023-2024 game)
+#
+# NOTE: You can include this URL again - the discovery script will deduplicate.
+# Focus on collecting ALL 2023-2024 games to build complete season coverage.
+# =================================================
+
+# =================================================
+# COLLECTION STATUS:
+# Total URLs collected: 0
+# Status: INCOMPLETE - Need to collect all games for 2023-2024 season
+# Last updated: 2025-11-16
+# =================================================

@@ -1,0 +1,48 @@
+# LNB Pro A - Season 2025-2026 Match-Center URLs
+# =================================================
+#
+# INSTRUCTIONS:
+# 1. Open each calendar URL below in your browser
+# 2. For each date, click through each game to open match-center
+# 3. Copy the match-center URL (format: https://lnb.fr/fr/match-center/<UUID>)
+# 4. Paste it below the corresponding calendar date section
+# 5. Remove the example URLs and add your actual collected URLs
+#
+# After collecting all URLs, run:
+#   uv run python tools/lnb/discover_historical_fixture_uuids.py \
+#     --seasons 2025-2026 \
+#     --from-file tools/lnb/urls_2025_2026.txt
+#
+# =================================================
+
+# --- 2025-11-07 ---
+# Calendar anchor: https://lnb.fr/fr/calendar#2025-11-07
+# Match-center URLs for games on this date:
+
+
+
+# --- 2025-11-11 ---
+# Calendar anchor: https://lnb.fr/fr/calendar#2025-11-11
+# Match-center URLs for games on this date:
+
+
+
+# --- 2025-11-15 ---
+# Calendar anchor: https://lnb.fr/fr/calendar#2025-11-15
+# Match-center URLs for games on this date:
+
+# KNOWN FIXTURE (already collected):
+https://lnb.fr/fr/match-center/0bb374e8-6715-11f0-9c6e-27e6e78614e1
+
+
+# --- Additional Dates ---
+# Add more calendar dates and their match-center URLs below as you discover them
+# Follow the format above
+
+
+# =================================================
+# COLLECTION STATUS:
+# Total URLs collected: 1
+# Status: INCOMPLETE - Need to collect all games for 2025-2026 season
+# Last updated: 2025-11-16
+# =================================================

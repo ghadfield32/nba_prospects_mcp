@@ -1,0 +1,200 @@
+{
+  "generated_at": "2025-11-16T05:24:43.785020",
+  "duplicate_verification": {
+    "total_pairs": 8,
+    "verified_identical": 0,
+    "not_identical": 7,
+    "missing_files": 1,
+    "pairs": [
+      {
+        "game_id": "7d414bce-f5da...",
+        "true_season": "2021-2022",
+        "keep_path": "data/normalized/lnb/player_game/season=2021-2022/game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet",
+        "duplicate_path": "data/normalized/lnb/player_game/season=2023-2024/game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet",
+        "status": "not_identical",
+        "differences": [
+          "Data differs in 316 cells"
+        ]
+      },
+      {
+        "game_id": "cc7e470e-11a0...",
+        "true_season": "2022-2023",
+        "keep_path": "data/normalized/lnb/player_game/season=2022-2023/game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet",
+        "duplicate_path": "data/normalized/lnb/player_game/season=2023-2024/game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet",
+        "status": "not_identical",
+        "differences": [
+          "Shape mismatch: (17, 27) vs (18, 27)"
+        ]
+      },
+      {
+        "game_id": "0cac6e1b-6715...",
+        "true_season": "2023-2024",
+        "keep_path": "data/normalized/lnb/player_game/season=2023-2024/game_id=0cac6e1b-6715-11f0-a9f3-27e6e78614e1.parquet",
+        "duplicate_path": "data/normalized/lnb/player_game/season=2024-2025/game_id=0cac6e1b-6715-11f0-a9f3-27e6e78614e1.parquet",
+        "status": "not_identical",
+        "differences": [
+          "Shape mismatch: (18, 27) vs (20, 27)"
+        ]
+      },
+      {
+        "game_id": "0cd1323f-6715...",
+        "true_season": "2023-2024",
+        "keep_path": "data/normalized/lnb/player_game/season=2023-2024/game_id=0cd1323f-6715-11f0-86f4-27e6e78614e1.parquet",
+        "duplicate_path": "data/normalized/lnb/player_game/season=2024-2025/game_id=0cd1323f-6715-11f0-86f4-27e6e78614e1.parquet",
+        "status": "not_identical",
+        "differences": [
+          "Shape mismatch: (18, 27) vs (20, 27)"
+        ]
+      },
+      {
+        "game_id": "7d414bce-f5da...",
+        "true_season": "2021-2022",
+        "keep_path": "data/normalized/lnb/team_game/season=2021-2022/game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet",
+        "duplicate_path": "data/normalized/lnb/team_game/season=2023-2024/game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet",
+        "status": "not_identical",
+        "differences": [
+          "Data differs in 44 cells"
+        ]
+      },
+      {
+        "game_id": "cc7e470e-11a0...",
+        "true_season": "2022-2023",
+        "keep_path": "data/normalized/lnb/team_game/season=2022-2023/game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet",
+        "duplicate_path": "data/normalized/lnb/team_game/season=2023-2024/game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet",
+        "status": "not_identical",
+        "differences": [
+          "Data differs in 41 cells"
+        ]
+      },
+      {
+        "game_id": "0cac6e1b-6715...",
+        "true_season": "2023-2024",
+        "keep_path": "data/normalized/lnb/team_game/season=2023-2024/game_id=0cac6e1b-6715-11f0-a9f3-27e6e78614e1.parquet",
+        "duplicate_path": "data/normalized/lnb/team_game/season=2024-2025/game_id=0cac6e1b-6715-11f0-a9f3-27e6e78614e1.parquet",
+        "status": "not_identical",
+        "differences": [
+          "Data differs in 44 cells"
+        ]
+      },
+      {
+        "game_id": "0cd1323f-6715...",
+        "true_season": "2023-2024",
+        "keep_path": "data/normalized/lnb/team_game/season=2023-2024/game_id=0cd1323f-6715-11f0-86f4-27e6e78614e1.parquet",
+        "duplicate_path": "data/normalized/lnb/team_game/season=2024-2025/game_id=0cd1323f-6715-11f0-a9f3-27e6e78614e1.parquet",
+        "status": "missing_duplicate"
+      }
+    ]
+  },
+  "game_date_availability": {
+    "fixtures_has_date": true,
+    "pbp_has_date": false,
+    "sample_dates": [
+      {
+        "game_date": "2025-11-14"
+      },
+      {
+        "game_date": "2025-11-15"
+      },
+      {
+        "game_date": "2025-11-15"
+      }
+    ],
+    "can_recover_dates": true
+  },
+  "early_season_investigation": {
+    "2021-2022": {
+      "games": [
+        {
+          "file": "game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet",
+          "rows": 18,
+          "game_id": "7d414bce-f5da-11eb-b3fd-a23ac5ab90da",
+          "season_in_data": "2021-2022",
+          "columns": [
+            "GAME_ID",
+            "PLAYER_ID",
+            "PLAYER_NAME",
+            "TEAM_ID",
+            "MIN",
+            "PTS",
+            "FGM",
+            "FGA",
+            "FG_PCT",
+            "FG2M",
+            "FG2A",
+            "FG2_PCT",
+            "FG3M",
+            "FG3A",
+            "FG3_PCT",
+            "FTM",
+            "FTA",
+            "FT_PCT",
+            "REB",
+            "AST",
+            "STL",
+            "BLK",
+            "TOV",
+            "PF",
+            "PLUS_MINUS",
+            "SEASON",
+            "LEAGUE"
+          ]
+        }
+      ],
+      "investigation": ""
+    },
+    "2022-2023": {
+      "games": [
+        {
+          "file": "game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet",
+          "rows": 17,
+          "game_id": "cc7e470e-11a0-11ed-8ef5-8d12cdc95909",
+          "season_in_data": "2022-2023",
+          "columns": [
+            "GAME_ID",
+            "PLAYER_ID",
+            "PLAYER_NAME",
+            "TEAM_ID",
+            "MIN",
+            "PTS",
+            "FGM",
+            "FGA",
+            "FG_PCT",
+            "FG2M",
+            "FG2A",
+            "FG2_PCT",
+            "FG3M",
+            "FG3A",
+            "FG3_PCT",
+            "FTM",
+            "FTA",
+            "FT_PCT",
+            "REB",
+            "AST",
+            "STL",
+            "BLK",
+            "TOV",
+            "PF",
+            "PLUS_MINUS",
+            "SEASON",
+            "LEAGUE"
+          ]
+        }
+      ],
+      "investigation": ""
+    },
+    "conclusion": "Without a game index, cannot determine if more games existed. The single game per season may represent: (1) Test data only, (2) Limited initial ingestion, (3) Only available data from source"
+  },
+  "missing_2025_pbp": {
+    "total_fixtures": 8,
+    "games_with_pbp": 6,
+    "games_with_shots": 6,
+    "missing_pbp": [
+      "0cf637f3-6715-11f0-b9ed-27e6e78614e1",
+      "0d225fad-6715-11f0-810f-27e6e78614e1"
+    ],
+    "missing_shots": [
+      "0cf637f3-6715-11f0-b9ed-27e6e78614e1",
+      "0d225fad-6715-11f0-810f-27e6e78614e1"
+    ]
+  }
+}

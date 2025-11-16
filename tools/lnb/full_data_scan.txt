@@ -1,0 +1,695 @@
+################################################################################
+# COMPREHENSIVE DATA SCAN: LNB FILES
+################################################################################
+
+
+================================================================================
+SCANNING: data\lnb
+================================================================================
+
+Found 6 parquet files:
+
+📄 lnb\historical\2025-2026\fixtures.parquet
+   Size: 8,377 bytes
+   Rows: 8
+   Columns: 12
+   Unique Games: 8
+
+📄 lnb\historical\2025-2026\pbp_events.parquet
+   Size: 82,037 bytes
+   Rows: 3,336
+   Columns: 12
+   Unique Games: 6
+
+📄 lnb\historical\2025-2026\shots.parquet
+   Size: 22,693 bytes
+   Rows: 973
+   Columns: 10
+   Unique Games: 6
+
+📄 lnb\lnb_fixtures_2025_div1.parquet
+   Size: 20,674 bytes
+   Rows: 8
+   Columns: 28
+   Unique Games: 8
+
+📄 lnb\lnb_pbp_2025_div1.parquet
+   Size: 636 bytes
+   Rows: 0
+   Columns: 0
+
+📄 lnb\lnb_shots_2025_div1.parquet
+   Size: 636 bytes
+   Rows: 0
+   Columns: 0
+
+
+Found 1 JSON files:
+📄 lnb\lnb_coverage_2025_div1.json (346 bytes)
+
+================================================================================
+SCANNING: data\normalized\lnb
+================================================================================
+
+Found 102 parquet files:
+
+📄 normalized\lnb\player_game\season=2021-2022\game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet
+   Size: 16,996 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2022-2023\game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet
+   Size: 17,067 bytes
+   Rows: 17
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2023-2024\game_id=0cac6e1b-6715-11f0-a9f3-27e6e78614e1.parquet
+   Size: 17,074 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2023-2024\game_id=0cd1323f-6715-11f0-86f4-27e6e78614e1.parquet
+   Size: 17,074 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2023-2024\game_id=3fcea9a1-1f10-11ee-a687-db190750bdda.parquet
+   Size: 17,074 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2023-2024\game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet
+   Size: 17,074 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2023-2024\game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet
+   Size: 17,074 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2023-2024\game_id=LNB_2023-2024_10.parquet
+   Size: 16,974 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2023-2024\game_id=LNB_2023-2024_11.parquet
+   Size: 16,974 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2023-2024\game_id=LNB_2023-2024_12.parquet
+   Size: 16,974 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2023-2024\game_id=LNB_2023-2024_13.parquet
+   Size: 16,974 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2023-2024\game_id=LNB_2023-2024_14.parquet
+   Size: 16,974 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2023-2024\game_id=LNB_2023-2024_15.parquet
+   Size: 16,974 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2023-2024\game_id=LNB_2023-2024_16.parquet
+   Size: 16,974 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2023-2024\game_id=LNB_2023-2024_6.parquet
+   Size: 16,969 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2023-2024\game_id=LNB_2023-2024_7.parquet
+   Size: 16,969 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2023-2024\game_id=LNB_2023-2024_8.parquet
+   Size: 16,969 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2023-2024\game_id=LNB_2023-2024_9.parquet
+   Size: 16,969 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2024-2025\game_id=0cac6e1b-6715-11f0-a9f3-27e6e78614e1.parquet
+   Size: 17,222 bytes
+   Rows: 20
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2024-2025\game_id=0cd1323f-6715-11f0-86f4-27e6e78614e1.parquet
+   Size: 17,222 bytes
+   Rows: 20
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2024-2025\game_id=0ce02919-6715-11f0-9d01-27e6e78614e1.parquet
+   Size: 17,069 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2024-2025\game_id=0d0504a0-6715-11f0-98ab-27e6e78614e1.parquet
+   Size: 17,222 bytes
+   Rows: 20
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2024-2025\game_id=LNB_2024-2025_10.parquet
+   Size: 16,969 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2024-2025\game_id=LNB_2024-2025_11.parquet
+   Size: 16,969 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2024-2025\game_id=LNB_2024-2025_12.parquet
+   Size: 16,969 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2024-2025\game_id=LNB_2024-2025_13.parquet
+   Size: 16,969 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2024-2025\game_id=LNB_2024-2025_14.parquet
+   Size: 16,969 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2024-2025\game_id=LNB_2024-2025_15.parquet
+   Size: 16,969 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2024-2025\game_id=LNB_2024-2025_16.parquet
+   Size: 16,969 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2024-2025\game_id=LNB_2024-2025_5.parquet
+   Size: 16,964 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2024-2025\game_id=LNB_2024-2025_6.parquet
+   Size: 16,964 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2024-2025\game_id=LNB_2024-2025_7.parquet
+   Size: 16,964 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2024-2025\game_id=LNB_2024-2025_8.parquet
+   Size: 16,964 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\player_game\season=2024-2025\game_id=LNB_2024-2025_9.parquet
+   Size: 16,964 bytes
+   Rows: 18
+   Columns: 27
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2021-2022\game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet
+   Size: 17,711 bytes
+   Rows: 120
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2022-2023\game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet
+   Size: 18,227 bytes
+   Rows: 138
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2023-2024\game_id=0cac6e1b-6715-11f0-a9f3-27e6e78614e1.parquet
+   Size: 17,446 bytes
+   Rows: 122
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2023-2024\game_id=0cd1323f-6715-11f0-86f4-27e6e78614e1.parquet
+   Size: 17,446 bytes
+   Rows: 122
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2023-2024\game_id=3fcea9a1-1f10-11ee-a687-db190750bdda.parquet
+   Size: 17,446 bytes
+   Rows: 122
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2023-2024\game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet
+   Size: 17,446 bytes
+   Rows: 122
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2023-2024\game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet
+   Size: 17,446 bytes
+   Rows: 122
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2023-2024\game_id=LNB_2023-2024_10.parquet
+   Size: 17,446 bytes
+   Rows: 122
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2023-2024\game_id=LNB_2023-2024_11.parquet
+   Size: 17,446 bytes
+   Rows: 122
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2023-2024\game_id=LNB_2023-2024_12.parquet
+   Size: 17,446 bytes
+   Rows: 122
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2023-2024\game_id=LNB_2023-2024_13.parquet
+   Size: 17,446 bytes
+   Rows: 122
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2023-2024\game_id=LNB_2023-2024_14.parquet
+   Size: 17,446 bytes
+   Rows: 122
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2023-2024\game_id=LNB_2023-2024_15.parquet
+   Size: 17,446 bytes
+   Rows: 122
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2023-2024\game_id=LNB_2023-2024_16.parquet
+   Size: 17,446 bytes
+   Rows: 122
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2023-2024\game_id=LNB_2023-2024_6.parquet
+   Size: 17,446 bytes
+   Rows: 122
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2023-2024\game_id=LNB_2023-2024_7.parquet
+   Size: 17,446 bytes
+   Rows: 122
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2023-2024\game_id=LNB_2023-2024_8.parquet
+   Size: 17,446 bytes
+   Rows: 122
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2023-2024\game_id=LNB_2023-2024_9.parquet
+   Size: 17,446 bytes
+   Rows: 122
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2024-2025\game_id=0cac6e1b-6715-11f0-a9f3-27e6e78614e1.parquet
+   Size: 17,939 bytes
+   Rows: 123
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2024-2025\game_id=0cd1323f-6715-11f0-86f4-27e6e78614e1.parquet
+   Size: 17,939 bytes
+   Rows: 123
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2024-2025\game_id=0ce02919-6715-11f0-9d01-27e6e78614e1.parquet
+   Size: 18,203 bytes
+   Rows: 126
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2024-2025\game_id=0d0504a0-6715-11f0-98ab-27e6e78614e1.parquet
+   Size: 17,938 bytes
+   Rows: 123
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2024-2025\game_id=LNB_2024-2025_10.parquet
+   Size: 18,204 bytes
+   Rows: 126
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2024-2025\game_id=LNB_2024-2025_11.parquet
+   Size: 18,204 bytes
+   Rows: 126
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2024-2025\game_id=LNB_2024-2025_12.parquet
+   Size: 18,204 bytes
+   Rows: 126
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2024-2025\game_id=LNB_2024-2025_13.parquet
+   Size: 18,204 bytes
+   Rows: 126
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2024-2025\game_id=LNB_2024-2025_14.parquet
+   Size: 18,204 bytes
+   Rows: 126
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2024-2025\game_id=LNB_2024-2025_15.parquet
+   Size: 18,204 bytes
+   Rows: 126
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2024-2025\game_id=LNB_2024-2025_16.parquet
+   Size: 18,204 bytes
+   Rows: 126
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2024-2025\game_id=LNB_2024-2025_5.parquet
+   Size: 18,204 bytes
+   Rows: 126
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2024-2025\game_id=LNB_2024-2025_6.parquet
+   Size: 18,204 bytes
+   Rows: 126
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2024-2025\game_id=LNB_2024-2025_7.parquet
+   Size: 18,204 bytes
+   Rows: 126
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2024-2025\game_id=LNB_2024-2025_8.parquet
+   Size: 18,204 bytes
+   Rows: 126
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\shot_events\season=2024-2025\game_id=LNB_2024-2025_9.parquet
+   Size: 18,204 bytes
+   Rows: 126
+   Columns: 19
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2021-2022\game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet
+   Size: 15,034 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2022-2023\game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet
+   Size: 15,034 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2023-2024\game_id=0cac6e1b-6715-11f0-a9f3-27e6e78614e1.parquet
+   Size: 15,034 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2023-2024\game_id=0cd1323f-6715-11f0-86f4-27e6e78614e1.parquet
+   Size: 15,034 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2023-2024\game_id=3fcea9a1-1f10-11ee-a687-db190750bdda.parquet
+   Size: 15,034 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2023-2024\game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet
+   Size: 15,034 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2023-2024\game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet
+   Size: 15,034 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2023-2024\game_id=LNB_2023-2024_10.parquet
+   Size: 14,933 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2023-2024\game_id=LNB_2023-2024_11.parquet
+   Size: 14,933 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2023-2024\game_id=LNB_2023-2024_12.parquet
+   Size: 14,933 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2023-2024\game_id=LNB_2023-2024_13.parquet
+   Size: 14,933 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2023-2024\game_id=LNB_2023-2024_14.parquet
+   Size: 14,933 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2023-2024\game_id=LNB_2023-2024_15.parquet
+   Size: 14,933 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2023-2024\game_id=LNB_2023-2024_16.parquet
+   Size: 14,933 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2023-2024\game_id=LNB_2023-2024_6.parquet
+   Size: 14,928 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2023-2024\game_id=LNB_2023-2024_7.parquet
+   Size: 14,928 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2023-2024\game_id=LNB_2023-2024_8.parquet
+   Size: 14,928 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2023-2024\game_id=LNB_2023-2024_9.parquet
+   Size: 14,928 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2024-2025\game_id=0cac6e1b-6715-11f0-a9f3-27e6e78614e1.parquet
+   Size: 15,032 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2024-2025\game_id=0cd1323f-6715-11f0-86f4-27e6e78614e1.parquet
+   Size: 15,032 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2024-2025\game_id=0ce02919-6715-11f0-9d01-27e6e78614e1.parquet
+   Size: 15,018 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2024-2025\game_id=0d0504a0-6715-11f0-98ab-27e6e78614e1.parquet
+   Size: 15,032 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2024-2025\game_id=LNB_2024-2025_10.parquet
+   Size: 14,917 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2024-2025\game_id=LNB_2024-2025_11.parquet
+   Size: 14,917 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2024-2025\game_id=LNB_2024-2025_12.parquet
+   Size: 14,917 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2024-2025\game_id=LNB_2024-2025_13.parquet
+   Size: 14,917 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2024-2025\game_id=LNB_2024-2025_14.parquet
+   Size: 14,917 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2024-2025\game_id=LNB_2024-2025_15.parquet
+   Size: 14,917 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2024-2025\game_id=LNB_2024-2025_16.parquet
+   Size: 14,917 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2024-2025\game_id=LNB_2024-2025_5.parquet
+   Size: 14,912 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2024-2025\game_id=LNB_2024-2025_6.parquet
+   Size: 14,912 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2024-2025\game_id=LNB_2024-2025_7.parquet
+   Size: 14,912 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2024-2025\game_id=LNB_2024-2025_8.parquet
+   Size: 14,912 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+📄 normalized\lnb\team_game\season=2024-2025\game_id=LNB_2024-2025_9.parquet
+   Size: 14,912 bytes
+   Rows: 2
+   Columns: 26
+   Unique Games: 1
+
+
+
+================================================================================
+SCAN SUMMARY
+================================================================================
+
+Total parquet files found: 108
+
+Normalized files: 102
+Historical files: 3
+Other files: 3
+
+Other files found:
+  - lnb\lnb_fixtures_2025_div1.parquet
+  - lnb\lnb_pbp_2025_div1.parquet
+  - lnb\lnb_shots_2025_div1.parquet
+
+================================================================================
+CHECKING FOR ADDITIONAL HISTORICAL SEASONS
+================================================================================
+
+Historical season directories found: 1
+  2025-2026: 3 parquet files
+    Data: fixtures (8 rows), PBP (3336 events), shots (973 shots)
+
+================================================================================
+SCAN COMPLETE
+================================================================================

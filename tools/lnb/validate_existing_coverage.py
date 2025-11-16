@@ -6,11 +6,18 @@ This script validates the integrity and coverage of existing LNB data:
 - Historical PBP/shots (2025-2026): pbp_events, shots
 - Raw schedule data
 
+Enhanced Features:
+    - Tracks per-season game IDs for duplicate detection
+    - Detects duplicate games across season partitions
+    - Summarizes fixture-level coverage (fixtures with/without PBP/shots)
+    - Flags potential duplicate PBP/shot events using inferred keys
+    - Reports global unique game counts per dataset
+
 Purpose:
     - Verify data integrity (row counts, schemas, null values)
     - Document actual coverage by season
-    - Identify data quality issues
-    - Generate validation report
+    - Identify data quality issues (duplicates, missing data)
+    - Generate comprehensive validation report
 
 Usage:
     uv run python tools/lnb/validate_existing_coverage.py
@@ -54,18 +61,18 @@ HISTORICAL_SEASONS = ["2025-2026"]
 
 
 def validate_normalized_season(dataset_name: str, season: str) -> dict:
-    """Validate a normalized dataset for a specific season
+    """Validate a normalized dataset for a specific season.
 
     Args:
         dataset_name: "player_game" or "team_game"
         season: Season string (e.g., "2021-2022")
 
     Returns:
-        Dict with validation results
+        Dict with validation results, including per-season game IDs.
     """
     season_dir = NORMALIZED_ROOT / dataset_name / f"season={season}"
 
-    result = {
+    result: dict[str, object] = {
         "dataset": dataset_name,
         "season": season,
         "exists": False,
@@ -77,6 +84,8 @@ def validate_normalized_season(dataset_name: str, season: str) -> dict:
         "date_range": None,
         "unique_games": 0,
         "unique_players_or_teams": 0,
+        # NEW: list of GAME_IDs to enable duplicate analysis across seasons
+        "game_ids": [],
         "issues": [],
     }
 
@@ -86,7 +95,6 @@ def validate_normalized_season(dataset_name: str, season: str) -> dict:
 
     result["exists"] = True
 
-    # Find all parquet files
     parquet_files = list(season_dir.glob("*.parquet"))
     result["file_count"] = len(parquet_files)
 
@@ -94,19 +102,20 @@ def validate_normalized_season(dataset_name: str, season: str) -> dict:
         result["issues"].append("No parquet files found")
         return result
 
-    # Read all files into single dataframe
     try:
-        df = pd.concat([pd.read_parquet(f) for f in parquet_files], ignore_index=True)
+        df = pd.concat(
+            [pd.read_parquet(f) for f in parquet_files],
+            ignore_index=True,
+        )
 
         result["total_rows"] = len(df)
         result["columns"] = list(df.columns)
         result["column_count"] = len(df.columns)
 
-        # Check for nulls in key columns
         key_cols = ["GAME_ID", "GAME_DATE", "SEASON"]
         if dataset_name == "player_game":
             key_cols.extend(["PLAYER_ID", "PLAYER_NAME", "PTS", "REB", "AST"])
-        else:  # team_game
+        else:
             key_cols.extend(["TEAM_ID", "PTS", "FG_PCT"])
 
         for col in key_cols:
@@ -115,7 +124,7 @@ def validate_normalized_season(dataset_name: str, season: str) -> dict:
                 if null_count > 0:
                     result["null_counts"][col] = null_count
 
-        # Extract metadata
+        # Date range (if GAME_DATE exists and is non-null)
         if "GAME_DATE" in df.columns:
             dates = pd.to_datetime(df["GAME_DATE"], errors="coerce").dropna()
             if not dates.empty:
@@ -124,44 +133,124 @@ def validate_normalized_season(dataset_name: str, season: str) -> dict:
                     "latest": dates.max().isoformat(),
                 }
 
+        # Game and entity counts
         if "GAME_ID" in df.columns:
-            result["unique_games"] = int(df["GAME_ID"].nunique())
+            game_ids = df["GAME_ID"].dropna().astype(str)
+            result["unique_games"] = int(game_ids.nunique())
+            # Store sorted unique game IDs for duplicate analysis
+            result["game_ids"] = sorted(game_ids.unique().tolist())
 
         if dataset_name == "player_game" and "PLAYER_ID" in df.columns:
             result["unique_players_or_teams"] = int(df["PLAYER_ID"].nunique())
         elif dataset_name == "team_game" and "TEAM_ID" in df.columns:
             result["unique_players_or_teams"] = int(df["TEAM_ID"].nunique())
 
-        # Data quality checks
         if result["total_rows"] == 0:
             result["issues"].append("Zero rows in dataset")
 
         if result["unique_games"] == 0:
             result["issues"].append("No unique games found")
 
-    except Exception as e:
-        result["issues"].append(f"Error reading parquet files: {str(e)[:100]}")
+    except Exception as exc:  # pragma: no cover - defensive logging
+        result["issues"].append(f"Error reading parquet files: {str(exc)[:100]}")
 
     return result
 
 
+# ==============================================================================
+# PBP/SHOT EVENT VALIDATION HELPERS
+# ==============================================================================
+
+
+def _infer_pbp_key_columns(columns: list[str]) -> list[str] | None:
+    """Infer a reasonable key for identifying unique PBP events.
+
+    We try several common patterns and fall back to None if nothing fits.
+
+    Args:
+        columns: List of column names in the PBP dataframe
+
+    Returns:
+        List of column names that form a unique key, or None if no key can be inferred
+    """
+    col_set = set(columns)
+
+    candidates: list[list[str]] = [
+        ["GAME_ID", "EVENT_ID"],
+        ["GAME_ID", "EVENT_NUM"],
+        ["GAME_ID", "PERIOD", "GAME_CLOCK", "TEAM_ID", "PLAYER_ID", "EVENT_TYPE"],
+    ]
+
+    for candidate in candidates:
+        if set(candidate).issubset(col_set):
+            return candidate
+
+    return None
+
+
+def _infer_shot_key_columns(columns: list[str]) -> list[str] | None:
+    """Infer a reasonable key for identifying unique shot events.
+
+    Args:
+        columns: List of column names in the shots dataframe
+
+    Returns:
+        List of column names that form a unique key, or None if no key can be inferred
+    """
+    col_set = set(columns)
+
+    candidates: list[list[str]] = [
+        ["GAME_ID", "SHOT_ID"],
+        ["GAME_ID", "PERIOD", "GAME_CLOCK", "PLAYER_ID", "SHOT_RESULT"],
+    ]
+
+    for candidate in candidates:
+        if set(candidate).issubset(col_set):
+            return candidate
+
+    return None
+
+
+def _count_duplicates(df: pd.DataFrame, key_cols: list[str]) -> int:
+    """Count potential duplicate rows based on a set of key columns.
+
+    Args:
+        df: DataFrame to check for duplicates
+        key_cols: List of column names to use as key
+
+    Returns:
+        Number of duplicate rows (all instances, not just extras)
+    """
+    if not key_cols:
+        return 0
+    dup_mask = df.duplicated(subset=key_cols, keep=False)
+    return int(dup_mask.sum())
+
+
+# ==============================================================================
+# HISTORICAL DATA VALIDATION
+# ==============================================================================
+
+
 def validate_historical_season(season: str) -> dict:
-    """Validate historical PBP/shots data for a season
+    """Validate historical PBP/shots data for a season.
 
     Args:
         season: Season string (e.g., "2025-2026")
 
     Returns:
-        Dict with validation results
+        Dict with validation results, including fixture-level coverage.
     """
     season_dir = HISTORICAL_ROOT / season
 
-    result = {
+    result: dict[str, object] = {
         "season": season,
         "exists": False,
         "fixtures": {"exists": False, "rows": 0},
         "pbp": {"exists": False, "rows": 0},
         "shots": {"exists": False, "rows": 0},
+        # NEW: fixture-level coverage summary
+        "coverage": {},
         "issues": [],
     }
 
@@ -171,55 +260,181 @@ def validate_historical_season(season: str) -> dict:
 
     result["exists"] = True
 
-    # Check fixtures
+    fixtures_df: pd.DataFrame | None = None
+    pbp_df: pd.DataFrame | None = None
+    shots_df: pd.DataFrame | None = None
+
+    # Fixtures
     fixtures_path = season_dir / "fixtures.parquet"
     if fixtures_path.exists():
         result["fixtures"]["exists"] = True
         try:
-            df = pd.read_parquet(fixtures_path)
-            result["fixtures"]["rows"] = len(df)
-            result["fixtures"]["columns"] = list(df.columns)
+            fixtures_df = pd.read_parquet(fixtures_path)
+            result["fixtures"]["rows"] = len(fixtures_df)
+            result["fixtures"]["columns"] = list(fixtures_df.columns)
 
-            if "GAME_ID" in df.columns:
-                result["fixtures"]["unique_games"] = int(df["GAME_ID"].nunique())
-        except Exception as e:
-            result["issues"].append(f"Error reading fixtures: {str(e)[:50]}")
+            if "GAME_ID" in fixtures_df.columns:
+                result["fixtures"]["unique_games"] = int(fixtures_df["GAME_ID"].nunique())
+        except Exception as exc:
+            result["issues"].append(f"Error reading fixtures: {str(exc)[:50]}")
 
-    # Check PBP
+    # PBP
     pbp_path = season_dir / "pbp_events.parquet"
     if pbp_path.exists():
         result["pbp"]["exists"] = True
         try:
-            df = pd.read_parquet(pbp_path)
-            result["pbp"]["rows"] = len(df)
-            result["pbp"]["columns"] = list(df.columns)
+            pbp_df = pd.read_parquet(pbp_path)
+            result["pbp"]["rows"] = len(pbp_df)
+            result["pbp"]["columns"] = list(pbp_df.columns)
 
-            if "GAME_ID" in df.columns:
-                result["pbp"]["unique_games"] = int(df["GAME_ID"].nunique())
-        except Exception as e:
-            result["issues"].append(f"Error reading PBP: {str(e)[:50]}")
+            if "GAME_ID" in pbp_df.columns:
+                result["pbp"]["unique_games"] = int(pbp_df["GAME_ID"].nunique())
 
-    # Check shots
+            # Detect potential duplicate PBP events (report only, no mutation)
+            key_cols = _infer_pbp_key_columns(list(pbp_df.columns))
+            if key_cols is not None:
+                dup_events = _count_duplicates(pbp_df, key_cols)
+                if dup_events > 0:
+                    result["pbp"]["potential_duplicate_events"] = dup_events
+                    result["issues"].append(
+                        f"PBP: {dup_events} potential duplicate events based on {key_cols}"
+                    )
+        except Exception as exc:
+            result["issues"].append(f"Error reading PBP: {str(exc)[:50]}")
+
+    # Shots
     shots_path = season_dir / "shots.parquet"
     if shots_path.exists():
         result["shots"]["exists"] = True
         try:
-            df = pd.read_parquet(shots_path)
-            result["shots"]["rows"] = len(df)
-            result["shots"]["columns"] = list(df.columns)
+            shots_df = pd.read_parquet(shots_path)
+            result["shots"]["rows"] = len(shots_df)
+            result["shots"]["columns"] = list(shots_df.columns)
 
-            if "GAME_ID" in df.columns:
-                result["shots"]["unique_games"] = int(df["GAME_ID"].nunique())
-        except Exception as e:
-            result["issues"].append(f"Error reading shots: {str(e)[:50]}")
+            if "GAME_ID" in shots_df.columns:
+                result["shots"]["unique_games"] = int(shots_df["GAME_ID"].nunique())
+
+            key_cols = _infer_shot_key_columns(list(shots_df.columns))
+            if key_cols is not None:
+                dup_shots = _count_duplicates(shots_df, key_cols)
+                if dup_shots > 0:
+                    result["shots"]["potential_duplicate_shots"] = dup_shots
+                    result["issues"].append(
+                        f"Shots: {dup_shots} potential duplicate events based on {key_cols}"
+                    )
+        except Exception as exc:
+            result["issues"].append(f"Error reading shots: {str(exc)[:50]}")
+
+    # Fixture-level coverage summary (only if we have fixtures)
+    if fixtures_df is not None and "GAME_ID" in fixtures_df.columns:
+        fixtures_game_ids = {
+            str(gid) for gid in fixtures_df["GAME_ID"].dropna().astype(str).unique().tolist()
+        }
+        pbp_game_ids: set[str] = set()
+        shots_game_ids: set[str] = set()
+
+        if pbp_df is not None and "GAME_ID" in pbp_df.columns:
+            pbp_game_ids = {
+                str(gid) for gid in pbp_df["GAME_ID"].dropna().astype(str).unique().tolist()
+            }
+
+        if shots_df is not None and "GAME_ID" in shots_df.columns:
+            shots_game_ids = {
+                str(gid) for gid in shots_df["GAME_ID"].dropna().astype(str).unique().tolist()
+            }
+
+        fixtures_with_pbp = fixtures_game_ids & pbp_game_ids
+        fixtures_with_shots = fixtures_game_ids & shots_game_ids
+
+        result["coverage"] = {
+            "fixtures_total": len(fixtures_game_ids),
+            "fixtures_with_pbp": len(fixtures_with_pbp),
+            "fixtures_with_shots": len(fixtures_with_shots),
+            "fixtures_without_pbp": len(fixtures_game_ids - pbp_game_ids),
+            "fixtures_without_shots": len(fixtures_game_ids - shots_game_ids),
+        }
+
+        # If there are fixtures without PBP/shots, make that explicit
+        if result["coverage"]["fixtures_without_pbp"] > 0:
+            result["issues"].append(
+                f"{result['coverage']['fixtures_without_pbp']} fixtures lack PBP data"
+            )
+        if result["coverage"]["fixtures_without_shots"] > 0:
+            result["issues"].append(
+                f"{result['coverage']['fixtures_without_shots']} fixtures lack shot data"
+            )
 
     return result
 
 
+# ==============================================================================
+# DUPLICATE ANALYSIS
+# ==============================================================================
+
+
+def _analyze_duplicate_games(normalized_results: list[dict]) -> dict:
+    """Analyze duplicate games across normalized season folders.
+
+    Returns a dict keyed by dataset ("player_game", "team_game") with:
+        - total_unique_games
+        - duplicates: list of {game_id, seasons}
+
+    Args:
+        normalized_results: List of validation results from validate_normalized_season
+
+    Returns:
+        Dict mapping dataset name to duplicate analysis
+    """
+    per_dataset: dict[str, dict[str, set[str]]] = {}
+
+    for result in normalized_results:
+        if not result.get("exists"):
+            continue
+
+        dataset = str(result.get("dataset"))
+        season = str(result.get("season"))
+        game_ids = result.get("game_ids") or []
+
+        if dataset not in per_dataset:
+            per_dataset[dataset] = {}
+
+        for game_id in game_ids:
+            if game_id not in per_dataset[dataset]:
+                per_dataset[dataset][game_id] = set()
+            per_dataset[dataset][game_id].add(season)
+
+    analysis: dict[str, dict[str, object]] = {}
+
+    for dataset, game_map in per_dataset.items():
+        duplicates: list[dict[str, object]] = []
+
+        for game_id, seasons in game_map.items():
+            if len(seasons) > 1:
+                duplicates.append(
+                    {
+                        "game_id": game_id,
+                        "seasons": sorted(seasons),
+                    }
+                )
+
+        analysis[dataset] = {
+            "total_unique_games": len(game_map),
+            "duplicate_games": duplicates,
+        }
+
+    return analysis
+
+
+# ==============================================================================
+# REPORT GENERATION
+# ==============================================================================
+
+
 def generate_validation_report(
-    normalized_results: list[dict], historical_results: list[dict]
+    normalized_results: list[dict],
+    historical_results: list[dict],
 ) -> dict:
-    """Generate comprehensive validation report
+    """Generate comprehensive validation report.
 
     Args:
         normalized_results: List of normalized dataset validation results
@@ -228,12 +443,14 @@ def generate_validation_report(
     Returns:
         Complete validation report dict
     """
-    report = {
+    report: dict[str, object] = {
         "generated_at": datetime.now().isoformat(),
         "validation_type": "LNB Historical Coverage",
         "normalized_data": {
             "seasons_validated": len({r["season"] for r in normalized_results}),
             "datasets": {},
+            # NEW: duplicate analysis across seasons
+            "duplicate_analysis": {},
         },
         "historical_data": {
             "seasons_validated": len(historical_results),
@@ -241,11 +458,13 @@ def generate_validation_report(
         },
         "summary": {
             "total_seasons_covered": 0,
-            "total_games": 0,
+            "total_games": 0,  # optional: can be used later if you want
             "total_player_game_records": 0,
             "total_team_game_records": 0,
             "total_pbp_events": 0,
             "total_shots": 0,
+            # NEW: global unique game counts per dataset
+            "unique_games_by_dataset": {},
             "issues_found": [],
         },
     }
@@ -257,18 +476,17 @@ def generate_validation_report(
             report["normalized_data"]["datasets"][dataset] = []
         report["normalized_data"]["datasets"][dataset].append(result)
 
-    # Calculate summary statistics
-    seasons_covered = set()
+    seasons_covered: set[str] = set()
 
-    # From normalized data
+    # Aggregate normalized data
     for result in normalized_results:
         if result["exists"] and result["total_rows"] > 0:
-            seasons_covered.add(result["season"])
+            seasons_covered.add(str(result["season"]))
 
             if result["dataset"] == "player_game":
-                report["summary"]["total_player_game_records"] += result["total_rows"]
+                report["summary"]["total_player_game_records"] += result["total_rows"]  # type: ignore[operator]
             elif result["dataset"] == "team_game":
-                report["summary"]["total_team_game_records"] += result["total_rows"]
+                report["summary"]["total_team_game_records"] += result["total_rows"]  # type: ignore[operator]
 
             if result["issues"]:
                 for issue in result["issues"]:
@@ -276,16 +494,18 @@ def generate_validation_report(
                         f"{result['dataset']} {result['season']}: {issue}"
                     )
 
-    # From historical data
+    # Aggregate historical data
     for result in historical_results:
         if result["exists"]:
-            seasons_covered.add(result["season"])
+            seasons_covered.add(str(result["season"]))
 
-            if result["pbp"]["exists"]:
-                report["summary"]["total_pbp_events"] += result["pbp"]["rows"]
+            pbp = result.get("pbp") or {}
+            shots = result.get("shots") or {}
 
-            if result["shots"]["exists"]:
-                report["summary"]["total_shots"] += result["shots"]["rows"]
+            if pbp.get("exists"):
+                report["summary"]["total_pbp_events"] += pbp.get("rows", 0)  # type: ignore[operator]
+            if shots.get("exists"):
+                report["summary"]["total_shots"] += shots.get("rows", 0)  # type: ignore[operator]
 
             if result["issues"]:
                 for issue in result["issues"]:
@@ -295,15 +515,30 @@ def generate_validation_report(
 
     report["summary"]["total_seasons_covered"] = len(seasons_covered)
 
+    # Analyze duplicates across seasons for normalized data
+    duplicate_analysis = _analyze_duplicate_games(normalized_results)
+    report["normalized_data"]["duplicate_analysis"] = duplicate_analysis
+
+    # Fill summary.unique_games_by_dataset and add issues for duplicates
+    unique_by_dataset: dict[str, int] = {}
+    for dataset, stats in duplicate_analysis.items():
+        unique_by_dataset[dataset] = int(stats["total_unique_games"])
+        duplicate_games = stats["duplicate_games"]
+        if duplicate_games:
+            for entry in duplicate_games:
+                game_id = entry["game_id"]
+                seasons = ", ".join(entry["seasons"])
+                report["summary"]["issues_found"].append(
+                    f"Duplicate {dataset} game {game_id} appears in seasons: {seasons}"
+                )
+
+    report["summary"]["unique_games_by_dataset"] = unique_by_dataset
+
     return report
 
 
 def print_validation_report(report: dict) -> None:
-    """Print human-readable validation report
-
-    Args:
-        report: Validation report dictionary
-    """
+    """Print human-readable validation report."""
     print("=" * 80)
     print("LNB PRO A - DATA COVERAGE VALIDATION REPORT")
     print("=" * 80)
@@ -331,13 +566,29 @@ def print_validation_report(report: dict) -> None:
                     f"{r['unique_players_or_teams']:<15} "
                     f"{status}"
                 )
-
-                # Show null counts if any
                 if r["null_counts"]:
                     print(f"  └─ Null values: {r['null_counts']}")
             else:
                 print(f"{r['season']:<15} {'N/A':<10} {'N/A':<8} {'N/A':<15} ❌ Missing")
 
+        print()
+
+    # Duplicate analysis summary
+    duplicate_analysis = report["normalized_data"].get("duplicate_analysis", {})
+    if duplicate_analysis:
+        print("-" * 80)
+        print("GLOBAL UNIQUE GAME COUNTS (NORMALIZED)")
+        print("-" * 80)
+        for dataset, stats in duplicate_analysis.items():
+            total_unique = stats["total_unique_games"]
+            duplicates = stats["duplicate_games"]
+            print(f"{dataset}: {total_unique} unique games")
+            if duplicates:
+                print(f"  Duplicates ({len(duplicates)}):")
+                for entry in duplicates:
+                    game_id = entry["game_id"]
+                    seasons = ", ".join(entry["seasons"])
+                    print(f"    • {game_id} in seasons [{seasons}]")
         print()
 
     # Historical Data Section
@@ -350,18 +601,26 @@ def print_validation_report(report: dict) -> None:
         print(f"Season: {r['season']}")
 
         if r["exists"]:
+            fixtures = r["fixtures"]
+            pbp = r["pbp"]
+            shots = r["shots"]
+            coverage = r.get("coverage") or {}
+
             print(
-                f"  Fixtures:   {'✅' if r['fixtures']['exists'] else '❌'} "
-                f"{r['fixtures'].get('rows', 0)} rows"
+                f"  Fixtures:   {'✅' if fixtures['exists'] else '❌'} "
+                f"{fixtures.get('rows', 0)} rows"
             )
-            print(
-                f"  PBP Events: {'✅' if r['pbp']['exists'] else '❌'} "
-                f"{r['pbp'].get('rows', 0)} events"
-            )
-            print(
-                f"  Shots:      {'✅' if r['shots']['exists'] else '❌'} "
-                f"{r['shots'].get('rows', 0)} shots"
-            )
+            print(f"  PBP Events: {'✅' if pbp['exists'] else '❌'} {pbp.get('rows', 0)} events")
+            print(f"  Shots:      {'✅' if shots['exists'] else '❌'} {shots.get('rows', 0)} shots")
+
+            if coverage:
+                print(
+                    f"  Coverage: {coverage.get('fixtures_total', 0)} fixtures | "
+                    f"{coverage.get('fixtures_with_pbp', 0)} with PBP | "
+                    f"{coverage.get('fixtures_with_shots', 0)} with shots | "
+                    f"{coverage.get('fixtures_without_pbp', 0)} without PBP | "
+                    f"{coverage.get('fixtures_without_shots', 0)} without shots"
+                )
 
             if r["issues"]:
                 print(f"  Issues: {', '.join(r['issues'])}")
@@ -380,6 +639,14 @@ def print_validation_report(report: dict) -> None:
     print(f"Total team-game records: {summary['total_team_game_records']:,}")
     print(f"Total PBP events: {summary['total_pbp_events']:,}")
     print(f"Total shots: {summary['total_shots']:,}")
+
+    unique_games_by_dataset = summary.get("unique_games_by_dataset") or {}
+    if unique_games_by_dataset:
+        print()
+        print("Unique games (normalized) by dataset:")
+        for dataset, count in unique_games_by_dataset.items():
+            print(f"  {dataset}: {count} unique games")
+
     print()
 
     if summary["issues_found"]:
@@ -390,6 +657,11 @@ def print_validation_report(report: dict) -> None:
         print("✅ No data quality issues detected")
 
     print()
+
+
+# ==============================================================================
+# MAIN
+# ==============================================================================
 
 
 def main():

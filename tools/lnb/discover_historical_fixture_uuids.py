@@ -401,8 +401,21 @@ def discover_uuids_automated(
                     # Wait for page to reload with historical data
                     time.sleep(2)
                 else:
-                    print("  [WARN] Could not navigate to historical season")
-                    print("  [INFO] Will discover UUIDs from current page (may be current season)")
+                    # CRITICAL: For historical seasons, inability to navigate is a FATAL error
+                    print(f"  [FATAL] Could not navigate to historical season {season}")
+                    print(
+                        "          The LNB calendar page does not expose season navigation controls."
+                    )
+                    print("          Automated discovery ONLY works for the current season.\n")
+                    print("  [SOLUTION] Use manual file-based discovery instead:")
+                    print(f"             1. Manually browse {season} games on https://www.lnb.fr")
+                    print("             2. Save match-center URLs to a text file")
+                    print(
+                        "             3. Run: python tools/lnb/discover_historical_fixture_uuids.py \\"
+                    )
+                    print(f"                       --seasons {season} --from-file <urls.txt>\n")
+                    print(f"  [ABORT] Returning empty UUID list for {season}")
+                    return []
 
             # Try basic network extraction first (fast path)
             uuids_from_requests = scraper.extract_uuid_from_requests(
@@ -654,14 +667,75 @@ def discover_all_seasons(
     # Load existing mappings
     all_mappings = load_existing_mappings()
 
+    # Track newly discovered mappings for validation
+    newly_discovered = {}
+
     # Discover UUIDs for each season
     for season in seasons:
         uuids = discover_uuids_for_season(season, interactive, from_file=from_file)
 
         if uuids:
-            all_mappings[season] = uuids
+            newly_discovered[season] = uuids
         else:
             print(f"  [WARN] No UUIDs discovered for {season}")
+
+    # VALIDATION: Detect duplicate UUID sets across seasons
+    if len(newly_discovered) > 1:
+        print(f"\n{'='*80}")
+        print("  VALIDATING DISCOVERED UUIDS")
+        print(f"{'='*80}\n")
+
+        # Compare UUID sets across newly discovered seasons
+        season_uuid_sets = {season: set(uuids) for season, uuids in newly_discovered.items()}
+
+        duplicates = []
+        for season1, uuids1 in season_uuid_sets.items():
+            for season2, uuids2 in season_uuid_sets.items():
+                if season1 < season2 and uuids1 == uuids2:
+                    duplicates.append((season1, season2, len(uuids1)))
+
+        if duplicates:
+            print("[ERROR] Duplicate UUID sets detected across seasons!")
+            print("        This likely means the scraper is fetching the current schedule")
+            print("        for all requested seasons (unable to navigate to historical data).\n")
+
+            for s1, s2, count in duplicates:
+                print(f"  - {s1} and {s2} have identical {count} UUIDs")
+
+            print(
+                "\n[SOLUTION] The LNB calendar page does not expose historical season navigation."
+            )
+            print("           Use one of these approaches instead:\n")
+            print("  1. MANUAL FILE-BASED:")
+            print("     - Manually browse each season's games on the LNB website")
+            print("     - Copy match-center URLs to a text file (one per line)")
+            print("     - Run: python tools/lnb/discover_historical_fixture_uuids.py \\")
+            print("              --seasons <SEASON> --from-file <urls.txt>\n")
+            print("  2. API-BASED (if you find the JSON endpoint):")
+            print("     - Use browser DevTools to find the schedule JSON API")
+            print("     - Add a new fetcher function to src.cbb_data.fetchers.lnb")
+            print("     - Modify this script to use the JSON endpoint\n")
+
+            print("[ACTION] Refusing to write duplicate UUIDs as historical seasons.")
+            print("         Saving as 'current_round' instead.\n")
+
+            # Save only as current_round
+            if newly_discovered:
+                # Take any season's UUIDs (they're all the same)
+                first_season = list(newly_discovered.keys())[0]
+                all_mappings["current_round"] = newly_discovered[first_season]
+                print(
+                    f"[SAVED] {len(newly_discovered[first_season])} UUIDs saved under 'current_round'"
+                )
+
+            return all_mappings
+
+        else:
+            print("[OK] No duplicate UUID sets detected across seasons")
+            print("     Each season has unique fixtures ✅\n")
+
+    # If validation passed, merge newly discovered into all_mappings
+    all_mappings.update(newly_discovered)
 
     return all_mappings
 

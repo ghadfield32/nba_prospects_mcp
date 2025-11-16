@@ -1,0 +1,59 @@
+{
+  "generated_at": "2025-11-16T06:13:39.941071",
+  "dry_run": false,
+  "raw_audit": {
+    "total_files": 11,
+    "valid": 7,
+    "corrupted": 4,
+    "errors": 0
+  },
+  "raw_deletion": {
+    "deleted": [
+      "data\\raw\\lnb\\pbp\\season=2023-2024\\game_id=0cac6e1b-6715-11f0-a9f3-27e6e78614e1.parquet",
+      "data\\raw\\lnb\\pbp\\season=2023-2024\\game_id=0cd1323f-6715-11f0-86f4-27e6e78614e1.parquet",
+      "data\\raw\\lnb\\pbp\\season=2023-2024\\game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet",
+      "data\\raw\\lnb\\pbp\\season=2023-2024\\game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet"
+    ],
+    "failed": [],
+    "dry_run": false
+  },
+  "normalized_deletion": {
+    "deleted": [
+      "data\\normalized\\lnb\\player_game\\season=2023-2024\\game_id=0cac6e1b-6715-11f0-a9f3-27e6e78614e1.parquet",
+      "data\\normalized\\lnb\\player_game\\season=2023-2024\\game_id=0cd1323f-6715-11f0-86f4-27e6e78614e1.parquet",
+      "data\\normalized\\lnb\\player_game\\season=2023-2024\\game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet",
+      "data\\normalized\\lnb\\player_game\\season=2023-2024\\game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet",
+      "data\\normalized\\lnb\\player_game\\season=2023-2024\\game_id=LNB_2023-2024_10.parquet",
+      "data\\normalized\\lnb\\player_game\\season=2023-2024\\game_id=LNB_2023-2024_11.parquet",
+      "data\\normalized\\lnb\\player_game\\season=2023-2024\\game_id=LNB_2023-2024_12.parquet",
+      "data\\normalized\\lnb\\player_game\\season=2023-2024\\game_id=LNB_2023-2024_13.parquet",
+      "data\\normalized\\lnb\\player_game\\season=2023-2024\\game_id=LNB_2023-2024_14.parquet",
+      "data\\normalized\\lnb\\player_game\\season=2023-2024\\game_id=LNB_2023-2024_15.parquet",
+      "data\\normalized\\lnb\\player_game\\season=2023-2024\\game_id=LNB_2023-2024_16.parquet",
+      "data\\normalized\\lnb\\player_game\\season=2023-2024\\game_id=LNB_2023-2024_6.parquet",
+      "data\\normalized\\lnb\\player_game\\season=2023-2024\\game_id=LNB_2023-2024_7.parquet",
+      "data\\normalized\\lnb\\player_game\\season=2023-2024\\game_id=LNB_2023-2024_8.parquet",
+      "data\\normalized\\lnb\\player_game\\season=2023-2024\\game_id=LNB_2023-2024_9.parquet",
+      "data\\normalized\\lnb\\team_game\\season=2023-2024\\game_id=0cac6e1b-6715-11f0-a9f3-27e6e78614e1.parquet",
+      "data\\normalized\\lnb\\team_game\\season=2023-2024\\game_id=0cd1323f-6715-11f0-86f4-27e6e78614e1.parquet",
+      "data\\normalized\\lnb\\team_game\\season=2023-2024\\game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet",
+      "data\\normalized\\lnb\\team_game\\season=2023-2024\\game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet",
+      "data\\normalized\\lnb\\team_game\\season=2023-2024\\game_id=LNB_2023-2024_10.parquet",
+      "data\\normalized\\lnb\\team_game\\season=2023-2024\\game_id=LNB_2023-2024_11.parquet",
+      "data\\normalized\\lnb\\team_game\\season=2023-2024\\game_id=LNB_2023-2024_12.parquet",
+      "data\\normalized\\lnb\\team_game\\season=2023-2024\\game_id=LNB_2023-2024_13.parquet",
+      "data\\normalized\\lnb\\team_game\\season=2023-2024\\game_id=LNB_2023-2024_14.parquet",
+      "data\\normalized\\lnb\\team_game\\season=2023-2024\\game_id=LNB_2023-2024_15.parquet",
+      "data\\normalized\\lnb\\team_game\\season=2023-2024\\game_id=LNB_2023-2024_16.parquet",
+      "data\\normalized\\lnb\\team_game\\season=2023-2024\\game_id=LNB_2023-2024_6.parquet",
+      "data\\normalized\\lnb\\team_game\\season=2023-2024\\game_id=LNB_2023-2024_7.parquet",
+      "data\\normalized\\lnb\\team_game\\season=2023-2024\\game_id=LNB_2023-2024_8.parquet",
+      "data\\normalized\\lnb\\team_game\\season=2023-2024\\game_id=LNB_2023-2024_9.parquet"
+    ],
+    "kept": [
+      "data\\normalized\\lnb\\player_game\\season=2023-2024\\game_id=3fcea9a1-1f10-11ee-a687-db190750bdda.parquet",
+      "data\\normalized\\lnb\\team_game\\season=2023-2024\\game_id=3fcea9a1-1f10-11ee-a687-db190750bdda.parquet"
+    ],
+    "dry_run": false
+  }
+}

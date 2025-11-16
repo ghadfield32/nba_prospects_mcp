@@ -1,0 +1,157 @@
+################################################################################
+# GAME SEASON ASSIGNMENT ANALYSIS
+# Investigating duplicate games and season misassignments
+################################################################################
+
+
+================================================================================
+ANALYZING SEASON ASSIGNMENTS: player_game
+================================================================================
+
+📁 2021-2022: 1 files
+📁 2022-2023: 1 files
+📁 2023-2024: 16 files
+📁 2024-2025: 16 files
+
+================================================================================
+DUPLICATE & MISASSIGNMENT DETECTION
+================================================================================
+
+🔴 DUPLICATE: 7d414bce-f5da-11eb-b3fd-a23ac5ab90da
+   Appears in folders: 2021-2022, 2023-2024
+   Data says season: 2021-2022
+   Game date: None
+
+🔴 DUPLICATE: cc7e470e-11a0-11ed-8ef5-8d12cdc95909
+   Appears in folders: 2022-2023, 2023-2024
+   Data says season: 2022-2023
+   Game date: None
+
+🔴 DUPLICATE: 0cac6e1b-6715-11f0-a9f3-27e6e78614e1
+   Appears in folders: 2023-2024, 2024-2025
+   Data says season: 2023-2024
+   Game date: None
+
+🔴 DUPLICATE: 0cd1323f-6715-11f0-86f4-27e6e78614e1
+   Appears in folders: 2023-2024, 2024-2025
+   Data says season: 2023-2024
+   Game date: None
+
+
+================================================================================
+SUMMARY FOR player_game
+================================================================================
+Total unique games: 30
+Duplicate games (appear in multiple folders): 4
+Misassigned games (folder ≠ data): 0
+Correctly assigned games: 26
+
+Games per season folder:
+  2021-2022: 1 files
+  2022-2023: 1 files
+  2023-2024: 16 files
+  2024-2025: 16 files
+
+================================================================================
+ANALYZING SEASON ASSIGNMENTS: team_game
+================================================================================
+
+📁 2021-2022: 1 files
+📁 2022-2023: 1 files
+📁 2023-2024: 16 files
+📁 2024-2025: 16 files
+
+================================================================================
+DUPLICATE & MISASSIGNMENT DETECTION
+================================================================================
+
+🔴 DUPLICATE: 7d414bce-f5da-11eb-b3fd-a23ac5ab90da
+   Appears in folders: 2021-2022, 2023-2024
+   Data says season: 2021-2022
+   Game date: None
+
+🔴 DUPLICATE: cc7e470e-11a0-11ed-8ef5-8d12cdc95909
+   Appears in folders: 2022-2023, 2023-2024
+   Data says season: 2022-2023
+   Game date: None
+
+🔴 DUPLICATE: 0cac6e1b-6715-11f0-a9f3-27e6e78614e1
+   Appears in folders: 2023-2024, 2024-2025
+   Data says season: 2023-2024
+   Game date: None
+
+🔴 DUPLICATE: 0cd1323f-6715-11f0-86f4-27e6e78614e1
+   Appears in folders: 2023-2024, 2024-2025
+   Data says season: 2023-2024
+   Game date: None
+
+
+================================================================================
+SUMMARY FOR team_game
+================================================================================
+Total unique games: 30
+Duplicate games (appear in multiple folders): 4
+Misassigned games (folder ≠ data): 0
+Correctly assigned games: 26
+
+Games per season folder:
+  2021-2022: 1 files
+  2022-2023: 1 files
+  2023-2024: 16 files
+  2024-2025: 16 files
+
+
+################################################################################
+# DEEP DIVE: 2021-2022 SEASON
+################################################################################
+
+================================================================================
+GAME DATE ANALYSIS: player_game / 2021-2022
+================================================================================
+
+File: game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet
+  Game ID: 7d414bce-f5da-11eb-b3fd-a23ac5ab90da
+  Season in data: 2021-2022
+  Game date: None
+  Has SEASON column: True
+  Has GAME_DATE column: False
+
+
+
+################################################################################
+# DEEP DIVE: 2022-2023 SEASON
+################################################################################
+
+================================================================================
+GAME DATE ANALYSIS: player_game / 2022-2023
+================================================================================
+
+File: game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet
+  Game ID: cc7e470e-11a0-11ed-8ef5-8d12cdc95909
+  Season in data: 2022-2023
+  Game date: None
+  Has SEASON column: True
+  Has GAME_DATE column: False
+
+
+
+################################################################################
+# FINAL SUMMARY
+################################################################################
+
+PLAYER_GAME:
+  Total unique games: 30
+  Duplicates: 4
+  Misassignments: 0
+
+TEAM_GAME:
+  Total unique games: 30
+  Duplicates: 4
+  Misassignments: 0
+
+⚠️ CRITICAL FINDING:
+   The same games appear in multiple season folders!
+   This explains why 2021-2022 and 2022-2023 only show 1 game each.
+   Those games are DUPLICATED in the 2023-2024 folder.
+   The actual unique game count across all seasons is:
+   30 games (not 34 files)

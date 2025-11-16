@@ -1,0 +1,843 @@
+Starting comprehensive LNB coverage analysis...
+This will examine all data sources to understand actual coverage.
+
+
+================================================================================
+ANALYZING: player_game / 2021-2022
+Directory: data\normalized\lnb\player_game\season=2021-2022
+Found 1 parquet files
+================================================================================
+
+File: game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['7d414bce-f5da-11eb-b3fd-a23ac5ab90da']
+  Unique Players: 18
+  Sample Game ID: 7d414bce-f5da-11eb-b3fd-a23ac5ab90da
+  Sample Date: N/A
+
+================================================================================
+SUMMARY for player_game / 2021-2022:
+  Total Files: 1
+  Total Rows: 18
+  Unique Games: 1
+  Unique Players/Teams: 18
+================================================================================
+
+================================================================================
+ANALYZING: player_game / 2022-2023
+Directory: data\normalized\lnb\player_game\season=2022-2023
+Found 1 parquet files
+================================================================================
+
+File: game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet
+  Rows: 17
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['cc7e470e-11a0-11ed-8ef5-8d12cdc95909']
+  Unique Players: 17
+  Sample Game ID: cc7e470e-11a0-11ed-8ef5-8d12cdc95909
+  Sample Date: N/A
+
+================================================================================
+SUMMARY for player_game / 2022-2023:
+  Total Files: 1
+  Total Rows: 17
+  Unique Games: 1
+  Unique Players/Teams: 17
+================================================================================
+
+================================================================================
+ANALYZING: player_game / 2023-2024
+Directory: data\normalized\lnb\player_game\season=2023-2024
+Found 16 parquet files
+================================================================================
+
+File: game_id=0cac6e1b-6715-11f0-a9f3-27e6e78614e1.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['0cac6e1b-6715-11f0-a9f3-27e6e78614e1']
+  Unique Players: 18
+  Sample Game ID: 0cac6e1b-6715-11f0-a9f3-27e6e78614e1
+  Sample Date: N/A
+
+File: game_id=0cd1323f-6715-11f0-86f4-27e6e78614e1.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['0cd1323f-6715-11f0-86f4-27e6e78614e1']
+  Unique Players: 18
+  Sample Game ID: 0cd1323f-6715-11f0-86f4-27e6e78614e1
+  Sample Date: N/A
+
+File: game_id=3fcea9a1-1f10-11ee-a687-db190750bdda.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['3fcea9a1-1f10-11ee-a687-db190750bdda']
+  Unique Players: 18
+  Sample Game ID: 3fcea9a1-1f10-11ee-a687-db190750bdda
+  Sample Date: N/A
+
+File: game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['7d414bce-f5da-11eb-b3fd-a23ac5ab90da']
+  Unique Players: 18
+  Sample Game ID: 7d414bce-f5da-11eb-b3fd-a23ac5ab90da
+  Sample Date: N/A
+
+File: game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['cc7e470e-11a0-11ed-8ef5-8d12cdc95909']
+  Unique Players: 18
+  Sample Game ID: cc7e470e-11a0-11ed-8ef5-8d12cdc95909
+  Sample Date: N/A
+
+File: game_id=LNB_2023-2024_10.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['LNB_2023-2024_10']
+  Unique Players: 18
+  Sample Game ID: LNB_2023-2024_10
+  Sample Date: N/A
+
+File: game_id=LNB_2023-2024_11.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['LNB_2023-2024_11']
+  Unique Players: 18
+  Sample Game ID: LNB_2023-2024_11
+  Sample Date: N/A
+
+File: game_id=LNB_2023-2024_12.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['LNB_2023-2024_12']
+  Unique Players: 18
+  Sample Game ID: LNB_2023-2024_12
+  Sample Date: N/A
+
+File: game_id=LNB_2023-2024_13.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['LNB_2023-2024_13']
+  Unique Players: 18
+  Sample Game ID: LNB_2023-2024_13
+  Sample Date: N/A
+
+File: game_id=LNB_2023-2024_14.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['LNB_2023-2024_14']
+  Unique Players: 18
+  Sample Game ID: LNB_2023-2024_14
+  Sample Date: N/A
+
+File: game_id=LNB_2023-2024_15.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['LNB_2023-2024_15']
+  Unique Players: 18
+  Sample Game ID: LNB_2023-2024_15
+  Sample Date: N/A
+
+File: game_id=LNB_2023-2024_16.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['LNB_2023-2024_16']
+  Unique Players: 18
+  Sample Game ID: LNB_2023-2024_16
+  Sample Date: N/A
+
+File: game_id=LNB_2023-2024_6.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['LNB_2023-2024_6']
+  Unique Players: 18
+  Sample Game ID: LNB_2023-2024_6
+  Sample Date: N/A
+
+File: game_id=LNB_2023-2024_7.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['LNB_2023-2024_7']
+  Unique Players: 18
+  Sample Game ID: LNB_2023-2024_7
+  Sample Date: N/A
+
+File: game_id=LNB_2023-2024_8.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['LNB_2023-2024_8']
+  Unique Players: 18
+  Sample Game ID: LNB_2023-2024_8
+  Sample Date: N/A
+
+File: game_id=LNB_2023-2024_9.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['LNB_2023-2024_9']
+  Unique Players: 18
+  Sample Game ID: LNB_2023-2024_9
+  Sample Date: N/A
+
+================================================================================
+SUMMARY for player_game / 2023-2024:
+  Total Files: 16
+  Total Rows: 288
+  Unique Games: 16
+  Unique Players/Teams: 18
+================================================================================
+
+================================================================================
+ANALYZING: player_game / 2024-2025
+Directory: data\normalized\lnb\player_game\season=2024-2025
+Found 16 parquet files
+================================================================================
+
+File: game_id=0cac6e1b-6715-11f0-a9f3-27e6e78614e1.parquet
+  Rows: 20
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['0cac6e1b-6715-11f0-a9f3-27e6e78614e1']
+  Unique Players: 20
+  Sample Game ID: 0cac6e1b-6715-11f0-a9f3-27e6e78614e1
+  Sample Date: N/A
+
+File: game_id=0cd1323f-6715-11f0-86f4-27e6e78614e1.parquet
+  Rows: 20
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['0cd1323f-6715-11f0-86f4-27e6e78614e1']
+  Unique Players: 20
+  Sample Game ID: 0cd1323f-6715-11f0-86f4-27e6e78614e1
+  Sample Date: N/A
+
+File: game_id=0ce02919-6715-11f0-9d01-27e6e78614e1.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['0ce02919-6715-11f0-9d01-27e6e78614e1']
+  Unique Players: 18
+  Sample Game ID: 0ce02919-6715-11f0-9d01-27e6e78614e1
+  Sample Date: N/A
+
+File: game_id=0d0504a0-6715-11f0-98ab-27e6e78614e1.parquet
+  Rows: 20
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['0d0504a0-6715-11f0-98ab-27e6e78614e1']
+  Unique Players: 20
+  Sample Game ID: 0d0504a0-6715-11f0-98ab-27e6e78614e1
+  Sample Date: N/A
+
+File: game_id=LNB_2024-2025_10.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['LNB_2024-2025_10']
+  Unique Players: 18
+  Sample Game ID: LNB_2024-2025_10
+  Sample Date: N/A
+
+File: game_id=LNB_2024-2025_11.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['LNB_2024-2025_11']
+  Unique Players: 18
+  Sample Game ID: LNB_2024-2025_11
+  Sample Date: N/A
+
+File: game_id=LNB_2024-2025_12.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['LNB_2024-2025_12']
+  Unique Players: 18
+  Sample Game ID: LNB_2024-2025_12
+  Sample Date: N/A
+
+File: game_id=LNB_2024-2025_13.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['LNB_2024-2025_13']
+  Unique Players: 18
+  Sample Game ID: LNB_2024-2025_13
+  Sample Date: N/A
+
+File: game_id=LNB_2024-2025_14.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['LNB_2024-2025_14']
+  Unique Players: 18
+  Sample Game ID: LNB_2024-2025_14
+  Sample Date: N/A
+
+File: game_id=LNB_2024-2025_15.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['LNB_2024-2025_15']
+  Unique Players: 18
+  Sample Game ID: LNB_2024-2025_15
+  Sample Date: N/A
+
+File: game_id=LNB_2024-2025_16.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['LNB_2024-2025_16']
+  Unique Players: 18
+  Sample Game ID: LNB_2024-2025_16
+  Sample Date: N/A
+
+File: game_id=LNB_2024-2025_5.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['LNB_2024-2025_5']
+  Unique Players: 18
+  Sample Game ID: LNB_2024-2025_5
+  Sample Date: N/A
+
+File: game_id=LNB_2024-2025_6.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['LNB_2024-2025_6']
+  Unique Players: 18
+  Sample Game ID: LNB_2024-2025_6
+  Sample Date: N/A
+
+File: game_id=LNB_2024-2025_7.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['LNB_2024-2025_7']
+  Unique Players: 18
+  Sample Game ID: LNB_2024-2025_7
+  Sample Date: N/A
+
+File: game_id=LNB_2024-2025_8.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['LNB_2024-2025_8']
+  Unique Players: 18
+  Sample Game ID: LNB_2024-2025_8
+  Sample Date: N/A
+
+File: game_id=LNB_2024-2025_9.parquet
+  Rows: 18
+  Columns: 27
+  Unique Games: 1
+    Game IDs: ['LNB_2024-2025_9']
+  Unique Players: 18
+  Sample Game ID: LNB_2024-2025_9
+  Sample Date: N/A
+
+================================================================================
+SUMMARY for player_game / 2024-2025:
+  Total Files: 16
+  Total Rows: 294
+  Unique Games: 16
+  Unique Players/Teams: 38
+================================================================================
+
+================================================================================
+ANALYZING: team_game / 2021-2022
+Directory: data\normalized\lnb\team_game\season=2021-2022
+Found 1 parquet files
+================================================================================
+
+File: game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['7d414bce-f5da-11eb-b3fd-a23ac5ab90da']
+  Unique Teams: 2
+  Sample Game ID: 7d414bce-f5da-11eb-b3fd-a23ac5ab90da
+  Sample Date: N/A
+
+================================================================================
+SUMMARY for team_game / 2021-2022:
+  Total Files: 1
+  Total Rows: 2
+  Unique Games: 1
+  Unique Players/Teams: 2
+================================================================================
+
+================================================================================
+ANALYZING: team_game / 2022-2023
+Directory: data\normalized\lnb\team_game\season=2022-2023
+Found 1 parquet files
+================================================================================
+
+File: game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['cc7e470e-11a0-11ed-8ef5-8d12cdc95909']
+  Unique Teams: 2
+  Sample Game ID: cc7e470e-11a0-11ed-8ef5-8d12cdc95909
+  Sample Date: N/A
+
+================================================================================
+SUMMARY for team_game / 2022-2023:
+  Total Files: 1
+  Total Rows: 2
+  Unique Games: 1
+  Unique Players/Teams: 2
+================================================================================
+
+================================================================================
+ANALYZING: team_game / 2023-2024
+Directory: data\normalized\lnb\team_game\season=2023-2024
+Found 16 parquet files
+================================================================================
+
+File: game_id=0cac6e1b-6715-11f0-a9f3-27e6e78614e1.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['0cac6e1b-6715-11f0-a9f3-27e6e78614e1']
+  Unique Teams: 2
+  Sample Game ID: 0cac6e1b-6715-11f0-a9f3-27e6e78614e1
+  Sample Date: N/A
+
+File: game_id=0cd1323f-6715-11f0-86f4-27e6e78614e1.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['0cd1323f-6715-11f0-86f4-27e6e78614e1']
+  Unique Teams: 2
+  Sample Game ID: 0cd1323f-6715-11f0-86f4-27e6e78614e1
+  Sample Date: N/A
+
+File: game_id=3fcea9a1-1f10-11ee-a687-db190750bdda.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['3fcea9a1-1f10-11ee-a687-db190750bdda']
+  Unique Teams: 2
+  Sample Game ID: 3fcea9a1-1f10-11ee-a687-db190750bdda
+  Sample Date: N/A
+
+File: game_id=7d414bce-f5da-11eb-b3fd-a23ac5ab90da.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['7d414bce-f5da-11eb-b3fd-a23ac5ab90da']
+  Unique Teams: 2
+  Sample Game ID: 7d414bce-f5da-11eb-b3fd-a23ac5ab90da
+  Sample Date: N/A
+
+File: game_id=cc7e470e-11a0-11ed-8ef5-8d12cdc95909.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['cc7e470e-11a0-11ed-8ef5-8d12cdc95909']
+  Unique Teams: 2
+  Sample Game ID: cc7e470e-11a0-11ed-8ef5-8d12cdc95909
+  Sample Date: N/A
+
+File: game_id=LNB_2023-2024_10.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['LNB_2023-2024_10']
+  Unique Teams: 2
+  Sample Game ID: LNB_2023-2024_10
+  Sample Date: N/A
+
+File: game_id=LNB_2023-2024_11.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['LNB_2023-2024_11']
+  Unique Teams: 2
+  Sample Game ID: LNB_2023-2024_11
+  Sample Date: N/A
+
+File: game_id=LNB_2023-2024_12.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['LNB_2023-2024_12']
+  Unique Teams: 2
+  Sample Game ID: LNB_2023-2024_12
+  Sample Date: N/A
+
+File: game_id=LNB_2023-2024_13.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['LNB_2023-2024_13']
+  Unique Teams: 2
+  Sample Game ID: LNB_2023-2024_13
+  Sample Date: N/A
+
+File: game_id=LNB_2023-2024_14.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['LNB_2023-2024_14']
+  Unique Teams: 2
+  Sample Game ID: LNB_2023-2024_14
+  Sample Date: N/A
+
+File: game_id=LNB_2023-2024_15.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['LNB_2023-2024_15']
+  Unique Teams: 2
+  Sample Game ID: LNB_2023-2024_15
+  Sample Date: N/A
+
+File: game_id=LNB_2023-2024_16.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['LNB_2023-2024_16']
+  Unique Teams: 2
+  Sample Game ID: LNB_2023-2024_16
+  Sample Date: N/A
+
+File: game_id=LNB_2023-2024_6.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['LNB_2023-2024_6']
+  Unique Teams: 2
+  Sample Game ID: LNB_2023-2024_6
+  Sample Date: N/A
+
+File: game_id=LNB_2023-2024_7.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['LNB_2023-2024_7']
+  Unique Teams: 2
+  Sample Game ID: LNB_2023-2024_7
+  Sample Date: N/A
+
+File: game_id=LNB_2023-2024_8.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['LNB_2023-2024_8']
+  Unique Teams: 2
+  Sample Game ID: LNB_2023-2024_8
+  Sample Date: N/A
+
+File: game_id=LNB_2023-2024_9.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['LNB_2023-2024_9']
+  Unique Teams: 2
+  Sample Game ID: LNB_2023-2024_9
+  Sample Date: N/A
+
+================================================================================
+SUMMARY for team_game / 2023-2024:
+  Total Files: 16
+  Total Rows: 32
+  Unique Games: 16
+  Unique Players/Teams: 2
+================================================================================
+
+================================================================================
+ANALYZING: team_game / 2024-2025
+Directory: data\normalized\lnb\team_game\season=2024-2025
+Found 16 parquet files
+================================================================================
+
+File: game_id=0cac6e1b-6715-11f0-a9f3-27e6e78614e1.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['0cac6e1b-6715-11f0-a9f3-27e6e78614e1']
+  Unique Teams: 2
+  Sample Game ID: 0cac6e1b-6715-11f0-a9f3-27e6e78614e1
+  Sample Date: N/A
+
+File: game_id=0cd1323f-6715-11f0-86f4-27e6e78614e1.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['0cd1323f-6715-11f0-86f4-27e6e78614e1']
+  Unique Teams: 2
+  Sample Game ID: 0cd1323f-6715-11f0-86f4-27e6e78614e1
+  Sample Date: N/A
+
+File: game_id=0ce02919-6715-11f0-9d01-27e6e78614e1.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['0ce02919-6715-11f0-9d01-27e6e78614e1']
+  Unique Teams: 2
+  Sample Game ID: 0ce02919-6715-11f0-9d01-27e6e78614e1
+  Sample Date: N/A
+
+File: game_id=0d0504a0-6715-11f0-98ab-27e6e78614e1.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['0d0504a0-6715-11f0-98ab-27e6e78614e1']
+  Unique Teams: 2
+  Sample Game ID: 0d0504a0-6715-11f0-98ab-27e6e78614e1
+  Sample Date: N/A
+
+File: game_id=LNB_2024-2025_10.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['LNB_2024-2025_10']
+  Unique Teams: 2
+  Sample Game ID: LNB_2024-2025_10
+  Sample Date: N/A
+
+File: game_id=LNB_2024-2025_11.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['LNB_2024-2025_11']
+  Unique Teams: 2
+  Sample Game ID: LNB_2024-2025_11
+  Sample Date: N/A
+
+File: game_id=LNB_2024-2025_12.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['LNB_2024-2025_12']
+  Unique Teams: 2
+  Sample Game ID: LNB_2024-2025_12
+  Sample Date: N/A
+
+File: game_id=LNB_2024-2025_13.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['LNB_2024-2025_13']
+  Unique Teams: 2
+  Sample Game ID: LNB_2024-2025_13
+  Sample Date: N/A
+
+File: game_id=LNB_2024-2025_14.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['LNB_2024-2025_14']
+  Unique Teams: 2
+  Sample Game ID: LNB_2024-2025_14
+  Sample Date: N/A
+
+File: game_id=LNB_2024-2025_15.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['LNB_2024-2025_15']
+  Unique Teams: 2
+  Sample Game ID: LNB_2024-2025_15
+  Sample Date: N/A
+
+File: game_id=LNB_2024-2025_16.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['LNB_2024-2025_16']
+  Unique Teams: 2
+  Sample Game ID: LNB_2024-2025_16
+  Sample Date: N/A
+
+File: game_id=LNB_2024-2025_5.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['LNB_2024-2025_5']
+  Unique Teams: 2
+  Sample Game ID: LNB_2024-2025_5
+  Sample Date: N/A
+
+File: game_id=LNB_2024-2025_6.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['LNB_2024-2025_6']
+  Unique Teams: 2
+  Sample Game ID: LNB_2024-2025_6
+  Sample Date: N/A
+
+File: game_id=LNB_2024-2025_7.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['LNB_2024-2025_7']
+  Unique Teams: 2
+  Sample Game ID: LNB_2024-2025_7
+  Sample Date: N/A
+
+File: game_id=LNB_2024-2025_8.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['LNB_2024-2025_8']
+  Unique Teams: 2
+  Sample Game ID: LNB_2024-2025_8
+  Sample Date: N/A
+
+File: game_id=LNB_2024-2025_9.parquet
+  Rows: 2
+  Columns: 26
+  Unique Games: 1
+    Game IDs: ['LNB_2024-2025_9']
+  Unique Teams: 2
+  Sample Game ID: LNB_2024-2025_9
+  Sample Date: N/A
+
+================================================================================
+SUMMARY for team_game / 2024-2025:
+  Total Files: 16
+  Total Rows: 32
+  Unique Games: 16
+  Unique Players/Teams: 4
+================================================================================
+
+================================================================================
+ANALYZING HISTORICAL: 2025-2026
+Directory: data\lnb\historical\2025-2026
+================================================================================
+Found 3 parquet files: ['fixtures.parquet', 'pbp_events.parquet', 'shots.parquet']
+
+--- FIXTURES ---
+  Rows: 8
+  Columns (12): ['fixture_uuid', 'external_id', 'season', 'game_date', 'home_team', 'away_team', 'home_score', 'away_score', 'status', 'has_pbp']...
+
+--- PBP EVENTS ---
+  Rows: 3336
+  Columns (12): ['fixture_uuid', 'event_id', 'quarter', 'clock', 'team', 'player', 'event_type', 'event_description', 'score_home', 'score_away']...
+
+--- SHOTS ---
+  Rows: 973
+  Columns (10): ['fixture_uuid', 'shot_id', 'quarter', 'clock', 'team', 'player', 'shot_type', 'made', 'x', 'y']...
+================================================================================
+
+================================================================================
+SCANNING ALL HISTORICAL DIRECTORIES
+Root: data\lnb\historical
+================================================================================
+
+Found 1 directories:
+  2025-2026: 3 parquet files
+
+Game index does not exist: data\lnb\game_index.parquet
+
+
+################################################################################
+# COMPREHENSIVE COVERAGE ANALYSIS REPORT
+# Generated: 2025-11-16T04:54:25.567742
+################################################################################
+
+
+================================================================================
+SECTION 1: NORMALIZED DATA SUMMARY
+================================================================================
+
+PLAYER_GAME:
+Season          Files    Rows       Games    Players/Teams
+--------------------------------------------------------------------------------
+2021-2022       1        18         1        18
+2022-2023       1        17         1        17
+2023-2024       16       288        16       18
+2024-2025       16       294        16       38
+
+TEAM_GAME:
+Season          Files    Rows       Games    Players/Teams
+--------------------------------------------------------------------------------
+2021-2022       1        2          1        2
+2022-2023       1        2          1        2
+2023-2024       16       32         16       2
+2024-2025       16       32         16       4
+
+================================================================================
+SECTION 2: HISTORICAL DATA SUMMARY
+================================================================================
+
+2021-2022:
+  Directory does not exist
+
+2022-2023:
+  Directory does not exist
+
+2023-2024:
+  Directory does not exist
+
+2024-2025:
+  Directory does not exist
+
+2025-2026:
+  Files: fixtures.parquet, pbp_events.parquet, shots.parquet
+  Fixtures: 8 rows, 0 games
+  PBP: 3336 rows, 0 games
+  Shots: 973 rows, 0 games
+
+================================================================================
+SECTION 3: CROSS-REFERENCE ANALYSIS
+================================================================================
+
+All historical directories found:
+  ['2025-2026']
+
+================================================================================
+SECTION 4: KEY FINDINGS & OBSERVATIONS
+================================================================================
+
+Discrepancy Analysis:
+
+2021-2022:
+  Player-game parquet files: 1
+  Team-game parquet files: 1
+  Player-game unique games: 1
+  Team-game unique games: 1
+  ⚠️ OBSERVATION: Only 1 game found. This suggests:
+     - Either only 1 game was ingested for this season
+     - Or the parquet files only contain a subset of available data
+     - Historical data may exist elsewhere that wasn't normalized
+
+2022-2023:
+  Player-game parquet files: 1
+  Team-game parquet files: 1
+  Player-game unique games: 1
+  Team-game unique games: 1
+  ⚠️ OBSERVATION: Only 1 game found. This suggests:
+     - Either only 1 game was ingested for this season
+     - Or the parquet files only contain a subset of available data
+     - Historical data may exist elsewhere that wasn't normalized
+
+================================================================================
+Analysis complete!
+Results saved to: tools\lnb\debug_coverage_analysis.json
+================================================================================

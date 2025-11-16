@@ -1,0 +1,165 @@
+# LNB Pro A - Season 2022-2023 Match-Center URLs
+# =================================================
+#
+# INSTRUCTIONS:
+# 1. Open each calendar URL below in your browser
+# 2. For each date, click through each game to open match-center
+# 3. Copy the match-center URL (format: https://lnb.fr/fr/match-center/<UUID>)
+# 4. Paste it below the corresponding calendar date section
+# 5. Remove the example comments and add your actual collected URLs
+#
+# After collecting all URLs, run:
+#   uv run python tools/lnb/discover_historical_fixture_uuids.py \
+#     --seasons 2022-2023 \
+#     --from-file tools/lnb/urls_2022_2023.txt
+#
+# =================================================
+
+# --- SEPTEMBER 2022 (COLLECTED) ---
+# First month of 2022-2023 season - 22 games collected
+# Note: Specific dates TBD - these are all September 2022 games
+https://lnb.fr/fr/match-center/ca4b3e98-11a0-11ed-8669-c3922075d502
+https://lnb.fr/fr/match-center/be74a828-11a0-11ed-93df-63f705c24cd5
+https://lnb.fr/fr/match-center/be5b9430-11a0-11ed-bd09-63f705c24cd5
+https://lnb.fr/fr/match-center/ca45fb74-11a0-11ed-a33a-c3922075d502
+https://lnb.fr/fr/match-center/ca35a23f-11a0-11ed-b3c5-c3922075d502
+https://lnb.fr/fr/match-center/be90af50-11a0-11ed-a418-63f705c24cd5
+https://lnb.fr/fr/match-center/ca40b026-11a0-11ed-9838-c3922075d502
+https://lnb.fr/fr/match-center/be2a001f-11a0-11ed-9789-63f705c24cd5
+https://lnb.fr/fr/match-center/be457d9a-11a0-11ed-90c2-63f705c24cd5
+https://lnb.fr/fr/match-center/ca6c50ff-11a0-11ed-a7ef-c3922075d502
+https://lnb.fr/fr/match-center/ca786374-11a0-11ed-88d7-c3922075d502
+https://lnb.fr/fr/match-center/ca7e1555-11a0-11ed-bef6-c3922075d502
+https://lnb.fr/fr/match-center/ca7288e1-11a0-11ed-bdd7-c3922075d502
+https://lnb.fr/fr/match-center/ca66b6f2-11a0-11ed-b40a-c3922075d502
+https://lnb.fr/fr/match-center/ca508b8e-11a0-11ed-aadf-c3922075d502
+https://lnb.fr/fr/match-center/ca55d1a6-11a0-11ed-9e29-c3922075d502
+https://lnb.fr/fr/match-center/ca613415-11a0-11ed-9b97-c3922075d502
+https://lnb.fr/fr/match-center/ca83c274-11a0-11ed-ad24-c3922075d502
+https://lnb.fr/fr/match-center/ca9b4c1b-11a0-11ed-9581-c3922075d502
+https://lnb.fr/fr/match-center/caa6cf4b-11a0-11ed-99b7-c3922075d502
+https://lnb.fr/fr/match-center/ca8f63a9-11a0-11ed-b64c-c3922075d502
+https://lnb.fr/fr/match-center/ca895862-11a0-11ed-b944-c3922075d502
+
+
+# --- 2022-10-15 ---
+# Calendar anchor: https://lnb.fr/fr/calendar#2022-10-15
+# Match-center URLs for games on this date:
+
+
+
+# --- 2022-10-29 ---
+# Calendar anchor: https://lnb.fr/fr/calendar#2022-10-29
+# Match-center URLs for games on this date:
+
+
+
+# --- 2022-11-18 ---
+# Calendar anchor: https://lnb.fr/fr/calendar#2022-11-18
+# Match-center URLs for games on this date:
+
+
+
+# --- 2022-11-29 ---
+# Calendar anchor: https://lnb.fr/fr/calendar#2022-11-29
+# Match-center URLs for games on this date:
+
+
+
+# --- 2022-12-10 ---
+# Calendar anchor: https://lnb.fr/fr/calendar#2022-12-10
+# Match-center URLs for games on this date:
+
+
+
+# --- 2022-12-20 ---
+# Calendar anchor: https://lnb.fr/fr/calendar#2022-12-20
+# Match-center URLs for games on this date:
+
+
+
+# --- 2023-01-14 ---
+# Calendar anchor: https://lnb.fr/fr/calendar#2023-01-14
+# Match-center URLs for games on this date:
+
+
+
+# --- 2023-01-28 ---
+# Calendar anchor: https://lnb.fr/fr/calendar#2023-01-28
+# Match-center URLs for games on this date:
+
+
+
+# --- 2023-02-11 ---
+# Calendar anchor: https://lnb.fr/fr/calendar#2023-02-11
+# Match-center URLs for games on this date:
+
+
+
+# --- 2023-02-25 ---
+# Calendar anchor: https://lnb.fr/fr/calendar#2023-02-25
+# Match-center URLs for games on this date:
+
+
+
+# --- 2023-03-11 ---
+# Calendar anchor: https://lnb.fr/fr/calendar#2023-03-11
+# Match-center URLs for games on this date:
+
+
+
+# --- 2023-03-25 ---
+# Calendar anchor: https://lnb.fr/fr/calendar#2023-03-25
+# Match-center URLs for games on this date:
+
+
+
+# --- 2023-04-08 ---
+# Calendar anchor: https://lnb.fr/fr/calendar#2023-04-08
+# Match-center URLs for games on this date:
+
+
+
+# --- 2023-04-22 ---
+# Calendar anchor: https://lnb.fr/fr/calendar#2023-04-22
+# Match-center URLs for games on this date:
+
+
+
+# --- 2023-05-06 ---
+# Calendar anchor: https://lnb.fr/fr/calendar#2023-05-06
+# Match-center URLs for games on this date:
+
+
+
+# --- 2023-05-20 ---
+# Calendar anchor: https://lnb.fr/fr/calendar#2023-05-20
+# Match-center URLs for games on this date:
+
+
+
+# --- Additional Dates ---
+# Add more calendar dates and their match-center URLs below as you discover them
+# Follow the format above
+# Note: Playoffs typically occur in May/June - add those dates as you find them
+
+
+
+# =================================================
+# KNOWN FIXTURES (already in game index):
+# - cc7e470e-11a0-11ed-8ef5-8d12cdc95909 (previously ingested)
+# - 22 September 2022 games added above
+#
+# NOTE: You can include duplicate URLs - the discovery script will deduplicate.
+# Focus on collecting ALL 2022-2023 games to build complete season coverage.
+# =================================================
+
+# =================================================
+# COLLECTION STATUS:
+# Total URLs collected: 22 (September 2022 only)
+# Months completed: 1/9 (September)
+# Estimated remaining: ~280-330 games
+# Status: IN PROGRESS - Need to collect Oct 2022 through May 2023
+# Next steps: Collect October 2022 games using calendar anchors above
+# Last updated: 2025-11-16
+# =================================================

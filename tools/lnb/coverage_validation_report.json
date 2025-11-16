@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-11-15T20:55:46.185813",
+  "generated_at": "2025-11-16T06:03:34.894235",
   "validation_type": "LNB Historical Coverage",
   "normalized_data": {
     "seasons_validated": 4,
@@ -45,6 +45,9 @@
           "date_range": null,
           "unique_games": 1,
           "unique_players_or_teams": 18,
+          "game_ids": [
+            "7d414bce-f5da-11eb-b3fd-a23ac5ab90da"
+          ],
           "issues": []
         },
         {
@@ -87,6 +90,9 @@
           "date_range": null,
           "unique_games": 1,
           "unique_players_or_teams": 17,
+          "game_ids": [
+            "cc7e470e-11a0-11ed-8ef5-8d12cdc95909"
+          ],
           "issues": []
         },
         {
@@ -129,6 +135,24 @@
           "date_range": null,
           "unique_games": 16,
           "unique_players_or_teams": 18,
+          "game_ids": [
+            "0cac6e1b-6715-11f0-a9f3-27e6e78614e1",
+            "0cd1323f-6715-11f0-86f4-27e6e78614e1",
+            "3fcea9a1-1f10-11ee-a687-db190750bdda",
+            "7d414bce-f5da-11eb-b3fd-a23ac5ab90da",
+            "LNB_2023-2024_10",
+            "LNB_2023-2024_11",
+            "LNB_2023-2024_12",
+            "LNB_2023-2024_13",
+            "LNB_2023-2024_14",
+            "LNB_2023-2024_15",
+            "LNB_2023-2024_16",
+            "LNB_2023-2024_6",
+            "LNB_2023-2024_7",
+            "LNB_2023-2024_8",
+            "LNB_2023-2024_9",
+            "cc7e470e-11a0-11ed-8ef5-8d12cdc95909"
+          ],
           "issues": []
         },
         {
@@ -171,6 +195,24 @@
           "date_range": null,
           "unique_games": 16,
           "unique_players_or_teams": 38,
+          "game_ids": [
+            "0cac6e1b-6715-11f0-a9f3-27e6e78614e1",
+            "0cd1323f-6715-11f0-86f4-27e6e78614e1",
+            "0ce02919-6715-11f0-9d01-27e6e78614e1",
+            "0d0504a0-6715-11f0-98ab-27e6e78614e1",
+            "LNB_2024-2025_10",
+            "LNB_2024-2025_11",
+            "LNB_2024-2025_12",
+            "LNB_2024-2025_13",
+            "LNB_2024-2025_14",
+            "LNB_2024-2025_15",
+            "LNB_2024-2025_16",
+            "LNB_2024-2025_5",
+            "LNB_2024-2025_6",
+            "LNB_2024-2025_7",
+            "LNB_2024-2025_8",
+            "LNB_2024-2025_9"
+          ],
           "issues": []
         }
       ],
@@ -214,6 +256,9 @@
           "date_range": null,
           "unique_games": 1,
           "unique_players_or_teams": 2,
+          "game_ids": [
+            "7d414bce-f5da-11eb-b3fd-a23ac5ab90da"
+          ],
           "issues": []
         },
         {
@@ -255,6 +300,9 @@
           "date_range": null,
           "unique_games": 1,
           "unique_players_or_teams": 2,
+          "game_ids": [
+            "cc7e470e-11a0-11ed-8ef5-8d12cdc95909"
+          ],
           "issues": []
         },
         {
@@ -296,6 +344,24 @@
           "date_range": null,
           "unique_games": 16,
           "unique_players_or_teams": 2,
+          "game_ids": [
+            "0cac6e1b-6715-11f0-a9f3-27e6e78614e1",
+            "0cd1323f-6715-11f0-86f4-27e6e78614e1",
+            "3fcea9a1-1f10-11ee-a687-db190750bdda",
+            "7d414bce-f5da-11eb-b3fd-a23ac5ab90da",
+            "LNB_2023-2024_10",
+            "LNB_2023-2024_11",
+            "LNB_2023-2024_12",
+            "LNB_2023-2024_13",
+            "LNB_2023-2024_14",
+            "LNB_2023-2024_15",
+            "LNB_2023-2024_16",
+            "LNB_2023-2024_6",
+            "LNB_2023-2024_7",
+            "LNB_2023-2024_8",
+            "LNB_2023-2024_9",
+            "cc7e470e-11a0-11ed-8ef5-8d12cdc95909"
+          ],
           "issues": []
         },
         {
@@ -337,9 +403,95 @@
           "date_range": null,
           "unique_games": 16,
           "unique_players_or_teams": 4,
+          "game_ids": [
+            "0cac6e1b-6715-11f0-a9f3-27e6e78614e1",
+            "0cd1323f-6715-11f0-86f4-27e6e78614e1",
+            "0ce02919-6715-11f0-9d01-27e6e78614e1",
+            "0d0504a0-6715-11f0-98ab-27e6e78614e1",
+            "LNB_2024-2025_10",
+            "LNB_2024-2025_11",
+            "LNB_2024-2025_12",
+            "LNB_2024-2025_13",
+            "LNB_2024-2025_14",
+            "LNB_2024-2025_15",
+            "LNB_2024-2025_16",
+            "LNB_2024-2025_5",
+            "LNB_2024-2025_6",
+            "LNB_2024-2025_7",
+            "LNB_2024-2025_8",
+            "LNB_2024-2025_9"
+          ],
           "issues": []
         }
       ]
+    },
+    "duplicate_analysis": {
+      "player_game": {
+        "total_unique_games": 30,
+        "duplicate_games": [
+          {
+            "game_id": "7d414bce-f5da-11eb-b3fd-a23ac5ab90da",
+            "seasons": [
+              "2021-2022",
+              "2023-2024"
+            ]
+          },
+          {
+            "game_id": "cc7e470e-11a0-11ed-8ef5-8d12cdc95909",
+            "seasons": [
+              "2022-2023",
+              "2023-2024"
+            ]
+          },
+          {
+            "game_id": "0cac6e1b-6715-11f0-a9f3-27e6e78614e1",
+            "seasons": [
+              "2023-2024",
+              "2024-2025"
+            ]
+          },
+          {
+            "game_id": "0cd1323f-6715-11f0-86f4-27e6e78614e1",
+            "seasons": [
+              "2023-2024",
+              "2024-2025"
+            ]
+          }
+        ]
+      },
+      "team_game": {
+        "total_unique_games": 30,
+        "duplicate_games": [
+          {
+            "game_id": "7d414bce-f5da-11eb-b3fd-a23ac5ab90da",
+            "seasons": [
+              "2021-2022",
+              "2023-2024"
+            ]
+          },
+          {
+            "game_id": "cc7e470e-11a0-11ed-8ef5-8d12cdc95909",
+            "seasons": [
+              "2022-2023",
+              "2023-2024"
+            ]
+          },
+          {
+            "game_id": "0cac6e1b-6715-11f0-a9f3-27e6e78614e1",
+            "seasons": [
+              "2023-2024",
+              "2024-2025"
+            ]
+          },
+          {
+            "game_id": "0cd1323f-6715-11f0-86f4-27e6e78614e1",
+            "seasons": [
+              "2023-2024",
+              "2024-2025"
+            ]
+          }
+        ]
+      }
     }
   },
   "historical_data": {
@@ -400,6 +552,7 @@
             "y"
           ]
         },
+        "coverage": {},
         "issues": []
       }
     ]
@@ -411,6 +564,19 @@
     "total_team_game_records": 68,
     "total_pbp_events": 3336,
     "total_shots": 973,
-    "issues_found": []
+    "unique_games_by_dataset": {
+      "player_game": 30,
+      "team_game": 30
+    },
+    "issues_found": [
+      "Duplicate player_game game 7d414bce-f5da-11eb-b3fd-a23ac5ab90da appears in seasons: 2021-2022, 2023-2024",
+      "Duplicate player_game game cc7e470e-11a0-11ed-8ef5-8d12cdc95909 appears in seasons: 2022-2023, 2023-2024",
+      "Duplicate player_game game 0cac6e1b-6715-11f0-a9f3-27e6e78614e1 appears in seasons: 2023-2024, 2024-2025",
+      "Duplicate player_game game 0cd1323f-6715-11f0-86f4-27e6e78614e1 appears in seasons: 2023-2024, 2024-2025",
+      "Duplicate team_game game 7d414bce-f5da-11eb-b3fd-a23ac5ab90da appears in seasons: 2021-2022, 2023-2024",
+      "Duplicate team_game game cc7e470e-11a0-11ed-8ef5-8d12cdc95909 appears in seasons: 2022-2023, 2023-2024",
+      "Duplicate team_game game 0cac6e1b-6715-11f0-a9f3-27e6e78614e1 appears in seasons: 2023-2024, 2024-2025",
+      "Duplicate team_game game 0cd1323f-6715-11f0-86f4-27e6e78614e1 appears in seasons: 2023-2024, 2024-2025"
+    ]
   }
 }

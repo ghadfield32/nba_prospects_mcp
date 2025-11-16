@@ -556,7 +556,35 @@ def transform_season(season: str, force: bool = False) -> dict[str, Any]:
         return {"total": 0, "player_game": 0, "team_game": 0, "shot_events": 0}
 
     pbp_files = list(season_pbp_dir.glob("game_id=*.parquet"))
-    game_ids = [f.stem.replace("game_id=", "") for f in pbp_files]
+
+    # Read UUID from data (not filename) to prevent propagating corruption
+    game_ids = []
+    for pbp_file in pbp_files:
+        try:
+            df = pd.read_parquet(pbp_file)
+
+            if len(df) == 0:
+                print(f"    [WARN] Empty file: {pbp_file.name}")
+                continue
+
+            # Extract UUIDs
+            data_game_id = str(df["GAME_ID"].iloc[0])
+            filename_game_id = pbp_file.stem.replace("game_id=", "")
+
+            # VALIDATE: Filename must match data UUID
+            if data_game_id != filename_game_id:
+                print(f"    [ERROR] UUID MISMATCH in {pbp_file.name}:")
+                print(f"            Filename: {filename_game_id}")
+                print(f"            Data:     {data_game_id}")
+                print("            SKIPPING - clean up raw data first!")
+                continue
+
+            # Use validated UUID from data
+            game_ids.append(data_game_id)
+
+        except Exception as e:
+            print(f"    [ERROR] Failed to process {pbp_file.name}: {str(e)}")
+            continue
 
     print(f"  Found {len(game_ids)} games to transform")
 

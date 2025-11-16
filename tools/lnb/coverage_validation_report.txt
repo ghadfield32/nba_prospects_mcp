@@ -1,7 +1,7 @@
 ================================================================================
 LNB PRO A - DATA COVERAGE VALIDATION REPORT
 ================================================================================
-Generated: 2025-11-15T20:55:46.185813
+Generated: 2025-11-16T06:03:34.894235
 
 ================================================================================
 NORMALIZED DATA (BOX SCORES)
@@ -23,6 +23,22 @@ Season          Rows       Games    Players/Teams   Status
 2023-2024       32         16       2               ✅ Valid
 2024-2025       32         16       4               ✅ Valid
 
+--------------------------------------------------------------------------------
+GLOBAL UNIQUE GAME COUNTS (NORMALIZED)
+--------------------------------------------------------------------------------
+player_game: 30 unique games
+  Duplicates (4):
+    • 7d414bce-f5da-11eb-b3fd-a23ac5ab90da in seasons [2021-2022, 2023-2024]
+    • cc7e470e-11a0-11ed-8ef5-8d12cdc95909 in seasons [2022-2023, 2023-2024]
+    • 0cac6e1b-6715-11f0-a9f3-27e6e78614e1 in seasons [2023-2024, 2024-2025]
+    • 0cd1323f-6715-11f0-86f4-27e6e78614e1 in seasons [2023-2024, 2024-2025]
+team_game: 30 unique games
+  Duplicates (4):
+    • 7d414bce-f5da-11eb-b3fd-a23ac5ab90da in seasons [2021-2022, 2023-2024]
+    • cc7e470e-11a0-11ed-8ef5-8d12cdc95909 in seasons [2022-2023, 2023-2024]
+    • 0cac6e1b-6715-11f0-a9f3-27e6e78614e1 in seasons [2023-2024, 2024-2025]
+    • 0cd1323f-6715-11f0-86f4-27e6e78614e1 in seasons [2023-2024, 2024-2025]
+
 ================================================================================
 HISTORICAL DATA (PBP & SHOTS)
 ================================================================================
@@ -41,4 +57,16 @@ Total team-game records: 68
 Total PBP events: 3,336
 Total shots: 973
 
-✅ No data quality issues detected
+Unique games (normalized) by dataset:
+  player_game: 30 unique games
+  team_game: 30 unique games
+
+⚠️ ISSUES FOUND:
+  • Duplicate player_game game 7d414bce-f5da-11eb-b3fd-a23ac5ab90da appears in seasons: 2021-2022, 2023-2024
+  • Duplicate player_game game cc7e470e-11a0-11ed-8ef5-8d12cdc95909 appears in seasons: 2022-2023, 2023-2024
+  • Duplicate player_game game 0cac6e1b-6715-11f0-a9f3-27e6e78614e1 appears in seasons: 2023-2024, 2024-2025
+  • Duplicate player_game game 0cd1323f-6715-11f0-86f4-27e6e78614e1 appears in seasons: 2023-2024, 2024-2025
+  • Duplicate team_game game 7d414bce-f5da-11eb-b3fd-a23ac5ab90da appears in seasons: 2021-2022, 2023-2024
+  • Duplicate team_game game cc7e470e-11a0-11ed-8ef5-8d12cdc95909 appears in seasons: 2022-2023, 2023-2024
+  • Duplicate team_game game 0cac6e1b-6715-11f0-a9f3-27e6e78614e1 appears in seasons: 2023-2024, 2024-2025
+  • Duplicate team_game game 0cd1323f-6715-11f0-86f4-27e6e78614e1 appears in seasons: 2023-2024, 2024-2025

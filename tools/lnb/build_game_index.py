@@ -45,8 +45,6 @@ if sys.platform == "win32":
 
 import pandas as pd
 
-from src.cbb_data.fetchers.lnb import fetch_lnb_schedule
-
 # ==============================================================================
 # CONFIG
 # ==============================================================================
@@ -162,7 +160,11 @@ def build_index_for_season(
     discovered_uuids: dict[str, list[str]] = None,
     uuid_mappings: dict[str, list[str]] = None,
 ) -> pd.DataFrame:
-    """Build game index for a single season
+    """Build game index for a single season WITH game date population
+
+    ENHANCEMENT (2025-11-16): Now fetches fixture metadata from Atrium API
+    to populate game_date, team names, and status. This enables date-based
+    filtering to skip future games during ingestion.
 
     Args:
         season: Season string (e.g., "2024-2025")
@@ -170,7 +172,13 @@ def build_index_for_season(
         uuid_mappings: Dict mapping season -> list of UUIDs from JSON file (preferred)
 
     Returns:
-        DataFrame with game index for this season
+        DataFrame with game index for this season, including populated game_date field
+
+    Changes:
+        - Added API call to fetch fixture metadata
+        - Populates game_date from startTimeLocal field
+        - Populates team names and IDs from competitors data
+        - Better error handling for API failures
     """
     if discovered_uuids is None:
         discovered_uuids = {}
@@ -199,29 +207,71 @@ def build_index_for_season(
 
         print(f"  [INFO] Creating index entries for {len(fixture_uuids)} confirmed games")
 
+        # NEW: Fetch fixture metadata from Atrium API to get game dates and team names
+        # This enables date-based filtering to skip future games
+        fixtures_metadata_map = {}
+        try:
+            # Import helper function
+            from tools.lnb.fetch_fixture_metadata_helper import fetch_fixtures_metadata
+
+            # Get season metadata (competitionId and seasonId) for API call
+            SEASON_METADATA = {
+                "2022-2023": {
+                    "competition_id": "5b7857d9-0cbc-11ed-96a7-458862b58368",
+                    "season_id": "717ba1c6-0cbc-11ed-80ed-4b65c29000f2",
+                },
+                "2023-2024": {
+                    "competition_id": "2cd1ec93-19af-11ee-afb2-8125e5386866",
+                    "season_id": "418ecaae-19af-11ee-a563-47c909cdfb65",
+                },
+                "2024-2025": {
+                    "competition_id": "a2262b45-2fab-11ef-8eb7-99149ebb5652",
+                    "season_id": "cab2f926-2fab-11ef-8b99-e553c4d56b24",
+                },
+                "2025-2026": {
+                    "competition_id": "3f4064bb-51ad-11f0-aaaf-2923c944b404",
+                    "season_id": "df310a05-51ad-11f0-bd89-c735508e1e09",
+                },
+            }
+
+            if season in SEASON_METADATA:
+                print("  [FETCHING] Game dates and team names from Atrium API...")
+                metadata_list = fetch_fixtures_metadata(
+                    competition_id=SEASON_METADATA[season]["competition_id"],
+                    season_id=SEASON_METADATA[season]["season_id"],
+                )
+
+                # Create lookup map by fixture_id
+                for meta in metadata_list:
+                    fixtures_metadata_map[meta["fixture_id"]] = meta
+
+                print(f"  [SUCCESS] Fetched metadata for {len(fixtures_metadata_map)} games")
+            else:
+                print(f"  [WARN] Season {season} not in SEASON_METADATA, game dates will be empty")
+
+        except Exception as e:
+            print(f"  [WARN] Failed to fetch fixture metadata: {e}")
+            print("  [WARN] Continuing with empty game dates (can be populated later)")
+
         # Initialize index DataFrame with proper schema
         index_data = []
 
         # Create one index entry per confirmed UUID
         for game_id in fixture_uuids:
-            # Try to get metadata from schedule if available
-            try:
-                fetch_lnb_schedule(season=season)
-            except Exception:
-                pass  # Schedule not critical, we have UUIDs
+            # Get metadata from API if available, otherwise use defaults
+            meta = fixtures_metadata_map.get(game_id, {})
 
-            # Default metadata (will be populated during ingestion)
             index_row = {
                 "season": season,
                 "competition": "LNB Pro A",
                 "game_id": game_id,
                 "lnb_match_id": game_id,  # Use UUID as match ID
-                "game_date": "",
-                "home_team_id": "",
-                "home_team_name": "",
-                "away_team_id": "",
-                "away_team_name": "",
-                "status": "Completed",
+                "game_date": meta.get("game_date", ""),  # NOW POPULATED!
+                "home_team_id": meta.get("home_team_id", ""),
+                "home_team_name": meta.get("home_team_name", ""),
+                "away_team_id": meta.get("away_team_id", ""),
+                "away_team_name": meta.get("away_team_name", ""),
+                "status": meta.get("status", "Completed"),
                 "has_pbp": False,
                 "has_shots": False,
                 "has_boxscore": False,
@@ -235,6 +285,18 @@ def build_index_for_season(
         index_df = pd.DataFrame(index_data)
 
         print(f"  [SUCCESS] Built index with {len(index_df)} games")
+
+        # Show sample of populated dates for verification
+        if not index_df.empty and "game_date" in index_df.columns:
+            populated_dates = index_df[index_df["game_date"] != ""]["game_date"].nunique()
+            print(
+                f"  [INFO] Populated game_date for {len(index_df[index_df['game_date'] != ''])} games"
+            )
+            if populated_dates > 0:
+                print(
+                    f"  [SAMPLE] Date range: {index_df['game_date'].min()} to {index_df['game_date'].max()}"
+                )
+
         return index_df
 
     except Exception as e:
@@ -371,6 +433,34 @@ def build_complete_index(seasons: list[str], force_rebuild: bool = False) -> pd.
     return final_df
 
 
+def enforce_schema_dtypes(df: pd.DataFrame) -> pd.DataFrame:
+    """Enforce INDEX_SCHEMA dtypes on DataFrame
+
+    This ensures that boolean columns are actually bool type, not float64.
+    Critical for preventing type conversion issues during merge operations.
+
+    Args:
+        df: Game index DataFrame with potentially incorrect dtypes
+
+    Returns:
+        DataFrame with corrected dtypes matching INDEX_SCHEMA
+    """
+    print("[DEBUG] Enforcing schema dtypes...")
+    print(f"  Before: has_pbp={df['has_pbp'].dtype}, has_shots={df['has_shots'].dtype}")
+
+    # Convert float64 boolean flags to actual boolean
+    # float64 with values 0.0/1.0 converts cleanly to False/True
+    bool_columns = ["has_pbp", "has_shots", "has_boxscore"]
+    for col in bool_columns:
+        if col in df.columns:
+            # Convert: 0.0 → False, 1.0 → True, NaN → False
+            df[col] = df[col].fillna(0.0).astype(bool)
+
+    print(f"  After:  has_pbp={df['has_pbp'].dtype}, has_shots={df['has_shots'].dtype}")
+
+    return df
+
+
 def save_index(df: pd.DataFrame, output_path: Path) -> None:
     """Save game index to Parquet file
 
@@ -379,6 +469,9 @@ def save_index(df: pd.DataFrame, output_path: Path) -> None:
         output_path: Path to save file
     """
     try:
+        # Enforce schema dtypes before saving
+        df = enforce_schema_dtypes(df)
+
         output_path.parent.mkdir(parents=True, exist_ok=True)
         df.to_parquet(output_path, index=False)
         print(f"\n[SUCCESS] Saved game index to {output_path}")
