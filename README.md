@@ -148,6 +148,136 @@ df = get_dataset("schedule", filters={"league": "NCAA-MBB", "season": "2025"})
 df = get_dataset("schedule", filters={"league": "WNBA", "season": "2024", "pre_only": False})
 ```
 
+#### LNB Pro A (France) - Detailed Dataset Guide
+
+**🎉 Only International League with 7/7 Datasets Functional**
+
+LNB Pro A (Betclic ÉLITE) is France's top professional basketball league and the **only international league** in this library with complete dataset coverage across all 7 types.
+
+##### Dataset Details
+
+| Dataset | Source | Coverage | Columns | Sample Size |
+|---------|--------|----------|---------|-------------|
+| **schedule** | LNB API | 2024-25 season | 15 | 8 games |
+| **player_season** | LNB API | Current season | 20+ | Individual lookups |
+| **team_season** | LNB API | Current season | 15 | 16 teams |
+| **player_game** | Normalized Parquet | 2021-2025 | 27 | 18+ per game |
+| **team_game** | Normalized Parquet | 2021-2025 | 26 | 2 per game |
+| **pbp** | Historical Parquet | 2025-2026 | 15+ | 3,336 events |
+| **shots** | Historical Parquet | 2025-2026 | 10+ | 973 shots |
+
+##### Sample Queries
+
+```python
+from cbb_data.api.datasets import get_dataset
+from cbb_data.fetchers import lnb
+
+# 1. Get current season schedule
+schedule = get_dataset("schedule", filters={"league": "LNB_PROA", "season": "2024-25"})
+# Or call directly: lnb.fetch_lnb_schedule_v2(season=2025, division=1)
+
+# 2. Get team standings
+standings = get_dataset("team_season", filters={"league": "LNB_PROA", "season": "2024-25"})
+# Returns: TEAM_ID, TEAM_NAME, RANK, WINS, LOSSES, PCT, etc.
+
+# 3. Get player stats for a season (requires player_id)
+player_stats = lnb.fetch_lnb_player_season_v2(season=2025, player_id=5622)
+
+# 4. Get player-game box scores (normalized, 2021-2025)
+player_games = lnb.fetch_lnb_player_game_normalized(season="2021-2022")
+# Returns: GAME_ID, PLAYER_NAME, PTS, FGM, FGA, FG3M, REB, AST, etc. (27 columns)
+
+# 5. Get team-game box scores (normalized, 2021-2025)
+team_games = lnb.fetch_lnb_team_game_normalized(season="2023-2024")
+# Returns: GAME_ID, TEAM_ID, PTS, FGM, FGA, REB, AST, WIN (26 columns)
+
+# 6. Get play-by-play data (2025-2026)
+pbp = lnb.fetch_lnb_pbp_historical(season="2025-2026")
+# Returns: 3,336 events with fixture_uuid, event_id, quarter, clock, team, player, action
+
+# 7. Get shot chart data (2025-2026)
+shots = lnb.fetch_lnb_shots_historical(season="2025-2026")
+# Returns: 973 shots with coordinates, made/missed, shooter, distance, etc.
+```
+
+##### Key Column Details
+
+**player_game** (27 columns):
+- Identifiers: `GAME_ID`, `PLAYER_ID`, `PLAYER_NAME`, `TEAM_ID`
+- Traditional: `MIN`, `PTS`, `FGM`, `FGA`, `FG_PCT`, `FTM`, `FTA`, `FT_PCT`
+- Shooting: `FG2M`, `FG2A`, `FG2_PCT`, `FG3M`, `FG3A`, `FG3_PCT`
+- Box Score: `REB`, `AST`, `STL`, `BLK`, `TOV`, `PF`, `PLUS_MINUS`
+- Metadata: `SEASON`, `LEAGUE`
+
+**team_game** (26 columns):
+- Identifiers: `GAME_ID`, `TEAM_ID`, `OPP_ID`
+- Shooting: `PTS`, `FGM`, `FGA`, `FG_PCT`, `FG2M`, `FG2A`, `FG2_PCT`, `FG3M`, `FG3A`, `FG3_PCT`
+- Free Throws: `FTM`, `FTA`, `FT_PCT`
+- Box Score: `REB`, `AST`, `STL`, `BLK`, `TOV`, `PF`
+- Result: `OPP_PTS`, `WIN`
+- Metadata: `SEASON`, `LEAGUE`
+
+##### Data Sources & Architecture
+
+```
+LNB Pro A Data Pipeline:
+┌─────────────────────────────────────────────────────────────┐
+│ API-Based (Real-time)                                       │
+├─────────────────────────────────────────────────────────────┤
+│ • schedule      → lnb_api.py → LNB Official API             │
+│ • player_season → lnb_api.py → LNB Official API (by player) │
+│ • team_season   → lnb_api.py → LNB Official API (standings) │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ Parquet-Based (Historical)                                  │
+├─────────────────────────────────────────────────────────────┤
+│ • player_game   → data/normalized/lnb/player_game/          │
+│                   (Derived from PBP, 2021-2025)             │
+│ • team_game     → data/normalized/lnb/team_game/            │
+│                   (Aggregated from player stats, 2021-2025) │
+│ • pbp           → data/lnb/historical/2025-2026/            │
+│ • shots         → data/lnb/historical/2025-2026/            │
+└─────────────────────────────────────────────────────────────┘
+```
+
+##### Setup Requirements
+
+**No Additional Setup Required!** All LNB datasets work out-of-the-box:
+
+✅ **API Access**: LNB Official API headers pre-configured in `lnb_headers.json`
+✅ **Normalized Data**: Pre-computed box scores available in parquet format
+✅ **Historical Data**: PBP and shots data included in repository
+
+**Optional: Update Historical Data**
+
+To refresh PBP/shots data or regenerate normalized box scores:
+
+```bash
+# 1. Scrape latest LNB games (requires Playwright)
+python tools/lnb/scrape_lnb_historical.py --season 2025-2026
+
+# 2. Regenerate normalized box scores from PBP
+python scripts/create_normalized_tables.py --league lnb --season 2025-2026
+```
+
+##### Known Limitations
+
+1. **player_season**: Requires `player_id` parameter for individual lookups (no bulk endpoint available)
+2. **Normalized Data**: Limited to 2021-2025 (4 seasons, ~34 games per season)
+3. **PBP/Shots**: Currently only 2025-2026 season available (can be extended with scraper)
+4. **Season Format**: API uses 2-digit years (`"2024-25"`), normalized parquet uses 4-digit (`"2024-2025"`)
+
+##### Testing
+
+Verify all 7 datasets with included test suite:
+
+```bash
+python test_lnb_complete.py
+```
+
+Expected output: `7/7 datasets functional ✅`
+
 ---
 
 ## ✨ Key Features
