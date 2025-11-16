@@ -12323,3 +12323,34 @@ Successfully merged LNB API integration branch into main and updated README with
 **Test**: 2025-2026 season now attempts 2 games (Nov 16), skips 174 future games (Nov 22+)
 
 ---
+
+## 2025-11-16: LNB Incremental + Live-Ready Ingestion
+
+**Enhancement**: Added disk-aware helpers and status-aware filtering to enable incremental ingestion and live game support, eliminating redundant API calls.
+
+**Problem Solved**: 
+- Ingestion reprocessed all games every run because it only checked index flags, not actual files on disk
+- Live games were skipped even when currently in progress
+- No quick visibility into dataset completeness percentages per season
+
+**Changes**:
+- `tools/lnb/bulk_ingest_pbp_shots.py:78`: Updated `is_game_played()` to accept optional `status` parameter, bypassing date checks for live games (LIVE, IN_PROGRESS, STARTED)
+- `tools/lnb/bulk_ingest_pbp_shots.py:139`: Added `has_parquet_for_game()` helper to check disk for existing parquet files
+- `tools/lnb/bulk_ingest_pbp_shots.py:156`: Added `select_games_to_ingest()` to centralize filtering logic (date/status check + disk-aware skip)
+- `tools/lnb/bulk_ingest_pbp_shots.py:389`: Updated `bulk_ingest()` to use `select_games_to_ingest()`, check disk before ingestion, and respect `--force-refetch` flag
+- `tools/lnb/validate_and_monitor_coverage.py:287`: Added `summarize_dataset_completeness()` to show per-season PBP/shots coverage percentages
+- `tools/lnb/validate_and_monitor_coverage.py:456`: Integrated completeness summary into main validation flow
+
+**Impact**:
+- Incremental runs now skip games already on disk (regardless of stale index flags)
+- Live games can be ingested in real-time when status indicates they're in progress
+- `--force-refetch` still bypasses disk checks while respecting date/status filters
+- Validation output now shows exact coverage percentages (e.g., "2022-2023: PBP 306/306 (100.0%), Shots 306/306 (100.0%)")
+
+**Files Modified**: 
+- `tools/lnb/bulk_ingest_pbp_shots.py` (lines 78-104, 139-208, 389-493)
+- `tools/lnb/validate_and_monitor_coverage.py` (lines 287-303, 456)
+
+**Next Steps**: Deploy updated ingestion, rerun to backfill remaining games, verify 100% coverage for 2022-23 and 2023-24 seasons
+
+---

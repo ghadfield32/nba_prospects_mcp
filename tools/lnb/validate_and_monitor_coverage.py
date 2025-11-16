@@ -284,6 +284,25 @@ def analyze_future_games(index_df: pd.DataFrame) -> dict[str, Any]:
     return analysis
 
 
+def summarize_dataset_completeness(disk_data: dict[str, dict[str, int]]) -> None:
+    """Print a compact per-season completeness report for PBP and shots.
+
+    Args:
+        disk_data: Dict with 'pbp' and 'shots' keys mapping season -> file count
+    """
+    print("\nDATASET COMPLETENESS SUMMARY")
+    print("-" * 40)
+    for season, expected in EXPECTED_GAMES.items():
+        pbp = disk_data["pbp"].get(season, 0)
+        shots = disk_data["shots"].get(season, 0)
+        pbp_pct = (pbp / expected * 100) if expected else 0
+        shots_pct = (shots / expected * 100) if expected else 0
+        print(
+            f"{season}: PBP {pbp}/{expected} ({pbp_pct:5.1f}%), "
+            f"Shots {shots}/{expected} ({shots_pct:5.1f}%)"
+        )
+
+
 def check_live_data_readiness() -> dict[str, Any]:
     """Check if system is ready for live data ingestion
 
@@ -434,6 +453,7 @@ def main():
     # Step 2: Validate data on disk
     print("\n[2/7] Validating data on disk...")
     disk_data = validate_data_on_disk()
+    summarize_dataset_completeness(disk_data)
 
     # Step 3: Validate index accuracy
     print("\n[3/7] Validating index accuracy...")
