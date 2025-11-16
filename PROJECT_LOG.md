@@ -11613,3 +11613,30 @@ Successfully merged LNB API integration branch into main and updated README with
 - 🔄 Ready to push to origin/main
 
 ---
+
+## 2025-11-15: LNB Pro A - 7/7 Datasets Complete (ONLY International League)
+
+**Achievement**: Completed LNB Pro A integration - now the ONLY international league with all 7 datasets functional.
+
+**Changes**:
+- Added `fetch_lnb_player_game_normalized()` and `fetch_lnb_team_game_normalized()` wrappers in `lnb.py` to access normalized parquet box scores (2021-2025, 4 seasons, 34 games)
+- Created `get_lnb_normalized_player_game()` and `get_lnb_normalized_team_game()` in `lnb_historical.py` for parquet data access (27 & 26 columns respectively)
+- Updated `sources.py` catalog registration to wire up all 7 datasets: `box_score_source="lnb_api"`, added `fetch_team_game` mapping
+- Fixed `datasets.py` to support both "LNB" and "LNB_PROA" league names across all dataset types
+- Updated `tools/generate_league_coverage_matrix.py` to show LNB with 7/7 "Yes" status
+- Updated README: LNB row shows 7/7 "Yes", updated historical coverage to "2021-present (box scores), 2025-2026 (PBP/shots)", promoted to "16 leagues with comprehensive datasets"
+
+**Datasets Available**:
+1. ✅ `schedule`: 8 games (API-based)
+2. ✅ `player_season`: API functional (requires player_id parameter for individual lookups)
+3. ✅ `team_season`: 16 teams (API-based)
+4. ✅ `player_game`: 18+ player-games per season (normalized parquet, 27 columns, 2021-2025)
+5. ✅ `team_game`: 2+ team-games per file (normalized parquet, 26 columns, 2021-2025)
+6. ✅ `pbp`: 3,336 events (historical parquet, 2025-2026)
+7. ✅ `shots`: 973 shots (historical parquet, 2025-2026)
+
+**Test Results**: All 7/7 datasets verified functional via `test_lnb_complete.py`
+
+**Files Modified**: `lnb.py`, `lnb_historical.py`, `sources.py`, `datasets.py`, `generate_league_coverage_matrix.py`, `README.md`
+
+---

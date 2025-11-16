@@ -91,7 +91,7 @@ This library focuses on **pre-NBA/WNBA prospects** and includes:
 | **ABA** (Adriatic) | PREPRO | Yes | Yes | Yes | Yes | No | Yes | Yes |
 | **BAL** (Africa) | PREPRO | Yes | Yes | Yes | Yes | No | Yes | Yes |
 | **BCL** (Champions) | PREPRO | Yes | Yes | Yes | Yes | No | Yes | Yes |
-| **LNB Pro A** (France) | PREPRO | Yes | Limited | No | Yes | Yes | Yes | Yes |
+| **LNB Pro A** (France) | PREPRO | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
 | **ACB** (Spain) | PREPRO | No | No | No | No | No | Scaffold | Scaffold |
 | **WNBA** | PRO | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
 
@@ -123,7 +123,7 @@ This library focuses on **pre-NBA/WNBA prospects** and includes:
 | **ABA** (Adriatic) | Current season | Post-game | FIBA LiveStats HTML |
 | **BAL** (Africa) | Current season | Post-game | FIBA LiveStats HTML |
 | **BCL** (Champions) | Current season | Post-game | FIBA LiveStats HTML |
-| **LNB Pro A** (France) | 2023-present (partial) | Post-game | LNB Official API |
+| **LNB Pro A** (France) | 2021-present (box scores), 2025-2026 (PBP/shots) | Post-game | LNB Official API |
 | **ACB** (Spain) | Scaffold only | Scaffold only | HTML Scraping (JS-rendered) |
 
 #### Integration Status
@@ -134,8 +134,8 @@ This library focuses on **pre-NBA/WNBA prospects** and includes:
 - Full scope (pre_only=False): All 20 leagues
 
 **Data Availability Notes**:
-- **Full Data**: 15 leagues with comprehensive datasets (NCAA, EuroLeague, G-League, NBL, FIBA Cluster, etc.)
-- **LNB Pro A**: Schedule, player_season, team_season, pbp, and shots fully functional (2025-2026: 8 games, 3,336 PBP events, 973 shots); player_game data limited; team_game not yet available
+- **Full Data**: 16 leagues with comprehensive datasets (NCAA, EuroLeague, G-League, NBL, FIBA Cluster, LNB Pro A, etc.)
+- **LNB Pro A**: First international league with 7/7 datasets functional! Box scores (2021-2025: 4 seasons, 34 games), PBP/shots (2025-2026: 3,336 events, 973 shots), schedule/season stats via API
 - **NZ-NBL**: Scaffold only (requires manual game index creation)
 - **ACB**: Scaffold only (JavaScript-rendered site, requires Selenium/Playwright)
 

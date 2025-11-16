@@ -1665,3 +1665,93 @@ def fetch_lnb_shots_historical(
     except Exception as e:
         logger.error(f"fetch_lnb_shots_historical failed: {e}")
         return pd.DataFrame()
+
+
+def fetch_lnb_player_game_normalized(
+    season: str | None = None,
+    game_ids: list[str] | None = None,
+    **kwargs: Any,
+) -> pd.DataFrame:
+    """Fetch LNB player-game box scores from normalized parquet files
+
+    These are pre-computed box scores derived from PBP data. The data includes
+    all traditional box score statistics (PTS, REB, AST, etc.) calculated from
+    play-by-play events using the create_normalized_tables.py script.
+
+    Note: This is different from fetch_lnb_player_game() which attempts to fetch
+    from the LNB API box-score endpoint (not yet discovered). This function reads
+    from pre-ingested normalized parquet files.
+
+    Args:
+        season: Season in format "2024-2025" or "2025-2026"
+        game_ids: List of game/fixture UUIDs to filter
+        **kwargs: Additional filters (team, player, limit)
+
+    Returns:
+        DataFrame with 27 columns: GAME_ID, PLAYER_ID, PLAYER_NAME, TEAM_ID,
+        MIN, PTS, FGM, FGA, FG_PCT, FG2M, FG2A, FG2_PCT, FG3M, FG3A, FG3_PCT,
+        FTM, FTA, FT_PCT, REB, AST, STL, BLK, TOV, PF, PLUS_MINUS, SEASON, LEAGUE
+
+    Example:
+        >>> player_game = fetch_lnb_player_game_normalized(season="2024-2025")
+        >>> team_stats = fetch_lnb_player_game_normalized(
+        ...     season="2024-2025",
+        ...     team="Paris Basketball"
+        ... )
+    """
+    from ..api.lnb_historical import get_lnb_normalized_player_game
+
+    if season is None:
+        logger.warning(
+            "fetch_lnb_player_game_normalized: season is required, defaulting to 2024-2025"
+        )
+        season = "2024-2025"
+
+    try:
+        return get_lnb_normalized_player_game(season=season, game_ids=game_ids, **kwargs)
+    except Exception as e:
+        logger.error(f"fetch_lnb_player_game_normalized failed: {e}")
+        return pd.DataFrame()
+
+
+def fetch_lnb_team_game_normalized(
+    season: str | None = None,
+    game_ids: list[str] | None = None,
+    **kwargs: Any,
+) -> pd.DataFrame:
+    """Fetch LNB team-game box scores from normalized parquet files
+
+    These are pre-computed team box scores aggregated from player stats derived
+    from PBP data. Each game has 2 rows (home and away teams) with traditional
+    box score statistics and opponent information.
+
+    Args:
+        season: Season in format "2024-2025" or "2025-2026"
+        game_ids: List of game/fixture UUIDs to filter
+        **kwargs: Additional filters (team, limit)
+
+    Returns:
+        DataFrame with 26 columns: GAME_ID, TEAM_ID, PTS, FGM, FGA, FG2M, FG2A,
+        FG3M, FG3A, FTM, FTA, REB, AST, STL, BLK, TOV, PF, FG_PCT, FG2_PCT,
+        FG3_PCT, FT_PCT, SEASON, LEAGUE, OPP_ID, OPP_PTS, WIN
+
+    Example:
+        >>> team_game = fetch_lnb_team_game_normalized(season="2024-2025")
+        >>> team_stats = fetch_lnb_team_game_normalized(
+        ...     season="2024-2025",
+        ...     team="Monaco"
+        ... )
+    """
+    from ..api.lnb_historical import get_lnb_normalized_team_game
+
+    if season is None:
+        logger.warning(
+            "fetch_lnb_team_game_normalized: season is required, defaulting to 2024-2025"
+        )
+        season = "2024-2025"
+
+    try:
+        return get_lnb_normalized_team_game(season=season, game_ids=game_ids, **kwargs)
+    except Exception as e:
+        logger.error(f"fetch_lnb_team_game_normalized failed: {e}")
+        return pd.DataFrame()

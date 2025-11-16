@@ -153,7 +153,7 @@ def get_current_season(league: str) -> str:
         else:  # Jan-Sep
             return f"{year - 1}-{str(year)[-2:]}"  # e.g., "2023-24"
 
-    elif league in ["ACB", "LNB", "BBL", "BSL", "LBA"]:
+    elif league in ["ACB", "LNB", "LNB_PROA", "BBL", "BSL", "LBA"]:
         # European domestic leagues: Oct-May season
         # Oct-Dec → current year
         # Jan-Sep → previous year
@@ -809,7 +809,7 @@ def _fetch_schedule(compiled: dict[str, Any]) -> pd.DataFrame:
 
         df = nbl_official.fetch_nbl_schedule(season=season_str, season_type=season_type)
 
-    elif league == "LNB":
+    elif league in ["LNB", "LNB_PROA"]:
         # LNB Pro A (France) - API-based
         season_str = params.get("Season", "2024-25")
         # Parse season: "2024-25" -> 2025 (second year), or "2025" -> 2025
@@ -1124,7 +1124,7 @@ def _fetch_player_game(compiled: dict[str, Any]) -> pd.DataFrame:
         if post_mask.get("GAME_ID"):
             df = df[df["GAME_ID"].isin(post_mask["GAME_ID"])]
 
-    elif league in ["ACB", "LNB", "BBL", "BSL", "LBA"]:
+    elif league in ["ACB", "LNB", "LNB_PROA", "BBL", "BSL", "LBA"]:
         # European domestic leagues
         if not post_mask.get("GAME_ID"):
             raise ValueError(f"player_game requires game_ids filter for {league}")
@@ -1300,7 +1300,7 @@ def _fetch_play_by_play(compiled: dict[str, Any]) -> pd.DataFrame:
                 pbp = nbl_official.fetch_nbl_pbp(season=season_str, game_id=game_id)
                 frames.append(pbp)
 
-            elif league in ["ACB", "LNB", "BBL", "BSL", "LBA"]:
+            elif league in ["ACB", "LNB", "LNB_PROA", "BBL", "BSL", "LBA"]:
                 # European domestic leagues PBP (mostly unavailable)
                 pbp = domestic_euro.fetch_domestic_euro_play_by_play(league, game_id)
                 frames.append(pbp)
@@ -1495,7 +1495,7 @@ def _fetch_shots(compiled: dict[str, Any]) -> pd.DataFrame:
             except Exception as e:
                 logger.warning(f"Failed to fetch NBL shots for game {game_id}: {e}")
 
-    elif league in ["ACB", "LNB", "BBL", "BSL", "LBA"]:
+    elif league in ["ACB", "LNB", "LNB_PROA", "BBL", "BSL", "LBA"]:
         # European domestic leagues shots (mostly unavailable)
         for game_id in post_mask["GAME_ID"]:
             try:

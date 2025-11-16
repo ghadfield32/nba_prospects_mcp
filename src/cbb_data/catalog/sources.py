@@ -595,24 +595,25 @@ def _register_league_sources() -> None:
         )
     )
 
-    # LNB Pro A (France) - API Integration Complete
+    # LNB Pro A (France) - Full Integration Complete (7/7 datasets)
     register_league_source(
         LeagueSourceConfig(
             league="LNB_PROA",
             player_season_source="lnb_api",  # LNB Official API (via lnb_api.py client)
             team_season_source="lnb_api",  # LNB Official API
             schedule_source="lnb_api",  # LNB Official API
-            box_score_source="html",  # Boxscore endpoint not yet discovered
+            box_score_source="lnb_api",  # Normalized parquet files (via lnb_historical.py)
             pbp_source="lnb_api",  # Historical parquet files (via lnb_historical.py)
             shots_source="lnb_api",  # Historical parquet files (via lnb_historical.py)
             fetch_schedule=lnb.fetch_lnb_schedule_v2,  # ✅ API-based schedule
             fetch_player_season=lnb.fetch_lnb_player_season_v2,  # ✅ API-based player stats
             fetch_team_season=lnb.fetch_lnb_team_season_v2,  # ✅ API-based team standings
-            fetch_player_game=lnb.fetch_lnb_player_game,  # Placeholder (boxscore endpoint TODO)
+            fetch_player_game=lnb.fetch_lnb_player_game_normalized,  # ✅ Normalized parquet (27 cols, 4 seasons)
+            fetch_team_game=lnb.fetch_lnb_team_game_normalized,  # ✅ Normalized parquet (26 cols, 4 seasons)
             fetch_pbp=lnb.fetch_lnb_pbp_historical,  # ✅ Historical PBP data (2025-2026: 3,336 events)
             fetch_shots=lnb.fetch_lnb_shots_historical,  # ✅ Historical shots data (2025-2026: 973 shots)
             fallback_source="html",  # Old HTML scrapers as backup
-            notes="Phase 4-5 COMPLETE: LNB Official API integration. Schedule, player_season, team_season, pbp, shots functional (2025-2026 season). Boxscore endpoint discovery pending.",
+            notes="COMPLETE: LNB Pro A is the only international league with 7/7 datasets functional. API-based schedule/season stats + normalized parquet box scores (2021-2025) + historical PBP/shots (2025-2026).",
         )
     )
 

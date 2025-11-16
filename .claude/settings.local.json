@@ -130,7 +130,10 @@
       "Bash(Select-String -Pattern \"Scraping|Found|UUID|Saved|ERROR|Total\" -CaseSensitive:$false)",
       "Bash(.venvScriptspython append_stress_test_to_log.py)",
       "Bash(.gitignore)",
-      "Bash(Select-Object -First 30)"
+      "Bash(Select-Object -First 30)",
+      "Bash(.venvScriptspython -m pytest tests/test_lnb_health.py -v --tb=short)",
+      "Bash(league_coverage_output.txt)",
+      "Bash(.venvScriptspython tools/generate_league_coverage_matrix.py)"
     ],
     "deny": [],
     "ask": []

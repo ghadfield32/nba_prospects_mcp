@@ -77,12 +77,17 @@ def get_dataset_status(config, dataset_type: str) -> str:
 
     # Special cases based on notes
     if config.league == "LNB_PROA":
-        if dataset_type in ["schedule", "player_season", "team_season", "pbp", "shots"]:
+        # LNB Pro A now has 7/7 datasets fully functional
+        if dataset_type in [
+            "schedule",
+            "player_season",
+            "team_season",
+            "player_game",
+            "team_game",
+            "pbp",
+            "shots",
+        ]:
             return "Yes"
-        elif dataset_type in ["player_game"]:
-            return "Limited"
-        elif dataset_type in ["team_game"]:
-            return "No"
         return "No"
     elif config.league in ["NBL"]:
         if dataset_type in [
@@ -148,7 +153,7 @@ def get_historical_coverage(league: str, config) -> str:
         "BCL": "Current season",
         "ABA": "Current season",
         "ACB": "Scaffold only",
-        "LNB_PROA": "2023-present (partial)",
+        "LNB_PROA": "2021-present (box scores), 2025-2026 (PBP/shots)",
     }
     return coverage_map.get(league, "Unknown")
 

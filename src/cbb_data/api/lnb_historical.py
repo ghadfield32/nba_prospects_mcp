@@ -400,6 +400,204 @@ def get_lnb_historical_shots(
 
 
 # ==============================================================================
+# Normalized Box Score Functions - Game-Level Stats
+# ==============================================================================
+
+
+def get_lnb_normalized_player_game(
+    season: str,
+    game_ids: list[str] | None = None,
+    team: str | list[str] | None = None,
+    player: str | list[str] | None = None,
+    limit: int | None = None,
+) -> pd.DataFrame:
+    """Get normalized LNB player-game box scores from parquet files
+
+    These are pre-computed box scores derived from PBP data using the
+    create_normalized_tables.py script. The data is stored in partitioned
+    parquet format for efficient querying.
+
+    Args:
+        season: Season string (e.g., "2024-2025")
+        game_ids: Game UUID or list of UUIDs to filter (optional)
+        team: Team name or list of teams to filter (optional)
+        player: Player name or list of players to filter (optional)
+        limit: Maximum number of rows to return (optional)
+
+    Returns:
+        DataFrame with columns:
+        - GAME_ID: Game identifier (fixture UUID)
+        - PLAYER_ID: Player identifier
+        - PLAYER_NAME: Player name
+        - TEAM_ID: Team identifier
+        - MIN: Minutes played
+        - PTS, FGM, FGA, FG_PCT: Points and field goal stats
+        - FG2M, FG2A, FG2_PCT: 2-point stats
+        - FG3M, FG3A, FG3_PCT: 3-point stats
+        - FTM, FTA, FT_PCT: Free throw stats
+        - REB, AST, STL, BLK, TOV, PF: Traditional box score stats
+        - PLUS_MINUS: Plus/minus rating
+        - SEASON, LEAGUE: Metadata
+
+    Examples:
+        >>> # Get all player-game data for a season
+        >>> player_game = get_lnb_normalized_player_game("2024-2025")
+
+        >>> # Get specific game
+        >>> game_stats = get_lnb_normalized_player_game(
+        ...     "2024-2025",
+        ...     game_ids=["abc-123-def-456"]
+        ... )
+
+        >>> # Get player's games
+        >>> player_stats = get_lnb_normalized_player_game(
+        ...     "2024-2025",
+        ...     player="John Doe"
+        ... )
+    """
+    # Construct path to normalized data
+    season_dir = Path(f"data/normalized/lnb/player_game/season={season}")
+
+    if not season_dir.exists():
+        logger.warning(
+            f"No normalized player_game data found for LNB {season}. "
+            f"Directory does not exist: {season_dir}\n"
+            f"Run: python tools/lnb/create_normalized_tables.py --season {season}"
+        )
+        return pd.DataFrame()
+
+    # Read all parquet files for season
+    parquet_files = list(season_dir.glob("*.parquet"))
+    if not parquet_files:
+        logger.warning(f"No parquet files found in {season_dir}")
+        return pd.DataFrame()
+
+    try:
+        df = pd.concat([pd.read_parquet(f) for f in parquet_files], ignore_index=True)
+    except Exception as e:
+        logger.error(f"Error reading normalized player_game data: {e}")
+        return pd.DataFrame()
+
+    # Filter by game IDs if specified
+    if game_ids:
+        df = df[df["GAME_ID"].isin(game_ids)]
+
+    # Filter by team if specified
+    if team:
+        teams = [team] if isinstance(team, str) else team
+        df = df[df["TEAM_ID"].isin(teams)]
+
+    # Filter by player if specified
+    if player:
+        players = [player] if isinstance(player, str) else player
+        df = df[df["PLAYER_NAME"].isin(players)]
+
+    # Apply limit if specified
+    if limit:
+        df = df.head(limit)
+
+    logger.info(
+        f"Retrieved {len(df)} player-game records for LNB {season} "
+        f"(games={len(df['GAME_ID'].unique()) if len(df) > 0 else 0}, "
+        f"players={len(df['PLAYER_ID'].unique()) if len(df) > 0 else 0})"
+    )
+
+    return df
+
+
+def get_lnb_normalized_team_game(
+    season: str,
+    game_ids: list[str] | None = None,
+    team: str | list[str] | None = None,
+    limit: int | None = None,
+) -> pd.DataFrame:
+    """Get normalized LNB team-game box scores from parquet files
+
+    These are pre-computed team box scores aggregated from player stats
+    derived from PBP data. Each game has 2 rows (home and away teams).
+
+    Args:
+        season: Season string (e.g., "2024-2025")
+        game_ids: Game UUID or list of UUIDs to filter (optional)
+        team: Team name or list of teams to filter (optional)
+        limit: Maximum number of rows to return (optional)
+
+    Returns:
+        DataFrame with columns:
+        - GAME_ID: Game identifier (fixture UUID)
+        - TEAM_ID: Team identifier
+        - PTS, FGM, FGA: Points and field goal stats
+        - FG2M, FG2A: 2-point stats
+        - FG3M, FG3A: 3-point stats
+        - FTM, FTA: Free throw stats
+        - REB, AST, STL, BLK, TOV, PF: Traditional box score stats
+        - FG_PCT, FG2_PCT, FG3_PCT, FT_PCT: Shooting percentages
+        - SEASON, LEAGUE: Metadata
+        - OPP_ID, OPP_PTS: Opponent info
+        - WIN: Boolean win/loss indicator
+
+    Examples:
+        >>> # Get all team-game data for a season
+        >>> team_game = get_lnb_normalized_team_game("2024-2025")
+
+        >>> # Get specific game
+        >>> game_stats = get_lnb_normalized_team_game(
+        ...     "2024-2025",
+        ...     game_ids=["abc-123-def-456"]
+        ... )
+
+        >>> # Get team's games
+        >>> team_stats = get_lnb_normalized_team_game(
+        ...     "2024-2025",
+        ...     team="Paris Basketball"
+        ... )
+    """
+    # Construct path to normalized data
+    season_dir = Path(f"data/normalized/lnb/team_game/season={season}")
+
+    if not season_dir.exists():
+        logger.warning(
+            f"No normalized team_game data found for LNB {season}. "
+            f"Directory does not exist: {season_dir}\n"
+            f"Run: python tools/lnb/create_normalized_tables.py --season {season}"
+        )
+        return pd.DataFrame()
+
+    # Read all parquet files for season
+    parquet_files = list(season_dir.glob("*.parquet"))
+    if not parquet_files:
+        logger.warning(f"No parquet files found in {season_dir}")
+        return pd.DataFrame()
+
+    try:
+        df = pd.concat([pd.read_parquet(f) for f in parquet_files], ignore_index=True)
+    except Exception as e:
+        logger.error(f"Error reading normalized team_game data: {e}")
+        return pd.DataFrame()
+
+    # Filter by game IDs if specified
+    if game_ids:
+        df = df[df["GAME_ID"].isin(game_ids)]
+
+    # Filter by team if specified
+    if team:
+        teams = [team] if isinstance(team, str) else team
+        df = df[df["TEAM_ID"].isin(teams)]
+
+    # Apply limit if specified
+    if limit:
+        df = df.head(limit)
+
+    logger.info(
+        f"Retrieved {len(df)} team-game records for LNB {season} "
+        f"(games={len(df['GAME_ID'].unique()) if len(df) > 0 else 0}, "
+        f"teams={len(df['TEAM_ID'].unique()) if len(df) > 0 else 0})"
+    )
+
+    return df
+
+
+# ==============================================================================
 # Aggregation Functions - Season Stats
 # ==============================================================================
 
