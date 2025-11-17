@@ -5,12 +5,26 @@ This script tests the FIBA shot chart implementation using Playwright browser
 rendering to bypass HTTP 403 blocking. It verifies that shot data can be
 successfully retrieved for all 4 FIBA cluster leagues.
 
+NEW DEBUG FEATURES:
+    --debug-html: Save raw HTML when parsing fails (for inspecting page structure)
+    --capture-responses: Capture network JSON responses (for finding shot data endpoints)
+    --debug-dir: Custom directory for debug artifacts
+
 Usage:
     # Test all leagues
     python tools/fiba/test_browser_scraping.py
 
     # Test specific league
     python tools/fiba/test_browser_scraping.py --league LKL
+
+    # Test with HTML debug (saves HTML when shots not found)
+    python tools/fiba/test_browser_scraping.py --league LKL --debug-html
+
+    # Test with network capture (saves XHR/JSON responses)
+    python tools/fiba/test_browser_scraping.py --league LKL --capture-responses
+
+    # Full debug mode
+    python tools/fiba/test_browser_scraping.py --league LKL --debug-html --capture-responses
 
     # Dry run (check setup only)
     python tools/fiba/test_browser_scraping.py --dry-run
@@ -28,6 +42,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parents[2] / "src"))
 
 from cbb_data.fetchers import lkl, aba, bal, bcl
+from cbb_data.fetchers.browser_scraper import BrowserScraper
 
 
 def check_playwright_installed() -> bool:
@@ -60,6 +75,9 @@ def test_league_shots(
     fetch_function,
     season: str = "2023-24",
     max_games: int = 1,
+    debug_html: bool = False,
+    capture_responses: bool = False,
+    debug_dir: str = "data/raw/fiba/debug",
 ) -> dict:
     """Test shot chart fetching for a single league
 
@@ -68,6 +86,9 @@ def test_league_shots(
         fetch_function: League's fetch_shot_chart function
         season: Season to test
         max_games: Maximum number of games to test (for speed)
+        debug_html: Enable HTML debug dumps
+        capture_responses: Enable network response capturing
+        debug_dir: Base directory for debug artifacts
 
     Returns:
         dict with test results
@@ -77,10 +98,7 @@ def test_league_shots(
     print(f"{'='*80}")
 
     try:
-        # Fetch shots with browser rendering
-        print(f"Fetching shot chart (use_browser=True, max {max_games} game)...")
-
-        # Get schedule first to limit games
+        # Get schedule first to see what games are available
         if league_name == "LKL":
             schedule = lkl.fetch_schedule(season)
         elif league_name == "ABA":
@@ -101,18 +119,52 @@ def test_league_shots(
         total_games = len(schedule)
         print(f"  Schedule has {total_games} games, testing first {max_games}")
 
-        # Test with limited games for speed
-        # We'll manually limit by modifying what fetch_shot_chart sees
-        # For now, just fetch all and see what happens
-        shots_df = fetch_function(season, force_refresh=True, use_browser=True)
+        # Get first N game IDs for testing
+        test_game_ids = schedule["GAME_ID"].head(max_games).tolist()
+
+        # Network response capture (if enabled)
+        if capture_responses and test_game_ids:
+            print(f"\n  🔍 Network Response Capture Mode Enabled")
+            print(f"  Testing game: {test_game_ids[0]}")
+
+            debug_path = Path(debug_dir) / league_name / season / f"{test_game_ids[0]}_responses"
+
+            with BrowserScraper(headless=True, timeout=30000) as scraper:
+                url = f"https://fibalivestats.dcd.shared.geniussports.com/u/{league_name}/{test_game_ids[0]}/shotchart.html"
+                html, responses = scraper.get_rendered_html_with_responses(
+                    url,
+                    wait_time=3.0,
+                    response_filter_keywords=("shots", "shotchart", ".json", "data"),
+                    debug_dir=debug_path,
+                )
+
+                json_responses = [r for r in responses if r["content_type"] and "json" in r["content_type"]]
+                print(f"  📦 Captured {len(responses)} total responses, {len(json_responses)} JSON-like")
+
+                if json_responses:
+                    print(f"\n  JSON Responses Found:")
+                    for i, resp in enumerate(json_responses[:3]):  # Show first 3
+                        url_short = resp["url"][-60:] if len(resp["url"]) > 60 else resp["url"]
+                        size = len(resp["text"]) if resp["text"] else 0
+                        print(f"    {i+1}. {url_short}")
+                        print(f"       Status: {resp['status']}, Size: {size} bytes")
+
+        # Fetch shots with browser rendering (standard test)
+        print(f"\n  Fetching shot chart (use_browser=True, debug_html={debug_html})...")
+
+        # Call fetch with appropriate debug flags
+        shots_df = fetch_function(season, force_refresh=True, use_browser=True, debug_html=debug_html)
 
         if shots_df.empty:
+            print(f"\n  ❌ No shots data retrieved")
+            if debug_html:
+                print(f"  💾 HTML debug files saved to: {debug_dir}/{league_name}/{season}/")
             return {
                 "league": league_name,
                 "success": False,
                 "error": "No shots data retrieved",
                 "shots": 0,
-                "games_attempted": total_games,
+                "games_attempted": len(test_game_ids),
             }
 
         # Analyze results
@@ -130,7 +182,9 @@ def test_league_shots(
         # Show sample data
         if total_shots > 0:
             print(f"\nSample data (first 3 shots):")
-            print(shots_df.head(3)[["GAME_ID", "PLAYER_NAME", "SHOT_TYPE", "SHOT_MADE", "SHOT_X", "SHOT_Y"]].to_string())
+            sample_cols = ["GAME_ID", "PLAYER_NAME", "SHOT_TYPE", "SHOT_MADE", "SHOT_X", "SHOT_Y"]
+            available_cols = [c for c in sample_cols if c in shots_df.columns]
+            print(shots_df.head(3)[available_cols].to_string())
 
         return {
             "league": league_name,
@@ -175,6 +229,21 @@ def main():
         help="Maximum games to test per league (default: 1 for speed)"
     )
     parser.add_argument(
+        "--debug-html",
+        action="store_true",
+        help="Dump raw HTML for games with no parsed shots (for debugging page structure)"
+    )
+    parser.add_argument(
+        "--capture-responses",
+        action="store_true",
+        help="Capture network responses (shots/shotchart JSON) via Playwright (for finding data endpoints)"
+    )
+    parser.add_argument(
+        "--debug-dir",
+        default="data/raw/fiba/debug",
+        help="Base directory for debug artifacts (default: data/raw/fiba/debug)"
+    )
+    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Only check if Playwright is installed, don't fetch data"
@@ -197,6 +266,17 @@ def main():
         print("\n✅ Dry run complete - Playwright is ready")
         return 0
 
+    # Show debug mode status
+    if args.debug_html or args.capture_responses:
+        print("\n🔧 DEBUG MODE ENABLED:")
+        if args.debug_html:
+            print("  ✓ HTML debug dumps: ON")
+            print(f"    → Saves to: {args.debug_dir}/<LEAGUE>/<SEASON>/<GAME_ID>/")
+        if args.capture_responses:
+            print("  ✓ Network response capture: ON")
+            print(f"    → Saves to: {args.debug_dir}/<LEAGUE>/<SEASON>/<GAME_ID>_responses/")
+        print()
+
     # Define leagues to test
     leagues = {
         "LKL": lkl.fetch_shot_chart,
@@ -216,6 +296,9 @@ def main():
             fetch_fn,
             season=args.season,
             max_games=args.max_games,
+            debug_html=args.debug_html,
+            capture_responses=args.capture_responses,
+            debug_dir=args.debug_dir,
         )
         results.append(result)
 
@@ -235,6 +318,14 @@ def main():
         print(f"\n❌ Failed: {len(failed)}/{len(results)} leagues")
         for r in failed:
             print(f"  - {r['league']}: {r.get('error', 'Unknown error')}")
+
+        if args.debug_html or args.capture_responses:
+            print(f"\n💡 DEBUG ARTIFACTS SAVED TO: {args.debug_dir}/")
+            print("   Inspect HTML and JSON responses to understand why scraping failed.")
+            print("   Look for:")
+            print("     • shotData, shots, or shotChart variables in JavaScript")
+            print("     • Network responses containing shot coordinates (x,y or LOC_X,LOC_Y)")
+            print("     • JSON endpoints returning shot arrays")
 
     # Return code
     return 0 if len(failed) == 0 else 1

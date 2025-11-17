@@ -791,6 +791,90 @@ def scrape_fiba_play_by_play(
 
 
 # ==============================================================================
+# Shot Chart Debug Infrastructure
+# ==============================================================================
+
+
+def save_fiba_html_debug(
+    league_code: str,
+    season: str,
+    game_id: str,
+    html_sc: str,
+    html_shotchart: str,
+    html_shots: str,
+    root_dir: Path | None = None,
+) -> Path:
+    """Save raw HTML from FIBA LiveStats pages for debugging
+
+    This is debug-only infrastructure to inspect what FIBA actually returns
+    for sc.html / shotchart.html / shots.html when parsing fails.
+
+    The directory structure is:
+        data/raw/fiba/debug/<LEAGUE>/<season>/<GAME_ID>/{sc,shotchart,shots}.html
+
+    Args:
+        league_code: FIBA league code (e.g., "LKL", "ABA")
+        season: Season string (e.g., "2023-24")
+        game_id: FIBA game ID
+        html_sc: HTML content from sc.html endpoint
+        html_shotchart: HTML content from shotchart.html endpoint
+        html_shots: HTML content from shots.html endpoint
+        root_dir: Optional custom root directory (default: data/raw/fiba/debug)
+
+    Returns:
+        Path to directory where files were written
+
+    Example:
+        >>> save_fiba_html_debug("LKL", "2023-24", "301234", html1, html2, html3)
+        PosixPath('data/raw/fiba/debug/LKL/2023-24/301234')
+    """
+    if root_dir is None:
+        root_dir = Path("data") / "raw" / "fiba" / "debug"
+
+    out_dir = root_dir / league_code / season / str(game_id)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    try:
+        (out_dir / "sc.html").write_text(html_sc, encoding="utf-8")
+        (out_dir / "shotchart.html").write_text(html_shotchart, encoding="utf-8")
+        (out_dir / "shots.html").write_text(html_shots, encoding="utf-8")
+        logger.warning(
+            "Saved FIBA HTML debug files for %s %s game %s at %s",
+            league_code,
+            season,
+            game_id,
+            out_dir,
+        )
+    except Exception as exc:
+        logger.error(
+            "Failed to write FIBA HTML debug files for %s %s game %s: %s",
+            league_code,
+            season,
+            game_id,
+            exc,
+        )
+
+    # Also log a short snippet for quick inspection in logs
+    logger.debug(
+        "FIBA HTML snippets for %s %s game %s:\n"
+        "  sc.html      (len=%d) %r\n"
+        "  shotchart.html (len=%d) %r\n"
+        "  shots.html   (len=%d) %r",
+        league_code,
+        season,
+        game_id,
+        len(html_sc),
+        html_sc[:200],
+        len(html_shotchart),
+        html_shotchart[:200],
+        len(html_shots),
+        html_shots[:200],
+    )
+
+    return out_dir
+
+
+# ==============================================================================
 # Shot Chart Scraping
 # ==============================================================================
 
@@ -801,14 +885,14 @@ def scrape_fiba_shot_chart(
     league: str | None = None,
     season: str | None = None,
     use_browser: bool = False,
+    debug_html: bool = False,
 ) -> pd.DataFrame:
     """Scrape shot chart data from FIBA LiveStats
 
     Attempts multiple methods to retrieve shot chart data:
-    1. Try HTML endpoint (sc.html, shotchart.html, shots.html)
+    1. Try HTML endpoint via HTTP (sc.html, shotchart.html, shots.html)
     2. Try JSON API endpoint
-    3. Check if shot data embedded in PBP page
-    4. If use_browser=True, use Playwright to render JavaScript
+    3. If use_browser=True, use Playwright to render JavaScript
 
     Args:
         league_code: FIBA league code (e.g., "LKL", "ABA", "BAL", "BCL")
@@ -816,6 +900,7 @@ def scrape_fiba_shot_chart(
         league: League name for standardization (e.g., "LKL")
         season: Season string for standardization (e.g., "2023-24")
         use_browser: If True, use Playwright browser rendering (slower but works for JS pages)
+        debug_html: If True, dump raw HTML to data/raw/fiba/debug for inspection when no shots found
 
     Returns:
         DataFrame with shot chart data
@@ -842,13 +927,16 @@ def scrape_fiba_shot_chart(
         >>> # Try simple HTTP first
         >>> shots = scrape_fiba_shot_chart("LKL", "301234", "LKL", "2023-24")
         >>>
-        >>> # If blocked, use browser rendering
-        >>> shots = scrape_fiba_shot_chart("LKL", "301234", "LKL", "2023-24", use_browser=True)
+        >>> # If blocked, use browser rendering with debug
+        >>> shots = scrape_fiba_shot_chart("LKL", "301234", "LKL", "2023-24",
+        ...                                 use_browser=True, debug_html=True)
 
     Note:
         FIBA LiveStats may block simple HTTP requests (403 Forbidden) due to bot protection.
         In such cases, use use_browser=True to render pages with Playwright.
         This requires: uv pip install playwright && playwright install chromium
+
+        Use debug_html=True to save HTML files when parsing fails - helpful for debugging.
     """
     if not HTML_PARSING_AVAILABLE:
         logger.warning("HTML parsing dependencies not available")
@@ -858,19 +946,24 @@ def scrape_fiba_shot_chart(
 
     shots = []
 
-    # Method 1: Try HTML endpoints
+    # Storage for debug HTML (captured when use_browser=True)
+    html_sc = ""
+    html_shotchart = ""
+    html_shots = ""
+
+    # Method 1: Try HTML endpoints via HTTP (simple requests)
     if not use_browser:
-        for suffix in ["sc.html", "shotchart.html", "shots.html"]:
+        for suffix in ["sc", "shotchart", "shots"]:
             try:
-                html = _fetch_fiba_html_page(league_code, game_id, suffix.replace(".html", ""))
+                html = _fetch_fiba_html(league_code, game_id, suffix)
                 if html:
                     shots_from_html = _parse_fiba_shot_chart_html(html, league_code, game_id)
                     if not shots_from_html.empty:
-                        logger.info(f"Found shots in {suffix}: {len(shots_from_html)} shots")
+                        logger.info(f"Found shots in {suffix}.html: {len(shots_from_html)} shots")
                         shots.extend(shots_from_html.to_dict("records"))
                         break
             except Exception as e:
-                logger.debug(f"Failed to fetch {suffix}: {e}")
+                logger.debug(f"Failed to fetch {suffix}.html via HTTP: {e}")
                 continue
 
     # Method 2: Try JSON API endpoint
@@ -885,37 +978,43 @@ def scrape_fiba_shot_chart(
         except Exception as e:
             logger.debug(f"Failed to fetch JSON API: {e}")
 
-    # Method 3: Check if embedded in PBP page
-    if not shots and not use_browser:
-        try:
-            html = _fetch_fiba_html_page(league_code, game_id, "pbp")
-            if html and ("shotChart" in html or "shot_chart" in html or "LOC_X" in html):
-                shots_from_pbp = _extract_shots_from_pbp_html(html, league_code, game_id)
-                if not shots_from_pbp.empty:
-                    logger.info(f"Found embedded shots in PBP: {len(shots_from_pbp)} shots")
-                    shots.extend(shots_from_pbp.to_dict("records"))
-        except Exception as e:
-            logger.debug(f"Failed to extract embedded shots: {e}")
-
-    # Method 4: Use browser rendering (fallback for JS-required pages)
-    if not shots and use_browser:
+    # Method 3: Use browser rendering (for JS-required pages)
+    if use_browser:
         try:
             from .browser_scraper import BrowserScraper
 
             with BrowserScraper(headless=True, timeout=30000) as scraper:
-                for suffix in ["sc.html", "shotchart.html", "shots.html"]:
+                # Fetch all three pages to maximize debug info
+                for suffix, storage_var in [
+                    ("sc", "html_sc"),
+                    ("shotchart", "html_shotchart"),
+                    ("shots", "html_shots"),
+                ]:
                     try:
-                        url = f"{FIBA_BASE_URL}/u/{league_code}/{game_id}/{suffix}"
-                        html = scraper.get_rendered_html(url)
+                        url = f"{FIBA_BASE_URL}/u/{league_code}/{game_id}/{suffix}.html"
+                        logger.debug(f"Fetching {url} via browser...")
+                        html = scraper.get_rendered_html(url, wait_time=3.0)
+
+                        # Store for debug
+                        if suffix == "sc":
+                            html_sc = html
+                        elif suffix == "shotchart":
+                            html_shotchart = html
+                        elif suffix == "shots":
+                            html_shots = html
+
+                        logger.debug(f"  Retrieved {len(html)} chars from {suffix}.html")
+
                         if html:
                             shots_from_browser = _parse_fiba_shot_chart_html(html, league_code, game_id)
                             if not shots_from_browser.empty:
-                                logger.info(f"Found shots via browser ({suffix}): {len(shots_from_browser)} shots")
+                                logger.info(f"Found shots via browser ({suffix}.html): {len(shots_from_browser)} shots")
                                 shots.extend(shots_from_browser.to_dict("records"))
-                                break
+                                # Don't break - keep fetching others for debug
                     except Exception as e:
-                        logger.debug(f"Browser scraping failed for {suffix}: {e}")
+                        logger.debug(f"Browser scraping failed for {suffix}.html: {e}")
                         continue
+
         except ImportError:
             logger.warning(
                 "Browser scraping requested but Playwright not installed. "
@@ -927,6 +1026,17 @@ def scrape_fiba_shot_chart(
     # Convert to DataFrame
     if not shots:
         logger.warning(f"No shot chart data found for {league_code} game {game_id}")
+
+        # Save debug HTML if requested and we have HTML from browser
+        if debug_html and season and use_browser and (html_sc or html_shotchart or html_shots):
+            save_fiba_html_debug(
+                league_code=league_code,
+                season=season,
+                game_id=game_id,
+                html_sc=html_sc or "(not fetched)",
+                html_shotchart=html_shotchart or "(not fetched)",
+                html_shots=html_shots or "(not fetched)",
+            )
         return pd.DataFrame(
             columns=[
                 "GAME_ID",

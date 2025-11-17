@@ -375,6 +375,7 @@ def fetch_shot_chart(
     season: str = "2023-24",
     force_refresh: bool = False,
     use_browser: bool = False,
+    debug_html: bool = False,
 ) -> pd.DataFrame:
     """Fetch LKL shot chart data for a season
 
@@ -385,6 +386,7 @@ def fetch_shot_chart(
         season: Season string (e.g., "2023-24")
         force_refresh: If True, ignore cache and re-scrape all games
         use_browser: If True, use Playwright for JavaScript-rendered pages (slower but works when HTTP blocked)
+        debug_html: If True, save HTML debug files when no shots found (for debugging)
 
     Returns:
         DataFrame with shot data
@@ -402,12 +404,13 @@ def fetch_shot_chart(
         >>> shots = fetch_shot_chart("2023-24")
         >>> made_threes = shots[(shots['SHOT_TYPE'] == '3PT') & (shots['SHOT_MADE'] == True)]
         >>>
-        >>> # If HTTP blocked, use browser rendering
-        >>> shots = fetch_shot_chart("2023-24", use_browser=True)
+        >>> # If HTTP blocked, use browser rendering with debug
+        >>> shots = fetch_shot_chart("2023-24", use_browser=True, debug_html=True)
 
     Note:
         FIBA LiveStats may block HTTP requests. If you get empty results,
         try use_browser=True (requires: uv pip install playwright && playwright install chromium)
+        Use debug_html=True to save HTML files for inspection when scraping fails.
     """
     logger.info(f"Fetching {LEAGUE} shot chart for season {season}")
 
@@ -434,6 +437,7 @@ def fetch_shot_chart(
                 league=LEAGUE,
                 season=season,
                 use_browser=use_browser,
+                debug_html=debug_html,
             )
 
             if not shots.empty:
