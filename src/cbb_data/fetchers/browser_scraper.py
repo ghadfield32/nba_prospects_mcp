@@ -218,6 +218,165 @@ class BrowserScraper:
             logger.error(f"Failed to fetch rendered HTML from {url}: {e}")
             raise
 
+    def get_rendered_html_with_responses(
+        self,
+        url: str,
+        wait_for: str | None = None,
+        wait_time: float = 2.0,
+        response_filter_keywords: tuple[str, ...] = ("shots", "shotchart", ".json"),
+        debug_dir: Any = None,
+    ) -> tuple[str, list[dict]]:
+        """Get fully-rendered HTML and capture network responses for debugging
+
+        This is a debug-only method that captures both the page HTML and all network
+        responses matching filter keywords. Useful for debugging FIBA LiveStats where
+        shot data may come from XHR/JSON responses rather than embedded in HTML.
+
+        Args:
+            url: URL to fetch
+            wait_for: CSS selector to wait for (optional)
+            wait_time: Additional time to wait after page load in seconds
+            response_filter_keywords: Only capture responses whose URL contains these keywords
+            debug_dir: If provided (Path object), write captured responses to this directory
+
+        Returns:
+            Tuple of (html_content, captured_responses)
+            where captured_responses is a list of dicts with keys:
+                - url: Response URL
+                - status: HTTP status code
+                - content_type: Content-Type header
+                - text: Response body (if successfully retrieved)
+
+        Raises:
+            RuntimeError: If Playwright is not installed
+            TimeoutError: If page load exceeds timeout
+
+        Example:
+            >>> from pathlib import Path
+            >>> scraper = BrowserScraper()
+            >>> debug_dir = Path("data/raw/fiba/debug/LKL/2023-24/301234_responses")
+            >>> html, responses = scraper.get_rendered_html_with_responses(
+            ...     "https://fibalivestats.dcd.shared.geniussports.com/u/LKL/301234/shotchart.html",
+            ...     debug_dir=debug_dir
+            ... )
+            >>> print(f"Captured {len(responses)} network responses")
+        """
+        from pathlib import Path
+
+        self._ensure_browser()
+
+        logger.info(f"Fetching JavaScript-rendered page with network capture: {url}")
+
+        captured: list[dict] = []
+
+        def handle_response(response: Any) -> None:
+            """Capture relevant network responses"""
+            try:
+                resp_url = response.url
+                # Filter by keywords
+                if not any(keyword in resp_url for keyword in response_filter_keywords):
+                    return
+
+                status = response.status
+                headers = response.headers
+                content_type = headers.get("content-type", "")
+
+                # Try to get response body (best effort)
+                try:
+                    text = response.text()
+                except Exception:
+                    text = None
+
+                captured.append({
+                    "url": resp_url,
+                    "status": status,
+                    "content_type": content_type,
+                    "text": text,
+                })
+
+                logger.debug(
+                    "Captured response: %s (status=%d, content-type=%s, size=%d)",
+                    resp_url,
+                    status,
+                    content_type,
+                    len(text) if text else 0,
+                )
+
+            except Exception as exc:
+                logger.debug("Failed to capture response: %s", exc)
+
+        try:
+            # Set up response listener
+            self._page.on("response", handle_response)  # type: ignore[attr-defined]
+
+            # Navigate to page
+            self._page.goto(url, wait_until="networkidle")  # type: ignore[attr-defined]
+
+            # Wait for specific element if requested
+            if wait_for:
+                logger.debug(f"Waiting for element: {wait_for}")
+                self._page.wait_for_selector(wait_for, state="visible")  # type: ignore[attr-defined]
+
+            # Additional wait for dynamic content
+            if wait_time > 0:
+                logger.debug(f"Waiting {wait_time}s for dynamic content...")
+                time.sleep(wait_time)
+
+            # Get rendered HTML
+            html: str = self._page.content()  # type: ignore[attr-defined]
+
+            logger.info(
+                "Successfully fetched %d characters of HTML and captured %d network responses",
+                len(html),
+                len(captured),
+            )
+
+            # Optionally save to disk for debugging
+            if debug_dir is not None:
+                debug_path = Path(debug_dir)
+                debug_path.mkdir(parents=True, exist_ok=True)
+
+                # Save page HTML
+                (debug_path / "page.html").write_text(html, encoding="utf-8")
+
+                # Save each response
+                for i, resp in enumerate(captured):
+                    # Determine file extension
+                    if resp["content_type"] and "json" in resp["content_type"]:
+                        ext = "json"
+                    else:
+                        ext = "txt"
+
+                    # Extract filename from URL (last path component)
+                    try:
+                        filename_base = Path(resp["url"]).name or f"response_{i}"
+                    except Exception:
+                        filename_base = f"response_{i}"
+
+                    filename = f"{i:02d}_{resp['status']}_{filename_base}.{ext}"
+                    filepath = debug_path / filename
+
+                    if resp["text"]:
+                        filepath.write_text(resp["text"], encoding="utf-8")
+
+                logger.warning(
+                    "Saved debug artifacts: page.html + %d responses to %s",
+                    len(captured),
+                    debug_path,
+                )
+
+            return html, captured
+
+        except Exception as e:
+            logger.error(f"Failed to fetch rendered HTML with responses from {url}: {e}")
+            raise
+        finally:
+            # Clean up listener
+            try:
+                self._page.remove_listener("response", handle_response)  # type: ignore[attr-defined]
+            except Exception:
+                pass
+
     def get_tables(
         self, url: str, wait_for: str | None = "table", wait_time: float = 2.0
     ) -> list[str]:

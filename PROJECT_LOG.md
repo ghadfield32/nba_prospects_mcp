@@ -1,3 +1,61 @@
+## 2025-11-17 - FIBA Debug Infrastructure: HTML Dumps + Network Capture + Test Flags
+
+**Type:** Data Ingestion Debugging - FIBA cluster (LKL, ABA, BAL, BCL)
+**Status:** ✅ COMPLETE - Debug infrastructure ready for investigating 0% coverage issue
+**Depends On:** FIBA Production Readiness (2025-11-17)
+
+**Summary**: Added comprehensive debug infrastructure to investigate why FIBA scrapers return 0% coverage. Implemented HTML debug dumps, network response capture, and CLI debug flags without masking underlying issues. Coverage will remain 0% until parsers are updated to read correct JSON format.
+
+**The Problem**:
+- FIBA validation shows 0% coverage for all 4 leagues (LKL, ABA, BAL, BCL)
+- Browser scraper returns tiny HTML (300-330 bytes) - just shell pages
+- Actual shot data likely comes from XHR/JSON requests not captured by `page.content()`
+- Current parsers look for embedded data in HTML but find nothing
+
+**The Solution** (Debug-First Approach):
+Instead of guessing or masking, add visibility infrastructure to:
+1. Capture and save raw HTML when parsing fails
+2. Capture network responses (JSON/XHR) during page load
+3. Provide CLI flags to trigger debug features on-demand
+
+**Implementation**:
+
+**Feature A - HTML Debug Dumps** (`src/cbb_data/fetchers/fiba_html_common.py`)
+- Added `save_fiba_html_debug()` helper function (saves sc.html, shotchart.html, shots.html to debug dir)
+- Updated `scrape_fiba_shot_chart()` with `debug_html` parameter, calls debug helper when shots empty
+
+**Feature B - Network Response Capture** (`src/cbb_data/fetchers/browser_scraper.py`)
+- Added `get_rendered_html_with_responses()` method to capture XHR/JSON during page load
+- Filters by keywords ("shots", "shotchart", ".json"), saves page HTML + responses to disk
+
+**Feature C - CLI Debug Flags** (`tools/fiba/test_browser_scraping.py`)
+- Added `--debug-html` (trigger HTML dumps), `--capture-responses` (capture network traffic)
+- Wired debug_html through all 4 league fetchers (lkl.py, aba.py, bal.py, bcl.py)
+
+**Files Created/Modified (7 files)**:
+- `src/cbb_data/fetchers/fiba_html_common.py` - Debug helper + updated scraper
+- `src/cbb_data/fetchers/browser_scraper.py` - Response capture method
+- `tools/fiba/test_browser_scraping.py` - Complete rewrite with debug flags
+- `src/cbb_data/fetchers/{lkl,aba,bal,bcl}.py` - Added debug_html parameter
+
+**Usage**:
+```bash
+# Full debug mode
+python tools/fiba/test_browser_scraping.py --league LKL --debug-html --capture-responses
+
+# Artifacts saved to:
+# data/raw/fiba/debug/LKL/2023-24/<GAME_ID>/{sc,shotchart,shots}.html
+# data/raw/fiba/debug/LKL/2023-24/<GAME_ID>_responses/{page.html,*.json}
+```
+
+**Next Steps** (User Investigation):
+1. Run debug test, inspect HTML/JSON to find shot data endpoints
+2. Write `parse_fiba_shots_from_json()` based on discovered JSON schema
+3. Update scraper to use JSON-first approach, persist to DuckDB
+4. Re-run validation → expect 0% → ~95% coverage jump
+
+---
+
 ## 2025-11-17 - FIBA Production Readiness: Storage + Health Check + MCP Integration
 
 **Type:** Production Infrastructure - Storage Integration + Health Monitoring + MCP Tools

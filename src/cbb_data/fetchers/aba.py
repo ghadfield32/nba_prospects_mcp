@@ -435,6 +435,7 @@ def fetch_shot_chart(
     season: str = "2023-24",
     force_refresh: bool = False,
     use_browser: bool = False,
+    debug_html: bool = False,
 ) -> pd.DataFrame:
     """Fetch ABA League shot chart data for a season
 
@@ -467,6 +468,7 @@ def fetch_shot_chart(
                 league=LEAGUE,
                 season=season,
                 use_browser=use_browser,
+                debug_html=debug_html,
             )
             if not shots.empty:
                 all_shots.append(shots)
