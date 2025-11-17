@@ -1,3 +1,449 @@
+## 2025-11-17 - FIBA Production Readiness: Storage + Health Check + MCP Integration
+
+**Type:** Production Infrastructure - Storage Integration + Health Monitoring + MCP Tools
+**Status:** ✅ COMPLETE - Ready for Playwright browser scraping tests
+**Depends On:** FIBA Validation Layer (2025-11-16)
+
+**Summary**: Completed FIBA production infrastructure by wiring coverage validation to DuckDB storage, creating comprehensive health check script, and integrating FIBA MCP tools into main tools.py. FIBA cluster leagues (LKL, ABA, BAL, BCL) now follow same production pattern as LNB.
+
+**Implementation:**
+
+1. **Coverage Validation → DuckDB Integration** (`tools/fiba/validate_and_monitor_coverage.py`)
+   - Updated `estimate_coverage_from_cache()` to query DuckDB storage
+   - Replaces stubbed 0 return with actual game counts from storage
+   - Season format conversion: "2023-24" → "2023" for storage queries
+   - Counts distinct GAME_IDs for PBP and shots coverage
+
+2. **Health Check Script** (`tools/fiba/health_check.py` - new)
+   - One-command comprehensive FIBA pipeline status
+   - Checks 5 components: Playwright, game indexes, storage, validation, golden fixtures
+   - Clear status icons (✅ ⏳ ❌) with actionable next steps
+   - Supports verbose mode and per-league filtering
+   - Usage: `python tools/fiba/health_check.py [--league LKL] [--verbose]`
+
+3. **MCP Tools Integration** (`src/cbb_data/servers/mcp/tools.py`)
+   - Added `_ensure_fiba_season_ready()` guard function
+   - Integrated 3 FIBA MCP tools into TOOLS registry:
+     - `get_fiba_shots` - Shot chart data with filters (team, player, shot_type, period)
+     - `get_fiba_schedule` - Game schedule with date filters
+     - `list_fiba_leagues` - League discovery with readiness status
+   - All tools enforce season readiness before data access
+   - Browser scraping enabled by default (`use_browser=True`)
+
+**Key Features:**
+
+- **Real Storage Integration**: Coverage validation now checks actual DuckDB data
+- **One-Command Health Check**: Instant pipeline status across all components
+- **LLM-Friendly MCP Tools**: Natural language examples in tool descriptions
+- **Season Readiness Guards**: Prevent access to incomplete/unvalidated data
+- **LNB Pattern Reuse**: FIBA follows proven LNB production infrastructure
+
+**Files Created/Modified (3 files):**
+
+**New:**
+- `tools/fiba/health_check.py` - Comprehensive health check script
+
+**Modified:**
+- `tools/fiba/validate_and_monitor_coverage.py` - DuckDB storage integration
+- `src/cbb_data/servers/mcp/tools.py` - FIBA MCP tools + guard function
+
+**Usage Examples:**
+
+```bash
+# Health check (all leagues)
+python tools/fiba/health_check.py
+
+# Health check (specific league)
+python tools/fiba/health_check.py --league LKL --verbose
+
+# Run validation (now checks real storage)
+python tools/fiba/validate_and_monitor_coverage.py
+```
+
+```python
+# MCP tool usage (example)
+from cbb_data.servers.mcp.tools import tool_get_fiba_shots
+
+# Get LKL made 3-pointers
+result = tool_get_fiba_shots(
+    league="LKL",
+    season="2023-24",
+    shot_type=["3PT"],
+    shot_made=True,
+    limit=100
+)
+# Returns {"success": True/False, "data": [...], "count": N}
+```
+
+**Next Steps:**
+
+1. **Test with Playwright**: `python tools/fiba/test_browser_scraping.py --league LKL`
+2. **Populate golden fixtures** with real values from browser tests
+3. **Add persistent storage** when fetching FIBA data (parquet/DuckDB)
+4. **Test MCP tools** once data is validated and ready
+
+---
+
+## 2025-11-16 - FIBA Validation Layer: Complete Production Infrastructure
+
+**Type:** Production Infrastructure - Validation + Guards + Testing Framework
+**Status:** ✅ COMPLETE - Ready for browser scraping tests
+**Depends On:** FIBA Shots Implementation (2025-11-16)
+
+**Summary**: Built comprehensive validation and readiness infrastructure for all 4 FIBA cluster leagues (LKL, ABA, BAL, BCL), following the proven LNB production pattern. Includes browser scraping tests, coverage validation, season readiness guards, and golden fixtures framework.
+
+**Implementation:**
+
+1. **Browser Scraping Test Framework** (`tools/fiba/test_browser_scraping.py`)
+   - Tests Playwright setup and browser rendering
+   - Validates shot data quality for all 4 FIBA leagues
+   - Provides detailed metrics (total shots, made %, 3PT %, games)
+   - Supports per-league or all-league testing
+
+2. **Coverage Validation Pipeline** (`tools/fiba/validate_and_monitor_coverage.py`)
+   - Loads game indexes for all 4 FIBA leagues
+   - Computes coverage (PBP, shots) vs expected games
+   - Checks readiness threshold (>= 95% coverage)
+   - Generates `data/raw/fiba/fiba_last_validation.json` status file
+
+3. **Season Readiness Helpers** (`src/cbb_data/validation/fiba.py`)
+   - `require_fiba_season_ready(league, season)` - Guard function for data access
+   - `get_fiba_validation_status()` - Get current validation status
+   - `check_fiba_league_ready(league, season)` - Quick boolean check
+   - Provides clear error messages with remediation steps
+
+4. **Golden Fixtures Framework**
+   - `tools/fiba/golden_fixtures_shots.json` - Regression test fixtures (1 game per league)
+   - `tools/fiba/validate_golden_fixtures.py` - Validator with 5% tolerance
+   - Detects schema changes, data quality issues, upstream API changes
+
+5. **Documentation**
+   - `FIBA_VALIDATION_IMPLEMENTATION.md` - Complete technical documentation
+   - Integration patterns for MCP tools and REST API
+   - Testing workflow and success metrics
+
+**Key Features:**
+
+- **Multi-Method Validation**: Browser scraping → Coverage check → Readiness gate
+- **Standardized Thresholds**: >= 95% coverage for both PBP and shots
+- **Clear Error Messages**: Actionable guidance when data not ready
+- **Regression Protection**: Golden fixtures detect silent changes
+- **LNB Pattern Reuse**: Proven production infrastructure adapted for FIBA
+
+**Files Created/Modified (9 files):**
+
+**Tools:**
+- `tools/fiba/test_browser_scraping.py` (new) - Browser scraping test framework
+- `tools/fiba/validate_and_monitor_coverage.py` (new) - Coverage validation
+- `tools/fiba/validate_golden_fixtures.py` (new) - Golden fixture validator
+- `tools/fiba/golden_fixtures_shots.json` (new) - Regression test fixtures
+
+**Core:**
+- `src/cbb_data/validation/__init__.py` (new) - Validation module
+- `src/cbb_data/validation/fiba.py` (new) - FIBA readiness helpers
+
+**Documentation:**
+- `FIBA_VALIDATION_IMPLEMENTATION.md` (new) - Complete technical docs
+- `PROJECT_LOG.md` (updated) - This entry
+
+**Usage Examples:**
+
+```bash
+# 1. Test browser scraping
+python tools/fiba/test_browser_scraping.py --league LKL
+
+# 2. Run validation
+python tools/fiba/validate_and_monitor_coverage.py
+
+# 3. Validate golden fixtures
+python tools/fiba/validate_golden_fixtures.py
+```
+
+```python
+# In MCP tool or API endpoint
+from cbb_data.validation.fiba import require_fiba_season_ready
+
+# Enforce readiness before data access
+require_fiba_season_ready("LKL", "2023-24")
+# Raises ValueError if not ready, returns None if ready
+```
+
+**Testing Workflow:**
+
+1. Install Playwright: `uv pip install playwright && playwright install chromium`
+2. Test browser scraping: `python tools/fiba/test_browser_scraping.py --dry-run`
+3. Fetch real data: `python tools/fiba/test_browser_scraping.py --league LKL`
+4. Update golden fixtures with actual values
+5. Run validation: `python tools/fiba/validate_and_monitor_coverage.py`
+6. Validate fixtures: `python tools/fiba/validate_golden_fixtures.py`
+
+**Known Limitations:**
+
+1. **No Persistent Storage Yet** - FIBA data currently ephemeral, coverage shows 0%
+2. **Single Season** - Only validates 2023-24 currently
+3. **Manual Fixture Updates** - Golden fixtures need manual population after tests
+4. **Slow Browser Scraping** - 3-5 sec/game vs <1 sec HTTP
+
+**Next Steps:**
+
+**Immediate:**
+- [ ] Test with Playwright browser scraping (blocked by 403 currently)
+- [ ] Populate golden fixtures with real data
+- [ ] Add persistent storage (parquet cache or DuckDB)
+
+**Short Term:**
+- [ ] Wire FIBA into MCP tools with guards
+- [ ] Add FIBA REST API endpoints
+- [ ] Set up CI/CD for golden fixture validation
+
+**Medium Term:**
+- [ ] Extend game indexes for historical seasons
+- [ ] Investigate FIBA API authentication for direct access
+- [ ] Add daily automation similar to LNB
+
+**Impact:** All 4 FIBA leagues now have production-ready validation infrastructure matching the LNB standard. Clear path from current state (shots implemented but untested) to production state (validated data with readiness guards).
+
+**Pattern:** Replicates LNB success pattern:
+- Validation pipeline → Season readiness file → Guard functions → Golden fixtures
+- Same pattern can be applied to NCAA, EuroLeague, and other leagues
+
+---
+
+## 2025-11-16 - Comprehensive League Audit: 20 Leagues, Gaps, & Production Roadmap
+
+**Type:** Analysis - Complete Repository Audit
+**Status:** ✅ COMPLETE - Comprehensive audit of all 20 leagues with prioritized action plan
+
+**Summary**: Conducted comprehensive audit of all 20 leagues to identify data gaps, infrastructure needs, and production readiness. Created prioritized roadmap to achieve universal production-ready status across all leagues.
+
+**Current State:**
+- **20 leagues total**: 6 college + 13 prepro + 1 pro (WNBA)
+- **Fully Functional**: 16/20 leagues with all or most datasets
+- **Production-Ready**: 1/20 (LNB only with full validation infrastructure)
+- **Scaffold/Blocked**: 2/20 (ACB, NZ-NBL need enablement)
+
+**Major Findings:**
+
+1. **LNB Pattern Success** (Production-Ready Template)
+   - Only league with comprehensive validation pipeline
+   - Golden fixtures, API spot-checks, consistency checks
+   - Season readiness gates, API endpoints, MCP guards
+   - 15 comprehensive tests, operational runbook
+   - **Gap**: Historical coverage still incomplete (2024-2025 at 50%)
+
+2. **NCAA-MBB/WBB** (Largest Volume, No Validation)
+   - 7/7 datasets, 2002+ historical data, real-time updates
+   - **Gap**: No validation pipeline, no readiness gates, no guards
+
+3. **EuroLeague/EuroCup** (Top Tier EU, No Validation)
+   - 7/7 datasets, 2001+ historical data, real-time updates
+   - **Gap**: No validation infrastructure
+
+4. **FIBA Cluster** (4 Leagues Missing Shots)
+   - LKL, ABA, BAL, BCL: 6/7 datasets (missing shots)
+   - **Gap**: No shots data implementation
+
+5. **College Cluster** (4 Leagues Missing PBP/Shots)
+   - NJCAA, NAIA, USPORTS, CCAA: 5/7 datasets (missing pbp, shots)
+   - **Gap**: PrestoSports doesn't provide detailed event data
+
+6. **ACB (Spain)** (Scaffold Only, JS-Rendered)
+   - 0/7 datasets functional (scaffold only)
+   - **Blocker**: JavaScript-rendered site needs Selenium/Playwright
+
+7. **NZ-NBL** (Scaffold, Needs Manual Index)
+   - 2/7 datasets functional (season stats only)
+   - **Blocker**: No automated game discovery, needs manual index
+
+**Priority Action Plan:**
+
+**P0 - This Week:**
+- [ ] Complete LNB 2024-2025 backfill to 100% (1 hour)
+- [ ] Set up LNB daily automation (cron/GitHub Action) (2 hours)
+
+**P1 - Next 2 Weeks:**
+- [ ] Add FIBA shots data → unlocks 4 leagues (2-3 days)
+- [ ] Enable ACB browser scraper → unlocks major EU league (2-3 days)
+- [ ] Enable NZ-NBL game index → unlocks Pacific league (1-2 days)
+
+**P2 - Weeks 3-4:**
+- [ ] Add NCAA-MBB/WBB validation pipeline (3-4 days)
+- [ ] Add EuroLeague/EuroCup validation pipeline (2-3 days)
+- [ ] Add G-League validation pipeline (2 days)
+
+**P3 - Weeks 5-8:**
+- [ ] Create universal validation framework (1 week)
+- [ ] Roll out validation to all 20 leagues (2 weeks)
+- [ ] Investigate PrestoSports PBP/shots availability (1 week)
+
+**Long-Term Vision (3 Months):**
+- All 20 leagues fully functional
+- 18/20 with 7/7 datasets (up from 16/20)
+- 20/20 with validation pipelines (up from 1/20)
+- 20/20 with season readiness gates
+- Universal operational standards
+
+**Files Created:**
+- [LEAGUE_COMPLETENESS_AUDIT.md](LEAGUE_COMPLETENESS_AUDIT.md) - 600+ line comprehensive audit
+  - Detailed status per league
+  - Priority matrix with effort estimates
+  - 4-phase roadmap (8 weeks)
+  - Success metrics and quality standards
+
+**Key Insights:**
+
+1. **LNB is the template**: First international league with full production infrastructure
+2. **High-value gaps**: FIBA shots (4 leagues), ACB (major EU league), NCAA validation (largest volume)
+3. **Standardization needed**: Only 1/20 leagues has validation/ops infrastructure
+4. **Quick wins available**: FIBA shots (2-3 days), ACB (2-3 days), NZ-NBL (1-2 days)
+
+**Impact**: Clear roadmap to achieve production-ready status for all 20 leagues. Identifies exactly what's needed to go from current state (16/20 functional, 1/20 production-ready) to target state (20/20 functional, 20/20 production-ready).
+
+---
+
+## 2025-11-16 - LNB Production Ready: Season Guards + Tests + Operational Runbook
+
+**Type:** Production Hardening - Guards + Tests + Operations
+**Status:** ✅ COMPLETE - All data access points protected, comprehensive tests, operational runbook
+
+**Summary**: Completed production hardening by enforcing season readiness guards across all LNB data access points (MCP tools + API), adding comprehensive test coverage, and creating operational runbook for daily pipeline management.
+
+**Implementation:**
+
+1. **MCP Season Guards** ([tools.py:33-105](src/cbb_data/servers/mcp/tools.py))
+   - Added `_ensure_lnb_season_ready(season)` helper - reads `lnb_last_validation.json`
+   - Enforced in all 4 LNB MCP tools: schedule, pbp, player stats, team stats
+   - Clear error messages with coverage% + remediation commands
+
+2. **Comprehensive Test Suite** ([test_lnb_production_readiness.py](tests/test_lnb_production_readiness.py))
+   - 8 unit tests: validation functions (is_game_played, has_parquet_for_game, score/shot counting, readiness checks)
+   - 7 integration tests: MCP guards + API endpoints (all error paths + status codes)
+
+3. **Operational Runbook** ([LNB_OPERATIONAL_RUNBOOK.md](tools/lnb/LNB_OPERATIONAL_RUNBOOK.md))
+   - Daily operations workflow, 3-tier health checks, troubleshooting guide
+   - Emergency procedures, maintenance windows, monitoring metrics
+
+**Guard Coverage:** 100% of LNB data access (2 API endpoints + 4 MCP tools + 2 guard functions)
+
+**Files:** [tools.py](src/cbb_data/servers/mcp/tools.py), [test_lnb_production_readiness.py](tests/test_lnb_production_readiness.py), [LNB_OPERATIONAL_RUNBOOK.md](tools/lnb/LNB_OPERATIONAL_RUNBOOK.md)
+
+**Impact:** LNB pipeline is production-ready with quality gates at every access point. Operators have clear runbook. All consumers automatically protected from incomplete/unvalidated data.
+
+---
+
+## 2025-11-16 - LNB API-Ready: Health/Readiness Endpoints + Data Contracts
+
+**Type:** API Integration - Production Readiness Features
+**Status:** ✅ COMPLETE - FastAPI endpoints + error contracts + season guards fully wired
+
+**Summary**: Completed API-ready infrastructure by wiring validation machinery into FastAPI layer. Added health/readiness endpoints, standardized error contracts, and season readiness guards to ensure API consumers only access validated, production-quality data.
+
+**Implementation:**
+
+1. **LNB-Specific API Endpoints** ([routes.py:806-963](src/cbb_data/api/rest_api/routes.py))
+   - `GET /lnb/readiness` - Season readiness status (≥95% coverage + 0 errors = ready)
+   - `GET /lnb/validation-status` - QA metrics (golden fixtures, API spot-checks, consistency)
+   - Both read from `lnb_last_validation.json` (generated by validation pipeline)
+   - Returns 503 if validation not run, ensuring API never serves unvalidated data
+
+2. **Pydantic Response Models** ([models.py:232-380](src/cbb_data/api/rest_api/models.py))
+   - `LNBSeasonReadiness` - Per-season coverage + error counts
+   - `LNBReadinessResponse` - Multi-season readiness with ready_seasons list
+   - `LNBValidationStatusResponse` - Full QA status (golden fixtures, API spot-checks)
+   - `LNBErrorResponse` - Standardized error contract (SEASON_NOT_READY, INVALID_SEASON, etc.)
+
+3. **Season Readiness Guard** ([routes.py:967-1041](src/cbb_data/api/rest_api/routes.py))
+   - `require_lnb_season_ready(season)` - Boundary guard for season-scoped routes
+   - Raises 409 Conflict with detailed error if season not ready
+   - Raises 404 Not Found if season not tracked
+   - Raises 503 Service Unavailable if validation not run
+   - Returns structured `LNBErrorResponse` with coverage details
+
+4. **Validation Status Persistence** ([validate_and_monitor_coverage.py:857-906](tools/lnb/validate_and_monitor_coverage.py))
+   - Enhanced `save_validation_status()` to transform validation data → API schema
+   - Maps `pbp_count` → `pbp_coverage`, adds `pbp_expected` from `EXPECTED_GAMES`
+   - JSON written to `data/raw/lnb/lnb_last_validation.json`
+   - Integrated into main validation flow (step 9/9)
+
+**API Error Contract:**
+
+Standardized error codes for LNB endpoints:
+- `SEASON_NOT_READY` (409) - Season below 95% coverage or has critical errors
+- `INVALID_SEASON` (404) - Season not in tracked list
+- `GAME_NOT_FOUND` (404) - Game ID not found
+- `VALIDATION_FAILED` (503) - Validation pipeline not run yet
+- `INTERNAL_ERROR` (500) - Unexpected errors
+
+**Example Response (Readiness Check):**
+
+```json
+{
+  "checked_at": "2025-11-16T21:30:12Z",
+  "seasons": [
+    {
+      "season": "2023-2024",
+      "ready_for_modeling": true,
+      "pbp_coverage": 306,
+      "pbp_expected": 306,
+      "pbp_pct": 100.0,
+      "shots_coverage": 310,
+      "shots_expected": 306,
+      "shots_pct": 101.3,
+      "num_critical_issues": 0
+    }
+  ],
+  "any_season_ready": true,
+  "ready_seasons": ["2022-2023", "2023-2024"]
+}
+```
+
+**Integration Pattern:**
+
+Any LNB route that serves season-scoped data should use the guard:
+
+```python
+from src.cbb_data.api.rest_api.routes import require_lnb_season_ready
+
+@router.get("/lnb/{season}/shots")
+async def get_season_shots(season: str):
+    require_lnb_season_ready(season)  # Raises HTTPException if not ready
+    # Safe to load + return data
+    return load_shots_parquet(season)
+```
+
+**Validation Coverage:**
+
+Current status (as of 2025-11-16):
+- 2022-2023: ✓ READY (100.0% PBP, 100.0% shots, 0 errors)
+- 2023-2024: ✓ READY (100.0% PBP, 101.3% shots, 0 errors)
+- 2024-2025: ✗ NOT READY (50.0% PBP, 50.0% shots, 0 errors)
+- 2025-2026: ✗ NOT READY (0.0% PBP, 0.0% shots, 0 errors)
+
+**Files Created/Updated:**
+- [routes.py](src/cbb_data/api/rest_api/routes.py) - Added /lnb/readiness, /lnb/validation-status, require_lnb_season_ready()
+- [models.py](src/cbb_data/api/rest_api/models.py) - Added LNB response models + error contracts
+- [validate_and_monitor_coverage.py](tools/lnb/validate_and_monitor_coverage.py) - Fixed save_validation_status() schema mapping
+- [lnb_last_validation.json](data/raw/lnb/lnb_last_validation.json) - Generated validation status for API consumption
+
+**Testing:**
+
+Validation pipeline tested:
+```bash
+uv run python tools/lnb/validate_and_monitor_coverage.py
+# [INFO] Saved validation status to data/raw/lnb/lnb_last_validation.json
+# Status: 2/4 seasons ready, golden fixtures passed, 1 API discrepancy (non-critical)
+```
+
+**Next Steps:**
+1. Wire `require_lnb_season_ready()` into MCP tools that take season parameter
+2. Add `GET /lnb/health` with disk/config checks (nice-to-have)
+3. Consider pre-computed aggregates in `data/processed/lnb/` for heavy season queries
+4. Add rate limiting + per-request timeouts once API goes to production
+
+**Impact:** API layer now enforces data quality contracts - consumers can't accidentally query unvalidated/incomplete seasons. All validation machinery (golden fixtures, spot-checks, consistency, provenance) automatically protects API responses.
+
+---
+
 ## 2025-11-16 - LNB Coverage Monitoring + UUID Cleanup Hardening
 
 - **Pre-commit/Lint Diagnostics:** Addressed ruff blockers (loop var usage, sorted set conversion, exception chaining) to keep automation unblocked while surfacing better context via targeted prints.
@@ -12321,5 +12767,165 @@ Successfully merged LNB API integration branch into main and updated README with
 **Fix**: Changed `tools/lnb/bulk_ingest_pbp_shots.py:101` from `game_date < today` to `game_date <= today`
 **Result**: Now correctly includes games from today, excludes only games from tomorrow onwards
 **Test**: 2025-2026 season now attempts 2 games (Nov 16), skips 174 future games (Nov 22+)
+
+---
+
+## 2025-11-16: LNB Incremental + Live-Ready Ingestion
+
+**Enhancement**: Added disk-aware helpers and status-aware filtering to enable incremental ingestion and live game support, eliminating redundant API calls.
+
+**Problem Solved**: 
+- Ingestion reprocessed all games every run because it only checked index flags, not actual files on disk
+- Live games were skipped even when currently in progress
+- No quick visibility into dataset completeness percentages per season
+
+**Changes**:
+- `tools/lnb/bulk_ingest_pbp_shots.py:78`: Updated `is_game_played()` to accept optional `status` parameter, bypassing date checks for live games (LIVE, IN_PROGRESS, STARTED)
+- `tools/lnb/bulk_ingest_pbp_shots.py:139`: Added `has_parquet_for_game()` helper to check disk for existing parquet files
+- `tools/lnb/bulk_ingest_pbp_shots.py:156`: Added `select_games_to_ingest()` to centralize filtering logic (date/status check + disk-aware skip)
+- `tools/lnb/bulk_ingest_pbp_shots.py:389`: Updated `bulk_ingest()` to use `select_games_to_ingest()`, check disk before ingestion, and respect `--force-refetch` flag
+- `tools/lnb/validate_and_monitor_coverage.py:287`: Added `summarize_dataset_completeness()` to show per-season PBP/shots coverage percentages
+- `tools/lnb/validate_and_monitor_coverage.py:456`: Integrated completeness summary into main validation flow
+
+**Impact**:
+- Incremental runs now skip games already on disk (regardless of stale index flags)
+- Live games can be ingested in real-time when status indicates they're in progress
+- `--force-refetch` still bypasses disk checks while respecting date/status filters
+- Validation output now shows exact coverage percentages (e.g., "2022-2023: PBP 306/306 (100.0%), Shots 306/306 (100.0%)")
+
+**Files Modified**: 
+- `tools/lnb/bulk_ingest_pbp_shots.py` (lines 78-104, 139-208, 389-493)
+- `tools/lnb/validate_and_monitor_coverage.py` (lines 287-303, 456)
+
+**Next Steps**: Deploy updated ingestion, rerun to backfill remaining games, verify 100% coverage for 2022-23 and 2023-24 seasons
+
+---
+
+## 2025-11-16: LNB Per-Game Consistency & Season Readiness Validation
+
+**Enhancement**: Added comprehensive per-game validation and season readiness checks to ensure data quality and modeling readiness for LNB PBP and shots datasets.
+
+**Problem Solved**:
+- No validation of per-game internal consistency (score monotonicity, schema compliance)
+- No cross-dataset validation between PBP and shots tables
+- No clear "ready for modeling" signal for each season
+- Potential silent failures in data quality going undetected
+
+**Changes**:
+- `tools/lnb/validate_and_monitor_coverage.py:306`: Added `compute_per_game_score_from_pbp()` to reconstruct final scores from PBP (uses HOME_SCORE, AWAY_SCORE from last row)
+- `tools/lnb/validate_and_monitor_coverage.py:328`: Added `compute_per_game_shot_counts_from_pbp()` to count field goal attempts (2pt, 3pt only, excludes freeThrow to match shots table)
+- `tools/lnb/validate_and_monitor_coverage.py:352`: Added `validate_per_game_consistency()` to check:
+  - PBP required columns (HOME_SCORE, AWAY_SCORE, PERIOD_ID, EVENT_TYPE)
+  - Score monotonicity (neither HOME_SCORE nor AWAY_SCORE can decrease)
+  - Period monotonicity (PERIOD_ID should not decrease)
+  - Shots required columns (SHOT_TYPE, SUCCESS, TEAM_ID)
+  - Valid SHOT_TYPE values ('2pt', '3pt')
+  - Valid SUCCESS flags (True, False, 0, 1)
+  - PBP field goal count vs shots table count (should match exactly)
+- `tools/lnb/validate_and_monitor_coverage.py:511`: Added `check_season_readiness()` to determine modeling readiness:
+  - Criteria: ≥95% coverage for both PBP and shots AND zero critical errors
+  - Returns detailed readiness status per season
+- `tools/lnb/validate_and_monitor_coverage.py:717-747`: Integrated consistency checks and readiness reporting into main validation flow (steps 4-5 of 7)
+- `tools/lnb/validate_and_monitor_coverage.py:782-794`: Enhanced summary with per-game consistency metrics and season readiness breakdown
+
+**Validation Results** (as of 2025-11-16):
+- 2022-2023: ✓ READY (306/306 PBP, 306/306 shots, 0 errors)
+- 2023-2024: ✓ READY (306/306 PBP, 310/306 shots, 0 errors)
+- 2024-2025: ✗ NOT READY (120/240 PBP, 120/240 shots, 50% coverage)
+- 2025-2026: ✗ NOT READY (0/176 PBP, 0/176 shots, future season)
+
+**Impact**:
+- Catches partial/truncated PBP files via score monotonicity checks
+- Detects schema changes or missing columns immediately
+- Validates PBP-to-shots consistency for every game
+- Provides clear go/no-go signal for Bayesian modeling and live ingestion
+- Enables defensive programming: "only use seasons marked READY"
+
+**Files Modified**:
+- `tools/lnb/validate_and_monitor_coverage.py` (4 new validation functions, integrated into main flow, enhanced summary)
+
+**Next Steps**:
+- Backfill remaining 2024-2025 games to reach 100% coverage
+- Add optional API-based random audit for sample validation against source
+- Use season readiness flags to gate Bayesian training and MCP tools
+
+---
+
+## 2025-11-16: LNB Production-Grade Validation Polish (Final 20%)
+
+**Enhancement**: Added regression testing, API drift detection, metrics tracking, and provenance metadata to achieve production-grade data quality assurance for LNB datasets.
+
+**Problem Solved**:
+- No protection against silent API schema changes or data corruption
+- No detection of upstream data drift or corrections
+- No historical tracking of data quality metrics over time
+- No provenance/lineage metadata for debugging data issues
+- No standardized readiness gate for downstream modeling
+
+**Changes**:
+
+**1. Golden Fixtures Regression Suite:**
+- `tools/lnb/golden_fixtures.json`: Reference snapshots for 1 game (expandable to 5-10)
+- `tools/lnb/validate_and_monitor_coverage.py:562`: Added `validate_golden_fixtures()` checking row counts, final scores, periods, event distributions with ±5% tolerance
+- Catches: API schema changes, data corruption, incomplete fetches
+
+**2. API Spot-Check Validation:**
+- `tools/lnb/validate_and_monitor_coverage.py:708`: Added `audit_sampled_games_against_api()` randomly sampling 5 games from READY seasons
+- Compares disk vs live API: row counts, final scores
+- Detects: Upstream corrections, API drift, stale data
+
+**3. Time-Series Metrics Tracking:**
+- `tools/lnb/validate_and_monitor_coverage.py:815`: Added `record_validation_metrics()` appending daily metrics to parquet
+- `data/raw/lnb/lnb_metrics_daily.parquet`: Time-series of coverage%, errors, warnings, readiness per season
+- Enables: Trend analysis, coverage stagnation detection, quality monitoring over time
+
+**4. Provenance Metadata:**
+- `tools/lnb/bulk_ingest_pbp_shots.py:211-280`: Enhanced `save_partitioned_parquet()` to add metadata columns:
+  - `_source_system`: "LNB"
+  - `_source_endpoint`: "pbp" or "shots"
+  - `_fetched_at`: ISO timestamp
+  - `_ingestion_version`: Git SHA or "dev"
+- Enables: Data lineage tracking, debugging, audit trails
+
+**5. Readiness Gate for Downstream Code:**
+- `tools/lnb/validate_and_monitor_coverage.py:857`: Added `require_season_ready()` helper for modeling/MCP tools
+- Raises ValueError with actionable message if season not ready
+- Example: `require_season_ready("2023-2024")` prevents using incomplete data
+
+**6. Enhanced Validation Flow:**
+- Updated main() to 9-step validation (was 7)
+- Step 7: Golden fixtures regression testing
+- Step 8: API spot-check (random sampling)
+- Step 9: Live data readiness + metrics recording
+- Enhanced summary with regression testing and API spot-check status
+
+**7. Documentation:**
+- `tools/lnb/README_VALIDATION.md`: Complete usage guide for all validation features, monitoring, troubleshooting
+
+**Validation Results** (2025-11-16):
+- ✓ Golden fixtures: 1/1 passed (70-71 final score, 547 PBP rows, 129 shots)
+- ✓ API spot-check: 0 discrepancies (sampled 5 games)
+- Ready seasons: 2022-2023 (100%), 2023-2024 (100%)
+- Not ready: 2024-2025 (50%), 2025-2026 (0%)
+
+**Impact**:
+- **Accuracy**: Regression tests catch silent API changes before they affect modeling
+- **Reliability**: API spot-checks detect upstream data drift automatically
+- **Observability**: Time-series metrics enable proactive quality monitoring
+- **Debuggability**: Provenance metadata traces data lineage per game
+- **Safety**: Readiness gates prevent accidental use of incomplete data
+- **Automation**: All checks run in single command, no manual inspection needed
+
+**Files Modified**:
+- `tools/lnb/validate_and_monitor_coverage.py`: 4 new functions (validate_golden_fixtures, audit_sampled_games_against_api, record_validation_metrics, require_season_ready), enhanced main flow
+- `tools/lnb/bulk_ingest_pbp_shots.py`: Enhanced save_partitioned_parquet with provenance metadata
+- `tools/lnb/golden_fixtures.json`: New golden fixture reference data
+- `tools/lnb/README_VALIDATION.md`: New comprehensive validation guide
+
+**Next Steps**:
+- Add 4-9 more golden fixtures (OT games, playoffs, edge cases)
+- Monitor metrics_daily.parquet for trends and stagnation
+- Add Prometheus/Grafana integration for alerting (future)
+- Use require_season_ready() in all downstream modeling/MCP tools
 
 ---

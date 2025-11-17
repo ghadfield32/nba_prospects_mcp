@@ -75,32 +75,32 @@ SLEEP_BETWEEN_GAMES = 1.0  # seconds
 # ==============================================================================
 
 
-def is_game_played(game_date_str: str) -> bool:
-    """Check if a game has been played based on its date
+def is_game_played(game_date_str: str, status: str | None = None) -> bool:
+    """Return True when the fixture has already happened or is currently live.
 
     Args:
         game_date_str: Game date in ISO format (YYYY-MM-DD)
+        status: Optional fixture status (e.g., "LIVE", "IN_PROGRESS", "STARTED")
 
     Returns:
-        True if game date is in the past or today (already played), False otherwise
+        True if game is live or date is in the past/today, False otherwise
 
     Note:
-        Returns True for empty/missing dates to maintain backward compatibility
-        (allows ingestion attempts for games without populated dates)
-
-        Uses <= instead of < to include games scheduled for TODAY,
-        as they may have already been played earlier in the day.
+        Live games bypass date checks to enable real-time ingestion.
+        Returns True for empty/missing dates to maintain backward compatibility.
     """
+    # Check if game is currently live (takes precedence over date)
+    live_statuses = {"LIVE", "IN_PROGRESS", "STARTED"}
+    if status and status.upper() in live_statuses:
+        return True
+
     if not game_date_str or game_date_str.strip() == "":
-        # Empty date - assume played (backward compatibility)
         return True
 
     try:
         game_date = date.fromisoformat(game_date_str)
-        today = date.today()
-        return game_date <= today  # Include games from today!
+        return game_date <= date.today()
     except (ValueError, TypeError):
-        # Invalid date format - assume played to avoid skipping games
         return True
 
 
@@ -136,12 +136,84 @@ def save_game_index(df: pd.DataFrame) -> None:
         print(f"[ERROR] Failed to save game index: {e}")
 
 
+def has_parquet_for_game(dataset_dir: Path, season: str, game_id: str) -> bool:
+    """Check whether a Parquet file already exists for the given season/game.
+
+    Args:
+        dataset_dir: Base directory for dataset (PBP_DIR or SHOTS_DIR)
+        season: Season string (e.g., "2024-2025")
+        game_id: Game UUID
+
+    Returns:
+        True if parquet file exists on disk, False otherwise
+    """
+    season_dir = dataset_dir / f"season={season}"
+    if not season_dir.exists():
+        return False
+    return (season_dir / f"game_id={game_id}.parquet").exists()
+
+
+def select_games_to_ingest(
+    index_df: pd.DataFrame, *, allow_live: bool = True, skip_existing: bool = True
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Return (games_to_ingest, future_games) after applying date/status and disk checks.
+
+    Args:
+        index_df: Full game index DataFrame
+        allow_live: If True, include games with live status even if date is future
+        skip_existing: If True, skip games that already have parquet files on disk
+
+    Returns:
+        Tuple of (games_to_ingest, future_games) DataFrames
+    """
+    working_df = index_df.copy()
+
+    # Filter by date/status
+    if "game_date" in working_df.columns:
+
+        def played_fn(row: pd.Series) -> bool:
+            status = row.get("status") if allow_live else None
+            return is_game_played(row.get("game_date", ""), status)
+
+        working_df["_is_played"] = working_df.apply(played_fn, axis=1)
+    else:
+        working_df["_is_played"] = True
+
+    future_games = working_df[~working_df["_is_played"]].copy()
+    played_games = working_df[working_df["_is_played"]].copy()
+
+    # Filter by existing files on disk
+    if skip_existing:
+
+        def needs_ingest(row: pd.Series) -> bool:
+            season = row["season"]
+            game_id = row["game_id"]
+            pbp_done = bool(row.get("has_pbp", False)) or has_parquet_for_game(
+                PBP_DIR, season, game_id
+            )
+            shots_done = bool(row.get("has_shots", False)) or has_parquet_for_game(
+                SHOTS_DIR, season, game_id
+            )
+            return not (pbp_done and shots_done)
+
+        played_games["_needs_ingest"] = played_games.apply(needs_ingest, axis=1)
+        to_ingest = played_games[played_games["_needs_ingest"]].copy()
+        to_ingest = to_ingest.drop(columns=["_needs_ingest"])
+    else:
+        to_ingest = played_games
+
+    return (
+        to_ingest.drop(columns=["_is_played"]),
+        future_games.drop(columns=["_is_played"]),
+    )
+
+
 def save_partitioned_parquet(df: pd.DataFrame, data_type: str, season: str, game_id: str) -> None:
-    """Save DataFrame to partitioned Parquet file with UUID validation
+    """Save DataFrame to partitioned Parquet file with UUID validation and provenance metadata.
 
     This function validates that the game_id parameter matches the GAME_ID
-    column in the data before saving. This prevents UUID corruption where
-    files are saved with incorrect filenames.
+    column in the data before saving. It also adds provenance metadata columns
+    for tracking data lineage and debugging.
 
     Args:
         df: Data to save
@@ -151,6 +223,12 @@ def save_partitioned_parquet(df: pd.DataFrame, data_type: str, season: str, game
 
     Raises:
         ValueError: If data_type is invalid or UUID mismatch detected
+
+    Provenance columns added:
+        - _source_system: Always "LNB"
+        - _source_endpoint: Dataset type ('pbp' or 'shots')
+        - _fetched_at: ISO timestamp of ingestion
+        - _ingestion_version: Git SHA or "dev" if not in git repo
     """
     if data_type == "pbp":
         base_dir = PBP_DIR
@@ -170,11 +248,34 @@ def save_partitioned_parquet(df: pd.DataFrame, data_type: str, season: str, game
                 f"  This indicates a bug in the calling code. Fix the source of the UUID."
             )
 
+    # Add provenance metadata columns
+    df = df.copy()
+    df["_source_system"] = "LNB"
+    df["_source_endpoint"] = data_type
+    df["_fetched_at"] = datetime.now().isoformat()
+
+    # Try to get git SHA for ingestion version tracking
+    try:
+        import subprocess
+
+        result = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            capture_output=True,
+            text=True,
+            timeout=2,
+            cwd=Path(__file__).parent.parent.parent,
+        )
+        git_sha = result.stdout.strip() if result.returncode == 0 else "dev"
+    except Exception:
+        git_sha = "dev"
+
+    df["_ingestion_version"] = git_sha
+
     # Create season partition directory
     season_dir = base_dir / f"season={season}"
     season_dir.mkdir(parents=True, exist_ok=True)
 
-    # Save file with validated UUID
+    # Save file with validated UUID and provenance
     file_path = season_dir / f"game_id={game_id}.parquet"
     df.to_parquet(file_path, index=False)
 
@@ -333,48 +434,31 @@ def bulk_ingest(
 
     print(f"Seasons: {seasons}")
     print(f"Max games per season: {max_games_per_season or 'All'}")
-    print(f"Force re-fetch: {force_refetch}")
-    print()
+    print(f"Force re-fetch: {force_refetch}\n")
 
-    # Load game index
     index_df = load_game_index()
 
-    # Filter to requested seasons
     if seasons:
         index_df = index_df[index_df["season"].isin(seasons)]
         print(f"[INFO] Filtered to {len(index_df)} games in selected seasons")
 
-    # NEW: Filter out future games (haven't been played yet)
-    # This prevents wasting API calls on games that don't have data yet
-    if "game_date" in index_df.columns:
-        # Check which games have been played
-        index_df["_is_played"] = index_df["game_date"].apply(is_game_played)
+    to_fetch, future_games = select_games_to_ingest(
+        index_df,
+        allow_live=True,
+        skip_existing=not force_refetch,
+    )
 
-        future_games = index_df[~index_df["_is_played"]]
-        index_df = index_df[index_df["_is_played"]]
+    if not future_games.empty:
+        print(
+            f"[INFO] Skipped {len(future_games)} future games "
+            f"(dates {future_games['game_date'].min()} → {future_games['game_date'].max()})"
+        )
 
-        if len(future_games) > 0:
-            print(f"[INFO] Skipped {len(future_games)} future games (not yet played)")
-            print(
-                f"       Future games date range: {future_games['game_date'].min()} to {future_games['game_date'].max()}"
-            )
-
-        # Drop temporary column
-        index_df = index_df.drop(columns=["_is_played"])
-    else:
-        print("[WARN] game_date column not found - cannot filter future games")
-        print("[WARN] Run: uv run python tools/lnb/build_game_index.py --force-rebuild")
-
-    # Filter to games that need fetching
     if force_refetch:
-        print("[INFO] Force re-fetch enabled - will fetch all games")
-        to_fetch = index_df
+        print("[INFO] Force re-fetch enabled - reprocessing all played/live games")
     else:
-        # Only fetch games that don't have PBP or shots yet
-        to_fetch = index_df[(~index_df["has_pbp"]) | (~index_df["has_shots"])]
-        print(f"[INFO] {len(to_fetch)} games need fetching (haven't been fetched yet)")
+        print(f"[INFO] {len(to_fetch)} games need ingestion (missing PBP or shots on disk)")
 
-    # Limit games per season if specified
     if max_games_per_season:
         limited = []
         for season in seasons:
@@ -385,16 +469,8 @@ def bulk_ingest(
 
     if to_fetch.empty:
         print("\n[INFO] No games to fetch!")
-        return {
-            "total": 0,
-            "pbp_success": 0,
-            "shots_success": 0,
-            "both_success": 0,
-            "pbp_errors": 0,
-            "shots_errors": 0,
-        }
+        return {"total": 0, "pbp_success": 0, "shots_success": 0, "both_success": 0, "pbp_errors": 0, "shots_errors": 0}
 
-    # Ingestion stats
     stats = {
         "total": len(to_fetch),
         "pbp_success": 0,
@@ -404,7 +480,6 @@ def bulk_ingest(
         "both_success": 0,
     }
 
-    # Process each game
     print(f"\n[INFO] Processing {len(to_fetch)} games...\n")
 
     for idx, row in enumerate(to_fetch.itertuples(), 1):
@@ -412,9 +487,8 @@ def bulk_ingest(
         print(f"  Home: {row.home_team_name}")
         print(f"  Away: {row.away_team_name}")
 
-        # Fetch PBP (if not already fetched or force_refetch)
         pbp_success = False
-        if force_refetch or not row.has_pbp:
+        if force_refetch or not row.has_pbp or not has_parquet_for_game(PBP_DIR, row.season, row.game_id):
             pbp_success = ingest_pbp_for_game(row.game_id, row.season)
             if pbp_success:
                 stats["pbp_success"] += 1
@@ -422,12 +496,10 @@ def bulk_ingest(
             else:
                 stats["pbp_errors"] += 1
         else:
-            print("    [PBP] ⏭️  Already fetched")
-            pbp_success = True
+            print("  [SKIP] PBP already ingested")
 
-        # Fetch shots (if not already fetched or force_refetch)
         shots_success = False
-        if force_refetch or not row.has_shots:
+        if force_refetch or not row.has_shots or not has_parquet_for_game(SHOTS_DIR, row.season, row.game_id):
             shots_success = ingest_shots_for_game(row.game_id, row.season)
             if shots_success:
                 stats["shots_success"] += 1
@@ -435,25 +507,18 @@ def bulk_ingest(
             else:
                 stats["shots_errors"] += 1
         else:
-            print("    [SHOTS] ⏭️  Already fetched")
-            shots_success = True
+            print("  [SKIP] Shots already ingested")
 
-        # Track both success
         if pbp_success and shots_success:
             stats["both_success"] += 1
 
-        # Save updated index periodically (every 10 games)
         if idx % 10 == 0:
             save_game_index(index_df)
 
-        # Rate limiting
         time.sleep(SLEEP_BETWEEN_GAMES)
-
         print()
 
-    # Final save of index
     save_game_index(index_df)
-
     return stats
 
 

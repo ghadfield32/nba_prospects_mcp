@@ -27,9 +27,9 @@ Data Coverage:
 - Player-game box scores: Via FIBA LiveStats HTML scraping
 - Team-game box scores: Aggregated from player stats
 - Play-by-play: Via FIBA LiveStats HTML scraping (when available)
+- Shots: ✅ Via FIBA shot chart scraping (may require browser rendering if HTTP blocked)
 - Player-season: Aggregated from player-game
 - Team-season: Aggregated from team-game
-- Shots: ❌ Not available (FIBA HTML doesn't provide x,y coordinates)
 
 Competition Structure:
 - 14 teams from 6-7 countries
@@ -74,6 +74,7 @@ from .fiba_html_common import (
     load_fiba_game_index,
     scrape_fiba_box_score,
     scrape_fiba_play_by_play,
+    scrape_fiba_shot_chart,
 )
 
 logger = logging.getLogger(__name__)
@@ -425,6 +426,61 @@ def fetch_pbp(season: str = "2023-24", force_refresh: bool = False) -> pd.DataFr
     # Ensure standard columns
     df = ensure_standard_columns(df, "pbp", LEAGUE, season)
 
+    return df
+
+
+@retry_on_error(max_attempts=3, backoff_seconds=2.0)
+@cached_dataframe
+def fetch_shot_chart(
+    season: str = "2023-24",
+    force_refresh: bool = False,
+    use_browser: bool = False,
+) -> pd.DataFrame:
+    """Fetch ABA League shot chart data for a season
+
+    Args:
+        season: Season string (e.g., "2023-24")
+        force_refresh: If True, ignore cache and re-scrape all games
+        use_browser: If True, use Playwright for JavaScript-rendered pages
+
+    Returns:
+        DataFrame with shot data (GAME_ID, PLAYER_NAME, SHOT_X, SHOT_Y, SHOT_MADE, etc.)
+
+    Note:
+        FIBA LiveStats may block HTTP requests. If empty, try use_browser=True
+        Requires: uv pip install playwright && playwright install chromium
+    """
+    logger.info(f"Fetching {LEAGUE} shot chart for season {season}")
+
+    schedule = fetch_schedule(season)
+    if schedule.empty:
+        logger.warning(f"No schedule available for {LEAGUE} {season}")
+        return pd.DataFrame()
+
+    all_shots = []
+    for _, game_row in schedule.iterrows():
+        game_id = game_row["GAME_ID"]
+        try:
+            shots = scrape_fiba_shot_chart(
+                league_code=FIBA_LEAGUE_CODE,
+                game_id=str(game_id),
+                league=LEAGUE,
+                season=season,
+                use_browser=use_browser,
+            )
+            if not shots.empty:
+                all_shots.append(shots)
+        except Exception as e:
+            logger.warning(f"Failed to scrape {LEAGUE} shots for game {game_id}: {e}")
+            continue
+
+    if not all_shots:
+        logger.warning(f"No shot data for {LEAGUE} {season}. Try use_browser=True if HTTP blocked.")
+        return pd.DataFrame()
+
+    df = pd.concat(all_shots, ignore_index=True)
+    df = ensure_standard_columns(df, "shots", LEAGUE, season)
+    logger.info(f"Scraped {len(df)} shots for {LEAGUE} {season}")
     return df
 
 

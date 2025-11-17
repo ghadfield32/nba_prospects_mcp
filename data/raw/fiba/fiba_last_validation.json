@@ -1,0 +1,49 @@
+{
+  "run_at": "2025-11-16T20:26:49.408945",
+  "leagues": [
+    {
+      "league": "LKL",
+      "season": "2023-24",
+      "ready_for_modeling": false,
+      "expected_games": 3,
+      "pbp_coverage": 0,
+      "pbp_coverage_pct": 0.0,
+      "shots_coverage": 0,
+      "shots_coverage_pct": 0.0,
+      "reason": "PBP coverage 0.0% < 95.0%; Shots coverage 0.0% < 95.0%"
+    },
+    {
+      "league": "ABA",
+      "season": "2023-24",
+      "ready_for_modeling": false,
+      "expected_games": 3,
+      "pbp_coverage": 0,
+      "pbp_coverage_pct": 0.0,
+      "shots_coverage": 0,
+      "shots_coverage_pct": 0.0,
+      "reason": "PBP coverage 0.0% < 95.0%; Shots coverage 0.0% < 95.0%"
+    },
+    {
+      "league": "BAL",
+      "season": "2023-24",
+      "ready_for_modeling": false,
+      "expected_games": 3,
+      "pbp_coverage": 0,
+      "pbp_coverage_pct": 0.0,
+      "shots_coverage": 0,
+      "shots_coverage_pct": 0.0,
+      "reason": "PBP coverage 0.0% < 95.0%; Shots coverage 0.0% < 95.0%"
+    },
+    {
+      "league": "BCL",
+      "season": "2023-24",
+      "ready_for_modeling": false,
+      "expected_games": 3,
+      "pbp_coverage": 0,
+      "pbp_coverage_pct": 0.0,
+      "shots_coverage": 0,
+      "shots_coverage_pct": 0.0,
+      "reason": "PBP coverage 0.0% < 95.0%; Shots coverage 0.0% < 95.0%"
+    }
+  ]
+}

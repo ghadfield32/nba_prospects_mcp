@@ -1,0 +1,83 @@
+{
+  "description": "Golden fixtures for FIBA cluster shot chart data",
+  "purpose": "Regression testing to detect schema changes or data quality issues",
+  "created": "2025-11-16",
+  "last_updated": "2025-11-16",
+  "tolerance_pct": 5.0,
+  "fixtures": {
+    "LKL": {
+      "2023-24": {
+        "game_id": "301234",
+        "home_team": "Žalgiris Kaunas",
+        "away_team": "Rytas Vilnius",
+        "date": "2023-10-01",
+        "expected": {
+          "total_shots": null,
+          "made_shots": null,
+          "three_pointers": null,
+          "two_pointers": null,
+          "fg_pct": null,
+          "three_pct": null,
+          "note": "Pending real data fetch with browser scraping"
+        }
+      }
+    },
+    "ABA": {
+      "2023-24": {
+        "game_id": "601234",
+        "home_team": "Crvena Zvezda",
+        "away_team": "Partizan",
+        "date": "2023-10-07",
+        "expected": {
+          "total_shots": null,
+          "made_shots": null,
+          "three_pointers": null,
+          "two_pointers": null,
+          "fg_pct": null,
+          "three_pct": null,
+          "note": "Pending real data fetch with browser scraping"
+        }
+      }
+    },
+    "BAL": {
+      "2023-24": {
+        "game_id": "401234",
+        "home_team": "US Monastir",
+        "away_team": "Petro de Luanda",
+        "date": "2024-03-05",
+        "expected": {
+          "total_shots": null,
+          "made_shots": null,
+          "three_pointers": null,
+          "two_pointers": null,
+          "fg_pct": null,
+          "three_pct": null,
+          "note": "Pending real data fetch with browser scraping"
+        }
+      }
+    },
+    "BCL": {
+      "2023-24": {
+        "game_id": "501234",
+        "home_team": "Unicaja Málaga",
+        "away_team": "Filou Oostende",
+        "date": "2023-10-03",
+        "expected": {
+          "total_shots": null,
+          "made_shots": null,
+          "three_pointers": null,
+          "two_pointers": null,
+          "fg_pct": null,
+          "three_pct": null,
+          "note": "Pending real data fetch with browser scraping"
+        }
+      }
+    }
+  },
+  "instructions": {
+    "step_1": "Run browser scraping test to get real data",
+    "step_2": "Update 'expected' values with actual counts from test",
+    "step_3": "Run validate_golden_fixtures.py to ensure regression net works",
+    "step_4": "Include in CI/CD to detect upstream changes"
+  }
+}

@@ -32,7 +32,7 @@ Data Granularities:
 - player_game: ✅ Via HTML box score scraping
 - team_game: ✅ Aggregated from player_game
 - pbp: ✅ Via HTML play-by-play scraping
-- shots: ❌ FIBA HTML doesn't provide (x,y) coordinates
+- shots: ✅ Via HTML/JSON shot chart scraping (may require browser rendering)
 """
 
 from __future__ import annotations
@@ -788,3 +788,338 @@ def scrape_fiba_play_by_play(
     except Exception as e:
         logger.error(f"Failed to scrape PBP for {league_code} game {game_id}: {e}")
         return pd.DataFrame()
+
+
+# ==============================================================================
+# Shot Chart Scraping
+# ==============================================================================
+
+
+def scrape_fiba_shot_chart(
+    league_code: str,
+    game_id: str,
+    league: str | None = None,
+    season: str | None = None,
+    use_browser: bool = False,
+) -> pd.DataFrame:
+    """Scrape shot chart data from FIBA LiveStats
+
+    Attempts multiple methods to retrieve shot chart data:
+    1. Try HTML endpoint (sc.html, shotchart.html, shots.html)
+    2. Try JSON API endpoint
+    3. Check if shot data embedded in PBP page
+    4. If use_browser=True, use Playwright to render JavaScript
+
+    Args:
+        league_code: FIBA league code (e.g., "LKL", "ABA", "BAL", "BCL")
+        game_id: FIBA game ID
+        league: League name for standardization (e.g., "LKL")
+        season: Season string for standardization (e.g., "2023-24")
+        use_browser: If True, use Playwright browser rendering (slower but works for JS pages)
+
+    Returns:
+        DataFrame with shot chart data
+
+    Columns:
+        - GAME_ID: Game identifier
+        - PLAYER_ID: Player ID (if available)
+        - PLAYER_NAME: Player name
+        - TEAM_CODE: Team code
+        - TEAM_NAME: Team name
+        - PERIOD: Quarter/period number
+        - CLOCK: Game clock (MM:SS)
+        - SHOT_X: X coordinate on court
+        - SHOT_Y: Y coordinate on court
+        - SHOT_TYPE: Shot type (2PT/3PT)
+        - SHOT_MADE: Boolean - whether shot was made
+        - SHOT_VALUE: Points value (2 or 3)
+        - SHOT_DISTANCE: Distance from basket (if available)
+        - SHOT_ZONE: Court zone (if available)
+        - LEAGUE: League name (if provided)
+        - SEASON: Season string (if provided)
+
+    Example:
+        >>> # Try simple HTTP first
+        >>> shots = scrape_fiba_shot_chart("LKL", "301234", "LKL", "2023-24")
+        >>>
+        >>> # If blocked, use browser rendering
+        >>> shots = scrape_fiba_shot_chart("LKL", "301234", "LKL", "2023-24", use_browser=True)
+
+    Note:
+        FIBA LiveStats may block simple HTTP requests (403 Forbidden) due to bot protection.
+        In such cases, use use_browser=True to render pages with Playwright.
+        This requires: uv pip install playwright && playwright install chromium
+    """
+    if not HTML_PARSING_AVAILABLE:
+        logger.warning("HTML parsing dependencies not available")
+        return pd.DataFrame()
+
+    logger.info(f"Fetching {league_code} shot chart: game {game_id}")
+
+    shots = []
+
+    # Method 1: Try HTML endpoints
+    if not use_browser:
+        for suffix in ["sc.html", "shotchart.html", "shots.html"]:
+            try:
+                html = _fetch_fiba_html_page(league_code, game_id, suffix.replace(".html", ""))
+                if html:
+                    shots_from_html = _parse_fiba_shot_chart_html(html, league_code, game_id)
+                    if not shots_from_html.empty:
+                        logger.info(f"Found shots in {suffix}: {len(shots_from_html)} shots")
+                        shots.extend(shots_from_html.to_dict("records"))
+                        break
+            except Exception as e:
+                logger.debug(f"Failed to fetch {suffix}: {e}")
+                continue
+
+    # Method 2: Try JSON API endpoint
+    if not shots and not use_browser:
+        try:
+            json_data = _fetch_fiba_json_api(league_code, game_id, "shots")
+            if json_data:
+                shots_from_json = _parse_fiba_shot_chart_json(json_data, league_code, game_id)
+                if not shots_from_json.empty:
+                    logger.info(f"Found shots in JSON API: {len(shots_from_json)} shots")
+                    shots.extend(shots_from_json.to_dict("records"))
+        except Exception as e:
+            logger.debug(f"Failed to fetch JSON API: {e}")
+
+    # Method 3: Check if embedded in PBP page
+    if not shots and not use_browser:
+        try:
+            html = _fetch_fiba_html_page(league_code, game_id, "pbp")
+            if html and ("shotChart" in html or "shot_chart" in html or "LOC_X" in html):
+                shots_from_pbp = _extract_shots_from_pbp_html(html, league_code, game_id)
+                if not shots_from_pbp.empty:
+                    logger.info(f"Found embedded shots in PBP: {len(shots_from_pbp)} shots")
+                    shots.extend(shots_from_pbp.to_dict("records"))
+        except Exception as e:
+            logger.debug(f"Failed to extract embedded shots: {e}")
+
+    # Method 4: Use browser rendering (fallback for JS-required pages)
+    if not shots and use_browser:
+        try:
+            from .browser_scraper import BrowserScraper
+
+            with BrowserScraper(headless=True, timeout=30000) as scraper:
+                for suffix in ["sc.html", "shotchart.html", "shots.html"]:
+                    try:
+                        url = f"{FIBA_BASE_URL}/u/{league_code}/{game_id}/{suffix}"
+                        html = scraper.get_rendered_html(url)
+                        if html:
+                            shots_from_browser = _parse_fiba_shot_chart_html(html, league_code, game_id)
+                            if not shots_from_browser.empty:
+                                logger.info(f"Found shots via browser ({suffix}): {len(shots_from_browser)} shots")
+                                shots.extend(shots_from_browser.to_dict("records"))
+                                break
+                    except Exception as e:
+                        logger.debug(f"Browser scraping failed for {suffix}: {e}")
+                        continue
+        except ImportError:
+            logger.warning(
+                "Browser scraping requested but Playwright not installed. "
+                "Install with: uv pip install playwright && playwright install chromium"
+            )
+        except Exception as e:
+            logger.error(f"Browser scraping failed: {e}")
+
+    # Convert to DataFrame
+    if not shots:
+        logger.warning(f"No shot chart data found for {league_code} game {game_id}")
+        return pd.DataFrame(
+            columns=[
+                "GAME_ID",
+                "PLAYER_ID",
+                "PLAYER_NAME",
+                "TEAM_CODE",
+                "TEAM_NAME",
+                "PERIOD",
+                "CLOCK",
+                "SHOT_X",
+                "SHOT_Y",
+                "SHOT_TYPE",
+                "SHOT_MADE",
+                "SHOT_VALUE",
+                "SHOT_DISTANCE",
+                "SHOT_ZONE",
+                "LEAGUE",
+                "SEASON",
+            ]
+        )
+
+    df = pd.DataFrame(shots)
+
+    # Add game context
+    df["GAME_ID"] = game_id
+
+    # Add league/season if provided
+    if league:
+        df["LEAGUE"] = league
+    if season:
+        df["SEASON"] = season
+
+    logger.info(f"Scraped {len(df)} shots for {league_code} game {game_id}")
+    return df
+
+
+def _parse_fiba_shot_chart_html(html: str, league_code: str, game_id: str) -> pd.DataFrame:
+    """Parse FIBA shot chart HTML to extract shot data
+
+    Looks for:
+    - JavaScript variables with shot data (e.g., var shotData = [...])
+    - Tables with shot coordinates
+    - SVG/Canvas elements with shot markers
+    """
+    soup = BeautifulSoup(html, "html.parser")
+    shots = []
+
+    # Look for JavaScript shot data
+    scripts = soup.find_all("script")
+    for script in scripts:
+        if script.string and ("shot" in script.string.lower() or "LOC_X" in script.string or "loc_x" in script.string):
+            # Try to extract JSON data from JavaScript
+            import re
+            import json as json_lib
+
+            # Pattern: var shotData = [{...}, {...}]
+            patterns = [
+                r'shotData\s*=\s*(\[.*?\])',
+                r'shots\s*=\s*(\[.*?\])',
+                r'shotChart\s*=\s*(\{.*?\})',
+            ]
+
+            for pattern in patterns:
+                match = re.search(pattern, script.string, re.DOTALL)
+                if match:
+                    try:
+                        json_str = match.group(1)
+                        shot_data = json_lib.loads(json_str)
+                        if isinstance(shot_data, list):
+                            shots.extend(shot_data)
+                        elif isinstance(shot_data, dict) and "shots" in shot_data:
+                            shots.extend(shot_data["shots"])
+                    except Exception as e:
+                        logger.debug(f"Failed to parse JS shot data: {e}")
+                        continue
+
+    # Look for shot tables
+    if not shots:
+        tables = soup.find_all("table")
+        for table in tables:
+            # Check if table has shot-related headers
+            headers = [th.get_text(strip=True) for th in table.find_all("th")]
+            if any(h.lower() in ["x", "y", "loc_x", "loc_y", "shot", "coordinate"] for h in headers):
+                rows = table.find_all("tr")[1:]  # Skip header
+                for row in rows:
+                    cells = row.find_all("td")
+                    if len(cells) >= 4:  # Need at least player, x, y, result
+                        try:
+                            shot = {
+                                "PLAYER_NAME": cells[0].get_text(strip=True),
+                                "SHOT_X": float(cells[1].get_text(strip=True)),
+                                "SHOT_Y": float(cells[2].get_text(strip=True)),
+                                "SHOT_MADE": "made" in cells[3].get_text(strip=True).lower(),
+                            }
+                            shots.append(shot)
+                        except Exception:
+                            continue
+
+    if not shots:
+        return pd.DataFrame()
+
+    # Standardize shot data structure
+    standardized_shots = []
+    for shot in shots:
+        try:
+            standardized_shots.append({
+                "PLAYER_ID": shot.get("playerId", shot.get("player_id")),
+                "PLAYER_NAME": shot.get("playerName", shot.get("player_name", shot.get("PLAYER_NAME"))),
+                "TEAM_CODE": shot.get("teamCode", shot.get("team_code", shot.get("TEAM_CODE"))),
+                "TEAM_NAME": shot.get("teamName", shot.get("team_name", shot.get("TEAM_NAME"))),
+                "PERIOD": shot.get("period", shot.get("quarter", shot.get("PERIOD"))),
+                "CLOCK": shot.get("clock", shot.get("time", shot.get("CLOCK"))),
+                "SHOT_X": shot.get("x", shot.get("locX", shot.get("LOC_X", shot.get("SHOT_X")))),
+                "SHOT_Y": shot.get("y", shot.get("locY", shot.get("LOC_Y", shot.get("SHOT_Y")))),
+                "SHOT_TYPE": shot.get("shotType", shot.get("shot_type", shot.get("SHOT_TYPE", "2PT"))),
+                "SHOT_MADE": shot.get("made", shot.get("shotMade", shot.get("SHOT_MADE", False))),
+                "SHOT_VALUE": shot.get("pointsValue", shot.get("SHOT_VALUE", 2)),
+                "SHOT_DISTANCE": shot.get("distance", shot.get("SHOT_DISTANCE")),
+                "SHOT_ZONE": shot.get("zone", shot.get("SHOT_ZONE")),
+            })
+        except Exception as e:
+            logger.debug(f"Failed to standardize shot: {e}")
+            continue
+
+    return pd.DataFrame(standardized_shots)
+
+
+def _parse_fiba_shot_chart_json(json_data: dict[str, Any], league_code: str, game_id: str) -> pd.DataFrame:
+    """Parse FIBA shot chart JSON API response"""
+    shots = []
+
+    # Try to find shots in JSON structure
+    if isinstance(json_data, list):
+        shots = json_data
+    elif "shots" in json_data:
+        shots = json_data["shots"]
+    elif "data" in json_data and "shots" in json_data["data"]:
+        shots = json_data["data"]["shots"]
+
+    if not shots:
+        return pd.DataFrame()
+
+    # Use same standardization as HTML parser
+    standardized_shots = []
+    for shot in shots:
+        try:
+            standardized_shots.append({
+                "PLAYER_ID": shot.get("playerId", shot.get("player_id")),
+                "PLAYER_NAME": shot.get("playerName", shot.get("player_name")),
+                "TEAM_CODE": shot.get("teamCode", shot.get("team_code")),
+                "TEAM_NAME": shot.get("teamName", shot.get("team_name")),
+                "PERIOD": shot.get("period", shot.get("quarter")),
+                "CLOCK": shot.get("clock", shot.get("time")),
+                "SHOT_X": shot.get("x", shot.get("locX", shot.get("LOC_X"))),
+                "SHOT_Y": shot.get("y", shot.get("locY", shot.get("LOC_Y"))),
+                "SHOT_TYPE": shot.get("shotType", shot.get("shot_type", "2PT")),
+                "SHOT_MADE": shot.get("made", shot.get("shotMade", False)),
+                "SHOT_VALUE": shot.get("pointsValue", shot.get("points_value", 2)),
+                "SHOT_DISTANCE": shot.get("distance"),
+                "SHOT_ZONE": shot.get("zone"),
+            })
+        except Exception as e:
+            logger.debug(f"Failed to parse shot from JSON: {e}")
+            continue
+
+    return pd.DataFrame(standardized_shots)
+
+
+def _extract_shots_from_pbp_html(html: str, league_code: str, game_id: str) -> pd.DataFrame:
+    """Extract shot data embedded in PBP HTML page"""
+    # Similar logic to _parse_fiba_shot_chart_html but looks in PBP context
+    return _parse_fiba_shot_chart_html(html, league_code, game_id)
+
+
+def _fetch_fiba_json_api(league_code: str, game_id: str, endpoint: str) -> dict[str, Any] | None:
+    """Fetch data from FIBA LiveStats JSON API
+
+    Note: May return 403 Forbidden if authentication required
+    """
+    try:
+        # Try FIBA API endpoint structure (similar to fiba_livestats_direct.py)
+        # Endpoint pattern: /data/{competition}/{season}/data/{game_code}/{endpoint}.json
+        # But we don't have season info here, so try simplified endpoint
+        url = f"{FIBA_BASE_URL}/data/{league_code}/data/{game_id}/{endpoint}.json"
+
+        rate_limiter.acquire("fiba_livestats")
+        response = requests.get(url, timeout=10)
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            logger.debug(f"JSON API returned {response.status_code} for {url}")
+            return None
+    except Exception as e:
+        logger.debug(f"Failed to fetch JSON API: {e}")
+        return None
