@@ -83,25 +83,52 @@ def load_game_index(league: str, season: str) -> pd.DataFrame:
 
 
 def estimate_coverage_from_cache(league: str, season: str, data_type: str) -> int:
-    """Estimate data coverage from cache (since FIBA data is ephemeral)
+    """Estimate data coverage from DuckDB storage
 
-    Currently returns 0 since we don't have persistent storage for FIBA.
-    In the future, this could check:
-    - Local parquet cache
-    - DuckDB storage
-    - Remote storage (S3/GCS)
+    Counts distinct games with data in DuckDB storage for a specific league/season.
 
     Args:
-        league: League code
-        season: Season string
+        league: League code (LKL, ABA, BAL, BCL)
+        season: Season string (e.g., "2023-24")
         data_type: "pbp" or "shots"
 
     Returns:
-        Estimated number of games with data
+        Number of games with data in storage
     """
-    # TODO: Implement actual cache checking when FIBA data is persisted
-    # For now, return 0 (conservative estimate)
-    return 0
+    try:
+        # Import storage helper
+        sys.path.insert(0, str(project_root / "src"))
+        from cbb_data.storage.duckdb_storage import get_storage
+
+        storage = get_storage()
+
+        # Convert season format: "2023-24" -> "2023" for storage queries
+        # (Storage uses YYYY format, not YYYY-YY)
+        season_year = season.split("-")[0]
+
+        # Check if data exists for this league/season/type
+        if not storage.has_data(data_type, league, season_year):
+            return 0
+
+        # Count unique games with data
+        # Load minimal data just to count unique GAME_IDs
+        df = storage.load(data_type, league, season_year, limit=None)
+
+        if df.empty:
+            return 0
+
+        # Count distinct games
+        if "GAME_ID" in df.columns:
+            unique_games = df["GAME_ID"].nunique()
+            print(f"  [{league} {season}] Found {unique_games} games with {data_type} in storage")
+            return unique_games
+        else:
+            print(f"  [{league} {season}] WARNING: No GAME_ID column in {data_type} data")
+            return 0
+
+    except Exception as e:
+        print(f"  [{league} {season}] ERROR checking storage for {data_type}: {e}")
+        return 0
 
 
 def check_season_readiness(

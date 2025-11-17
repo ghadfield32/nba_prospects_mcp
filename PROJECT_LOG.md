@@ -1,3 +1,89 @@
+## 2025-11-17 - FIBA Production Readiness: Storage + Health Check + MCP Integration
+
+**Type:** Production Infrastructure - Storage Integration + Health Monitoring + MCP Tools
+**Status:** ✅ COMPLETE - Ready for Playwright browser scraping tests
+**Depends On:** FIBA Validation Layer (2025-11-16)
+
+**Summary**: Completed FIBA production infrastructure by wiring coverage validation to DuckDB storage, creating comprehensive health check script, and integrating FIBA MCP tools into main tools.py. FIBA cluster leagues (LKL, ABA, BAL, BCL) now follow same production pattern as LNB.
+
+**Implementation:**
+
+1. **Coverage Validation → DuckDB Integration** (`tools/fiba/validate_and_monitor_coverage.py`)
+   - Updated `estimate_coverage_from_cache()` to query DuckDB storage
+   - Replaces stubbed 0 return with actual game counts from storage
+   - Season format conversion: "2023-24" → "2023" for storage queries
+   - Counts distinct GAME_IDs for PBP and shots coverage
+
+2. **Health Check Script** (`tools/fiba/health_check.py` - new)
+   - One-command comprehensive FIBA pipeline status
+   - Checks 5 components: Playwright, game indexes, storage, validation, golden fixtures
+   - Clear status icons (✅ ⏳ ❌) with actionable next steps
+   - Supports verbose mode and per-league filtering
+   - Usage: `python tools/fiba/health_check.py [--league LKL] [--verbose]`
+
+3. **MCP Tools Integration** (`src/cbb_data/servers/mcp/tools.py`)
+   - Added `_ensure_fiba_season_ready()` guard function
+   - Integrated 3 FIBA MCP tools into TOOLS registry:
+     - `get_fiba_shots` - Shot chart data with filters (team, player, shot_type, period)
+     - `get_fiba_schedule` - Game schedule with date filters
+     - `list_fiba_leagues` - League discovery with readiness status
+   - All tools enforce season readiness before data access
+   - Browser scraping enabled by default (`use_browser=True`)
+
+**Key Features:**
+
+- **Real Storage Integration**: Coverage validation now checks actual DuckDB data
+- **One-Command Health Check**: Instant pipeline status across all components
+- **LLM-Friendly MCP Tools**: Natural language examples in tool descriptions
+- **Season Readiness Guards**: Prevent access to incomplete/unvalidated data
+- **LNB Pattern Reuse**: FIBA follows proven LNB production infrastructure
+
+**Files Created/Modified (3 files):**
+
+**New:**
+- `tools/fiba/health_check.py` - Comprehensive health check script
+
+**Modified:**
+- `tools/fiba/validate_and_monitor_coverage.py` - DuckDB storage integration
+- `src/cbb_data/servers/mcp/tools.py` - FIBA MCP tools + guard function
+
+**Usage Examples:**
+
+```bash
+# Health check (all leagues)
+python tools/fiba/health_check.py
+
+# Health check (specific league)
+python tools/fiba/health_check.py --league LKL --verbose
+
+# Run validation (now checks real storage)
+python tools/fiba/validate_and_monitor_coverage.py
+```
+
+```python
+# MCP tool usage (example)
+from cbb_data.servers.mcp.tools import tool_get_fiba_shots
+
+# Get LKL made 3-pointers
+result = tool_get_fiba_shots(
+    league="LKL",
+    season="2023-24",
+    shot_type=["3PT"],
+    shot_made=True,
+    limit=100
+)
+# Returns {"success": True/False, "data": [...], "count": N}
+```
+
+**Next Steps:**
+
+1. **Test with Playwright**: `python tools/fiba/test_browser_scraping.py --league LKL`
+2. **Populate golden fixtures** with real values from browser tests
+3. **Add persistent storage** when fetching FIBA data (parquet/DuckDB)
+4. **Test MCP tools** once data is validated and ready
+
+---
+
 ## 2025-11-16 - FIBA Validation Layer: Complete Production Infrastructure
 
 **Type:** Production Infrastructure - Validation + Guards + Testing Framework
