@@ -46,18 +46,27 @@ def test_json_api(competition: str, season: int, game_code: int) -> dict:
 
         if response.status_code == 200:
             data = response.json()
-            print(f"  ✅ SUCCESS - Got JSON data")
+            print("  ✅ SUCCESS - Got JSON data")
             print(f"  Keys: {list(data.keys())[:5]}")
-            return {"success": True, "method": "json_api", "url": url, "data_sample": str(data)[:200]}
+            return {
+                "success": True,
+                "method": "json_api",
+                "url": url,
+                "data_sample": str(data)[:200],
+            }
         elif response.status_code == 403:
-            print(f"  ❌ FORBIDDEN - Requires authentication")
+            print("  ❌ FORBIDDEN - Requires authentication")
             return {"success": False, "method": "json_api", "error": "403 Forbidden"}
         elif response.status_code == 404:
-            print(f"  ❌ NOT FOUND")
+            print("  ❌ NOT FOUND")
             return {"success": False, "method": "json_api", "error": "404 Not Found"}
         else:
             print(f"  ❌ ERROR - Status {response.status_code}")
-            return {"success": False, "method": "json_api", "error": f"Status {response.status_code}"}
+            return {
+                "success": False,
+                "method": "json_api",
+                "error": f"Status {response.status_code}",
+            }
     except Exception as e:
         print(f"  ❌ EXCEPTION: {e}")
         return {"success": False, "method": "json_api", "error": str(e)}
@@ -78,11 +87,18 @@ def test_html_endpoint(league_code: str, game_id: str, page_suffix: str) -> dict
             soup = BeautifulSoup(html, "html.parser")
 
             # Check if page has shot data indicators
-            has_shot_coords = "loc" in html.lower() or "coordinate" in html.lower() or '"x"' in html or '"y"' in html
-            has_shot_table = soup.find("table", class_=lambda x: x and "shot" in x.lower()) if soup else False
+            has_shot_coords = (
+                "loc" in html.lower()
+                or "coordinate" in html.lower()
+                or '"x"' in html
+                or '"y"' in html
+            )
+            has_shot_table = (
+                soup.find("table", class_=lambda x: x and "shot" in x.lower()) if soup else False
+            )
             has_canvas = soup.find("canvas") if soup else False
 
-            print(f"  ✅ SUCCESS - Page exists")
+            print("  ✅ SUCCESS - Page exists")
             print(f"  Has coordinates: {has_shot_coords}")
             print(f"  Has shot table: {bool(has_shot_table)}")
             print(f"  Has canvas: {bool(has_canvas)}")
@@ -95,14 +111,18 @@ def test_html_endpoint(league_code: str, game_id: str, page_suffix: str) -> dict
                 "has_coords": has_shot_coords,
                 "has_table": bool(has_shot_table),
                 "has_canvas": bool(has_canvas),
-                "html_sample": html[:500]
+                "html_sample": html[:500],
             }
         elif response.status_code == 404:
-            print(f"  ❌ NOT FOUND")
+            print("  ❌ NOT FOUND")
             return {"success": False, "method": f"html_{page_suffix}", "error": "404 Not Found"}
         else:
             print(f"  ❌ ERROR - Status {response.status_code}")
-            return {"success": False, "method": f"html_{page_suffix}", "error": f"Status {response.status_code}"}
+            return {
+                "success": False,
+                "method": f"html_{page_suffix}",
+                "error": f"Status {response.status_code}",
+            }
     except Exception as e:
         print(f"  ❌ EXCEPTION: {e}")
         return {"success": False, "method": f"html_{page_suffix}", "error": str(e)}
@@ -146,11 +166,15 @@ def check_embedded_in_existing(league_code: str, game_id: str, page_type: str) -
                 "success": has_shot_data,
                 "method": f"embedded_{page_type}",
                 "url": url,
-                "patterns_found": found_patterns
+                "patterns_found": found_patterns,
             }
         else:
             print(f"  ❌ ERROR - Status {response.status_code}")
-            return {"success": False, "method": f"embedded_{page_type}", "error": f"Status {response.status_code}"}
+            return {
+                "success": False,
+                "method": f"embedded_{page_type}",
+                "error": f"Status {response.status_code}",
+            }
     except Exception as e:
         print(f"  ❌ EXCEPTION: {e}")
         return {"success": False, "method": f"embedded_{page_type}", "error": str(e)}

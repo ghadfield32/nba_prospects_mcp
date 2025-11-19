@@ -831,8 +831,8 @@ async def lnb_readiness_check() -> LNBReadinessResponse:
     """
     try:
         # Import validation functions (lazy import to avoid startup overhead)
-        from pathlib import Path
         import json
+        from pathlib import Path
 
         # Load cached validation status from disk
         data_dir = Path(__file__).parents[4] / "data" / "raw" / "lnb"
@@ -908,8 +908,8 @@ async def lnb_validation_status() -> LNBValidationStatusResponse:
     """
     try:
         # Import validation functions (lazy import to avoid startup overhead)
-        from pathlib import Path
         import json
+        from pathlib import Path
 
         # Load cached validation status from disk
         data_dir = Path(__file__).parents[4] / "data" / "raw" / "lnb"
@@ -983,8 +983,8 @@ def require_lnb_season_ready(season: str) -> None:
         HTTPException: 404 Not Found if season not tracked
     """
     try:
-        from pathlib import Path
         import json
+        from pathlib import Path
 
         # Load cached validation status from disk
         data_dir = Path(__file__).parents[4] / "data" / "raw" / "lnb"
@@ -1001,9 +1001,7 @@ def require_lnb_season_ready(season: str) -> None:
             validation_data = json.load(f)
 
         # Find the requested season
-        season_data = next(
-            (s for s in validation_data["seasons"] if s["season"] == season), None
-        )
+        season_data = next((s for s in validation_data["seasons"] if s["season"] == season), None)
 
         if not season_data:
             raise HTTPException(

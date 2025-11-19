@@ -74,41 +74,44 @@ TIMEOUT = 15  # seconds
 # SEASON METADATA
 # ==============================================================================
 
-# Known competitionId and seasonId for LNB Pro A seasons
-# These were extracted from fixture_detail responses during manual collection
+# UPDATED 2025-11-18: Import centralized league configuration
+# Now supports all 4 LNB leagues via lnb_league_config module
 #
-# To add new seasons:
-# 1. Get ONE fixture UUID from that season (any game)
-# 2. Call fixture_detail endpoint: /v1/embed/12/fixture_detail?fixtureId=<UUID>
-# 3. Extract competitionId and seasonId from response
-# 4. Add to this dict
+# Leagues available:
+# - Betclic ELITE (formerly Pro A) - Top-tier professional, 16 teams
+# - ELITE 2 (formerly Pro B) - Second-tier professional, 20 teams
+# - Espoirs ELITE - U21 top-tier youth league
+# - Espoirs PROB - U21 second-tier youth league
 
-SEASON_METADATA = {
-    "2022-2023": {
-        "competition_id": "5b7857d9-0cbc-11ed-96a7-458862b58368",
-        "season_id": "717ba1c6-0cbc-11ed-80ed-4b65c29000f2",
-        "season_name": "Betclic ÉLITE 2022",
-        "source": "Extracted from ca4b3e98-11a0-11ed-8669-c3922075d502 (Sept 2022 game)",
-    },
-    "2023-2024": {
-        "competition_id": "2cd1ec93-19af-11ee-afb2-8125e5386866",
-        "season_id": "418ecaae-19af-11ee-a563-47c909cdfb65",
-        "season_name": "Betclic ÉLITE 2023",
-        "source": "Extracted from standings API",
-    },
-    "2024-2025": {
-        "competition_id": "a2262b45-2fab-11ef-8eb7-99149ebb5652",
-        "season_id": "cab2f926-2fab-11ef-8b99-e553c4d56b24",
-        "season_name": "Betclic ÉLITE 2024",
-        "source": "Extracted from standings API",
-    },
-    "2025-2026": {
-        "competition_id": "3f4064bb-51ad-11f0-aaaf-2923c944b404",
-        "season_id": "df310a05-51ad-11f0-bd89-c735508e1e09",
-        "season_name": "Betclic ÉLITE 2025",
-        "source": "Extracted from standings API",
-    },
-}
+import sys
+from pathlib import Path
+
+# Add project root to path for imports
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
+
+from src.cbb_data.fetchers.lnb_league_config import (
+    BETCLIC_ELITE_SEASONS,
+    ELITE_2_SEASONS,
+    ESPOIRS_ELITE_SEASONS,
+    ESPOIRS_PROB_SEASONS,  # Default to Betclic ELITE for backward compat
+)
+
+# Combine all league seasons into unified lookup dict
+# This allows discovery for any season from any league
+SEASON_METADATA = {}
+for seasons_dict in [
+    BETCLIC_ELITE_SEASONS,
+    ELITE_2_SEASONS,
+    ESPOIRS_ELITE_SEASONS,
+    ESPOIRS_PROB_SEASONS,
+]:
+    for season_key, meta in seasons_dict.items():
+        # Preserve competition_name from config, add "season_name" alias for compatibility
+        if season_key not in SEASON_METADATA:
+            meta_copy = dict(meta)  # Create copy to avoid modifying source
+            meta_copy["season_name"] = meta.get("competition_name", "Unknown")
+            SEASON_METADATA[season_key] = meta_copy
 
 
 # ==============================================================================

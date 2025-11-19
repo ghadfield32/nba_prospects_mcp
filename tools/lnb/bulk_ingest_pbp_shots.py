@@ -469,7 +469,14 @@ def bulk_ingest(
 
     if to_fetch.empty:
         print("\n[INFO] No games to fetch!")
-        return {"total": 0, "pbp_success": 0, "shots_success": 0, "both_success": 0, "pbp_errors": 0, "shots_errors": 0}
+        return {
+            "total": 0,
+            "pbp_success": 0,
+            "shots_success": 0,
+            "both_success": 0,
+            "pbp_errors": 0,
+            "shots_errors": 0,
+        }
 
     stats = {
         "total": len(to_fetch),
@@ -488,7 +495,11 @@ def bulk_ingest(
         print(f"  Away: {row.away_team_name}")
 
         pbp_success = False
-        if force_refetch or not row.has_pbp or not has_parquet_for_game(PBP_DIR, row.season, row.game_id):
+        if (
+            force_refetch
+            or not row.has_pbp
+            or not has_parquet_for_game(PBP_DIR, row.season, row.game_id)
+        ):
             pbp_success = ingest_pbp_for_game(row.game_id, row.season)
             if pbp_success:
                 stats["pbp_success"] += 1
@@ -499,7 +510,11 @@ def bulk_ingest(
             print("  [SKIP] PBP already ingested")
 
         shots_success = False
-        if force_refetch or not row.has_shots or not has_parquet_for_game(SHOTS_DIR, row.season, row.game_id):
+        if (
+            force_refetch
+            or not row.has_shots
+            or not has_parquet_for_game(SHOTS_DIR, row.season, row.game_id)
+        ):
             shots_success = ingest_shots_for_game(row.game_id, row.season)
             if shots_success:
                 stats["shots_success"] += 1

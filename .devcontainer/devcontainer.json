@@ -1,0 +1,57 @@
+{
+  "name": "CBB Data - Full Stack",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.debugpy",
+        "charliermarsh.ruff",
+        "REditorSupport.r",
+        "Ikuyadeu.r",
+        "ms-toolsai.jupyter",
+        "ms-toolsai.jupyter-keymap",
+        "ms-toolsai.jupyter-renderers",
+        "mechatroner.rainbow-csv",
+        "eamodio.gitlens",
+        "mhutchie.git-graph",
+        "streetsidesoftware.code-spell-checker",
+        "usernamehw.errorlens"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.analysis.typeCheckingMode": "basic",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.organizeImports": "explicit"
+        },
+        "[python]": {
+          "editor.defaultFormatter": "charliermarsh.ruff"
+        },
+        "r.rterm.linux": "/usr/bin/R",
+        "r.bracketedPaste": true
+      }
+    }
+  },
+  "forwardPorts": [8000, 8080],
+  "postCreateCommand": "uv sync --extra dev --extra nz_nbl --extra acb --extra servers && playwright install chromium",
+  "containerEnv": {
+    "PYTHONUNBUFFERED": "1",
+    "UV_SYSTEM_PYTHON": "1"
+  },
+  "remoteUser": "vscode",
+  "mounts": [
+    "source=cbb-data-uv-cache,target=/home/vscode/.cache/uv,type=volume",
+    "source=cbb-data-r-libs,target=/usr/local/lib/R/site-library,type=volume"
+  ]
+}

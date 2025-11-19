@@ -19,7 +19,7 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parents[2] / "src"))
 
-from cbb_data.fetchers import lkl, aba, bal, bcl
+from cbb_data.fetchers import aba, bal, bcl, lkl
 
 
 def load_golden_fixtures() -> dict:
@@ -66,7 +66,7 @@ def validate_fixture(
 
     # Fetch actual data
     try:
-        print(f"Fetching shot chart (use_browser=True)...")
+        print("Fetching shot chart (use_browser=True)...")
         shots_df = fetch_function(season, force_refresh=True, use_browser=True)
 
         # Filter to specific game
@@ -88,7 +88,7 @@ def validate_fixture(
         three_pointers = len(game_shots[game_shots["SHOT_TYPE"] == "3PT"])
         two_pointers = len(game_shots[game_shots["SHOT_TYPE"] == "2PT"])
         fg_pct = made_shots / total_shots if total_shots > 0 else 0
-        threes_made = game_shots[(game_shots["SHOT_TYPE"] == "3PT") & (game_shots["SHOT_MADE"] == True)]
+        threes_made = game_shots[(game_shots["SHOT_TYPE"] == "3PT") & game_shots["SHOT_MADE"]]
         three_pct = len(threes_made) / three_pointers if three_pointers > 0 else 0
 
         actual = {
@@ -110,7 +110,7 @@ def validate_fixture(
                 continue
 
             # Calculate difference
-            if isinstance(actual_val, (int, float)):
+            if isinstance(actual_val, int | float):
                 diff_pct = abs(actual_val - expected_val) / expected_val if expected_val != 0 else 0
 
                 if diff_pct > tolerance:
@@ -120,16 +120,16 @@ def validate_fixture(
 
         # Determine status
         if issues:
-            print(f"\n⚠️  VALIDATION WARNINGS:")
+            print("\n⚠️  VALIDATION WARNINGS:")
             for issue in issues:
                 print(f"  - {issue}")
             status = "warning"
         else:
-            print(f"\n✅ VALIDATION PASSED")
+            print("\n✅ VALIDATION PASSED")
             status = "passed"
 
         # Print comparison
-        print(f"\nComparison:")
+        print("\nComparison:")
         print(f"  {'Metric':<20} {'Expected':<15} {'Actual':<15} {'Status':<10}")
         print(f"  {'-'*60}")
 
@@ -137,7 +137,7 @@ def validate_fixture(
             exp_val = expected.get(metric, "N/A")
             act_val = actual.get(metric, "N/A")
 
-            if isinstance(exp_val, (int, float)) and isinstance(act_val, (int, float)):
+            if isinstance(exp_val, int | float) and isinstance(act_val, int | float):
                 diff = abs(act_val - exp_val) / exp_val if exp_val != 0 else 0
                 status_symbol = "✅" if diff <= tolerance else "⚠️"
             else:
@@ -157,6 +157,7 @@ def validate_fixture(
     except Exception as e:
         print(f"\n❌ FAILED - {e}")
         import traceback
+
         traceback.print_exc()
 
         return {
@@ -174,7 +175,7 @@ def main():
         "--league",
         choices=["LKL", "ABA", "BAL", "BCL", "all"],
         default="all",
-        help="League to validate (default: all)"
+        help="League to validate (default: all)",
     )
 
     args = parser.parse_args()
@@ -223,7 +224,7 @@ def main():
     print(f"⏭️  Skipped: {len(skipped)}/{len(results)}")
 
     if warnings:
-        print(f"\nWarnings:")
+        print("\nWarnings:")
         for r in warnings:
             print(f"  - {r['league']} {r['season']} game {r['game_id']}")
             if r.get("issues"):
@@ -231,9 +232,11 @@ def main():
                     print(f"    • {issue}")
 
     if failed:
-        print(f"\nFailures:")
+        print("\nFailures:")
         for r in failed:
-            print(f"  - {r['league']} {r['season']} game {r['game_id']}: {r.get('reason', 'Unknown')}")
+            print(
+                f"  - {r['league']} {r['season']} game {r['game_id']}: {r.get('reason', 'Unknown')}"
+            )
 
     # Return exit code
     return 1 if (failed or warnings) else 0

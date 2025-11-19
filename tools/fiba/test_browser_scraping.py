@@ -41,7 +41,7 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parents[2] / "src"))
 
-from cbb_data.fetchers import lkl, aba, bal, bcl
+from cbb_data.fetchers import aba, bal, bcl, lkl
 from cbb_data.fetchers.browser_scraper import BrowserScraper
 
 
@@ -124,7 +124,7 @@ def test_league_shots(
 
         # Network response capture (if enabled)
         if capture_responses and test_game_ids:
-            print(f"\n  🔍 Network Response Capture Mode Enabled")
+            print("\n  🔍 Network Response Capture Mode Enabled")
             print(f"  Testing game: {test_game_ids[0]}")
 
             debug_path = Path(debug_dir) / league_name / season / f"{test_game_ids[0]}_responses"
@@ -138,11 +138,15 @@ def test_league_shots(
                     debug_dir=debug_path,
                 )
 
-                json_responses = [r for r in responses if r["content_type"] and "json" in r["content_type"]]
-                print(f"  📦 Captured {len(responses)} total responses, {len(json_responses)} JSON-like")
+                json_responses = [
+                    r for r in responses if r["content_type"] and "json" in r["content_type"]
+                ]
+                print(
+                    f"  📦 Captured {len(responses)} total responses, {len(json_responses)} JSON-like"
+                )
 
                 if json_responses:
-                    print(f"\n  JSON Responses Found:")
+                    print("\n  JSON Responses Found:")
                     for i, resp in enumerate(json_responses[:3]):  # Show first 3
                         url_short = resp["url"][-60:] if len(resp["url"]) > 60 else resp["url"]
                         size = len(resp["text"]) if resp["text"] else 0
@@ -153,10 +157,12 @@ def test_league_shots(
         print(f"\n  Fetching shot chart (use_browser=True, debug_html={debug_html})...")
 
         # Call fetch with appropriate debug flags
-        shots_df = fetch_function(season, force_refresh=True, use_browser=True, debug_html=debug_html)
+        shots_df = fetch_function(
+            season, force_refresh=True, use_browser=True, debug_html=debug_html
+        )
 
         if shots_df.empty:
-            print(f"\n  ❌ No shots data retrieved")
+            print("\n  ❌ No shots data retrieved")
             if debug_html:
                 print(f"  💾 HTML debug files saved to: {debug_dir}/{league_name}/{season}/")
             return {
@@ -171,9 +177,11 @@ def test_league_shots(
         total_shots = len(shots_df)
         unique_games = shots_df["GAME_ID"].nunique() if "GAME_ID" in shots_df.columns else 0
         made_shots = shots_df["SHOT_MADE"].sum() if "SHOT_MADE" in shots_df.columns else 0
-        three_pointers = len(shots_df[shots_df["SHOT_TYPE"] == "3PT"]) if "SHOT_TYPE" in shots_df.columns else 0
+        three_pointers = (
+            len(shots_df[shots_df["SHOT_TYPE"] == "3PT"]) if "SHOT_TYPE" in shots_df.columns else 0
+        )
 
-        print(f"\n✅ SUCCESS!")
+        print("\n✅ SUCCESS!")
         print(f"  Total shots: {total_shots}")
         print(f"  Unique games: {unique_games}")
         print(f"  Made shots: {made_shots} ({made_shots/total_shots*100:.1f}%)")
@@ -181,7 +189,7 @@ def test_league_shots(
 
         # Show sample data
         if total_shots > 0:
-            print(f"\nSample data (first 3 shots):")
+            print("\nSample data (first 3 shots):")
             sample_cols = ["GAME_ID", "PLAYER_NAME", "SHOT_TYPE", "SHOT_MADE", "SHOT_X", "SHOT_Y"]
             available_cols = [c for c in sample_cols if c in shots_df.columns]
             print(shots_df.head(3)[available_cols].to_string())
@@ -199,6 +207,7 @@ def test_league_shots(
     except Exception as e:
         print(f"\n❌ FAILED: {e}")
         import traceback
+
         traceback.print_exc()
 
         return {
@@ -215,45 +224,41 @@ def main():
         "--league",
         choices=["LKL", "ABA", "BAL", "BCL", "all"],
         default="all",
-        help="League to test (default: all)"
+        help="League to test (default: all)",
     )
-    parser.add_argument(
-        "--season",
-        default="2023-24",
-        help="Season to test (default: 2023-24)"
-    )
+    parser.add_argument("--season", default="2023-24", help="Season to test (default: 2023-24)")
     parser.add_argument(
         "--max-games",
         type=int,
         default=1,
-        help="Maximum games to test per league (default: 1 for speed)"
+        help="Maximum games to test per league (default: 1 for speed)",
     )
     parser.add_argument(
         "--debug-html",
         action="store_true",
-        help="Dump raw HTML for games with no parsed shots (for debugging page structure)"
+        help="Dump raw HTML for games with no parsed shots (for debugging page structure)",
     )
     parser.add_argument(
         "--capture-responses",
         action="store_true",
-        help="Capture network responses (shots/shotchart JSON) via Playwright (for finding data endpoints)"
+        help="Capture network responses (shots/shotchart JSON) via Playwright (for finding data endpoints)",
     )
     parser.add_argument(
         "--debug-dir",
         default="data/raw/fiba/debug",
-        help="Base directory for debug artifacts (default: data/raw/fiba/debug)"
+        help="Base directory for debug artifacts (default: data/raw/fiba/debug)",
     )
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Only check if Playwright is installed, don't fetch data"
+        help="Only check if Playwright is installed, don't fetch data",
     )
 
     args = parser.parse_args()
 
-    print("="*80)
+    print("=" * 80)
     print("FIBA Shot Chart Browser Scraping Test")
-    print("="*80)
+    print("=" * 80)
 
     # Check Playwright installation
     if not check_playwright_installed():
@@ -312,7 +317,9 @@ def main():
 
     print(f"\n✅ Successful: {len(successful)}/{len(results)} leagues")
     for r in successful:
-        print(f"  - {r['league']}: {r['shots']} shots from {r['games']} games ({r['pct_made']*100:.1f}% made)")
+        print(
+            f"  - {r['league']}: {r['shots']} shots from {r['games']} games ({r['pct_made']*100:.1f}% made)"
+        )
 
     if failed:
         print(f"\n❌ Failed: {len(failed)}/{len(results)} leagues")

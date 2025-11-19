@@ -287,12 +287,14 @@ class BrowserScraper:
                 except Exception:
                     text = None
 
-                captured.append({
-                    "url": resp_url,
-                    "status": status,
-                    "content_type": content_type,
-                    "text": text,
-                })
+                captured.append(
+                    {
+                        "url": resp_url,
+                        "status": status,
+                        "content_type": content_type,
+                        "text": text,
+                    }
+                )
 
                 logger.debug(
                     "Captured response: %s (status=%d, content-type=%s, size=%d)",

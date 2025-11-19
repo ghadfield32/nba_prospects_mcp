@@ -104,6 +104,22 @@ servers = [
     "mcp>=1.0.0",
 ]
 
+# NZ-NBL JS-rendered schedule discovery (Genius Sports widget)
+nz_nbl = [
+    "playwright>=1.49.0",
+]
+
+# ACB pbp + shot charts via BAwiR R package
+acb = [
+    "rpy2>=3.5.0",
+]
+
+# Full scraping bundle (all league-specific scrapers)
+scraping = [
+    "playwright>=1.49.0",
+    "rpy2>=3.5.0",
+]
+
 # Full installation with all optional dependencies
 all = [
     "pytest>=7.4.0",
@@ -123,6 +139,8 @@ all = [
     "uvicorn[standard]>=0.32.0",
     "python-multipart>=0.0.20",
     "mcp>=1.0.0",
+    "playwright>=1.49.0",
+    "rpy2>=3.5.0",
 ]
 
 [build-system]

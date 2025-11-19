@@ -495,14 +495,10 @@ def fetch_lnb_player_season(
 def fetch_lnb_schedule(
     season: str = "2024",
 ) -> pd.DataFrame:
-    """Fetch LNB Pro A schedule via web scraping (Playwright)
+    """Fetch LNB Pro A schedule via official JSON API.
 
-    Scrapes JavaScript-rendered schedule from official LNB website.
-    Falls back to empty DataFrame if Playwright is not installed.
-
-    ⚠️ **REQUIRES PLAYWRIGHT**: Install with:
-        uv pip install playwright
-        playwright install chromium
+    This is a wrapper around fetch_lnb_schedule_v2 that accepts string seasons.
+    Uses the official LNB Atrium API for accurate game schedules.
 
     Args:
         season: Season year as string (e.g., "2024" for 2024-25 season)
@@ -510,170 +506,36 @@ def fetch_lnb_schedule(
     Returns:
         DataFrame with game schedule
 
-    Columns (after normalization):
-        - GAME_ID: Unique game identifier
-        - SEASON: Season string
+    Columns:
+        - GAME_ID: Unique game identifier (int)
+        - LEAGUE: "LNB"
+        - SEASON: Season year (int)
         - GAME_DATE: Game date (YYYY-MM-DD format)
         - HOME_TEAM: Home team name
         - AWAY_TEAM: Away team name
         - HOME_SCORE: Home team final score (None if not played)
         - AWAY_SCORE: Away team final score (None if not played)
-        - STATUS: Game status (scheduled/live/finished)
-        - VENUE: Game venue/arena
-        - LEAGUE: "LNB_PROA"
+        - STATUS: Game status
 
     Example:
-        >>> # Requires Playwright installed
         >>> df = fetch_lnb_schedule("2024")
-        >>> upcoming = df[df["STATUS"] == "scheduled"]
-        >>> print(upcoming[["GAME_DATE", "HOME_TEAM", "AWAY_TEAM"]])
+        >>> print(df[["GAME_ID", "GAME_DATE", "HOME_TEAM", "AWAY_TEAM"]])
 
     Note:
-        - Requires Playwright for JavaScript execution
-        - Falls back gracefully if Playwright not installed
-        - Uses browser automation (slower than API but more reliable)
-        - Respects rate limiting (1 req/sec)
+        - Season "2024" → API season 2025 (2024-25 season)
+        - Uses JSON API (fast and reliable)
+        - No fallback to HTML scraping (which returns standings, not schedule)
     """
-    # Check Playwright availability
-    if not is_playwright_available():
-        logger.warning(
-            "Playwright not installed. Cannot scrape JavaScript-rendered schedule. "
-            "Install with: uv pip install playwright && playwright install chromium. "
-            "Returning empty DataFrame."
-        )
-        return pd.DataFrame(
-            columns=[
-                "GAME_ID",
-                "SEASON",
-                "GAME_DATE",
-                "HOME_TEAM",
-                "AWAY_TEAM",
-                "HOME_SCORE",
-                "AWAY_SCORE",
-                "STATUS",
-                "VENUE",
-                "LEAGUE",
-            ]
-        )
-
-    rate_limiter.acquire("lnb")
-    logger.info(f"Fetching LNB Pro A schedule via Playwright: season={season}")
-
+    # Convert string season to int for API
+    # "2024" → 2025 (2024-25 season uses end year in API)
     try:
-        with BrowserScraper(headless=True, timeout=45000) as scraper:
-            # Navigate to LNB schedule/calendar page
-            # URL structure: https://www.lnb.fr/pro-a/calendrier or /matchs
-            url = f"{LNB_BASE_URL}/pro-a/calendrier"
-
-            logger.info(f"Navigating to {url}")
-
-            # Get rendered HTML and extract tables
-            # Schedule tables may have fixtures grouped by round/date
-            tables = scraper.get_tables(
-                url=url,
-                wait_for="table",  # Wait for schedule table to appear
-                wait_time=3.0,  # Give extra time for JavaScript to fully render
-            )
-
-            if not tables:
-                logger.warning("No tables found on LNB schedule page")
-                return pd.DataFrame(
-                    columns=[
-                        "GAME_ID",
-                        "SEASON",
-                        "GAME_DATE",
-                        "HOME_TEAM",
-                        "AWAY_TEAM",
-                        "HOME_SCORE",
-                        "AWAY_SCORE",
-                        "STATUS",
-                        "LEAGUE",
-                    ]
-                )
-
-            logger.info(f"Found {len(tables)} tables on schedule page")
-
-            # Find schedule table (likely has dates, team names, scores)
-            # Schedule tables typically have moderate number of rows (200-300 games per season)
-            best_table = None
-            best_table_rows = 0
-
-            for i, table_html in enumerate(tables):
-                table_html_complete = f"<table>{table_html}</table>"
-
-                try:
-                    dfs = pd.read_html(StringIO(table_html_complete))
-                    if dfs and len(dfs) > 0:
-                        df = dfs[0]
-                        num_rows = len(df)
-                        num_cols = len(df.columns)
-
-                        logger.debug(f"Table {i+1}: {num_rows} rows x {num_cols} columns")
-
-                        # Schedule table should have:
-                        # - Moderate rows (50+ games)
-                        # - Several columns (date, teams, scores, venue)
-                        if num_rows > best_table_rows and num_cols >= 4:
-                            best_table = df
-                            best_table_rows = num_rows
-                            logger.debug(f"Table {i+1} is new best candidate")
-
-                except Exception as e:
-                    logger.debug(f"Failed to parse table {i+1}: {e}")
-                    continue
-
-            if best_table is None:
-                logger.warning("Could not find schedule table on page")
-                return pd.DataFrame(
-                    columns=[
-                        "GAME_ID",
-                        "SEASON",
-                        "GAME_DATE",
-                        "HOME_TEAM",
-                        "AWAY_TEAM",
-                        "HOME_SCORE",
-                        "AWAY_SCORE",
-                        "STATUS",
-                        "LEAGUE",
-                    ]
-                )
-
-            logger.info(
-                f"Selected schedule table: {len(best_table)} rows x {len(best_table.columns)} columns"
-            )
-
-            # Map columns to standard format
-            # Typical French schedule columns:
-            # - Date/Jour = Game date
-            # - Équipe dom./Domicile = Home team
-            # - Équipe ext./Extérieur = Away team
-            # - Score = Final score (e.g., "85-78" or "-" if not played)
-            # - Lieu/Salle = Venue
-
-            # For now, return with generic column mapping
-            # TODO: Inspect actual website to map columns accurately
-            df = best_table.copy()
-
-            # Add league metadata
-            df["LEAGUE"] = "LNB_PROA"
-            df["SEASON"] = season
-
-            # Generate game IDs if not present
-            if "GAME_ID" not in df.columns:
-                df["GAME_ID"] = [f"LNB_{season}_{i+1}" for i in range(len(df))]
-
-            logger.info(f"Successfully scraped {len(df)} games")
-            return df
-
-    except Exception as e:
-        logger.error(f"Failed to scrape LNB schedule: {e}")
-        import traceback
-
-        traceback.print_exc()
-
+        season_int = int(season) + 1
+    except ValueError:
+        logger.error(f"Invalid season format: {season}")
         return pd.DataFrame(
             columns=[
                 "GAME_ID",
+                "LEAGUE",
                 "SEASON",
                 "GAME_DATE",
                 "HOME_TEAM",
@@ -681,24 +543,11 @@ def fetch_lnb_schedule(
                 "HOME_SCORE",
                 "AWAY_SCORE",
                 "STATUS",
-                "LEAGUE",
             ]
         )
 
-    # Fallback return (unreachable but satisfies mypy)
-    return pd.DataFrame(
-        columns=[
-            "GAME_ID",
-            "SEASON",
-            "GAME_DATE",
-            "HOME_TEAM",
-            "AWAY_TEAM",
-            "HOME_SCORE",
-            "AWAY_SCORE",
-            "STATUS",
-            "LEAGUE",
-        ]
-    )
+    # Use the JSON API directly
+    return fetch_lnb_schedule_v2(season=season_int, division=1)
 
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
@@ -1670,6 +1519,7 @@ def fetch_lnb_shots_historical(
 def fetch_lnb_player_game_normalized(
     season: str | None = None,
     game_ids: list[str] | None = None,
+    league: str | None = None,
     **kwargs: Any,
 ) -> pd.DataFrame:
     """Fetch LNB player-game box scores from normalized parquet files
@@ -1685,6 +1535,7 @@ def fetch_lnb_player_game_normalized(
     Args:
         season: Season in format "2024-2025" or "2025-2026"
         game_ids: List of game/fixture UUIDs to filter
+        league: League identifier (e.g., "LNB_PROA", "LNB_ELITE2", "LNB_ESPOIRS_ELITE")
         **kwargs: Additional filters (team, player, limit)
 
     Returns:
@@ -1693,9 +1544,10 @@ def fetch_lnb_player_game_normalized(
         FTM, FTA, FT_PCT, REB, AST, STL, BLK, TOV, PF, PLUS_MINUS, SEASON, LEAGUE
 
     Example:
-        >>> player_game = fetch_lnb_player_game_normalized(season="2024-2025")
-        >>> team_stats = fetch_lnb_player_game_normalized(
+        >>> player_game = fetch_lnb_player_game_normalized(season="2024-2025", league="LNB_PROA")
+        >>> elite2_stats = fetch_lnb_player_game_normalized(
         ...     season="2024-2025",
+        ...     league="LNB_ELITE2",
         ...     team="Paris Basketball"
         ... )
     """
@@ -1708,7 +1560,9 @@ def fetch_lnb_player_game_normalized(
         season = "2024-2025"
 
     try:
-        return get_lnb_normalized_player_game(season=season, game_ids=game_ids, **kwargs)
+        return get_lnb_normalized_player_game(
+            season=season, game_ids=game_ids, league=league, **kwargs
+        )
     except Exception as e:
         logger.error(f"fetch_lnb_player_game_normalized failed: {e}")
         return pd.DataFrame()
@@ -1717,6 +1571,7 @@ def fetch_lnb_player_game_normalized(
 def fetch_lnb_team_game_normalized(
     season: str | None = None,
     game_ids: list[str] | None = None,
+    league: str | None = None,
     **kwargs: Any,
 ) -> pd.DataFrame:
     """Fetch LNB team-game box scores from normalized parquet files
@@ -1728,6 +1583,7 @@ def fetch_lnb_team_game_normalized(
     Args:
         season: Season in format "2024-2025" or "2025-2026"
         game_ids: List of game/fixture UUIDs to filter
+        league: League identifier (e.g., "LNB_PROA", "LNB_ELITE2", "LNB_ESPOIRS_ELITE")
         **kwargs: Additional filters (team, limit)
 
     Returns:
@@ -1736,9 +1592,10 @@ def fetch_lnb_team_game_normalized(
         FG3_PCT, FT_PCT, SEASON, LEAGUE, OPP_ID, OPP_PTS, WIN
 
     Example:
-        >>> team_game = fetch_lnb_team_game_normalized(season="2024-2025")
-        >>> team_stats = fetch_lnb_team_game_normalized(
+        >>> team_game = fetch_lnb_team_game_normalized(season="2024-2025", league="LNB_PROA")
+        >>> elite2_stats = fetch_lnb_team_game_normalized(
         ...     season="2024-2025",
+        ...     league="LNB_ELITE2",
         ...     team="Monaco"
         ... )
     """
@@ -1751,7 +1608,47 @@ def fetch_lnb_team_game_normalized(
         season = "2024-2025"
 
     try:
-        return get_lnb_normalized_team_game(season=season, game_ids=game_ids, **kwargs)
+        return get_lnb_normalized_team_game(
+            season=season, game_ids=game_ids, league=league, **kwargs
+        )
     except Exception as e:
         logger.error(f"fetch_lnb_team_game_normalized failed: {e}")
         return pd.DataFrame()
+
+
+# ==============================================================================
+# League-Specific Wrapper Functions (Multi-League Support)
+# ==============================================================================
+
+
+# Elite 2 (formerly Pro B) - Second-tier professional league
+def fetch_elite2_player_game(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
+    """Fetch Elite 2 player-game data (league-specific wrapper)"""
+    return fetch_lnb_player_game_normalized(season=season, league="LNB_ELITE2", **kwargs)
+
+
+def fetch_elite2_team_game(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
+    """Fetch Elite 2 team-game data (league-specific wrapper)"""
+    return fetch_lnb_team_game_normalized(season=season, league="LNB_ELITE2", **kwargs)
+
+
+# Espoirs ELITE (U21 top-tier youth league)
+def fetch_espoirs_elite_player_game(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
+    """Fetch Espoirs ELITE player-game data (league-specific wrapper)"""
+    return fetch_lnb_player_game_normalized(season=season, league="LNB_ESPOIRS_ELITE", **kwargs)
+
+
+def fetch_espoirs_elite_team_game(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
+    """Fetch Espoirs ELITE team-game data (league-specific wrapper)"""
+    return fetch_lnb_team_game_normalized(season=season, league="LNB_ESPOIRS_ELITE", **kwargs)
+
+
+# Espoirs PROB (U21 second-tier youth league)
+def fetch_espoirs_prob_player_game(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
+    """Fetch Espoirs PROB player-game data (league-specific wrapper)"""
+    return fetch_lnb_player_game_normalized(season=season, league="LNB_ESPOIRS_PROB", **kwargs)
+
+
+def fetch_espoirs_prob_team_game(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
+    """Fetch Espoirs PROB team-game data (league-specific wrapper)"""
+    return fetch_lnb_team_game_normalized(season=season, league="LNB_ESPOIRS_PROB", **kwargs)

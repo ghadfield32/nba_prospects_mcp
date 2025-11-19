@@ -272,9 +272,7 @@ class LNBReadinessResponse(BaseModel):
         default_factory=datetime.utcnow, description="Timestamp of readiness check (UTC)"
     )
     seasons: list[LNBSeasonReadiness] = Field(description="Readiness status per season")
-    any_season_ready: bool = Field(
-        description="Whether at least one season is ready for modeling"
-    )
+    any_season_ready: bool = Field(description="Whether at least one season is ready for modeling")
     ready_seasons: list[str] = Field(description="List of seasons ready for modeling")
 
     class Config:
@@ -314,9 +312,7 @@ class LNBValidationStatusResponse(BaseModel):
     api_discrepancies: int = Field(description="Number of API discrepancies found")
     consistency_errors: int = Field(description="Number of per-game consistency errors")
     consistency_warnings: int = Field(description="Number of per-game consistency warnings")
-    ready_for_live: bool = Field(
-        description="Whether system is ready for live game ingestion"
-    )
+    ready_for_live: bool = Field(description="Whether system is ready for live game ingestion")
     seasons: list[LNBSeasonReadiness] = Field(description="Readiness status per season")
 
     class Config:

@@ -1,21 +1,26 @@
 """NBL Australia Fetcher
 
-Official NBL Australia data via API-Basketball (api-sports.io).
+NBL Australia data via nblR GitHub data releases and API-Basketball.
 
 Australia's premier professional basketball league featuring top domestic and international talent.
 Known for developing NBA prospects including Josh Giddey, Dyson Daniels, and many others.
 
 **DATA AVAILABILITY**:
-- **Player/Team season stats**: ✅ Available (via API-Basketball)
-- **Schedule**: ✅ Available (via API-Basketball)
-- **Box scores**: ✅ Available (game-level stats via API-Basketball)
-- **Play-by-play**: ❌ Not available (API-Basketball doesn't provide PBP)
-- **Shot charts**: ⚠️ Limited (requires manual investigation of NBL website)
+- **Game results**: ✅ Available (via nblR data - 1979+)
+- **Player box scores**: ✅ Available (via nblR data - 2015+)
+- **Team box scores**: ✅ Available (via nblR data - 2015+)
+- **Play-by-play**: ✅ Available (via nblR data - 2015+)
+- **Shot charts**: ✅ Available (via nblR data - 2015+)
+- **Player season stats**: ✅ Available (via API-Basketball or aggregated from box scores)
 
-**Data Source**: API-Basketball (api-sports.io)
+**Primary Data Source**: nblR GitHub Data Releases
+- **URL**: https://github.com/JaseZiv/nblr_data/releases
+- **No API key required** - Public data files
+- **Format**: RDS (R data files) parsed with pyreadr
+- **Historical depth**: Results from 1979, detailed stats from 2015
+
+**Secondary Data Source**: API-Basketball (api-sports.io)
 - **Free tier**: 100 requests/day
-- **Paid tiers**: Basic ($10/mo, 3k req/day), Pro ($25/mo, 10k req/day)
-- **Coverage**: 426 leagues worldwide including NBL Australia
 - **API Key**: Set `API_BASKETBALL_KEY` environment variable
 
 Competition Structure:
@@ -30,26 +35,29 @@ Historical Context:
 - Strong development pathway to NBA
 
 Technical Notes:
-- Uses API-Basketball client with automatic caching and rate limiting
-- Graceful degradation: returns empty DataFrames if API unavailable
-- Rate limiting: Managed by API-Basketball client (respects quota)
-- Alternative: nblR R package (reverse-engineer their approach for shot data)
+- Uses nblR pre-processed data files (no scraping required)
+- Graceful degradation: falls back to API-Basketball if available
+- pyreadr required for RDS file parsing
 
 Documentation:
 - NBL Official: https://www.nbl.com.au/
-- API-Basketball: https://api-sports.io/documentation/basketball/v1
+- nblR Package: https://github.com/JaseZiv/nblR
+- nblR Data: https://github.com/JaseZiv/nblr_data/releases
 
 Implementation Status:
-✅ IMPLEMENTED - API-Basketball integration for schedule, player/team season stats
-⚠️ Shot data requires additional implementation (NBL website scraping or nblR reverse-engineering)
+✅ IMPLEMENTED - nblR data integration for all data types (2025-11-18)
+✅ IMPLEMENTED - API-Basketball integration for player season stats
 """
 
 from __future__ import annotations
 
 import logging
 import os
+import tempfile
+from pathlib import Path
 
 import pandas as pd
+import requests
 
 from ..clients.api_basketball import APIBasketballClient
 from ..utils.rate_limiter import get_source_limiter
@@ -57,12 +65,412 @@ from .base import cached_dataframe, retry_on_error
 
 logger = logging.getLogger(__name__)
 
+# nblR data release URLs
+# Each data type is in a different release tag
+NBLR_DATA_BASE_URL = "https://github.com/JaseZiv/nblr_data/releases/download"
+
+NBLR_DATA_FILES = {
+    "results": f"{NBLR_DATA_BASE_URL}/match_results/results_wide.rds",
+    "box_player": f"{NBLR_DATA_BASE_URL}/archive/box_player.rds",
+    "box_team": f"{NBLR_DATA_BASE_URL}/box_team/box_team.rds",
+    "pbp": f"{NBLR_DATA_BASE_URL}/pbp/pbp.csv",  # Use CSV for PBP (RDS has unsupported features)
+    "shots": f"{NBLR_DATA_BASE_URL}/shots/shots.rds",
+}
+
+# Local cache directory for downloaded RDS files
+NBLR_CACHE_DIR = Path(tempfile.gettempdir()) / "nblr_cache"
+
+# Check for pyreadr availability
+try:
+    import pyreadr
+
+    PYREADR_AVAILABLE = True
+except ImportError:
+    PYREADR_AVAILABLE = False
+    logger.warning("pyreadr not installed. Install with: pip install pyreadr")
+
 # Get rate limiter
 rate_limiter = get_source_limiter()
 
 # NBL League ID in API-Basketball (needs verification)
 # To find: client = APIBasketballClient(); client.find_league_id("NBL", country="Australia")
 NBL_API_LEAGUE_ID = 12  # Placeholder - verify with actual API call
+
+
+def _download_nblr_file(data_type: str, force_refresh: bool = False) -> Path | None:
+    """Download nblR data file from GitHub releases.
+
+    Args:
+        data_type: Type of data file (results, box_player, box_team, pbp, shots)
+        force_refresh: Force re-download even if cached
+
+    Returns:
+        Path to downloaded file, or None if download failed
+    """
+    if data_type not in NBLR_DATA_FILES:
+        logger.error(f"Unknown nblR data type: {data_type}")
+        return None
+
+    # Create cache directory if it doesn't exist
+    NBLR_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Get the file extension from the URL
+    url = NBLR_DATA_FILES[data_type]
+    ext = ".csv" if url.endswith(".csv") else ".rds"
+
+    # Check for cached file
+    cache_file = NBLR_CACHE_DIR / f"{data_type}{ext}"
+    if cache_file.exists() and not force_refresh:
+        logger.debug(f"Using cached nblR file: {cache_file}")
+        return cache_file
+
+    # Download from GitHub
+    logger.info(f"Downloading nblR {data_type} data from: {url}")
+
+    try:
+        response = requests.get(url, timeout=120)
+        response.raise_for_status()
+
+        # Save to cache
+        with open(cache_file, "wb") as f:
+            f.write(response.content)
+
+        logger.info(f"Downloaded {len(response.content) / 1024 / 1024:.1f} MB to {cache_file}")
+        return cache_file
+
+    except requests.RequestException as e:
+        logger.error(f"Failed to download nblR {data_type} data: {e}")
+        return None
+
+
+def _load_nblr_data(data_type: str, force_refresh: bool = False) -> pd.DataFrame:
+    """Load nblR data file as DataFrame.
+
+    Args:
+        data_type: Type of data file (results, box_player, box_team, pbp, shots)
+        force_refresh: Force re-download even if cached
+
+    Returns:
+        DataFrame with nblR data, or empty DataFrame on error
+    """
+    # Download file if needed
+    file_path = _download_nblr_file(data_type, force_refresh)
+    if file_path is None:
+        return pd.DataFrame()
+
+    try:
+        # Check file extension and use appropriate loader
+        if str(file_path).endswith(".csv"):
+            # Load CSV file directly with pandas
+            df = pd.read_csv(str(file_path))
+            logger.info(f"Loaded {len(df)} rows from nblR {data_type} (CSV)")
+            return df
+        else:
+            # Load RDS file with pyreadr
+            if not PYREADR_AVAILABLE:
+                logger.error("pyreadr not available. Install with: pip install pyreadr")
+                return pd.DataFrame()
+
+            result = pyreadr.read_r(str(file_path))
+
+            # RDS files contain a single object (usually named after the variable)
+            # Get the first (and only) DataFrame
+            if result:
+                df = list(result.values())[0]
+                logger.info(f"Loaded {len(df)} rows from nblR {data_type}")
+                return df
+            else:
+                logger.warning(f"Empty result from nblR {data_type}")
+                return pd.DataFrame()
+
+    except Exception as e:
+        logger.error(f"Failed to load nblR {data_type} data: {e}")
+        return pd.DataFrame()
+
+
+# =============================================================================
+# nblR Data Functions (Primary Data Source)
+# =============================================================================
+
+
+def fetch_nbl_schedule_nblr(
+    season: str | None = None,
+    force_refresh: bool = False,
+) -> pd.DataFrame:
+    """Fetch NBL schedule/results from nblR data.
+
+    Args:
+        season: Season string (e.g., "2024" for 2024-25) or None for all seasons
+        force_refresh: Force re-download of data
+
+    Returns:
+        DataFrame with game results
+
+    Columns:
+        - match_id: Unique game identifier
+        - season: Season string
+        - round: Round number
+        - game_date: Game date
+        - home_team: Home team name
+        - away_team: Away team name
+        - home_score: Home team score
+        - away_score: Away team score
+        - venue: Arena name
+        - LEAGUE: "NBL"
+
+    Note:
+        Data available from 1979 onwards.
+    """
+    logger.info(f"Fetching NBL schedule from nblR: season={season}")
+
+    df = _load_nblr_data("results", force_refresh)
+    if df.empty:
+        return df
+
+    # Add league metadata
+    df["LEAGUE"] = "NBL"
+
+    # Filter by season if specified
+    if season is not None:
+        # nblR uses format like "2024-25" or just "2024"
+        # Try multiple column names for season
+        season_col = None
+        for col in ["season", "Season", "SEASON"]:
+            if col in df.columns:
+                season_col = col
+                break
+
+        if season_col:
+            # Handle different season formats
+            if "-" in season:
+                # User provided "2024-25" format
+                df = df[df[season_col].astype(str).str.contains(season.split("-")[0])]
+            else:
+                # User provided "2024" format - match any containing that year
+                df = df[df[season_col].astype(str).str.contains(season)]
+
+    logger.info(f"Fetched {len(df)} NBL games from nblR")
+    return df
+
+
+def fetch_nbl_player_game_nblr(
+    season: str | None = None,
+    force_refresh: bool = False,
+) -> pd.DataFrame:
+    """Fetch NBL player box scores from nblR data.
+
+    Args:
+        season: Season string or None for all seasons
+        force_refresh: Force re-download of data
+
+    Returns:
+        DataFrame with player game statistics
+
+    Columns:
+        - match_id: Game identifier
+        - player: Player name
+        - team: Team name
+        - season: Season string
+        - minutes: Minutes played
+        - pts: Points
+        - reb: Rebounds
+        - ast: Assists
+        - stl: Steals
+        - blk: Blocks
+        - tov: Turnovers
+        - fgm, fga: Field goals
+        - fg3m, fg3a: Three-pointers
+        - ftm, fta: Free throws
+        - LEAGUE: "NBL"
+
+    Note:
+        Data available from 2015 onwards.
+    """
+    logger.info(f"Fetching NBL player box scores from nblR: season={season}")
+
+    df = _load_nblr_data("box_player", force_refresh)
+    if df.empty:
+        return df
+
+    # Add league metadata
+    df["LEAGUE"] = "NBL"
+
+    # Filter by season if specified
+    if season is not None:
+        season_col = None
+        for col in ["season", "Season", "SEASON"]:
+            if col in df.columns:
+                season_col = col
+                break
+
+        if season_col:
+            if "-" in season:
+                df = df[df[season_col].astype(str).str.contains(season.split("-")[0])]
+            else:
+                df = df[df[season_col].astype(str).str.contains(season)]
+
+    logger.info(f"Fetched {len(df)} NBL player game records from nblR")
+    return df
+
+
+def fetch_nbl_team_game_nblr(
+    season: str | None = None,
+    force_refresh: bool = False,
+) -> pd.DataFrame:
+    """Fetch NBL team box scores from nblR data.
+
+    Args:
+        season: Season string or None for all seasons
+        force_refresh: Force re-download of data
+
+    Returns:
+        DataFrame with team game statistics
+
+    Note:
+        Data available from 2015 onwards.
+    """
+    logger.info(f"Fetching NBL team box scores from nblR: season={season}")
+
+    df = _load_nblr_data("box_team", force_refresh)
+    if df.empty:
+        return df
+
+    # Add league metadata
+    df["LEAGUE"] = "NBL"
+
+    # Filter by season if specified
+    if season is not None:
+        season_col = None
+        for col in ["season", "Season", "SEASON"]:
+            if col in df.columns:
+                season_col = col
+                break
+
+        if season_col:
+            if "-" in season:
+                df = df[df[season_col].astype(str).str.contains(season.split("-")[0])]
+            else:
+                df = df[df[season_col].astype(str).str.contains(season)]
+
+    logger.info(f"Fetched {len(df)} NBL team game records from nblR")
+    return df
+
+
+def fetch_nbl_pbp_nblr(
+    season: str | None = None,
+    force_refresh: bool = False,
+) -> pd.DataFrame:
+    """Fetch NBL play-by-play from nblR data.
+
+    Args:
+        season: Season string or None for all seasons
+        force_refresh: Force re-download of data
+
+    Returns:
+        DataFrame with play-by-play events
+
+    Note:
+        Data available from 2015 onwards.
+    """
+    logger.info(f"Fetching NBL PBP from nblR: season={season}")
+
+    df = _load_nblr_data("pbp", force_refresh)
+    if df.empty:
+        return df
+
+    # Add league metadata
+    df["LEAGUE"] = "NBL"
+
+    # Filter by season if specified
+    if season is not None:
+        season_col = None
+        for col in ["season", "Season", "SEASON"]:
+            if col in df.columns:
+                season_col = col
+                break
+
+        if season_col:
+            if "-" in season:
+                df = df[df[season_col].astype(str).str.contains(season.split("-")[0])]
+            else:
+                df = df[df[season_col].astype(str).str.contains(season)]
+
+    logger.info(f"Fetched {len(df)} NBL PBP events from nblR")
+    return df
+
+
+def fetch_nbl_shots_nblr(
+    season: str | None = None,
+    force_refresh: bool = False,
+) -> pd.DataFrame:
+    """Fetch NBL shot chart data from nblR data.
+
+    Args:
+        season: Season string or None for all seasons
+        force_refresh: Force re-download of data
+
+    Returns:
+        DataFrame with shot data including coordinates
+
+    Columns:
+        - match_id: Game identifier
+        - player: Player name
+        - team: Team name
+        - shot_type: Type of shot
+        - made: Whether shot was made
+        - x, y: Shot coordinates
+        - LEAGUE: "NBL"
+
+    Note:
+        Data available from 2015 onwards.
+    """
+    logger.info(f"Fetching NBL shot data from nblR: season={season}")
+
+    df = _load_nblr_data("shots", force_refresh)
+    if df.empty:
+        return df
+
+    # Add league metadata
+    df["LEAGUE"] = "NBL"
+
+    # Filter by season if specified
+    if season is not None:
+        season_col = None
+        for col in ["season", "Season", "SEASON"]:
+            if col in df.columns:
+                season_col = col
+                break
+
+        if season_col:
+            if "-" in season:
+                df = df[df[season_col].astype(str).str.contains(season.split("-")[0])]
+            else:
+                df = df[df[season_col].astype(str).str.contains(season)]
+
+    logger.info(f"Fetched {len(df)} NBL shots from nblR")
+    return df
+
+
+# Convenience alias for unified API
+def fetch_nbl_player_game(
+    season: str | None = None,
+    force_refresh: bool = False,
+) -> pd.DataFrame:
+    """Fetch NBL player box scores (convenience wrapper for nblR data).
+
+    Args:
+        season: Season string or None for all seasons
+        force_refresh: Force re-download of data
+
+    Returns:
+        DataFrame with player game statistics
+    """
+    return fetch_nbl_player_game_nblr(season=season, force_refresh=force_refresh)
+
+
+# =============================================================================
+# API-Basketball Functions (Secondary Data Source)
+# =============================================================================
 
 # Initialize API-Basketball client (will be None if API key not set)
 _api_client = None

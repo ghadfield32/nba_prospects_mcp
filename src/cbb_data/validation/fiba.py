@@ -65,15 +65,14 @@ def require_fiba_season_ready(
     # Validate league
     if league not in VALID_LEAGUES:
         raise ValueError(
-            f"Invalid FIBA league: {league}. "
-            f"Valid leagues: {', '.join(VALID_LEAGUES)}"
+            f"Invalid FIBA league: {league}. " f"Valid leagues: {', '.join(VALID_LEAGUES)}"
         )
 
     # Check if validation file exists
     if not VALIDATION_FILE.exists():
         error_msg = (
-            f"FIBA validation status not found. Please run validation first:\n"
-            f"  python tools/fiba/validate_and_monitor_coverage.py"
+            "FIBA validation status not found. Please run validation first:\n"
+            "  python tools/fiba/validate_and_monitor_coverage.py"
         )
         if raise_on_not_ready:
             raise ValueError(error_msg)
@@ -91,7 +90,7 @@ def require_fiba_season_ready(
     except Exception as e:
         error_msg = f"Failed to load FIBA validation file: {e}"
         if raise_on_not_ready:
-            raise ValueError(error_msg)
+            raise ValueError(error_msg) from e
         return {
             "league": league,
             "season": season,

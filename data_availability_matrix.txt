@@ -1,0 +1,35 @@
+================================================================================
+DATA AVAILABILITY MATRIX
+================================================================================
+DATA AVAILABILITY MATRIX
+Generated: 2025-11-18 (Updated)
+================================================================================
+
+League            | player | team_s | schedu | box_sc |  pbp   | shots  | Total
+-------------------------------------------------------------------------------
+ABA               |   Y    |   Y    |   Y    |   Y    |   Y    |   -    | 5/6
+ACB               |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
+BAL               |   Y    |   Y    |   Y    |   Y    |   Y    |   -    | 5/6
+BCL               |   Y    |   Y    |   Y    |   Y    |   Y    |   -    | 5/6
+CCAA              |   Y    |   Y    |   Y    |   Y    |   -    |   -    | 4/6
+CEBL              |   Y    |   Y    |   Y    |   Y    |   -    |   -    | 4/6
+EuroCup           |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
+EuroLeague        |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
+G-League          |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
+LKL               |   Y    |   Y    |   Y    |   Y    |   Y    |   -    | 5/6
+LNB_ELITE2        |   P    |   P    |   P    |   Y    |   Y    |   Y    | 3/6
+LNB_ESPOIRS_ELITE |   P    |   P    |   P    |   Y    |   Y    |   Y    | 3/6
+LNB_ESPOIRS_PROB  |   P    |   P    |   P    |   Y    |   Y    |   Y    | 3/6
+LNB_PROA          |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
+NAIA              |   Y    |   Y    |   Y    |   Y    |   -    |   -    | 4/6
+NBL               |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
+NCAA-MBB          |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
+NCAA-WBB          |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
+NJCAA             |   Y    |   Y    |   Y    |   Y    |   -    |   -    | 4/6
+NZ-NBL            |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
+OTE               |   Y    |   Y    |   Y    |   Y    |   Y    |   P    | 5/6
+USPORTS           |   Y    |   Y    |   Y    |   Y    |   -    |   -    | 4/6
+WNBA              |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
+-------------------------------------------------------------------------------
+
+Legend: Y=Available, P=Partial, -=Not available

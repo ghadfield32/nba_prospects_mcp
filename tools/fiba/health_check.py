@@ -136,7 +136,9 @@ def check_validation_status() -> dict:
         with open(VALIDATION_FILE) as f:
             data = json.load(f)
 
-        ready_count = sum(1 for l in data.get("leagues", []) if l.get("ready_for_modeling"))
+        ready_count = sum(
+            1 for league_data in data.get("leagues", []) if league_data.get("ready_for_modeling")
+        )
         total_count = len(data.get("leagues", []))
 
         return {
@@ -161,8 +163,8 @@ def check_golden_fixtures() -> dict:
         populated = 0
         total = 0
 
-        for league, seasons in fixtures.get("fixtures", {}).items():
-            for season, fixture in seasons.items():
+        for _league, seasons in fixtures.get("fixtures", {}).items():
+            for _season, fixture in seasons.items():
                 total += 1
                 if fixture.get("expected", {}).get("total_shots") is not None:
                     populated += 1
@@ -312,11 +314,7 @@ def print_health_report(verbose: bool = False):
 def main():
     parser = argparse.ArgumentParser(description="FIBA Cluster Health Check")
     parser.add_argument("--verbose", "-v", action="store_true", help="Show detailed output")
-    parser.add_argument(
-        "--league",
-        choices=FIBA_LEAGUES,
-        help="Check specific league only"
-    )
+    parser.add_argument("--league", choices=FIBA_LEAGUES, help="Check specific league only")
 
     args = parser.parse_args()
 

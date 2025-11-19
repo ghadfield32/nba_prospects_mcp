@@ -822,8 +822,21 @@ def _fetch_schedule(compiled: dict[str, Any]) -> pd.DataFrame:
 
         df = fetchers.lnb.fetch_lnb_schedule_v2(season=season_year, division=division)
 
-    elif league in ["ACB", "BBL", "BSL", "LBA"]:
-        # European domestic leagues (excluding LNB)
+    elif league == "ACB":
+        # ACB (Spain) - HTML scraping ✅ WIRED 2025-11-18
+        season_str = params.get("Season", "2024-25")
+        season_type = params.get("SeasonType", "Regular Season")
+
+        df = fetchers.acb.fetch_acb_schedule(season=season_str, season_type=season_type)
+
+    elif league == "NZ-NBL":
+        # NZ NBL (New Zealand) - FIBA LiveStats HTML scraping ✅ WIRED 2025-11-18
+        season_str = params.get("Season", "2024")
+
+        df = fetchers.nz_nbl_fiba.fetch_nz_nbl_schedule(season=season_str)
+
+    elif league in ["BBL", "BSL", "LBA"]:
+        # European domestic leagues (scaffolds - not yet implemented)
         season_str = params.get("Season", "2024-25")
         season_type = params.get("SeasonType", "Regular Season")
 
@@ -1124,8 +1137,50 @@ def _fetch_player_game(compiled: dict[str, Any]) -> pd.DataFrame:
         if post_mask.get("GAME_ID"):
             df = df[df["GAME_ID"].isin(post_mask["GAME_ID"])]
 
-    elif league in ["ACB", "LNB", "LNB_PROA", "BBL", "BSL", "LBA"]:
-        # European domestic leagues
+    elif league == "ACB":
+        # ACB (Spain) - HTML scraping ✅ WIRED 2025-11-18
+        if not post_mask.get("GAME_ID"):
+            raise ValueError("player_game requires game_ids filter for ACB")
+
+        frames = []
+        for game_id in post_mask["GAME_ID"]:
+            try:
+                box_score = fetchers.acb.fetch_acb_box_score(game_id)
+                if not box_score.empty:
+                    frames.append(box_score)
+            except Exception as e:
+                logger.warning(f"Failed to fetch ACB game {game_id}: {e}")
+
+        df = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
+
+    elif league in ["LNB", "LNB_PROA"]:
+        # LNB Pro A (France) - Normalized parquet files ✅ WIRED 2025-11-18
+        # LNB can fetch by season or by specific game_ids
+        season_str = params.get("Season", "2024-25")
+        # Parse season: "2024-25" -> 2025, or "2025" -> 2025
+        if "-" in season_str:
+            season_year = int(season_str.split("-")[1]) + 2000
+        else:
+            season_year = int(season_str)
+
+        game_ids = post_mask.get("GAME_ID")
+        df = fetchers.lnb.fetch_lnb_player_game_normalized(
+            season=str(season_year), game_ids=game_ids
+        )
+
+    elif league == "NZ-NBL":
+        # NZ NBL (New Zealand) - FIBA LiveStats HTML scraping ✅ WIRED 2025-11-18
+        season_str = params.get("Season", "2024")
+
+        # Fetch all player games for the season
+        df = fetchers.nz_nbl_fiba.fetch_nz_nbl_player_game(season=season_str)
+
+        # Filter by game_ids if provided
+        if post_mask.get("GAME_ID"):
+            df = df[df["GAME_ID"].isin(post_mask["GAME_ID"])]
+
+    elif league in ["BBL", "BSL", "LBA"]:
+        # European domestic leagues (scaffolds - not yet implemented)
         if not post_mask.get("GAME_ID"):
             raise ValueError(f"player_game requires game_ids filter for {league}")
 
@@ -1300,8 +1355,26 @@ def _fetch_play_by_play(compiled: dict[str, Any]) -> pd.DataFrame:
                 pbp = nbl_official.fetch_nbl_pbp(season=season_str, game_id=game_id)
                 frames.append(pbp)
 
-            elif league in ["ACB", "LNB", "LNB_PROA", "BBL", "BSL", "LBA"]:
-                # European domestic leagues PBP (mostly unavailable)
+            elif league in ["LNB", "LNB_PROA"]:
+                # LNB Pro A (France) - Historical parquet files ✅ WIRED 2025-11-18
+                # Parse season
+                if "-" in season_str:
+                    season_year = int(season_str.split("-")[1]) + 2000
+                else:
+                    season_year = int(season_str)
+
+                pbp = fetchers.lnb.fetch_lnb_pbp_historical(
+                    season=str(season_year), game_ids=[game_id]
+                )
+                frames.append(pbp)
+
+            elif league == "NZ-NBL":
+                # NZ NBL (New Zealand) - FIBA LiveStats HTML scraping ✅ WIRED 2025-11-18
+                pbp = fetchers.nz_nbl_fiba.fetch_nz_nbl_pbp(season=season_str, game_id=game_id)
+                frames.append(pbp)
+
+            elif league in ["ACB", "BBL", "BSL", "LBA"]:
+                # European domestic leagues PBP (unavailable - returns empty scaffolds)
                 pbp = domestic_euro.fetch_domestic_euro_play_by_play(league, game_id)
                 frames.append(pbp)
 
@@ -1495,8 +1568,26 @@ def _fetch_shots(compiled: dict[str, Any]) -> pd.DataFrame:
             except Exception as e:
                 logger.warning(f"Failed to fetch NBL shots for game {game_id}: {e}")
 
-    elif league in ["ACB", "LNB", "LNB_PROA", "BBL", "BSL", "LBA"]:
-        # European domestic leagues shots (mostly unavailable)
+    elif league in ["LNB", "LNB_PROA"]:
+        # LNB Pro A (France) - Historical parquet files ✅ WIRED 2025-11-18
+        # Parse season
+        season_str_generic = params.get("Season", "2024-25")
+        if "-" in season_str_generic:
+            season_year = int(season_str_generic.split("-")[1]) + 2000
+        else:
+            season_year = int(season_str_generic)
+
+        for game_id in post_mask["GAME_ID"]:
+            try:
+                shots = fetchers.lnb.fetch_lnb_shots_historical(
+                    season=str(season_year), game_ids=[game_id]
+                )
+                frames.append(shots)
+            except Exception as e:
+                logger.warning(f"Failed to fetch LNB shots for game {game_id}: {e}")
+
+    elif league in ["ACB", "BBL", "BSL", "LBA"]:
+        # European domestic leagues shots (unavailable - returns empty scaffolds)
         for game_id in post_mask["GAME_ID"]:
             try:
                 shots = domestic_euro.fetch_domestic_euro_shot_chart(league, game_id)

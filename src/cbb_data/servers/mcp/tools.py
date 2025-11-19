@@ -53,28 +53,27 @@ def _ensure_lnb_season_ready(season: str) -> None:
         >>> _ensure_lnb_season_ready("2025-2026")  # Not ready - raises ValueError
     """
     try:
-        from pathlib import Path
         import json
+        from pathlib import Path
 
         # Load validation status from disk
         # This is the same file the API reads - ensures consistency
-        validation_file = Path(__file__).parents[3] / "data" / "raw" / "lnb" / "lnb_last_validation.json"
+        validation_file = (
+            Path(__file__).parents[3] / "data" / "raw" / "lnb" / "lnb_last_validation.json"
+        )
 
         if not validation_file.exists():
             raise ValueError(
-                f"LNB validation status not found. Please run validation first:\n"
-                f"  uv run python tools/lnb/validate_and_monitor_coverage.py\n"
-                f"This ensures data quality before access."
+                "LNB validation status not found. Please run validation first:\n"
+                "  uv run python tools/lnb/validate_and_monitor_coverage.py\n"
+                "This ensures data quality before access."
             )
 
         with open(validation_file) as f:
             validation_data = json.load(f)
 
         # Find the requested season
-        season_data = next(
-            (s for s in validation_data["seasons"] if s["season"] == season),
-            None
-        )
+        season_data = next((s for s in validation_data["seasons"] if s["season"] == season), None)
 
         if not season_data:
             available = [s["season"] for s in validation_data["seasons"]]
@@ -95,7 +94,9 @@ def _ensure_lnb_season_ready(season: str) -> None:
                 f"Run ingestion to complete data: uv run python tools/lnb/bulk_ingest_pbp_shots.py --seasons {season}"
             )
 
-        logger.info(f"LNB season {season} validated and ready (PBP: {season_data['pbp_pct']:.1f}%, Shots: {season_data['shots_pct']:.1f}%)")
+        logger.info(
+            f"LNB season {season} validated and ready (PBP: {season_data['pbp_pct']:.1f}%, Shots: {season_data['shots_pct']:.1f}%)"
+        )
 
     except ValueError:
         # Re-raise validation errors as-is
@@ -1176,7 +1177,10 @@ def tool_get_fiba_schedule(
             schedule_df = schedule_df[schedule_df["GAME_DATE"] >= date_from]
 
         if date_to:
-            if "GAME_DATE" not in schedule_df.columns or schedule_df["GAME_DATE"].dtype != "datetime64[ns]":
+            if (
+                "GAME_DATE" not in schedule_df.columns
+                or schedule_df["GAME_DATE"].dtype != "datetime64[ns]"
+            ):
                 schedule_df["GAME_DATE"] = pd.to_datetime(schedule_df["GAME_DATE"])
             schedule_df = schedule_df[schedule_df["GAME_DATE"] <= date_to]
 
@@ -1249,8 +1253,8 @@ def tool_list_fiba_leagues() -> dict[str, Any]:
         try:
             validation = get_fiba_validation_status()
             league_status = {
-                l["league"]: l["ready_for_modeling"]
-                for l in validation.get("leagues", [])
+                league_entry["league"]: league_entry["ready_for_modeling"]
+                for league_entry in validation.get("leagues", [])
             }
         except FileNotFoundError:
             league_status = {}
@@ -1258,11 +1262,13 @@ def tool_list_fiba_leagues() -> dict[str, Any]:
         # Build league list
         leagues = []
         for code, name in leagues_info.items():
-            leagues.append({
-                "code": code,
-                "name": name,
-                "ready": league_status.get(code, False),
-            })
+            leagues.append(
+                {
+                    "code": code,
+                    "name": name,
+                    "ready": league_status.get(code, False),
+                }
+            )
 
         return {
             "success": True,

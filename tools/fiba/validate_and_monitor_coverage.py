@@ -199,9 +199,9 @@ def validate_fiba_cluster() -> dict[str, Any]:
     Returns:
         Validation results dict
     """
-    print("="*80)
+    print("=" * 80)
     print("  FIBA CLUSTER VALIDATION")
-    print("="*80)
+    print("=" * 80)
     print()
 
     results = {
@@ -221,17 +221,19 @@ def validate_fiba_cluster() -> dict[str, Any]:
 
         if game_index.empty:
             print(f"[SKIP] No game index for {league_code} {season}")
-            results["leagues"].append({
-                "league": league_code,
-                "season": season,
-                "ready_for_modeling": False,
-                "expected_games": 0,
-                "pbp_coverage": 0,
-                "pbp_coverage_pct": 0.0,
-                "shots_coverage": 0,
-                "shots_coverage_pct": 0.0,
-                "reason": "No game index",
-            })
+            results["leagues"].append(
+                {
+                    "league": league_code,
+                    "season": season,
+                    "ready_for_modeling": False,
+                    "expected_games": 0,
+                    "pbp_coverage": 0,
+                    "pbp_coverage_pct": 0.0,
+                    "shots_coverage": 0,
+                    "shots_coverage_pct": 0.0,
+                    "reason": "No game index",
+                }
+            )
             continue
 
         expected_games = len(game_index)
@@ -290,8 +292,12 @@ def print_summary(results: dict[str, Any]):
     print("  SUMMARY")
     print(f"{'='*80}")
 
-    ready_leagues = [l for l in results["leagues"] if l["ready_for_modeling"]]
-    not_ready = [l for l in results["leagues"] if not l["ready_for_modeling"]]
+    ready_leagues = [
+        league_data for league_data in results["leagues"] if league_data["ready_for_modeling"]
+    ]
+    not_ready = [
+        league_data for league_data in results["leagues"] if not league_data["ready_for_modeling"]
+    ]
 
     print(f"\n✅ Ready for modeling: {len(ready_leagues)}/{len(results['leagues'])} leagues")
     for league in ready_leagues:
@@ -301,13 +307,13 @@ def print_summary(results: dict[str, Any]):
     for league in not_ready:
         print(f"  - {league['league']} {league['season']}: {league['reason']}")
 
-    print(f"\n📊 Next Steps:")
+    print("\n📊 Next Steps:")
     if not_ready:
-        print(f"  1. Run browser scraping tests: python tools/fiba/test_browser_scraping.py")
-        print(f"  2. Fetch data with Playwright: fetch_shot_chart(season, use_browser=True)")
-        print(f"  3. Re-run validation to update coverage")
+        print("  1. Run browser scraping tests: python tools/fiba/test_browser_scraping.py")
+        print("  2. Fetch data with Playwright: fetch_shot_chart(season, use_browser=True)")
+        print("  3. Re-run validation to update coverage")
     else:
-        print(f"  🎉 All FIBA leagues ready!")
+        print("  🎉 All FIBA leagues ready!")
 
 
 def main():
@@ -322,7 +328,9 @@ def main():
     print_summary(results)
 
     # Return exit code
-    not_ready = [l for l in results["leagues"] if not l["ready_for_modeling"]]
+    not_ready = [
+        league_data for league_data in results["leagues"] if not league_data["ready_for_modeling"]
+    ]
     return 0 if len(not_ready) == 0 else 1
 
 

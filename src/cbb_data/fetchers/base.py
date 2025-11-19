@@ -39,6 +39,35 @@ logger = logging.getLogger(__name__)
 T = TypeVar("T")
 
 
+class DataUnavailableError(RuntimeError):
+    """Domain-specific error for data unavailability across leagues.
+
+    Distinguishes between different unavailability reasons so the pipeline
+    can record explicit status instead of silent zeros.
+
+    Attributes:
+        kind: Type of unavailability
+            - 'no_games_for_season': Season not started or no games found
+            - 'access_forbidden': 403 from API/scraper
+            - 'endpoint_not_found': 404 or missing resource
+            - 'rate_limited': 429 or too many requests
+            - 'unknown': Other errors
+        league: Optional league identifier (e.g., 'nz_nbl', 'acb', 'lnb')
+
+    Example:
+        >>> raise DataUnavailableError(
+        ...     kind='access_forbidden',
+        ...     message='FIBA LiveStats returned 403',
+        ...     league='nz_nbl'
+        ... )
+    """
+
+    def __init__(self, kind: str, message: str, *, league: str | None = None):
+        super().__init__(message)
+        self.kind = kind
+        self.league = league
+
+
 class Cache:
     """Simple TTL cache with memory + optional Redis backend
 

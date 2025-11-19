@@ -583,7 +583,16 @@ def validate_golden_fixtures() -> list[dict[str, Any]]:
         with open(golden_file) as f:
             golden_data = json.load(f)
     except Exception as e:
-        return [{"game_id": "N/A", "season": "N/A", "field": "json_load", "expected": None, "actual": None, "message": f"Failed to load golden fixtures: {e}"}]
+        return [
+            {
+                "game_id": "N/A",
+                "season": "N/A",
+                "field": "json_load",
+                "expected": None,
+                "actual": None,
+                "message": f"Failed to load golden fixtures: {e}",
+            }
+        ]
 
     failures = []
 
@@ -596,25 +605,29 @@ def validate_golden_fixtures() -> list[dict[str, Any]]:
         shots_path = SHOTS_DIR / f"season={season}" / f"game_id={game_id}.parquet"
 
         if not pbp_path.exists():
-            failures.append({
-                "game_id": game_id,
-                "season": season,
-                "field": "pbp_file",
-                "expected": "exists",
-                "actual": "missing",
-                "message": f"PBP file missing for golden fixture"
-            })
+            failures.append(
+                {
+                    "game_id": game_id,
+                    "season": season,
+                    "field": "pbp_file",
+                    "expected": "exists",
+                    "actual": "missing",
+                    "message": "PBP file missing for golden fixture",
+                }
+            )
             continue
 
         if not shots_path.exists():
-            failures.append({
-                "game_id": game_id,
-                "season": season,
-                "field": "shots_file",
-                "expected": "exists",
-                "actual": "missing",
-                "message": f"Shots file missing for golden fixture"
-            })
+            failures.append(
+                {
+                    "game_id": game_id,
+                    "season": season,
+                    "field": "shots_file",
+                    "expected": "exists",
+                    "actual": "missing",
+                    "message": "Shots file missing for golden fixture",
+                }
+            )
             continue
 
         # Load data
@@ -626,64 +639,74 @@ def validate_golden_fixtures() -> list[dict[str, Any]]:
             actual_rows = len(pbp_df)
             expected_rows = expected["num_pbp_rows"]
             if actual_rows != expected_rows:
-                failures.append({
-                    "game_id": game_id,
-                    "season": season,
-                    "field": "num_pbp_rows",
-                    "expected": expected_rows,
-                    "actual": actual_rows,
-                    "message": f"PBP row count mismatch"
-                })
+                failures.append(
+                    {
+                        "game_id": game_id,
+                        "season": season,
+                        "field": "num_pbp_rows",
+                        "expected": expected_rows,
+                        "actual": actual_rows,
+                        "message": "PBP row count mismatch",
+                    }
+                )
 
         # Check shots row count
         if "num_shots" in expected:
             actual_shots = len(shots_df)
             expected_shots = expected["num_shots"]
             if actual_shots != expected_shots:
-                failures.append({
-                    "game_id": game_id,
-                    "season": season,
-                    "field": "num_shots",
-                    "expected": expected_shots,
-                    "actual": actual_shots,
-                    "message": f"Shots row count mismatch"
-                })
+                failures.append(
+                    {
+                        "game_id": game_id,
+                        "season": season,
+                        "field": "num_shots",
+                        "expected": expected_shots,
+                        "actual": actual_shots,
+                        "message": "Shots row count mismatch",
+                    }
+                )
 
         # Check final score
         if "final_score_home" in expected and "final_score_away" in expected:
             home_score, away_score = compute_per_game_score_from_pbp(pbp_df)
             if home_score != expected["final_score_home"]:
-                failures.append({
-                    "game_id": game_id,
-                    "season": season,
-                    "field": "final_score_home",
-                    "expected": expected["final_score_home"],
-                    "actual": home_score,
-                    "message": f"Home final score mismatch"
-                })
+                failures.append(
+                    {
+                        "game_id": game_id,
+                        "season": season,
+                        "field": "final_score_home",
+                        "expected": expected["final_score_home"],
+                        "actual": home_score,
+                        "message": "Home final score mismatch",
+                    }
+                )
             if away_score != expected["final_score_away"]:
-                failures.append({
-                    "game_id": game_id,
-                    "season": season,
-                    "field": "final_score_away",
-                    "expected": expected["final_score_away"],
-                    "actual": away_score,
-                    "message": f"Away final score mismatch"
-                })
+                failures.append(
+                    {
+                        "game_id": game_id,
+                        "season": season,
+                        "field": "final_score_away",
+                        "expected": expected["final_score_away"],
+                        "actual": away_score,
+                        "message": "Away final score mismatch",
+                    }
+                )
 
         # Check number of periods
         if "num_periods" in expected and "PERIOD_ID" in pbp_df.columns:
             actual_periods = pbp_df["PERIOD_ID"].max()
             expected_periods = expected["num_periods"]
             if actual_periods != expected_periods:
-                failures.append({
-                    "game_id": game_id,
-                    "season": season,
-                    "field": "num_periods",
-                    "expected": expected_periods,
-                    "actual": actual_periods,
-                    "message": f"Number of periods mismatch"
-                })
+                failures.append(
+                    {
+                        "game_id": game_id,
+                        "season": season,
+                        "field": "num_periods",
+                        "expected": expected_periods,
+                        "actual": actual_periods,
+                        "message": "Number of periods mismatch",
+                    }
+                )
 
         # Check event type distribution (if specified)
         if "pbp_event_types" in expected and "EVENT_TYPE" in pbp_df.columns:
@@ -693,22 +716,22 @@ def validate_golden_fixtures() -> list[dict[str, Any]]:
                 # Allow small variance (±5%) for non-deterministic events
                 tolerance = max(1, int(expected_count * 0.05))
                 if abs(actual_count - expected_count) > tolerance:
-                    failures.append({
-                        "game_id": game_id,
-                        "season": season,
-                        "field": f"pbp_event_type_{event_type}",
-                        "expected": expected_count,
-                        "actual": actual_count,
-                        "message": f"Event type '{event_type}' count outside tolerance"
-                    })
+                    failures.append(
+                        {
+                            "game_id": game_id,
+                            "season": season,
+                            "field": f"pbp_event_type_{event_type}",
+                            "expected": expected_count,
+                            "actual": actual_count,
+                            "message": f"Event type '{event_type}' count outside tolerance",
+                        }
+                    )
 
     return failures
 
 
 def audit_sampled_games_against_api(
-    index_df: pd.DataFrame,
-    sample_size: int = 5,
-    seasons: list[str] | None = None
+    index_df: pd.DataFrame, sample_size: int = 5, seasons: list[str] | None = None
 ) -> list[dict[str, Any]]:
     """Randomly sample games and compare disk data against live API.
 
@@ -729,7 +752,16 @@ def audit_sampled_games_against_api(
     try:
         from src.cbb_data.fetchers.lnb import fetch_lnb_play_by_play, fetch_lnb_shots
     except ImportError:
-        return [{"game_id": "N/A", "season": "N/A", "metric": "import", "disk_value": None, "api_value": None, "message": "Failed to import LNB fetchers"}]
+        return [
+            {
+                "game_id": "N/A",
+                "season": "N/A",
+                "metric": "import",
+                "disk_value": None,
+                "api_value": None,
+                "message": "Failed to import LNB fetchers",
+            }
+        ]
 
     discrepancies = []
 
@@ -764,50 +796,58 @@ def audit_sampled_games_against_api(
             api_pbp = fetch_lnb_play_by_play(game_id)
             api_shots = fetch_lnb_shots(game_id)
         except Exception as e:
-            discrepancies.append({
-                "game_id": game_id,
-                "season": season,
-                "metric": "api_fetch",
-                "disk_value": None,
-                "api_value": None,
-                "message": f"API fetch failed: {str(e)[:100]}"
-            })
+            discrepancies.append(
+                {
+                    "game_id": game_id,
+                    "season": season,
+                    "metric": "api_fetch",
+                    "disk_value": None,
+                    "api_value": None,
+                    "message": f"API fetch failed: {str(e)[:100]}",
+                }
+            )
             continue
 
         # Compare row counts
         if len(disk_pbp) != len(api_pbp):
-            discrepancies.append({
-                "game_id": game_id,
-                "season": season,
-                "metric": "pbp_row_count",
-                "disk_value": len(disk_pbp),
-                "api_value": len(api_pbp),
-                "message": "PBP row count mismatch between disk and API"
-            })
+            discrepancies.append(
+                {
+                    "game_id": game_id,
+                    "season": season,
+                    "metric": "pbp_row_count",
+                    "disk_value": len(disk_pbp),
+                    "api_value": len(api_pbp),
+                    "message": "PBP row count mismatch between disk and API",
+                }
+            )
 
         if len(disk_shots) != len(api_shots):
-            discrepancies.append({
-                "game_id": game_id,
-                "season": season,
-                "metric": "shots_row_count",
-                "disk_value": len(disk_shots),
-                "api_value": len(api_shots),
-                "message": "Shots row count mismatch between disk and API"
-            })
+            discrepancies.append(
+                {
+                    "game_id": game_id,
+                    "season": season,
+                    "metric": "shots_row_count",
+                    "disk_value": len(disk_shots),
+                    "api_value": len(api_shots),
+                    "message": "Shots row count mismatch between disk and API",
+                }
+            )
 
         # Compare final scores
         disk_home, disk_away = compute_per_game_score_from_pbp(disk_pbp)
         api_home, api_away = compute_per_game_score_from_pbp(api_pbp)
 
         if disk_home != api_home or disk_away != api_away:
-            discrepancies.append({
-                "game_id": game_id,
-                "season": season,
-                "metric": "final_score",
-                "disk_value": f"{disk_home}-{disk_away}",
-                "api_value": f"{api_home}-{api_away}",
-                "message": "Final score mismatch between disk and API"
-            })
+            discrepancies.append(
+                {
+                    "game_id": game_id,
+                    "season": season,
+                    "metric": "final_score",
+                    "disk_value": f"{disk_home}-{disk_away}",
+                    "api_value": f"{api_home}-{api_away}",
+                    "message": "Final score mismatch between disk and API",
+                }
+            )
 
     return discrepancies
 
@@ -816,7 +856,7 @@ def record_validation_metrics(
     disk_data: dict[str, dict[str, int]],
     readiness_results: list[dict[str, Any]],
     num_errors: int,
-    num_warnings: int
+    num_warnings: int,
 ) -> None:
     """Record validation metrics to time-series parquet for monitoring.
 
@@ -859,7 +899,7 @@ def save_validation_status(
     golden_failures: list[dict[str, Any]],
     api_discrepancies: list[dict[str, Any]],
     num_errors: int,
-    num_warnings: int
+    num_warnings: int,
 ) -> None:
     """Save latest validation status to JSON for API consumption.
 
@@ -876,17 +916,19 @@ def save_validation_status(
     api_seasons = []
     for r in readiness_results:
         season_expected = EXPECTED_GAMES.get(r["season"], 0)
-        api_seasons.append({
-            "season": r["season"],
-            "ready_for_modeling": r["ready_for_modeling"],
-            "pbp_coverage": r["pbp_count"],
-            "pbp_expected": season_expected,
-            "pbp_pct": r["pbp_pct"],
-            "shots_coverage": r["shots_count"],
-            "shots_expected": season_expected,
-            "shots_pct": r["shots_pct"],
-            "num_critical_issues": r["num_critical_issues"],
-        })
+        api_seasons.append(
+            {
+                "season": r["season"],
+                "ready_for_modeling": r["ready_for_modeling"],
+                "pbp_coverage": r["pbp_count"],
+                "pbp_expected": season_expected,
+                "pbp_pct": r["pbp_pct"],
+                "shots_coverage": r["shots_count"],
+                "shots_expected": season_expected,
+                "shots_pct": r["shots_pct"],
+                "num_critical_issues": r["num_critical_issues"],
+            }
+        )
 
     status = {
         "run_at": datetime.now().isoformat(),
@@ -1140,7 +1182,9 @@ def main():
     if golden_failures:
         print(f"      Found {len(golden_failures)} regression failures:")
         for failure in golden_failures[:5]:
-            print(f"        - {failure['field']}: expected={failure['expected']}, actual={failure['actual']}")
+            print(
+                f"        - {failure['field']}: expected={failure['expected']}, actual={failure['actual']}"
+            )
         if len(golden_failures) > 5:
             print(f"        ... and {len(golden_failures) - 5} more failures")
     else:
@@ -1149,7 +1193,9 @@ def main():
     # Step 8: API spot-check (random sampling)
     print("\n[8/9] Running API spot-check (sampling 5 random games)...")
     ready_seasons = [r["season"] for r in readiness_results if r["ready_for_modeling"]]
-    api_discrepancies = audit_sampled_games_against_api(index_df, sample_size=5, seasons=ready_seasons if ready_seasons else None)
+    api_discrepancies = audit_sampled_games_against_api(
+        index_df, sample_size=5, seasons=ready_seasons if ready_seasons else None
+    )
     if api_discrepancies:
         print(f"      Found {len(api_discrepancies)} API discrepancies:")
         for disc in api_discrepancies[:5]:
@@ -1167,7 +1213,9 @@ def main():
     record_validation_metrics(disk_data, readiness_results, num_errors, num_warnings)
 
     # Persist validation status for API consumption
-    save_validation_status(readiness_results, golden_failures, api_discrepancies, num_errors, num_warnings)
+    save_validation_status(
+        readiness_results, golden_failures, api_discrepancies, num_errors, num_warnings
+    )
 
     # Summary
     print(f"\n{'=' * 80}")
@@ -1191,11 +1239,15 @@ def main():
 
     print(f"\nPer-Game Consistency: {num_errors} errors, {num_warnings} warnings")
 
-    print(f"\nRegression Testing:")
-    print(f"  Golden fixtures: {'[PASS]' if not golden_failures else f'[FAIL] {len(golden_failures)} failures'}")
-    print(f"  API spot-check: {'[PASS]' if not api_discrepancies else f'[WARN] {len(api_discrepancies)} discrepancies'}")
+    print("\nRegression Testing:")
+    print(
+        f"  Golden fixtures: {'[PASS]' if not golden_failures else f'[FAIL] {len(golden_failures)} failures'}"
+    )
+    print(
+        f"  API spot-check: {'[PASS]' if not api_discrepancies else f'[WARN] {len(api_discrepancies)} discrepancies'}"
+    )
 
-    print(f"\nSeason Readiness:")
+    print("\nSeason Readiness:")
     ready_seasons_list = [r for r in readiness_results if r["ready_for_modeling"]]
     not_ready_seasons = [r for r in readiness_results if not r["ready_for_modeling"]]
     print(f"  Ready for modeling: {len(ready_seasons_list)}/{len(readiness_results)} seasons")

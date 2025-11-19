@@ -145,7 +145,16 @@
       "Bash(fi)",
       "Bash(timeout 60 sleep:*)",
       "Bash(Select-String -Pattern \"standings\" -Context 10,10)",
-      "Bash(timeout 30 sleep:*)"
+      "Bash(timeout 30 sleep:*)",
+      "Bash(move:*)",
+      "Bash(Select-String \"\\.parquet$\")",
+      "Bash(Select-Object -First 20)",
+      "Bash(.venvScriptspython tools/verify_historical_coverage.py --all)",
+      "Bash(uv sync:*)",
+      "Bash(.venvScriptspython tools/system_health.py)",
+      "Bash(if not exist \"c:\\docker_projects\\betts_basketball\\nba_prospects_mcp\\tools\\r\" mkdir \"c:\\docker_projects\\betts_basketball\\nba_prospects_mcp\\tools\\r\")",
+      "Bash(.venvScriptspython -c \"from cbb_data.fetchers import lnb; funcs = [f for f in dir(lnb) if f.startswith(''fetch_lnb'')]; print(''LNB fetch functions:''); [print(f''  {f}'') for f in sorted(funcs)]\")",
+      "Bash(Select-String -Pattern \"PASSED|FAILED|SKIPPED|ERROR|test_\")"
     ],
     "deny": [],
     "ask": []

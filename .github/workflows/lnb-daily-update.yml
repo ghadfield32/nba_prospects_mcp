@@ -1,0 +1,249 @@
+name: LNB Daily Data Update
+
+# Schedule: Run daily at 6 AM UTC (after LNB games typically complete)
+# Manual trigger: Can be run manually via GitHub Actions UI
+on:
+  schedule:
+    # Run at 6:00 AM UTC daily (1 AM ET, 7 AM CET)
+    - cron: '0 6 * * *'
+
+  workflow_dispatch:
+    # Allow manual triggering with optional parameters
+    inputs:
+      seasons:
+        description: 'Seasons to process (space-separated, e.g., "2024-2025 2023-2024")'
+        required: false
+        default: '2024-2025'
+      force_refetch:
+        description: 'Force re-fetch all games (ignore disk cache)'
+        required: false
+        type: boolean
+        default: false
+      skip_normalization:
+        description: 'Skip normalization step (faster, for testing)'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  lnb-update:
+    name: LNB Data Pipeline
+    runs-on: ubuntu-latest
+
+    # Increase timeout for large ingestions (default is 360 minutes)
+    timeout-minutes: 120
+
+    steps:
+      # =============================================================================
+      # STEP 1: Setup Environment
+      # =============================================================================
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Fetch full history for git provenance tracking
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install uv (fast Python package installer)
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: |
+          uv pip install --system -e .
+          uv pip install --system pandas pyarrow requests
+
+      # =============================================================================
+      # STEP 2: Discover New Games (Optional - depends on implementation)
+      # =============================================================================
+
+      # NOTE: Currently LNB game discovery is manual. This step would discover
+      # new games if automated discovery is implemented.
+      #
+      # - name: Discover new games
+      #   run: |
+      #     uv run python tools/lnb/discover_new_games.py --season 2024-2025
+      #     echo "New games discovered and added to fixture index"
+
+      # =============================================================================
+      # STEP 3: Bulk Ingest PBP and Shots
+      # =============================================================================
+
+      - name: Bulk ingest play-by-play and shots
+        id: bulk_ingest
+        run: |
+          # Determine seasons (use manual input if provided, otherwise default to current)
+          SEASONS="${{ github.event.inputs.seasons || '2024-2025' }}"
+
+          # Determine force-refetch flag
+          FORCE_FLAG=""
+          if [ "${{ github.event.inputs.force_refetch }}" = "true" ]; then
+            FORCE_FLAG="--force-refetch"
+          fi
+
+          echo "::group::LNB Bulk Ingestion"
+          echo "Seasons: $SEASONS"
+          echo "Force refetch: ${{ github.event.inputs.force_refetch }}"
+
+          # Run bulk ingestion
+          uv run python tools/lnb/bulk_ingest_pbp_shots.py \
+            --seasons $SEASONS \
+            $FORCE_FLAG
+
+          echo "::endgroup::"
+
+          # Check if ingestion errors occurred
+          if [ -f "data/raw/lnb/ingestion_errors.csv" ]; then
+            ERROR_COUNT=$(wc -l < data/raw/lnb/ingestion_errors.csv)
+            echo "error_count=$ERROR_COUNT" >> $GITHUB_OUTPUT
+
+            if [ $ERROR_COUNT -gt 1 ]; then
+              echo "::warning::$((ERROR_COUNT - 1)) ingestion errors occurred. Check error log."
+            fi
+          fi
+
+      # =============================================================================
+      # STEP 4: Normalize Data (Transform raw → normalized tables)
+      # =============================================================================
+
+      - name: Normalize data
+        if: ${{ github.event.inputs.skip_normalization != 'true' }}
+        run: |
+          SEASONS="${{ github.event.inputs.seasons || '2024-2025' }}"
+
+          echo "::group::LNB Data Normalization"
+
+          # Run normalization for each season
+          for season in $SEASONS; do
+            echo "Normalizing season: $season"
+            uv run python tools/lnb/create_normalized_tables.py \
+              --season $season \
+              --force
+          done
+
+          echo "::endgroup::"
+
+      # =============================================================================
+      # STEP 5: Validation and Coverage Reporting
+      # =============================================================================
+
+      - name: Validate coverage
+        id: validate
+        run: |
+          echo "::group::Coverage Validation"
+
+          # Generate coverage report
+          if [ -f "tools/lnb/validate_and_monitor_coverage.py" ]; then
+            uv run python tools/lnb/validate_and_monitor_coverage.py \
+              --season 2024-2025 \
+              --output coverage_report.json
+
+            # Parse coverage percentage (if report exists)
+            if [ -f "coverage_report.json" ]; then
+              COVERAGE=$(python -c "import json; print(json.load(open('coverage_report.json'))['coverage_pct'])")
+              echo "coverage_pct=$COVERAGE" >> $GITHUB_OUTPUT
+              echo "::notice::LNB Coverage: ${COVERAGE}%"
+            fi
+          else
+            echo "::warning::Coverage validation script not found. Skipping validation."
+          fi
+
+          echo "::endgroup::"
+
+      # =============================================================================
+      # STEP 6: Commit Changes (Optional - only if data files should be in repo)
+      # =============================================================================
+
+      # NOTE: Uncomment this section if you want to commit data files to git.
+      # For large datasets, consider using Git LFS or external storage instead.
+      #
+      # - name: Commit updated data
+      #   run: |
+      #     git config user.name "LNB Data Bot"
+      #     git config user.email "actions@github.com"
+      #
+      #     # Add data files
+      #     git add data/raw/lnb/
+      #     git add data/normalized/lnb/
+      #     git add data/raw/lnb/lnb_game_index.parquet
+      #
+      #     # Commit if changes exist
+      #     if git diff --staged --quiet; then
+      #       echo "No data changes to commit"
+      #     else
+      #       git commit -m "chore: Daily LNB data update $(date +'%Y-%m-%d')"
+      #       git push
+      #     fi
+
+      # =============================================================================
+      # STEP 7: Artifact Upload (Alternative to git commits)
+      # =============================================================================
+
+      - name: Upload ingestion logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lnb-ingestion-logs
+          path: |
+            data/raw/lnb/ingestion_errors.csv
+            coverage_report.json
+          retention-days: 30
+          if-no-files-found: ignore
+
+      # =============================================================================
+      # STEP 8: Slack/Discord Notification (Optional)
+      # =============================================================================
+
+      # - name: Send notification
+      #   if: always()
+      #   run: |
+      #     STATUS="${{ job.status }}"
+      #     COVERAGE="${{ steps.validate.outputs.coverage_pct || 'N/A' }}"
+      #     ERRORS="${{ steps.bulk_ingest.outputs.error_count || '0' }}"
+      #
+      #     MESSAGE="LNB Daily Update: $STATUS\nCoverage: ${COVERAGE}%\nErrors: $ERRORS"
+      #
+      #     # Send to Slack/Discord webhook
+      #     # curl -X POST -H 'Content-type: application/json' \
+      #     #   --data "{\"text\":\"$MESSAGE\"}" \
+      #     #   ${{ secrets.SLACK_WEBHOOK_URL }}
+
+# =============================================================================
+# Workflow Summary
+# =============================================================================
+#
+# This workflow automates the LNB data pipeline:
+# 1. Setup: Install Python, uv, and dependencies
+# 2. (Optional) Discover new games
+# 3. Bulk ingest: Fetch PBP and shots for all games
+# 4. Normalize: Transform raw data → normalized tables
+# 5. Validate: Check coverage and data quality
+# 6. (Optional) Commit changes or upload artifacts
+# 7. (Optional) Send notifications
+#
+# Manual Triggers:
+# - GitHub Actions UI → "Run workflow" button
+# - Customize seasons, force-refetch, skip-normalization
+#
+# Scheduled Runs:
+# - Daily at 6 AM UTC (after most LNB games complete)
+#
+# Failure Handling:
+# - Errors logged to data/raw/lnb/ingestion_errors.csv
+# - Artifacts uploaded for debugging
+# - Coverage warnings if below threshold
+#
+# Future Enhancements:
+# - Add automated game discovery
+# - Add golden fixtures validation
+# - Add readiness gate checks
+# - Add MCP server restart (if deployed)
+# - Add data export to S3/cloud storage
+# =============================================================================

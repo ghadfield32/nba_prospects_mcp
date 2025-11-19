@@ -22,6 +22,9 @@ from . import (
     wnba,
 )
 
+# Export shared error class for convenience
+from .base import DataUnavailableError
+
 __all__ = [
     "aba",
     "acb",
@@ -29,6 +32,7 @@ __all__ = [
     "base",
     "bcl",
     "cebl",
+    "DataUnavailableError",
     "espn_mbb",
     "espn_wbb",
     "euroleague",

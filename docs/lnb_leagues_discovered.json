@@ -1,0 +1,79 @@
+{
+  "leagues": {
+    "betclic_elite": {
+      "2022-2023": {
+        "competition_id": "2cd1ec93-19af-11ee-afb2-8125e5386866",
+        "season_id": "418ecaae-19af-11ee-a563-47c909cdfb65",
+        "competition_name": "Betclic ÉLITE"
+      },
+      "2024-2025": {
+        "competition_id": "3f4064bb-51ad-11f0-aaaf-2923c944b404",
+        "season_id": "df310a05-51ad-11f0-bd89-c735508e1e09",
+        "competition_name": "Betclic ÉLITE 2025"
+      },
+      "2023-2024": {
+        "competition_id": "a2262b45-2fab-11ef-8eb7-99149ebb5652",
+        "season_id": "cab2f926-2fab-11ef-8b99-e553c4d56b24",
+        "competition_name": "Betclic ÉLITE"
+      }
+    },
+    "elite_2": {
+      "2023-2024": {
+        "competition_id": "0847055c-2fb3-11ef-9b30-3333ffdb8385",
+        "season_id": "91334b18-2fb3-11ef-be14-e92481b1d83d",
+        "competition_name": "PROB"
+      },
+      "2022-2023": {
+        "competition_id": "213e021f-19b5-11ee-9190-29c4f278bc32",
+        "season_id": "7561dbee-19b5-11ee-affc-23e4d3a88307",
+        "competition_name": "PROB"
+      },
+      "2024-2025": {
+        "competition_id": "4c27df72-51ae-11f0-ab8c-73390bbc2fc6",
+        "season_id": "5e31a852-51ae-11f0-b5bf-5988dba0fcf9",
+        "competition_name": "ÉLITE 2"
+      }
+    },
+    "espoirs_elite": {
+      "2023-2024": {
+        "competition_id": "ac2bc8df-2fb4-11ef-9e38-9f35926cbbae",
+        "season_id": "c68a19df-2fb4-11ef-bf65-c13f469726eb",
+        "competition_name": "Espoirs ELITE"
+      }
+    },
+    "espoirs_prob": {
+      "2023-2024": {
+        "competition_id": "59512848-2fb5-11ef-9343-f7ede79b7e49",
+        "season_id": "702b8520-2fb5-11ef-8f58-ed6f7e8cdcbb",
+        "competition_name": "Espoirs PROB"
+      }
+    }
+  },
+  "test_results": [
+    {
+      "league": "betclic_elite",
+      "season": "2024-2025",
+      "fixtures_count": 174,
+      "status": "SUCCESS"
+    },
+    {
+      "league": "elite_2",
+      "season": "2024-2025",
+      "fixtures_count": 174,
+      "status": "SUCCESS"
+    },
+    {
+      "league": "espoirs_elite",
+      "season": "2023-2024",
+      "fixtures_count": 174,
+      "status": "SUCCESS"
+    },
+    {
+      "league": "espoirs_prob",
+      "season": "2023-2024",
+      "fixtures_count": 174,
+      "status": "SUCCESS"
+    }
+  ],
+  "discovery_date": "2025-11-18"
+}

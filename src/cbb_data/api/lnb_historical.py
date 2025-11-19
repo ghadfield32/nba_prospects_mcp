@@ -410,6 +410,7 @@ def get_lnb_normalized_player_game(
     team: str | list[str] | None = None,
     player: str | list[str] | None = None,
     limit: int | None = None,
+    league: str | None = None,
 ) -> pd.DataFrame:
     """Get normalized LNB player-game box scores from parquet files
 
@@ -423,6 +424,7 @@ def get_lnb_normalized_player_game(
         team: Team name or list of teams to filter (optional)
         player: Player name or list of players to filter (optional)
         limit: Maximum number of rows to return (optional)
+        league: League identifier to filter (e.g., "LNB_PROA", "LNB_ELITE2") (optional)
 
     Returns:
         DataFrame with columns:
@@ -478,6 +480,10 @@ def get_lnb_normalized_player_game(
         logger.error(f"Error reading normalized player_game data: {e}")
         return pd.DataFrame()
 
+    # Filter by league if specified
+    if league and "LEAGUE" in df.columns:
+        df = df[df["LEAGUE"] == league]
+
     # Filter by game IDs if specified
     if game_ids:
         df = df[df["GAME_ID"].isin(game_ids)]
@@ -510,6 +516,7 @@ def get_lnb_normalized_team_game(
     game_ids: list[str] | None = None,
     team: str | list[str] | None = None,
     limit: int | None = None,
+    league: str | None = None,
 ) -> pd.DataFrame:
     """Get normalized LNB team-game box scores from parquet files
 
@@ -521,6 +528,7 @@ def get_lnb_normalized_team_game(
         game_ids: Game UUID or list of UUIDs to filter (optional)
         team: Team name or list of teams to filter (optional)
         limit: Maximum number of rows to return (optional)
+        league: League identifier to filter (e.g., "LNB_PROA", "LNB_ELITE2") (optional)
 
     Returns:
         DataFrame with columns:
@@ -574,6 +582,10 @@ def get_lnb_normalized_team_game(
     except Exception as e:
         logger.error(f"Error reading normalized team_game data: {e}")
         return pd.DataFrame()
+
+    # Filter by league if specified
+    if league and "LEAGUE" in df.columns:
+        df = df[df["LEAGUE"] == league]
 
     # Filter by game IDs if specified
     if game_ids:

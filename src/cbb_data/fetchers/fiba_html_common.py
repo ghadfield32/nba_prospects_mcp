@@ -985,7 +985,7 @@ def scrape_fiba_shot_chart(
 
             with BrowserScraper(headless=True, timeout=30000) as scraper:
                 # Fetch all three pages to maximize debug info
-                for suffix, storage_var in [
+                for suffix, _storage_var in [
                     ("sc", "html_sc"),
                     ("shotchart", "html_shotchart"),
                     ("shots", "html_shots"),
@@ -1006,9 +1006,13 @@ def scrape_fiba_shot_chart(
                         logger.debug(f"  Retrieved {len(html)} chars from {suffix}.html")
 
                         if html:
-                            shots_from_browser = _parse_fiba_shot_chart_html(html, league_code, game_id)
+                            shots_from_browser = _parse_fiba_shot_chart_html(
+                                html, league_code, game_id
+                            )
                             if not shots_from_browser.empty:
-                                logger.info(f"Found shots via browser ({suffix}.html): {len(shots_from_browser)} shots")
+                                logger.info(
+                                    f"Found shots via browser ({suffix}.html): {len(shots_from_browser)} shots"
+                                )
                                 shots.extend(shots_from_browser.to_dict("records"))
                                 # Don't break - keep fetching others for debug
                     except Exception as e:
@@ -1087,16 +1091,18 @@ def _parse_fiba_shot_chart_html(html: str, league_code: str, game_id: str) -> pd
     # Look for JavaScript shot data
     scripts = soup.find_all("script")
     for script in scripts:
-        if script.string and ("shot" in script.string.lower() or "LOC_X" in script.string or "loc_x" in script.string):
+        if script.string and (
+            "shot" in script.string.lower() or "LOC_X" in script.string or "loc_x" in script.string
+        ):
             # Try to extract JSON data from JavaScript
-            import re
             import json as json_lib
+            import re
 
             # Pattern: var shotData = [{...}, {...}]
             patterns = [
-                r'shotData\s*=\s*(\[.*?\])',
-                r'shots\s*=\s*(\[.*?\])',
-                r'shotChart\s*=\s*(\{.*?\})',
+                r"shotData\s*=\s*(\[.*?\])",
+                r"shots\s*=\s*(\[.*?\])",
+                r"shotChart\s*=\s*(\{.*?\})",
             ]
 
             for pattern in patterns:
@@ -1119,7 +1125,9 @@ def _parse_fiba_shot_chart_html(html: str, league_code: str, game_id: str) -> pd
         for table in tables:
             # Check if table has shot-related headers
             headers = [th.get_text(strip=True) for th in table.find_all("th")]
-            if any(h.lower() in ["x", "y", "loc_x", "loc_y", "shot", "coordinate"] for h in headers):
+            if any(
+                h.lower() in ["x", "y", "loc_x", "loc_y", "shot", "coordinate"] for h in headers
+            ):
                 rows = table.find_all("tr")[1:]  # Skip header
                 for row in rows:
                     cells = row.find_all("td")
@@ -1142,21 +1150,33 @@ def _parse_fiba_shot_chart_html(html: str, league_code: str, game_id: str) -> pd
     standardized_shots = []
     for shot in shots:
         try:
-            standardized_shots.append({
-                "PLAYER_ID": shot.get("playerId", shot.get("player_id")),
-                "PLAYER_NAME": shot.get("playerName", shot.get("player_name", shot.get("PLAYER_NAME"))),
-                "TEAM_CODE": shot.get("teamCode", shot.get("team_code", shot.get("TEAM_CODE"))),
-                "TEAM_NAME": shot.get("teamName", shot.get("team_name", shot.get("TEAM_NAME"))),
-                "PERIOD": shot.get("period", shot.get("quarter", shot.get("PERIOD"))),
-                "CLOCK": shot.get("clock", shot.get("time", shot.get("CLOCK"))),
-                "SHOT_X": shot.get("x", shot.get("locX", shot.get("LOC_X", shot.get("SHOT_X")))),
-                "SHOT_Y": shot.get("y", shot.get("locY", shot.get("LOC_Y", shot.get("SHOT_Y")))),
-                "SHOT_TYPE": shot.get("shotType", shot.get("shot_type", shot.get("SHOT_TYPE", "2PT"))),
-                "SHOT_MADE": shot.get("made", shot.get("shotMade", shot.get("SHOT_MADE", False))),
-                "SHOT_VALUE": shot.get("pointsValue", shot.get("SHOT_VALUE", 2)),
-                "SHOT_DISTANCE": shot.get("distance", shot.get("SHOT_DISTANCE")),
-                "SHOT_ZONE": shot.get("zone", shot.get("SHOT_ZONE")),
-            })
+            standardized_shots.append(
+                {
+                    "PLAYER_ID": shot.get("playerId", shot.get("player_id")),
+                    "PLAYER_NAME": shot.get(
+                        "playerName", shot.get("player_name", shot.get("PLAYER_NAME"))
+                    ),
+                    "TEAM_CODE": shot.get("teamCode", shot.get("team_code", shot.get("TEAM_CODE"))),
+                    "TEAM_NAME": shot.get("teamName", shot.get("team_name", shot.get("TEAM_NAME"))),
+                    "PERIOD": shot.get("period", shot.get("quarter", shot.get("PERIOD"))),
+                    "CLOCK": shot.get("clock", shot.get("time", shot.get("CLOCK"))),
+                    "SHOT_X": shot.get(
+                        "x", shot.get("locX", shot.get("LOC_X", shot.get("SHOT_X")))
+                    ),
+                    "SHOT_Y": shot.get(
+                        "y", shot.get("locY", shot.get("LOC_Y", shot.get("SHOT_Y")))
+                    ),
+                    "SHOT_TYPE": shot.get(
+                        "shotType", shot.get("shot_type", shot.get("SHOT_TYPE", "2PT"))
+                    ),
+                    "SHOT_MADE": shot.get(
+                        "made", shot.get("shotMade", shot.get("SHOT_MADE", False))
+                    ),
+                    "SHOT_VALUE": shot.get("pointsValue", shot.get("SHOT_VALUE", 2)),
+                    "SHOT_DISTANCE": shot.get("distance", shot.get("SHOT_DISTANCE")),
+                    "SHOT_ZONE": shot.get("zone", shot.get("SHOT_ZONE")),
+                }
+            )
         except Exception as e:
             logger.debug(f"Failed to standardize shot: {e}")
             continue
@@ -1164,7 +1184,9 @@ def _parse_fiba_shot_chart_html(html: str, league_code: str, game_id: str) -> pd
     return pd.DataFrame(standardized_shots)
 
 
-def _parse_fiba_shot_chart_json(json_data: dict[str, Any], league_code: str, game_id: str) -> pd.DataFrame:
+def _parse_fiba_shot_chart_json(
+    json_data: dict[str, Any], league_code: str, game_id: str
+) -> pd.DataFrame:
     """Parse FIBA shot chart JSON API response"""
     shots = []
 
@@ -1183,21 +1205,23 @@ def _parse_fiba_shot_chart_json(json_data: dict[str, Any], league_code: str, gam
     standardized_shots = []
     for shot in shots:
         try:
-            standardized_shots.append({
-                "PLAYER_ID": shot.get("playerId", shot.get("player_id")),
-                "PLAYER_NAME": shot.get("playerName", shot.get("player_name")),
-                "TEAM_CODE": shot.get("teamCode", shot.get("team_code")),
-                "TEAM_NAME": shot.get("teamName", shot.get("team_name")),
-                "PERIOD": shot.get("period", shot.get("quarter")),
-                "CLOCK": shot.get("clock", shot.get("time")),
-                "SHOT_X": shot.get("x", shot.get("locX", shot.get("LOC_X"))),
-                "SHOT_Y": shot.get("y", shot.get("locY", shot.get("LOC_Y"))),
-                "SHOT_TYPE": shot.get("shotType", shot.get("shot_type", "2PT")),
-                "SHOT_MADE": shot.get("made", shot.get("shotMade", False)),
-                "SHOT_VALUE": shot.get("pointsValue", shot.get("points_value", 2)),
-                "SHOT_DISTANCE": shot.get("distance"),
-                "SHOT_ZONE": shot.get("zone"),
-            })
+            standardized_shots.append(
+                {
+                    "PLAYER_ID": shot.get("playerId", shot.get("player_id")),
+                    "PLAYER_NAME": shot.get("playerName", shot.get("player_name")),
+                    "TEAM_CODE": shot.get("teamCode", shot.get("team_code")),
+                    "TEAM_NAME": shot.get("teamName", shot.get("team_name")),
+                    "PERIOD": shot.get("period", shot.get("quarter")),
+                    "CLOCK": shot.get("clock", shot.get("time")),
+                    "SHOT_X": shot.get("x", shot.get("locX", shot.get("LOC_X"))),
+                    "SHOT_Y": shot.get("y", shot.get("locY", shot.get("LOC_Y"))),
+                    "SHOT_TYPE": shot.get("shotType", shot.get("shot_type", "2PT")),
+                    "SHOT_MADE": shot.get("made", shot.get("shotMade", False)),
+                    "SHOT_VALUE": shot.get("pointsValue", shot.get("points_value", 2)),
+                    "SHOT_DISTANCE": shot.get("distance"),
+                    "SHOT_ZONE": shot.get("zone"),
+                }
+            )
         except Exception as e:
             logger.debug(f"Failed to parse shot from JSON: {e}")
             continue

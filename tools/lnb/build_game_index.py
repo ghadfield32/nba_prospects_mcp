@@ -212,27 +212,30 @@ def build_index_for_season(
         fixtures_metadata_map = {}
         try:
             # Import helper function
+            # UPDATED 2025-11-18: Import centralized league metadata
+            # Now supports all 4 LNB leagues: Betclic ELITE, ELITE 2, Espoirs ELITE, Espoirs PROB
+            from src.cbb_data.fetchers.lnb_league_config import (
+                BETCLIC_ELITE_SEASONS,
+                ELITE_2_SEASONS,
+                ESPOIRS_ELITE_SEASONS,
+                ESPOIRS_PROB_SEASONS,
+            )
             from tools.lnb.fetch_fixture_metadata_helper import fetch_fixtures_metadata
 
-            # Get season metadata (competitionId and seasonId) for API call
-            SEASON_METADATA = {
-                "2022-2023": {
-                    "competition_id": "5b7857d9-0cbc-11ed-96a7-458862b58368",
-                    "season_id": "717ba1c6-0cbc-11ed-80ed-4b65c29000f2",
-                },
-                "2023-2024": {
-                    "competition_id": "2cd1ec93-19af-11ee-afb2-8125e5386866",
-                    "season_id": "418ecaae-19af-11ee-a563-47c909cdfb65",
-                },
-                "2024-2025": {
-                    "competition_id": "a2262b45-2fab-11ef-8eb7-99149ebb5652",
-                    "season_id": "cab2f926-2fab-11ef-8b99-e553c4d56b24",
-                },
-                "2025-2026": {
-                    "competition_id": "3f4064bb-51ad-11f0-aaaf-2923c944b404",
-                    "season_id": "df310a05-51ad-11f0-bd89-c735508e1e09",
-                },
-            }
+            # Combine all league seasons for backward compatibility
+            # This allows any season from any league to be looked up
+            SEASON_METADATA = {}
+            for seasons_dict in [
+                BETCLIC_ELITE_SEASONS,
+                ELITE_2_SEASONS,
+                ESPOIRS_ELITE_SEASONS,
+                ESPOIRS_PROB_SEASONS,
+            ]:
+                for season_key, meta in seasons_dict.items():
+                    # Use first occurrence if season exists in multiple leagues
+                    # (shouldn't happen, but defensive coding)
+                    if season_key not in SEASON_METADATA:
+                        SEASON_METADATA[season_key] = meta
 
             if season in SEASON_METADATA:
                 print("  [FETCHING] Game dates and team names from Atrium API...")
@@ -261,9 +264,23 @@ def build_index_for_season(
             # Get metadata from API if available, otherwise use defaults
             meta = fixtures_metadata_map.get(game_id, {})
 
+            # UPDATED 2025-11-18: Dynamic competition name lookup
+            # Import competition name mapper
+            from src.cbb_data.fetchers.lnb_league_config import get_competition_name
+
+            # Get competition_id for this season (if available)
+            season_meta = SEASON_METADATA.get(season, {})
+            comp_id = season_meta.get("competition_id", "")
+
+            # Map competition_id to display name (e.g., "Betclic ELITE", "ELITE 2")
+            # Falls back to "Unknown Competition" if ID not found
+            competition_display_name = (
+                get_competition_name(comp_id) if comp_id else "Unknown Competition"
+            )
+
             index_row = {
                 "season": season,
-                "competition": "LNB Pro A",
+                "competition": competition_display_name,  # Now dynamic!
                 "game_id": game_id,
                 "lnb_match_id": game_id,  # Use UUID as match ID
                 "game_date": meta.get("game_date", ""),  # NOW POPULATED!

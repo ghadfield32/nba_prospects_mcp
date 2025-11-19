@@ -41,6 +41,7 @@ League = Literal[
     "LKL",  # LKL Lithuania
     # International
     "NBL",  # Australia NBL
+    "NZ-NBL",  # New Zealand NBL
     "FIBA",  # FIBA competitions (World Cup, Olympics, etc.)
     # North American Alternative
     "OTE",  # Overtime Elite
