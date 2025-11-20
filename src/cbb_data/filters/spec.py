@@ -32,6 +32,9 @@ League = Literal[
     "ACB",  # Spanish Liga ACB
     "LNB",  # French LNB Pro A
     "LNB_PROA",  # French LNB Pro A (alternative identifier)
+    "LNB_ELITE2",  # French LNB Pro B (Elite 2)
+    "LNB_ESPOIRS_ELITE",  # French LNB Espoirs Elite (U21 top-tier youth)
+    "LNB_ESPOIRS_PROB",  # French LNB Espoirs Pro B (U21 second-tier youth)
     "BBL",  # German Basketball Bundesliga
     "BSL",  # Turkish Basketball Super League
     "LBA",  # Italian Lega Basket Serie A

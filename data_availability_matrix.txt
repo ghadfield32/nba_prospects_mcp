@@ -1,35 +1,216 @@
-================================================================================
+========================================================================================================================
 DATA AVAILABILITY MATRIX
-================================================================================
-DATA AVAILABILITY MATRIX
-Generated: 2025-11-18 (Updated)
-================================================================================
+Generated: 2025-11-19 12:05
+========================================================================================================================
 
+Legend: Y=Available, P=Partial, -=Not available
+
+
+TIER 0 - Core Feeders
+League            | player | team_s | schedu | box_sc |  pbp   | shots  | Total
+-------------------------------------------------------------------------------
+EuroCup           |   P    |   P    |   Y    |   Y    |   Y    |   Y    | 4/6
+EuroLeague        |   P    |   P    |   Y    |   Y    |   Y    |   Y    | 4/6
+G-League          |   P    |   P    |   Y    |   Y    |   Y    |   Y    | 4/6
+NCAA-MBB          |   P    |   P    |   Y    |   Y    |   Y    |   -    | 3/6
+NCAA-WBB          |   P    |   P    |   Y    |   Y    |   Y    |   -    | 3/6
+WNBA              |   P    |   P    |   Y    |   Y    |   Y    |   Y    | 4/6
+
+TIER 1 - Secondary
+League            | player | team_s | schedu | box_sc |  pbp   | shots  | Total
+-------------------------------------------------------------------------------
+ACB               |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
+CEBL              |   Y    |   P    |   Y    |   Y    |   Y    |   Y    | 5/6
+LNB_PROA          |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
+NBL               |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
+NZ-NBL            |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
+OTE               |   P    |   P    |   Y    |   Y    |   Y    |   -    | 3/6
+
+LNB France
+League            | player | team_s | schedu | box_sc |  pbp   | shots  | Total
+-------------------------------------------------------------------------------
+LNB_ELITE2        |   -    |   -    |   -    |   Y    |   Y    |   Y    | 3/6
+LNB_ESPOIRS_ELITE |   -    |   -    |   -    |   Y    |   Y    |   Y    | 3/6
+LNB_ESPOIRS_PROB  |   -    |   -    |   -    |   Y    |   Y    |   Y    | 3/6
+
+TIER 2 - Development
 League            | player | team_s | schedu | box_sc |  pbp   | shots  | Total
 -------------------------------------------------------------------------------
 ABA               |   Y    |   Y    |   Y    |   Y    |   Y    |   -    | 5/6
-ACB               |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
 BAL               |   Y    |   Y    |   Y    |   Y    |   Y    |   -    | 5/6
 BCL               |   Y    |   Y    |   Y    |   Y    |   Y    |   -    | 5/6
 CCAA              |   Y    |   Y    |   Y    |   Y    |   -    |   -    | 4/6
-CEBL              |   Y    |   Y    |   Y    |   Y    |   -    |   -    | 4/6
-EuroCup           |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
-EuroLeague        |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
-G-League          |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
 LKL               |   Y    |   Y    |   Y    |   Y    |   Y    |   -    | 5/6
-LNB_ELITE2        |   P    |   P    |   P    |   Y    |   Y    |   Y    | 3/6
-LNB_ESPOIRS_ELITE |   P    |   P    |   P    |   Y    |   Y    |   Y    | 3/6
-LNB_ESPOIRS_PROB  |   P    |   P    |   P    |   Y    |   Y    |   Y    | 3/6
-LNB_PROA          |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
 NAIA              |   Y    |   Y    |   Y    |   Y    |   -    |   -    | 4/6
-NBL               |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
-NCAA-MBB          |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
-NCAA-WBB          |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
 NJCAA             |   Y    |   Y    |   Y    |   Y    |   -    |   -    | 4/6
-NZ-NBL            |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
-OTE               |   Y    |   Y    |   Y    |   Y    |   Y    |   P    | 5/6
 USPORTS           |   Y    |   Y    |   Y    |   Y    |   -    |   -    | 4/6
-WNBA              |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
--------------------------------------------------------------------------------
 
-Legend: Y=Available, P=Partial, -=Not available
+========================================================================================================================
+DATE COVERAGE BY LEAGUE
+========================================================================================================================
+
+Format: dataset: min_date – max_date [source]
+
+TIER 0 - Core Feeders
+---------------------
+
+EuroCup:
+  schedule: 2000-01-01–present [euroleague-api 2000+]
+  box_score: 2000-01-01–present [euroleague-api 2000+]
+  pbp: N/A–N/A (25,413 records)
+  shots: N/A–N/A (6,352 records)
+
+EuroLeague:
+  schedule: 2000-01-01–present [euroleague-api 2000+]
+  box_score: 2000-01-01–present [euroleague-api 2000+]
+  pbp: N/A–N/A (25,413 records)
+  shots: N/A–N/A (6,352 records)
+
+G-League:
+  schedule: 2001-01-01–present [NBA Stats API 2001+]
+  box_score: 2001-01-01–present [NBA Stats API 2001+]
+  pbp: N/A–N/A (25,413 records)
+  shots: N/A–N/A (6,352 records)
+
+NCAA-MBB:
+  schedule: 2024-11-01–present [ESPN API - current season]
+  box_score: 2024-11-01–present [ESPN API - current season]
+  pbp: N/A–N/A (25,413 records)
+  shots: N/A–N/A (6,352 records)
+
+NCAA-WBB:
+  schedule: 2024-11-01–present [ESPN API - current season]
+  box_score: 2024-11-01–present [ESPN API - current season]
+  pbp: N/A–N/A (25,413 records)
+  shots: N/A–N/A (6,352 records)
+
+WNBA:
+  schedule: 1997-01-01–present [NBA Stats API 1997+]
+  box_score: 1997-01-01–present [NBA Stats API 1997+]
+  pbp: N/A–N/A (25,413 records)
+  shots: N/A–N/A (6,352 records)
+
+TIER 1 - Secondary
+------------------
+
+ACB:
+  schedule: 2020-01-01–present [HTML scraping]
+  box_score: 2020-01-01–present [HTML scraping]
+  pbp: N/A–N/A (25,413 records)
+  shots: N/A–N/A (6,352 records)
+
+CEBL:
+  schedule: 2019-01-01–present [ceblpy 2019+]
+  box_score: 2019-01-01–present [ceblpy 2019+]
+  pbp: N/A–N/A (25,413 records)
+  shots: N/A–N/A (6,352 records)
+
+LNB_PROA:
+  player_season: 2021-01-01–present [LNB API 2021+]
+  team_season: 2021-01-01–present [LNB API 2021+]
+  schedule: 2021-01-01–present [LNB API 2021+]
+  box_score: 2021-01-01–present [Normalized parquet 4 seasons]
+  pbp: N/A–N/A (474,399 records)
+  shots: N/A–N/A (113,950 records)
+
+NBL:
+  player_season: 1979-01-01–present [nblR 1979+]
+  team_season: 1979-01-01–present [nblR 1979+]
+  schedule: 1979-01-01–present [nblR 1979+]
+  box_score: 2015-10-01–present [nblR 2015-16+]
+  pbp: N/A–N/A (25,413 records)
+  shots: N/A–N/A (6,352 records)
+
+NZ-NBL:
+  schedule: 2024-04-15–2024-04-16 (2 records)
+  box_score: 2020-01-01–present [FIBA HTML]
+  pbp: N/A–N/A (25,413 records)
+  shots: N/A–N/A (6,352 records)
+
+OTE:
+  schedule: 2021-01-01–present [Web scraping 2021+]
+  box_score: 2021-01-01–present [Web scraping 2021+]
+  pbp: N/A–N/A (25,413 records)
+  shots: N/A–N/A (6,352 records)
+
+LNB France
+----------
+
+LNB_ELITE2:
+  pbp: N/A–N/A (474,399 records)
+  shots: N/A–N/A (113,950 records)
+
+LNB_ESPOIRS_ELITE:
+  pbp: N/A–N/A (474,399 records)
+  shots: N/A–N/A (113,950 records)
+
+LNB_ESPOIRS_PROB:
+  pbp: N/A–N/A (474,399 records)
+  shots: N/A–N/A (113,950 records)
+
+TIER 2 - Development
+--------------------
+
+ABA:
+  pbp: N/A–N/A (25,413 records)
+  shots: N/A–N/A (6,352 records)
+
+BAL:
+  pbp: N/A–N/A (25,413 records)
+  shots: N/A–N/A (6,352 records)
+
+BCL:
+  pbp: N/A–N/A (25,413 records)
+  shots: N/A–N/A (6,352 records)
+
+CCAA:
+  pbp: N/A–N/A (25,413 records)
+  shots: N/A–N/A (6,352 records)
+
+LKL:
+  pbp: N/A–N/A (25,413 records)
+  shots: N/A–N/A (6,352 records)
+
+NAIA:
+  pbp: N/A–N/A (25,413 records)
+  shots: N/A–N/A (6,352 records)
+
+NJCAA:
+  pbp: N/A–N/A (25,413 records)
+  shots: N/A–N/A (6,352 records)
+
+USPORTS:
+  pbp: N/A–N/A (25,413 records)
+  shots: N/A–N/A (6,352 records)
+
+
+================================================================================
+SUMMARY
+================================================================================
+
+Full (6/6):    4 leagues
+High (4-5/6):  13 leagues
+Medium (2-3/6): 6 leagues
+Total:         23 leagues
+
+================================================================================
+FILTER QUICK REFERENCE
+================================================================================
+
+Date Filters:
+  relative_days: 7 (last week), 30 (last month), 365 (last year)
+  start_date / end_date: YYYY-MM-DD format
+
+Game Segment Filters:
+  periods: [1,2,3,4] for quarters, [5,6,7] for OT
+  halves: [1] first half, [2] second half (NCAA)
+  start_seconds / end_seconds: elapsed time from tip
+
+Common Time Windows:
+  Crunch time (NBA): periods=[4], start_seconds=2640 (last 2 min)
+  First half (NCAA): halves=[1]
+  Overtime: periods=[5,6,7,8]
+
+Name Filters:
+  team_names: ['Duke', 'Kentucky'] - case-insensitive
+  player_names: ['LeBron James'] - partial match supported

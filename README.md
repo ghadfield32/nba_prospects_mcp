@@ -62,12 +62,12 @@ curl -X POST http://localhost:8000/datasets/player_game \
 
 ### Supported Leagues & Scope
 
-**Default Scope (pre_only=True)**: 19 leagues accessible (6 college + 13 prepro)
-**Full Scope (pre_only=False)**: 20 leagues accessible (adds WNBA)
+**Default Scope (pre_only=True)**: 22 leagues accessible (6 college + 16 prepro)
+**Full Scope (pre_only=False)**: 23 leagues accessible (adds WNBA)
 
 This library focuses on **pre-NBA/WNBA prospects** and includes:
 - **College Basketball** (6 leagues): NCAA-MBB, NCAA-WBB, NJCAA, NAIA, USPORTS, CCAA
-- **Pre-Professional/Development** (13 leagues): OTE, EuroLeague, EuroCup, G-League, CEBL, NBL (Australia), NZ-NBL (New Zealand), LKL (Lithuania), ABA (Adriatic), BAL (Africa), BCL (Champions League), LNB Pro A (France), ACB (Spain)
+- **Pre-Professional/Development** (16 leagues): OTE, EuroLeague, EuroCup, G-League, CEBL, NBL (Australia), NZ-NBL (New Zealand), LKL (Lithuania), ABA (Adriatic), BAL (Africa), BCL (Champions League), LNB Pro A (France), LNB Elite 2 (France), LNB Espoirs Elite (France U21), LNB Espoirs ProB (France U21), ACB (Spain)
 - **Professional** (excluded by default): WNBA only
 
 #### League × Dataset Availability Matrix
@@ -92,6 +92,9 @@ This library focuses on **pre-NBA/WNBA prospects** and includes:
 | **BAL** (Africa) | PREPRO | Yes | Yes | Yes | Yes | No | Yes | Yes |
 | **BCL** (Champions) | PREPRO | Yes | Yes | Yes | Yes | No | Yes | Yes |
 | **LNB Pro A** (France) | PREPRO | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
+| **LNB Elite 2** (France D2) | PREPRO | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
+| **LNB Espoirs Elite** (France U21) | PREPRO | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
+| **LNB Espoirs ProB** (France U21) | PREPRO | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
 | **ACB** (Spain) | PREPRO | No | No | No | No | No | Scaffold | Scaffold |
 | **WNBA** | PRO | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
 
@@ -123,19 +126,27 @@ This library focuses on **pre-NBA/WNBA prospects** and includes:
 | **ABA** (Adriatic) | Current season | Post-game | FIBA LiveStats HTML |
 | **BAL** (Africa) | Current season | Post-game | FIBA LiveStats HTML |
 | **BCL** (Champions) | Current season | Post-game | FIBA LiveStats HTML |
-| **LNB Pro A** (France) | Limited (34 games 2021-2025 box scores), 2025-2026 (8 games PBP/shots), API current season only | Post-game | LNB Official API + Manual UUID discovery |
+| **LNB Pro A** (France) | 254 games (5 seasons 2021-2026), 5,017 player_game rows | Post-game | LNB Official API + Atrium Scraping |
+| **LNB Elite 2** (France D2) | 🔶 2 games (Nov 2025), 40 player_game rows | Post-game | LNB Official API |
+| **LNB Espoirs Elite** (France U21) | 🔶 1 game (Nov 2025), 18 player_game rows | Post-game | LNB Official API |
+| **LNB Espoirs ProB** (France U21) | 🔶 Fixtures only (first games Nov 21-22) | Post-game | LNB Official API |
 | **ACB** (Spain) | Scaffold only | Scaffold only | HTML Scraping (JS-rendered) |
 
 #### Integration Status
 
-**Fully Integrated (20 leagues)**: All leagues accessible via Python API, REST API, and MCP Server
+**Fully Integrated (23 leagues)**: All leagues accessible via Python API, REST API, and MCP Server
 - Access via: `get_dataset()`, REST API `/datasets/*`, MCP tools
-- Default scope (pre_only=True): 19 leagues (excludes WNBA)
-- Full scope (pre_only=False): All 20 leagues
+- Default scope (pre_only=True): 22 leagues (excludes WNBA)
+- Full scope (pre_only=False): All 23 leagues
 
 **Data Availability Notes**:
-- **Full Data**: 16 leagues with comprehensive datasets (NCAA, EuroLeague, G-League, NBL, FIBA Cluster, LNB Pro A, etc.)
-- **LNB Pro A**: First international league with 7/7 datasets functional! **Limited coverage:** 34 games (2021-2025 box scores), 8 games (2025-2026 PBP/shots), current season only via API. See [docs/LNB_COVERAGE.md](docs/LNB_COVERAGE.md) for details
+- **Full Data**: 8 leagues with full datasets and substantial data (NCAA-MBB/WBB, EuroLeague, EuroCup, G-League, NBL, LNB_PROA, WNBA)
+- **LNB Leagues** (France): 4 leagues with 7/7 datasets wired:
+  - **LNB Pro A**: Top division - 254 games (5 seasons 2021-2026), 5,017 player_game rows
+  - **LNB Elite 2**: Second division - 🔶 2 games (limited, 2025)
+  - **LNB Espoirs Elite**: U21 Elite division - 🔶 1 game (limited, 2025)
+  - **LNB Espoirs ProB**: U21 ProB division - 🔶 fixtures only (no games yet)
+  - See [docs/DATA_AVAILABILITY_MATRIX.md](docs/DATA_AVAILABILITY_MATRIX.md) for details
 - **NZ-NBL**: Scaffold only (requires manual game index creation)
 - **ACB**: Scaffold only (JavaScript-rendered site, requires Selenium/Playwright)
 
@@ -148,13 +159,45 @@ df = get_dataset("schedule", filters={"league": "NCAA-MBB", "season": "2025"})
 df = get_dataset("schedule", filters={"league": "WNBA", "season": "2024", "pre_only": False})
 ```
 
-#### LNB Pro A (France) - Detailed Dataset Guide
+#### LNB Leagues (France) - Detailed Dataset Guide
 
-**🎉 Only International League with 7/7 Datasets Functional**
+**🎉 4 French Leagues with 7/7 Datasets Wired**
 
-LNB Pro A (Betclic ÉLITE) is France's top professional basketball league and the **only international league** in this library with complete dataset coverage across all 7 types.
+The LNB system (France) includes 4 fully-integrated leagues:
+- **LNB Pro A** (Betclic ÉLITE): Top professional division - ✅ 254 games
+- **LNB Elite 2**: Second professional division - 🔶 2 games (limited)
+- **LNB Espoirs Elite**: U21 Elite development division - 🔶 1 game (limited)
+- **LNB Espoirs ProB**: U21 ProB development division - 🔶 fixtures only
 
-**⚠️ Coverage Limitation:** Historical data is limited. LNB Schedule API only provides current season data. Historical box scores (2021-2025: 34 games) were obtained via manual UUID discovery. Full season coverage (~306 games/season) would require extensive manual work. See [docs/LNB_COVERAGE.md](docs/LNB_COVERAGE.md) for complete details.
+These leagues have complete **dataset wiring** across all 7 types, plus **name-based querying** (no UUIDs required).
+
+**⚠️ Coverage Limitation:** Sub-league data is extremely limited. LNB Pro A has 5 seasons of data (254 games), but sub-leagues only have data from games played in November 2025. As more games are played, data will accumulate automatically via the ingestion pipeline. See [docs/DATA_AVAILABILITY_MATRIX.md](docs/DATA_AVAILABILITY_MATRIX.md) for complete coverage details.
+
+##### Name Resolution (NEW!)
+
+Query by team/player names instead of UUIDs:
+
+```python
+from cbb_data.api.lnb_lookup import get_lnb_schedule, get_lnb_teams, LNBLookup
+
+# Get schedule with human-readable names
+schedule = get_lnb_schedule(season="2024-2025", league="LNB_ELITE2")
+# Returns: GAME_ID, GAME_DATE, HOME_TEAM, AWAY_TEAM, HOME_SCORE, AWAY_SCORE, VENUE
+
+# Filter by team name (partial match supported)
+games = get_lnb_schedule(season="2024-2025", team="Orleans")  # Finds "Orléans Loiret"
+
+# Filter by date range
+games = get_lnb_schedule(season="2024-2025", start_date="2024-10-01", end_date="2024-10-31")
+
+# Get team info with name/ID mapping
+teams = get_lnb_teams(season="2024-2025", league="LNB_ESPOIRS_ELITE")
+
+# Direct lookup utilities
+lookup = LNBLookup(season="2024-2025")
+team_name = lookup.get_team_name("uuid-here")  # UUID -> "Paris Basketball"
+team_id = lookup.get_team_id("Paris")          # "Paris" -> UUID (partial match)
+```
 
 ##### Dataset Details
 

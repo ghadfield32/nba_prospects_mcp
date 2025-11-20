@@ -60,6 +60,9 @@ LEAGUE_LEVELS: dict[str, LevelType] = {
     "BCL": "prepro",  # Basketball Champions League - FIBA European competition
     "LKL": "prepro",  # LKL Lithuania - Lithuanian league (Sabonis family, Valančiūnas pipeline)
     "LNB_PROA": "prepro",  # LNB Pro A (France) - French top-tier league (Wembanyama, Gobert pipeline)
+    "LNB_ELITE2": "prepro",  # LNB Pro B (France) - French second-tier league
+    "LNB_ESPOIRS_ELITE": "prepro",  # LNB Espoirs Elite (France) - U21 top-tier youth
+    "LNB_ESPOIRS_PROB": "prepro",  # LNB Espoirs Pro B (France) - U21 second-tier youth
     "NBL": "prepro",  # NBL Australia - Australian league (Josh Giddey, Dyson Daniels pipeline)
     "NZ-NBL": "prepro",  # New Zealand NBL - Sal's NBL (developmental league, NZ prospects)
     # Professional Leagues (EXCLUDED by default)

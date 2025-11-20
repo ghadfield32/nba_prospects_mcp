@@ -401,14 +401,31 @@ def tool_get_team_game_stats(
 
 
 def tool_get_play_by_play(
-    league: str, game_ids: list[str], compact: bool = False, pre_only: bool = True
+    league: str,
+    game_ids: list[str],
+    periods: list[int] | None = None,
+    halves: list[int] | None = None,
+    start_seconds: int | None = None,
+    end_seconds: int | None = None,
+    compact: bool = False,
+    pre_only: bool = True,
 ) -> dict[str, Any]:
     """
-    Get play-by-play event data for specific games.
+    Get play-by-play event data for specific games with segment filtering.
+
+    LLM Usage Examples:
+        • "Fourth quarter events" → periods=[4]
+        • "Clutch time (last 2 min)" → start_seconds=2280, end_seconds=2400
+        • "First half plays" → halves=[1]
+        • "Overtime events" → periods=[5, 6]
 
     Args:
         league: League identifier (NCAA-MBB, NCAA-WBB, EuroLeague)
         game_ids: List of game IDs (required)
+        periods: Filter by period (1-4 for quarters, 5+ for OT)
+        halves: Filter by half (1 or 2, for college basketball)
+        start_seconds: Filter from game time (seconds from tip)
+        end_seconds: Filter to game time (seconds from tip)
         compact: Return arrays instead of markdown (saves ~70% tokens)
         pre_only: If True, restrict to pre-NBA/WNBA leagues (default: True)
 
@@ -417,9 +434,23 @@ def tool_get_play_by_play(
 
     Examples:
         >>> tool_get_play_by_play("NCAA-MBB", game_ids=["401635571"])
-        >>> tool_get_play_by_play("NCAA-MBB", game_ids=["401635571"], compact=True)
+        >>> tool_get_play_by_play("NCAA-MBB", game_ids=["401635571"], periods=[4])
+        >>> tool_get_play_by_play("NCAA-MBB", game_ids=["401635571"], halves=[2], compact=True)
     """
+    from cbb_data.api.filters import DatasetFilter, GameSegmentFilter
+
     filters = {"league": league, "game_ids": game_ids}
+
+    # Build post-filters for segment filtering
+    post_filters = None
+    if periods or halves or start_seconds or end_seconds:
+        segments = GameSegmentFilter(
+            periods=periods,
+            halves=halves,
+            start_seconds=start_seconds,
+            end_seconds=end_seconds,
+        )
+        post_filters = DatasetFilter(segments=segments)
 
     return _safe_execute(
         "get_play_by_play",
@@ -428,6 +459,7 @@ def tool_get_play_by_play(
         grouping="pbp",
         filters=filters,
         pre_only=pre_only,
+        post_filters=post_filters,
     )
 
 
@@ -435,26 +467,52 @@ def tool_get_shot_chart(
     league: str,
     game_ids: list[str],
     player: list[str] | None = None,
+    periods: list[int] | None = None,
+    halves: list[int] | None = None,
+    start_seconds: int | None = None,
+    end_seconds: int | None = None,
     compact: bool = False,
     pre_only: bool = True,
 ) -> dict[str, Any]:
     """
-    Get shot chart data with X/Y coordinates.
+    Get shot chart data with X/Y coordinates and segment filtering.
+
+    LLM Usage Examples:
+        • "Fourth quarter shots" → periods=[4]
+        • "Clutch time shots" → start_seconds=2280, end_seconds=2400
+        • "Second half shots" → halves=[2]
 
     Args:
         league: League identifier (NCAA-MBB, EuroLeague)
         game_ids: List of game IDs (required)
         player: List of player names to filter, optional
+        periods: Filter by period (1-4 for quarters, 5+ for OT)
+        halves: Filter by half (1 or 2, for college basketball)
+        start_seconds: Filter from game time (seconds from tip)
+        end_seconds: Filter to game time (seconds from tip)
         compact: Return arrays instead of markdown (saves ~70% tokens)
         pre_only: If True, restrict to pre-NBA/WNBA leagues (default: True)
 
     Returns:
         Structured result with shot location data
     """
+    from cbb_data.api.filters import DatasetFilter, GameSegmentFilter
+
     filters = {"league": league, "game_ids": game_ids}
 
     if player:
         filters["player"] = player
+
+    # Build post-filters for segment filtering
+    post_filters = None
+    if periods or halves or start_seconds or end_seconds:
+        segments = GameSegmentFilter(
+            periods=periods,
+            halves=halves,
+            start_seconds=start_seconds,
+            end_seconds=end_seconds,
+        )
+        post_filters = DatasetFilter(segments=segments)
 
     return _safe_execute(
         "get_shot_chart",
@@ -463,6 +521,7 @@ def tool_get_shot_chart(
         grouping="shots",
         filters=filters,
         pre_only=pre_only,
+        post_filters=post_filters,
     )
 
 
@@ -1438,7 +1497,20 @@ Tips: Use compact=True for large result sets.""",
     },
     {
         "name": "get_play_by_play",
-        "description": "Get play-by-play event data for specific games. Requires game IDs. Use compact=True for large event sequences.",
+        "description": """Get play-by-play event data for specific games with segment filtering.
+
+LLM Usage Examples:
+  • "Fourth quarter events" → get_play_by_play(..., periods=[4])
+  • "Clutch time (last 2 min)" → get_play_by_play(..., start_seconds=2280, end_seconds=2400)
+  • "First half plays" → get_play_by_play(..., halves=[1])
+  • "Overtime events" → get_play_by_play(..., periods=[5, 6])
+
+Segment filters:
+  - periods: Filter by quarter (1-4) or overtime (5+)
+  - halves: Filter by half (1 or 2) for college basketball
+  - start_seconds/end_seconds: Filter by game time in seconds from tip
+
+Tips: Use compact=True for large event sequences.""",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -1452,6 +1524,24 @@ Tips: Use compact=True for large result sets.""",
                     "items": {"type": "string"},
                     "description": "List of game IDs (required)",
                 },
+                "periods": {
+                    "type": "array",
+                    "items": {"type": "integer"},
+                    "description": "Filter by period (1-4 for quarters, 5+ for OT)",
+                },
+                "halves": {
+                    "type": "array",
+                    "items": {"type": "integer"},
+                    "description": "Filter by half (1 or 2 for college basketball)",
+                },
+                "start_seconds": {
+                    "type": "integer",
+                    "description": "Filter from game time (seconds from tip, e.g., 2280 for last 2 min)",
+                },
+                "end_seconds": {
+                    "type": "integer",
+                    "description": "Filter to game time (seconds from tip, e.g., 2400 for end of regulation)",
+                },
                 "compact": {
                     "type": "boolean",
                     "description": "Return arrays instead of markdown",
@@ -1464,7 +1554,20 @@ Tips: Use compact=True for large result sets.""",
     },
     {
         "name": "get_shot_chart",
-        "description": "Get shot chart data with X/Y coordinates for visualization. Use compact=True for large shot datasets.",
+        "description": """Get shot chart data with X/Y coordinates and segment filtering.
+
+LLM Usage Examples:
+  • "Fourth quarter shots" → get_shot_chart(..., periods=[4])
+  • "Clutch time shots" → get_shot_chart(..., start_seconds=2280, end_seconds=2400)
+  • "Second half shots" → get_shot_chart(..., halves=[2])
+  • "Player's shots in Q4" → get_shot_chart(..., player=["Cooper Flagg"], periods=[4])
+
+Segment filters:
+  - periods: Filter by quarter (1-4) or overtime (5+)
+  - halves: Filter by half (1 or 2) for college basketball
+  - start_seconds/end_seconds: Filter by game time in seconds from tip
+
+Tips: Use compact=True for large shot datasets.""",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -1482,6 +1585,24 @@ Tips: Use compact=True for large result sets.""",
                     "type": "array",
                     "items": {"type": "string"},
                     "description": "List of player names to filter",
+                },
+                "periods": {
+                    "type": "array",
+                    "items": {"type": "integer"},
+                    "description": "Filter by period (1-4 for quarters, 5+ for OT)",
+                },
+                "halves": {
+                    "type": "array",
+                    "items": {"type": "integer"},
+                    "description": "Filter by half (1 or 2 for college basketball)",
+                },
+                "start_seconds": {
+                    "type": "integer",
+                    "description": "Filter from game time (seconds from tip)",
+                },
+                "end_seconds": {
+                    "type": "integer",
+                    "description": "Filter to game time (seconds from tip)",
                 },
                 "compact": {
                     "type": "boolean",

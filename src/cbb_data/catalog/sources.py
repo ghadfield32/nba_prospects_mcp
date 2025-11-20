@@ -34,6 +34,7 @@ SourceType = Literal[
     "api_basketball",  # API-Basketball (api-sports.io)
     "lnb_api",  # LNB Official API (France - Betclic ÉLITE)
     "lnb_normalized",  # LNB normalized parquet files (Elite 2, Espoirs leagues)
+    "lnb_aggregated",  # LNB aggregated statistics from normalized player_game/team_game data
     "nbl_official_r",  # NBL Australia via nblR R package (official stats, 1979+)
     "nz_nbl_fiba",  # NZ NBL via FIBA LiveStats HTML scraping
     "statorium",  # Statorium Basketball API
@@ -164,31 +165,36 @@ def _register_league_sources() -> None:
     Called after all fetcher modules are imported to avoid circular dependencies.
     This function should be called from api/datasets.py after imports.
 
-    **Phase 2 Status (Current)**:
+    **Phase 2 Status (Current)** - Updated 2025-11-19:
     - NCAA-MBB/WBB: ESPN API (fully functional)
-    - EuroLeague/EuroCup: euroleague-api package (fully functional)
-    - G-League: NBA Stats API (fully functional)
-    - WNBA: NBA Stats API (fully functional)
+    - EuroLeague/EuroCup: euroleague-api package (✅ FULLY WIRED - schedule, box, pbp, shots)
+    - G-League: NBA Stats API (✅ FULLY WIRED - schedule, box, pbp, shots)
+    - WNBA: NBA Stats API (✅ FULLY WIRED - schedule, box, pbp, shots)
     - CEBL: ceblpy + FIBA LiveStats (fully functional)
-    - OTE: Web scraping (fully functional)
+    - OTE: Web scraping (✅ FULLY WIRED - schedule, box, pbp)
     - NJCAA/NAIA/U-SPORTS: PrestoSports scraping (fully functional)
     - NBL: nblR R package (fully functional)
     - FIBA Cluster (LKL/BAL/BCL/ABA): FIBA HTML scraping (fully functional)
-    - ACB: HTML scaffold (empty DataFrames)
-    - LNB_PROA: team_season works (HTML), player_season scaffold
+    - ACB: BAwiR R package (✅ FULLY WIRED - schedule, box, pbp, shots)
+    - LNB_PROA: LNB API (✅ FULLY WIRED - schedule, box, pbp, shots)
 
-    **Phase 3 Plan**:
-    - ACB: Migrate to Statorium or API-Basketball
-    - LNB_PROA players: API-Basketball or Statorium
+    **Data Availability Matrix Status**:
+    - Tier 0 (Core Feeders): NCAA, EuroLeague, EuroCup, G-League, OTE, WNBA - COMPLETE
+    - Tier 1 (Secondary): CEBL, NZ-NBL, LNB_PROA, ACB, NBL - COMPLETE
+    - Tier 2 (Development): NJCAA, NAIA, USPORTS, CCAA, ABA/BAL/BCL - COMPLETE
     """
     from ..fetchers import (
         aba,
         acb,
         bal,
         bcl,
+        cbbpy_mbb,  # NCAA MBB box scores, PBP via cbbpy
+        cbbpy_wbb,  # NCAA WBB box scores, PBP via cbbpy
         ccaa,  # CCAA (Canada) via PrestoSports
+        cebl,  # CEBL via ceblpy + FIBA LiveStats
         espn_mbb,  # NCAA Men's Basketball via ESPN API
         espn_wbb,  # NCAA Women's Basketball via ESPN API
+        euroleague,  # EuroLeague/EuroCup via euroleague-api package
         gleague,  # G-League via NBA Stats API
         lkl,
         lnb,
@@ -196,48 +202,58 @@ def _register_league_sources() -> None:
         nbl_official,  # NBL Australia via nblR R package
         njcaa,  # NJCAA (USA) via PrestoSports
         nz_nbl_fiba,  # NZ NBL via FIBA LiveStats HTML scraping
+        ote,  # Overtime Elite via web scraping
         usports,  # U SPORTS (Canada) via PrestoSports
+        wnba,  # WNBA via NBA Stats API
     )
 
     # ==========================================================================
     # Fully Functional Leagues (Phase 2 Complete)
     # ==========================================================================
 
-    # NCAA Men's Basketball
+    # NCAA Men's Basketball - ✅ FULLY WIRED 2025-11-19
     register_league_source(
         LeagueSourceConfig(
             league="NCAA-MBB",
             player_season_source="espn",
             team_season_source="espn",
             schedule_source="espn",
-            box_score_source="espn",
-            pbp_source="espn",
-            shots_source="cbbpy",
-            fetch_schedule=espn_mbb.fetch_espn_scoreboard,  # Wired 2025-11-13
+            box_score_source="cbbpy",
+            pbp_source="cbbpy",
+            shots_source="none",  # Shot locations embedded in PBP data
+            fetch_schedule=espn_mbb.fetch_espn_scoreboard,
+            fetch_player_game=cbbpy_mbb.fetch_cbbpy_box_score,
+            fetch_pbp=cbbpy_mbb.fetch_cbbpy_pbp,
+            fetch_shots=None,  # Extract shots from PBP with shot_type filter
             fetch_player_season=None,  # Uses generic aggregation from player_game
             fetch_team_season=None,  # Uses generic aggregation from team_game
-            notes="Phase 2: ESPN API + cbbpy (schedule wired 2025-11-13, season stats via generic aggregation)",
+            fetch_team_game=None,  # Team box scores via aggregation from player_game
+            notes="✅ WIRED (2025-11-19): ESPN schedule + cbbpy box/PBP. Shots embedded in PBP (x,y coords). Season/team stats via aggregation.",
         )
     )
 
-    # NCAA Women's Basketball
+    # NCAA Women's Basketball - ✅ FULLY WIRED 2025-11-19
     register_league_source(
         LeagueSourceConfig(
             league="NCAA-WBB",
             player_season_source="espn",
             team_season_source="espn",
             schedule_source="espn",
-            box_score_source="espn",
-            pbp_source="espn",
-            shots_source="cbbpy",
-            fetch_schedule=espn_wbb.fetch_espn_wbb_scoreboard,  # Wired 2025-11-13
+            box_score_source="cbbpy",
+            pbp_source="cbbpy",
+            shots_source="none",  # Shot locations embedded in PBP data
+            fetch_schedule=espn_wbb.fetch_espn_wbb_scoreboard,
+            fetch_player_game=cbbpy_wbb.fetch_cbbpy_wbb_box_score,
+            fetch_pbp=cbbpy_wbb.fetch_cbbpy_wbb_pbp,
+            fetch_shots=None,  # Extract shots from PBP with shot_type filter
             fetch_player_season=None,  # Uses generic aggregation from player_game
             fetch_team_season=None,  # Uses generic aggregation from team_game
-            notes="Phase 2: ESPN API + cbbpy (schedule wired 2025-11-13, season stats via generic aggregation)",
+            fetch_team_game=None,  # Team box scores via aggregation from player_game
+            notes="✅ WIRED (2025-11-19): ESPN schedule + cbbpy box/PBP. Shots embedded in PBP (x,y coords). Season/team stats via aggregation.",
         )
     )
 
-    # EuroLeague
+    # EuroLeague - ✅ FULLY WIRED 2025-11-19
     register_league_source(
         LeagueSourceConfig(
             league="EuroLeague",
@@ -247,13 +263,35 @@ def _register_league_sources() -> None:
             box_score_source="euroleague_api",
             pbp_source="euroleague_api",
             shots_source="euroleague_api",
-            fetch_player_season=None,  # Uses generic aggregation
-            fetch_team_season=None,  # Uses generic aggregation
-            notes="Phase 2: euroleague-api package (fully functional via generic aggregation)",
+            fetch_schedule=lambda season, **kw: euroleague.fetch_euroleague_games(
+                int(season.split("-")[0]) if "-" in str(season) else int(season),
+                competition="E",
+                **kw,
+            ),
+            fetch_player_game=lambda game_id,
+            season="2024",
+            **kw: euroleague.fetch_euroleague_box_score(
+                int(season.split("-")[0]) if "-" in str(season) else int(season),
+                int(game_id),
+                competition="E",
+            ),
+            fetch_pbp=lambda game_id, season="2024", **kw: euroleague.fetch_euroleague_play_by_play(
+                int(season.split("-")[0]) if "-" in str(season) else int(season),
+                int(game_id),
+                competition="E",
+            ),
+            fetch_shots=lambda game_id, season="2024", **kw: euroleague.fetch_euroleague_shot_data(
+                int(season.split("-")[0]) if "-" in str(season) else int(season),
+                int(game_id),
+                competition="E",
+            ),
+            fetch_player_season=None,  # Uses generic aggregation from player_game
+            fetch_team_season=None,  # Uses generic aggregation from team_game
+            notes="✅ FULLY WIRED (2025-11-19): 6/6 datasets. euroleague-api package. Historical data 2000+. Rate limit 2 req/sec.",
         )
     )
 
-    # EuroCup
+    # EuroCup - ✅ FULLY WIRED 2025-11-19
     register_league_source(
         LeagueSourceConfig(
             league="EuroCup",
@@ -263,13 +301,35 @@ def _register_league_sources() -> None:
             box_score_source="euroleague_api",
             pbp_source="euroleague_api",
             shots_source="euroleague_api",
-            fetch_player_season=None,  # Uses generic aggregation
-            fetch_team_season=None,  # Uses generic aggregation
-            notes="Phase 2: euroleague-api package (fully functional via generic aggregation)",
+            fetch_schedule=lambda season, **kw: euroleague.fetch_euroleague_games(
+                int(season.split("-")[0]) if "-" in str(season) else int(season),
+                competition="U",
+                **kw,
+            ),
+            fetch_player_game=lambda game_id,
+            season="2024",
+            **kw: euroleague.fetch_euroleague_box_score(
+                int(season.split("-")[0]) if "-" in str(season) else int(season),
+                int(game_id),
+                competition="U",
+            ),
+            fetch_pbp=lambda game_id, season="2024", **kw: euroleague.fetch_euroleague_play_by_play(
+                int(season.split("-")[0]) if "-" in str(season) else int(season),
+                int(game_id),
+                competition="U",
+            ),
+            fetch_shots=lambda game_id, season="2024", **kw: euroleague.fetch_euroleague_shot_data(
+                int(season.split("-")[0]) if "-" in str(season) else int(season),
+                int(game_id),
+                competition="U",
+            ),
+            fetch_player_season=None,  # Uses generic aggregation from player_game
+            fetch_team_season=None,  # Uses generic aggregation from team_game
+            notes="✅ FULLY WIRED (2025-11-19): 6/6 datasets. euroleague-api package. Historical data 2000+. Rate limit 2 req/sec.",
         )
     )
 
-    # G-League
+    # G-League - ✅ FULLY WIRED 2025-11-19
     register_league_source(
         LeagueSourceConfig(
             league="G-League",
@@ -279,14 +339,17 @@ def _register_league_sources() -> None:
             box_score_source="nba_stats",
             pbp_source="nba_stats",
             shots_source="nba_stats",
-            fetch_schedule=gleague.fetch_gleague_schedule,  # Wired 2025-11-13
-            fetch_player_season=None,  # Uses generic aggregation
-            fetch_team_season=None,  # Uses generic aggregation
-            notes="Phase 2: NBA Stats API (schedule wired 2025-11-13, Ignite historical only, season stats via generic aggregation)",
+            fetch_schedule=gleague.fetch_gleague_schedule,
+            fetch_player_game=gleague.fetch_gleague_box_score,
+            fetch_pbp=gleague.fetch_gleague_play_by_play,
+            fetch_shots=gleague.fetch_gleague_shot_chart,
+            fetch_player_season=None,  # Uses generic aggregation from player_game
+            fetch_team_season=None,  # Uses generic aggregation from team_game
+            notes="✅ FULLY WIRED (2025-11-19): 6/6 datasets. NBA Stats API (stats.gleague.nba.com). Historical data 2001+. Rate limit 5 req/sec.",
         )
     )
 
-    # WNBA
+    # WNBA - ✅ FULLY WIRED 2025-11-19
     register_league_source(
         LeagueSourceConfig(
             league="WNBA",
@@ -296,13 +359,17 @@ def _register_league_sources() -> None:
             box_score_source="nba_stats",
             pbp_source="nba_stats",
             shots_source="nba_stats",
-            fetch_player_season=None,  # Uses generic aggregation
-            fetch_team_season=None,  # Uses generic aggregation
-            notes="Phase 2: NBA Stats API (fully functional via generic aggregation)",
+            fetch_schedule=wnba.fetch_wnba_schedule,
+            fetch_player_game=wnba.fetch_wnba_box_score,
+            fetch_pbp=wnba.fetch_wnba_play_by_play,
+            fetch_shots=wnba.fetch_wnba_shot_chart,
+            fetch_player_season=None,  # Uses generic aggregation from player_game
+            fetch_team_season=None,  # Uses generic aggregation from team_game
+            notes="✅ FULLY WIRED (2025-11-19): 6/6 datasets. NBA Stats API (stats.wnba.com). Historical data 1997+. Rate limit 5 req/sec.",
         )
     )
 
-    # CEBL
+    # CEBL - ✅ FULLY WIRED 2025-11-19
     register_league_source(
         LeagueSourceConfig(
             league="CEBL",
@@ -310,15 +377,19 @@ def _register_league_sources() -> None:
             team_season_source="ceblpy",
             schedule_source="ceblpy",
             box_score_source="ceblpy",
-            pbp_source="none",
-            shots_source="none",
-            fetch_player_season=None,  # Uses generic aggregation
-            fetch_team_season=None,  # Uses generic aggregation
-            notes="Phase 2: ceblpy + FIBA LiveStats JSON (fully functional via generic aggregation)",
+            pbp_source="ceblpy",
+            shots_source="ceblpy",
+            fetch_schedule=cebl.fetch_cebl_schedule,
+            fetch_player_game=cebl.fetch_cebl_box_score,
+            fetch_pbp=cebl.fetch_cebl_play_by_play,
+            fetch_shots=cebl.fetch_cebl_shot_chart,
+            fetch_player_season=cebl.fetch_cebl_season_stats,
+            fetch_team_season=None,  # Uses generic aggregation from team_game
+            notes="✅ WIRED (2025-11-19): 6/6 datasets. ceblpy + FIBA LiveStats. 2019+ data.",
         )
     )
 
-    # OTE (Overtime Elite)
+    # OTE (Overtime Elite) - ✅ FULLY WIRED 2025-11-19
     register_league_source(
         LeagueSourceConfig(
             league="OTE",
@@ -326,11 +397,15 @@ def _register_league_sources() -> None:
             team_season_source="html",
             schedule_source="html",
             box_score_source="html",
-            pbp_source="none",
-            shots_source="none",
-            fetch_player_season=None,  # Uses generic aggregation
-            fetch_team_season=None,  # Uses generic aggregation
-            notes="Phase 2: Web scraping (fully functional via generic aggregation)",
+            pbp_source="html",  # ✅ OTE publishes FULL PBP (rare for non-NBA leagues!)
+            shots_source="none",  # Shot coordinates not available
+            fetch_schedule=ote.fetch_ote_schedule,
+            fetch_player_game=ote.fetch_ote_box_score,
+            fetch_pbp=ote.fetch_ote_play_by_play,  # ✅ Full PBP available!
+            fetch_shots=ote.fetch_ote_shot_chart,  # Returns empty (no coordinates)
+            fetch_player_season=None,  # Uses generic aggregation from player_game
+            fetch_team_season=None,  # Uses generic aggregation from team_game
+            notes="✅ FULLY WIRED (2025-11-19): 5/6 datasets. Web scraping (overtimeelite.com). UNIQUE: Full PBP published! Key NBA prospect pipeline (ages 16-20). Shots unavailable (no x,y coords).",
         )
     )
 
@@ -613,12 +688,12 @@ def _register_league_sources() -> None:
             pbp_source="lnb_api",  # Historical parquet files (via lnb_historical.py)
             shots_source="lnb_api",  # Historical parquet files (via lnb_historical.py)
             fetch_schedule=lnb.fetch_lnb_schedule_v2,  # ✅ API-based schedule
-            fetch_player_season=lnb.fetch_lnb_player_season_v2,  # ✅ API-based player stats
+            fetch_player_season=lnb.fetch_lnb_player_season,  # ✅ Playwright-based stats (matches API signature)
             fetch_team_season=lnb.fetch_lnb_team_season_v2,  # ✅ API-based team standings
             fetch_player_game=lnb.fetch_lnb_player_game_normalized,  # ✅ Normalized parquet (27 cols, 4 seasons)
             fetch_team_game=lnb.fetch_lnb_team_game_normalized,  # ✅ Normalized parquet (26 cols, 4 seasons)
-            fetch_pbp=lnb.fetch_lnb_pbp_historical,  # ✅ Historical PBP data (2025-2026: 3,336 events)
-            fetch_shots=lnb.fetch_lnb_shots_historical,  # ✅ Historical shots data (2025-2026: 973 shots)
+            fetch_pbp=lnb.fetch_proa_pbp,  # ✅ Historical PBP data (league-filtered)
+            fetch_shots=lnb.fetch_proa_shots,  # ✅ Historical shots data (league-filtered)
             fallback_source="html",  # Old HTML scrapers as backup
             notes="✅ COMPLETE (2025-11-18): Betclic ELITE (formerly Pro A) - 7/7 datasets functional. API-based schedule/season stats + normalized parquet box scores (2021-2025) + historical PBP/shots (2025-2026). Part of LNB multi-league expansion (4 leagues total).",
         )
@@ -628,15 +703,20 @@ def _register_league_sources() -> None:
     register_league_source(
         LeagueSourceConfig(
             league="LNB_ELITE2",
-            player_season_source="none",  # Not yet implemented (would aggregate from player_game)
-            team_season_source="none",  # Not yet implemented (would aggregate from team_game)
-            schedule_source="none",  # Not yet implemented (would aggregate from game index)
-            box_score_source="lnb_normalized",  # Normalized parquet files (via lnb_historical.py)
-            pbp_source="lnb_normalized",  # Historical parquet files (via lnb_historical.py)
-            shots_source="lnb_normalized",  # Historical parquet files (via lnb_historical.py)
-            fetch_player_game=lnb.fetch_elite2_player_game,  # ✅ League-specific wrapper
-            fetch_team_game=lnb.fetch_elite2_team_game,  # ✅ League-specific wrapper
-            notes="✅ ADDED (2025-11-18): Elite 2 (formerly Pro B) - 272 fixtures discovered for 2024-2025. Player/team game data via normalized parquet. PBP/shots available once ingested. Part of LNB 4-league expansion.",
+            player_season_source="lnb_aggregated",  # Aggregated from player_game
+            team_season_source="lnb_aggregated",  # Aggregated from team_game
+            schedule_source="lnb_aggregated",  # Extracted from team_game
+            box_score_source="lnb_normalized",
+            pbp_source="lnb_normalized",
+            shots_source="lnb_normalized",
+            fetch_schedule=lnb.fetch_elite2_schedule,  # ✅ From team_game data
+            fetch_player_season=lnb.fetch_elite2_player_season,  # ✅ Aggregated
+            fetch_team_season=lnb.fetch_elite2_team_season,  # ✅ Aggregated
+            fetch_player_game=lnb.fetch_elite2_player_game,
+            fetch_team_game=lnb.fetch_elite2_team_game,
+            fetch_pbp=lnb.fetch_elite2_pbp,  # ✅ League-specific PBP
+            fetch_shots=lnb.fetch_elite2_shots,  # ✅ League-specific shots
+            notes="✅ COMPLETE (2025-11-19): Elite 2 - 7/7 datasets. Box + PBP + shots via league wrappers, schedule/season via aggregation.",
         )
     )
 
@@ -644,15 +724,20 @@ def _register_league_sources() -> None:
     register_league_source(
         LeagueSourceConfig(
             league="LNB_ESPOIRS_ELITE",
-            player_season_source="none",  # Not yet implemented
-            team_season_source="none",  # Not yet implemented
-            schedule_source="none",  # Not yet implemented
+            player_season_source="lnb_aggregated",  # Aggregated from player_game
+            team_season_source="lnb_aggregated",  # Aggregated from team_game
+            schedule_source="lnb_aggregated",  # Extracted from team_game
             box_score_source="lnb_normalized",  # Normalized parquet files
             pbp_source="lnb_normalized",  # Historical parquet files
             shots_source="lnb_normalized",  # Historical parquet files
+            fetch_schedule=lnb.fetch_espoirs_elite_schedule,  # ✅ From team_game data
+            fetch_player_season=lnb.fetch_espoirs_elite_player_season,  # ✅ Aggregated
+            fetch_team_season=lnb.fetch_espoirs_elite_team_season,  # ✅ Aggregated
             fetch_player_game=lnb.fetch_espoirs_elite_player_game,  # ✅ League-specific wrapper
             fetch_team_game=lnb.fetch_espoirs_elite_team_game,  # ✅ League-specific wrapper
-            notes="✅ ADDED (2025-11-18): Espoirs ELITE (U21 top-tier youth) - Metadata configured for 2023-2024 and 2024-2025 seasons. Ready for ingestion. Part of LNB 4-league expansion.",
+            fetch_pbp=lnb.fetch_espoirs_elite_pbp,  # ✅ League-specific PBP
+            fetch_shots=lnb.fetch_espoirs_elite_shots,  # ✅ League-specific shots
+            notes="✅ COMPLETE (2025-11-19): Espoirs ELITE - 7/7 datasets. Box + PBP + shots via league wrappers, schedule/season via aggregation.",
         )
     )
 
@@ -660,15 +745,20 @@ def _register_league_sources() -> None:
     register_league_source(
         LeagueSourceConfig(
             league="LNB_ESPOIRS_PROB",
-            player_season_source="none",  # Not yet implemented
-            team_season_source="none",  # Not yet implemented
-            schedule_source="none",  # Not yet implemented
+            player_season_source="lnb_aggregated",  # Aggregated from player_game
+            team_season_source="lnb_aggregated",  # Aggregated from team_game
+            schedule_source="lnb_aggregated",  # Extracted from team_game
             box_score_source="lnb_normalized",  # Normalized parquet files
             pbp_source="lnb_normalized",  # Historical parquet files
             shots_source="lnb_normalized",  # Historical parquet files
+            fetch_schedule=lnb.fetch_espoirs_prob_schedule,  # ✅ From team_game data
+            fetch_player_season=lnb.fetch_espoirs_prob_player_season,  # ✅ Aggregated
+            fetch_team_season=lnb.fetch_espoirs_prob_team_season,  # ✅ Aggregated
             fetch_player_game=lnb.fetch_espoirs_prob_player_game,  # ✅ League-specific wrapper
             fetch_team_game=lnb.fetch_espoirs_prob_team_game,  # ✅ League-specific wrapper
-            notes="✅ ADDED (2025-11-18): Espoirs PROB (U21 second-tier youth) - Metadata configured for 2023-2024 season. Ready for ingestion. Part of LNB 4-league expansion.",
+            fetch_pbp=lnb.fetch_espoirs_prob_pbp,  # ✅ League-specific PBP
+            fetch_shots=lnb.fetch_espoirs_prob_shots,  # ✅ League-specific shots
+            notes="✅ COMPLETE (2025-11-19): Espoirs PROB - 7/7 datasets. Box + PBP + shots via league wrappers, schedule/season via aggregation.",
         )
     )
 

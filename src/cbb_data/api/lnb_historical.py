@@ -33,7 +33,7 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 import pandas as pd
 
@@ -246,6 +246,9 @@ def get_lnb_historical_pbp(
     player: str | list[str] | None = None,
     event_type: str | list[str] | None = None,
     limit: int | None = None,
+    division: int | None = None,
+    league: str | None = None,
+    **kwargs: Any,  # Accept extra params like season_type from API layer
 ) -> pd.DataFrame:
     """Get historical play-by-play events for a season or specific games
 
@@ -257,6 +260,8 @@ def get_lnb_historical_pbp(
         event_type: Event type or list of types to filter (optional)
                    Examples: "SHOT_MADE", "REBOUND", "ASSIST", "TURNOVER"
         limit: Maximum number of rows to return (optional)
+        division: Division number to filter (1=PROA, 2=ELITE2) (optional)
+        league: League identifier (LNB_PROA, LNB_ELITE2, etc.) - maps to division (optional)
 
     Returns:
         DataFrame with columns:
@@ -290,6 +295,27 @@ def get_lnb_historical_pbp(
         ... )
     """
     df = _load_historical_data(season, "pbp_events")
+
+    # Map league to division if specified
+    if league and not division:
+        league_to_division = {
+            "LNB_PROA": 1,
+            "LNB_ELITE2": 2,
+            "LNB_ESPOIRS_ELITE": 3,  # Youth leagues use different IDs
+            "LNB_ESPOIRS_PROB": 4,
+        }
+        division = league_to_division.get(league)
+
+    # Filter by division via fixtures lookup
+    if division:
+        try:
+            fixtures_df = get_lnb_historical_fixtures(season, division=division)
+            if not fixtures_df.empty:
+                valid_uuids = fixtures_df["fixture_uuid"].tolist()
+                df = df[df["fixture_uuid"].isin(valid_uuids)]
+                logger.info(f"Filtered PBP to {len(valid_uuids)} fixtures for division {division}")
+        except Exception as e:
+            logger.warning(f"Could not filter by division {division}: {e}")
 
     # Filter by fixture UUID if specified
     if fixture_uuid:
@@ -330,6 +356,9 @@ def get_lnb_historical_shots(
     player: str | list[str] | None = None,
     made: bool | None = None,
     limit: int | None = None,
+    division: int | None = None,
+    league: str | None = None,
+    **kwargs: Any,  # Accept extra params like season_type from API layer
 ) -> pd.DataFrame:
     """Get historical shot chart data for a season or specific games
 
@@ -340,6 +369,8 @@ def get_lnb_historical_shots(
         player: Player name or list of players to filter (optional)
         made: Filter by shot result (True = made, False = missed, None = all)
         limit: Maximum number of rows to return (optional)
+        division: Division number to filter (1=PROA, 2=ELITE2) (optional)
+        league: League identifier (LNB_PROA, LNB_ELITE2, etc.) (optional)
 
     Returns:
         DataFrame with columns:
@@ -367,6 +398,29 @@ def get_lnb_historical_shots(
         >>> monaco_3pt = monaco_3pt[monaco_3pt['shot_type'] == '3PT']
     """
     df = _load_historical_data(season, "shots")
+
+    # Map league to division if specified
+    if league and not division:
+        league_to_division = {
+            "LNB_PROA": 1,
+            "LNB_ELITE2": 2,
+            "LNB_ESPOIRS_ELITE": 3,
+            "LNB_ESPOIRS_PROB": 4,
+        }
+        division = league_to_division.get(league)
+
+    # Filter by division via fixtures lookup
+    if division:
+        try:
+            fixtures_df = get_lnb_historical_fixtures(season, division=division)
+            if not fixtures_df.empty:
+                valid_uuids = fixtures_df["fixture_uuid"].tolist()
+                df = df[df["fixture_uuid"].isin(valid_uuids)]
+                logger.info(
+                    f"Filtered shots to {len(valid_uuids)} fixtures " f"for division {division}"
+                )
+        except Exception as e:
+            logger.warning(f"Could not filter by division {division}: {e}")
 
     # Filter by fixture UUID if specified
     if fixture_uuid:
@@ -604,6 +658,111 @@ def get_lnb_normalized_team_game(
         f"Retrieved {len(df)} team-game records for LNB {season} "
         f"(games={len(df['GAME_ID'].unique()) if len(df) > 0 else 0}, "
         f"teams={len(df['TEAM_ID'].unique()) if len(df) > 0 else 0})"
+    )
+
+    return df
+
+
+def get_lnb_normalized_shots(
+    season: str,
+    game_ids: list[str] | None = None,
+    team: str | list[str] | None = None,
+    player: str | list[str] | None = None,
+    made: bool | None = None,
+    limit: int | None = None,
+    league: str | None = None,
+    **kwargs: Any,
+) -> pd.DataFrame:
+    """Get LNB shot chart data from raw parquet files
+
+    Reads pre-ingested shot data from the raw shots directory. This function
+    reads per-game parquet files and concatenates them.
+
+    Args:
+        season: Season string (e.g., "2024-2025")
+        game_ids: Game UUID or list of UUIDs to filter (optional)
+        team: Team name or list of teams to filter (optional)
+        player: Player name or list of players to filter (optional)
+        made: Filter by shot result (True = made, False = missed, None = all)
+        limit: Maximum number of rows to return (optional)
+        league: League identifier to filter (e.g., "LNB_PROA", "LNB_ELITE2") (optional)
+
+    Returns:
+        DataFrame with columns:
+        - GAME_ID: Game identifier (fixture UUID)
+        - EVENT_ID: Shot sequence number
+        - PERIOD_ID: Quarter/period number
+        - CLOCK: Game clock
+        - SHOT_TYPE: Type of shot (2PT, 3PT, FT)
+        - SHOT_SUBTYPE: Detailed shot type
+        - PLAYER_ID, PLAYER_NAME: Shooting player info
+        - TEAM_ID: Shooting team
+        - SUCCESS: Whether shot was made (True/False)
+        - X_COORD, Y_COORD: Shot coordinates on court
+        - LEAGUE: League identifier
+
+    Examples:
+        >>> # Get all shots for a season
+        >>> shots = get_lnb_normalized_shots("2024-2025")
+
+        >>> # Get made shots for Elite2
+        >>> elite2_made = get_lnb_normalized_shots(
+        ...     "2024-2025", league="LNB_ELITE2", made=True
+        ... )
+    """
+    # Construct path to raw shots data
+    season_dir = Path(f"data/raw/lnb/shots/season={season}")
+
+    if not season_dir.exists():
+        logger.warning(
+            f"No shots data found for LNB {season}. "
+            f"Directory does not exist: {season_dir}\n"
+            f"Run: python tools/lnb/migrate_historical_to_raw.py --season {season}"
+        )
+        return pd.DataFrame()
+
+    # Read all parquet files for season
+    parquet_files = list(season_dir.glob("*.parquet"))
+    if not parquet_files:
+        logger.warning(f"No parquet files found in {season_dir}")
+        return pd.DataFrame()
+
+    try:
+        df = pd.concat([pd.read_parquet(f) for f in parquet_files], ignore_index=True)
+    except Exception as e:
+        logger.error(f"Error reading shots data: {e}")
+        return pd.DataFrame()
+
+    # Filter by league if specified
+    if league and "LEAGUE" in df.columns:
+        df = df[df["LEAGUE"] == league]
+
+    # Filter by game IDs if specified
+    if game_ids:
+        df = df[df["GAME_ID"].isin(game_ids)]
+
+    # Filter by team if specified
+    if team:
+        teams = [team] if isinstance(team, str) else team
+        df = df[df["TEAM_ID"].isin(teams)]
+
+    # Filter by player if specified
+    if player:
+        players = [player] if isinstance(player, str) else player
+        df = df[df["PLAYER_NAME"].isin(players)]
+
+    # Filter by shot result if specified
+    if made is not None and "SUCCESS" in df.columns:
+        df = df[df["SUCCESS"] == made]
+
+    # Apply limit if specified
+    if limit:
+        df = df.head(limit)
+
+    logger.info(
+        f"Retrieved {len(df)} shots for LNB {season} "
+        f"(games={len(df['GAME_ID'].unique()) if len(df) > 0 else 0}, "
+        f"league={league or 'all'})"
     )
 
     return df

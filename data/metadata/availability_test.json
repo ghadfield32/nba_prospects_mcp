@@ -1,0 +1,46 @@
+{
+  "LNB_ELITE2": {
+    "schedule": {
+      "available": false,
+      "rows": 0,
+      "error": "ValueError: Unsupported league for schedule: LNB_ELITE2",
+      "time": 0.0
+    },
+    "player_season": {
+      "available": false,
+      "rows": 0,
+      "error": "ValueError: Unsupported league for schedule: LNB_ELITE2",
+      "time": 0.0
+    },
+    "team_season": {
+      "available": false,
+      "rows": 0,
+      "error": "ValueError: Unsupported league for schedule: LNB_ELITE2",
+      "time": 0.0
+    },
+    "player_game": {
+      "available": false,
+      "rows": 0,
+      "error": "ValueError: Unsupported league for schedule: LNB_ELITE2",
+      "time": 0.0
+    },
+    "team_game": {
+      "available": false,
+      "rows": 0,
+      "error": "ValueError: Unsupported league for schedule: LNB_ELITE2",
+      "time": 0.0
+    },
+    "pbp": {
+      "available": false,
+      "rows": 0,
+      "error": "ValueError: Unsupported league for schedule: LNB_ELITE2",
+      "time": 0.0
+    },
+    "shots": {
+      "available": false,
+      "rows": 0,
+      "error": "ValueError: Unsupported league for schedule: LNB_ELITE2",
+      "time": 0.0
+    }
+  }
+}

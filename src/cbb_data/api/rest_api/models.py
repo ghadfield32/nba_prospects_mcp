@@ -7,10 +7,13 @@ for all API endpoints.
 
 from __future__ import annotations
 
-from datetime import datetime
-from typing import Any, Literal
+from datetime import date, datetime
+from typing import TYPE_CHECKING, Any, Literal
 
 from pydantic import BaseModel, Field
+
+if TYPE_CHECKING:
+    from cbb_data.api.filters import DatasetFilter
 
 
 class DatasetRequest(BaseModel):
@@ -19,6 +22,9 @@ class DatasetRequest(BaseModel):
 
     This model wraps the filter parameters that are passed to get_dataset().
     All validation is delegated to the existing FilterSpec class.
+
+    Post-fetch filters (team_names, player_names, dates, segments) are applied
+    after data retrieval for consistent filtering across all sources.
     """
 
     filters: dict[str, Any] = Field(
@@ -47,16 +53,114 @@ class DatasetRequest(BaseModel):
         default=True, description="Include metadata about the query execution"
     )
 
+    # Post-fetch name filters
+    team_names: list[str] | None = Field(
+        default=None,
+        description="Filter by team names (case-insensitive, aliases supported)",
+        examples=[["Duke", "Kentucky"], ["Real Madrid"]],
+    )
+
+    player_names: list[str] | None = Field(
+        default=None,
+        description="Filter by player names (partial match supported)",
+        examples=[["LeBron James"], ["Cooper Flagg", "RJ Davis"]],
+    )
+
+    # Post-fetch date filters
+    start_date: date | None = Field(
+        default=None, description="Filter games from this date (YYYY-MM-DD)"
+    )
+
+    end_date: date | None = Field(
+        default=None, description="Filter games up to this date (YYYY-MM-DD)"
+    )
+
+    relative_days: int | None = Field(
+        default=None,
+        description="Filter to last N days (e.g., 7 for last week, 30 for last month)",
+        ge=1,
+        le=365,
+    )
+
+    # Post-fetch game segment filters
+    periods: list[int] | None = Field(
+        default=None,
+        description="Filter PBP/shots by period (1-4 for quarters, 5+ for OT)",
+        examples=[[4], [1, 2, 3, 4], [5, 6]],
+    )
+
+    halves: list[int] | None = Field(
+        default=None,
+        description="Filter PBP/shots by half (1=first, 2=second) for college basketball",
+        examples=[[1], [2]],
+    )
+
+    start_seconds: int | None = Field(
+        default=None,
+        description="Filter PBP/shots from this game time (seconds from tip)",
+        ge=0,
+    )
+
+    end_seconds: int | None = Field(
+        default=None,
+        description="Filter PBP/shots up to this game time (seconds from tip)",
+        ge=0,
+    )
+
     class Config:
         json_schema_extra = {
             "example": {
-                "filters": {"league": "NCAA-MBB", "season": "2025", "team": ["Duke"]},
+                "filters": {"league": "NCAA-MBB", "season": "2025"},
+                "team_names": ["Duke"],
+                "relative_days": 7,
                 "limit": 50,
-                "offset": 0,
                 "output_format": "json",
                 "include_metadata": True,
             }
         }
+
+    def to_post_filters(self) -> DatasetFilter | None:
+        """Convert post-filter fields to DatasetFilter object"""
+        from cbb_data.api.filters import DatasetFilter, DateFilter, GameSegmentFilter, NameFilter
+
+        # Check if any post-filters are specified
+        has_name_filters = self.team_names or self.player_names
+        has_date_filters = self.start_date or self.end_date or self.relative_days
+        has_segment_filters = self.periods or self.halves or self.start_seconds or self.end_seconds
+
+        if not (has_name_filters or has_date_filters or has_segment_filters):
+            return None
+
+        # Build name filter
+        names = None
+        if has_name_filters:
+            league = self.filters.get("league", "")
+            names = NameFilter(
+                leagues=[league] if league else [],
+                team_names=self.team_names,
+                player_names=self.player_names,
+            )
+
+        # Build date filter
+        dates = None
+        if has_date_filters:
+            dates = DateFilter(
+                start_date=self.start_date,
+                end_date=self.end_date,
+                relative_days=self.relative_days,
+            )
+
+        # Build segment filter
+        segments = None
+        if has_segment_filters:
+            segments = GameSegmentFilter(
+                periods=self.periods,
+                halves=self.halves,
+                start_seconds=self.start_seconds,
+                end_seconds=self.end_seconds,
+            )
+
+        return DatasetFilter(names=names, dates=dates, segments=segments)
 
 
 class DatasetMetadata(BaseModel):

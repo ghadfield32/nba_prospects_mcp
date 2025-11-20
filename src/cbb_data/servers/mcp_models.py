@@ -23,6 +23,14 @@ LeagueType = Literal[
     "NAIA",
     "U-SPORTS",
     "CCAA",
+    "NBL",
+    "NZ-NBL",
+    "ACB",
+    "LNB",
+    "LNB_PROA",
+    "LNB_ELITE2",
+    "LNB_ESPOIRS_ELITE",
+    "LNB_ESPOIRS_PROB",
 ]
 PerModeType = Literal["Totals", "PerGame", "Per40"]
 DivisionType = Literal["D1", "D2", "D3", "all"]

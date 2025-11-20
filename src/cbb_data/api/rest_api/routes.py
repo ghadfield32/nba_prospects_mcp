@@ -238,6 +238,7 @@ async def list_all_datasets() -> DatasetsListResponse:
     tags=["Datasets"],
     summary="Query a dataset",
     description="Fetch data from a specific dataset with filters. Supports streaming with output_format=ndjson",
+    response_model=None,  # Disable auto-model due to StreamingResponse union
 )
 async def query_dataset(
     dataset_id: str = Path(
@@ -272,7 +273,10 @@ async def query_dataset(
         # Log the request
         logger.info(f"Dataset query: {dataset_id} with filters {request.filters}")
 
-        # Call existing get_dataset() function - NO CHANGES NEEDED!
+        # Convert post-filter fields to DatasetFilter object
+        post_filters = request.to_post_filters()
+
+        # Call existing get_dataset() function with post-filters
         df = get_dataset(
             grouping=dataset_id,
             filters=request.filters,
@@ -281,6 +285,7 @@ async def query_dataset(
             as_format="pandas",  # We'll convert to requested format
             name_resolver=None,  # Use default name resolution
             force_fresh=False,  # Use cache when available
+            post_filters=post_filters,  # Apply name/date/segment filters
         )
 
         # Handle pagination with offset

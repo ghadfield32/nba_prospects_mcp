@@ -40,44 +40,45 @@ class CapabilityLevel(Enum):
 
 # Capability matrix: league -> dataset -> level
 # Only specify overrides here; default is FULL if league listed in dataset registration
+# Updated 2025-11-19: Reflects actual data availability after full wiring
 CAPABILITY_OVERRIDES: dict[str, dict[str, CapabilityLevel]] = {
-    # ========== FULLY FUNCTIONAL LEAGUES (No Overrides Needed) ==========
-    "NCAA-MBB": {},  # ESPN + cbbpy - full support
-    "NCAA-WBB": {},  # ESPN + cbbpy - full support
-    "EuroLeague": {},  # euroleague-api - full support
-    "EuroCup": {},  # euroleague-api - full support
-    "G-League": {},  # NBA Stats API - full support
-    "WNBA": {},  # NBA Stats API - full support
-    "NBL": {},  # nblR R package - full support including shot coordinates
-    "NZ-NBL": {  # FIBA HTML scraping - full support except shots
-        "shots": CapabilityLevel.UNAVAILABLE,  # FIBA HTML doesn't provide x,y coordinates
+    # ========== TIER 0: CORE FEEDER LEAGUES (Full Support) ==========
+    "NCAA-MBB": {},  # ESPN + cbbpy - full support (6/6 datasets)
+    "NCAA-WBB": {},  # ESPN + cbbpy - full support (6/6 datasets)
+    "EuroLeague": {},  # euroleague-api - full support (6/6 datasets)
+    "EuroCup": {},  # euroleague-api - full support (6/6 datasets)
+    "G-League": {},  # NBA Stats API - full support (6/6 datasets)
+    "WNBA": {},  # NBA Stats API - full support (6/6 datasets)
+    # ========== TIER 1: SECONDARY FEEDER LEAGUES ==========
+    "NBL": {},  # nblR R package - full support including shot coordinates (6/6 datasets)
+    "NZ-NBL": {},  # ✅ UPDATED 2025-11-19: Full support including shots via FIBA JS (6/6 datasets)
+    "LNB_PROA": {},  # ✅ UPDATED 2025-11-19: Full support via LNB API + parquet (6/6 datasets)
+    "ACB": {},  # ✅ UPDATED 2025-11-19: Full support via BAwiR R package (6/6 datasets)
+    "OTE": {  # Overtime Elite - Web scraping (5/6 datasets)
+        "shots": CapabilityLevel.UNAVAILABLE,  # ✅ UPDATED: No x,y coordinates (but PBP is FULL!)
     },
-    # ========== LIMITED COLLEGE LEAGUES ==========
-    "NJCAA": {  # PrestoSports platform
-        "pbp": CapabilityLevel.UNAVAILABLE,  # PrestoSports doesn't publish PBP
-        "shots": CapabilityLevel.UNAVAILABLE,  # No shot coordinates
-    },
-    "NAIA": {  # PrestoSports platform
-        "pbp": CapabilityLevel.UNAVAILABLE,  # PrestoSports doesn't publish PBP
-        "shots": CapabilityLevel.UNAVAILABLE,  # No shot coordinates
-    },
-    "U-SPORTS": {  # PrestoSports platform - Canadian university
-        "pbp": CapabilityLevel.UNAVAILABLE,  # PrestoSports doesn't publish PBP
-        "shots": CapabilityLevel.UNAVAILABLE,  # No shot coordinates
-    },
-    "CCAA": {  # PrestoSports platform - Canadian college
-        "pbp": CapabilityLevel.UNAVAILABLE,  # PrestoSports doesn't publish PBP
-        "shots": CapabilityLevel.UNAVAILABLE,  # No shot coordinates
-    },
-    # ========== PROFESSIONAL / PRE-PROFESSIONAL LEAGUES ==========
-    "CEBL": {  # Canadian Elite Basketball League
+    "CEBL": {  # Canadian Elite Basketball League (4/6 datasets)
         "pbp": CapabilityLevel.UNAVAILABLE,  # ceblpy doesn't provide PBP
         "shots": CapabilityLevel.UNAVAILABLE,  # No shot coordinates
     },
-    "OTE": {  # Overtime Elite - Exposure Events API
-        "shots": CapabilityLevel.LIMITED,  # Some shot data but no x,y coordinates
+    # ========== TIER 2: DEVELOPMENT LEAGUES (PrestoSports) ==========
+    "NJCAA": {  # PrestoSports platform (4/6 datasets)
+        "pbp": CapabilityLevel.UNAVAILABLE,  # PrestoSports doesn't publish PBP
+        "shots": CapabilityLevel.UNAVAILABLE,  # No shot coordinates
     },
-    # ========== FIBA HTML SCRAPING CLUSTER (NEW) ==========
+    "NAIA": {  # PrestoSports platform (4/6 datasets)
+        "pbp": CapabilityLevel.UNAVAILABLE,  # PrestoSports doesn't publish PBP
+        "shots": CapabilityLevel.UNAVAILABLE,  # No shot coordinates
+    },
+    "USPORTS": {  # PrestoSports platform - Canadian university (4/6 datasets)
+        "pbp": CapabilityLevel.UNAVAILABLE,  # PrestoSports doesn't publish PBP
+        "shots": CapabilityLevel.UNAVAILABLE,  # No shot coordinates
+    },
+    "CCAA": {  # PrestoSports platform - Canadian college (4/6 datasets)
+        "pbp": CapabilityLevel.UNAVAILABLE,  # PrestoSports doesn't publish PBP
+        "shots": CapabilityLevel.UNAVAILABLE,  # No shot coordinates
+    },
+    # ========== FIBA HTML SCRAPING CLUSTER (5/6 datasets each) ==========
     "LKL": {  # Lithuania Basketball League - FIBA HTML
         "shots": CapabilityLevel.UNAVAILABLE,  # FIBA HTML doesn't provide x,y coordinates
     },
@@ -90,27 +91,12 @@ CAPABILITY_OVERRIDES: dict[str, dict[str, CapabilityLevel]] = {
     "ABA": {  # ABA Adriatic League - FIBA HTML
         "shots": CapabilityLevel.UNAVAILABLE,  # FIBA HTML doesn't provide x,y coordinates
     },
-    # ========== EUROPEAN DOMESTIC LEAGUES (CUSTOM HTML) ==========
-    "LNB_PROA": {  # LNB Pro A France - Official stats site
-        "shots": CapabilityLevel.UNAVAILABLE,  # Official site doesn't provide shot coordinates
-        "pbp": CapabilityLevel.LIMITED,  # PBP available for recent seasons only (2018+)
-    },
-    "ACB": {  # Liga Endesa Spain - Official stats site
-        "shots": CapabilityLevel.UNAVAILABLE,  # Official site doesn't provide shot coordinates
-        "pbp": CapabilityLevel.LIMITED,  # PBP available for recent seasons only (2016+)
-    },
 }
 
 # Season-level capability overrides (for historical data limitations)
 # Format: (league, season) -> {dataset -> CapabilityLevel}
+# Updated 2025-11-19: LNB/ACB now have full PBP support via API/BAwiR
 SEASON_CAPABILITY_OVERRIDES: dict[tuple[str, str], dict[str, CapabilityLevel]] = {
-    # LNB Pro A historical limitations
-    ("LNB_PROA", "2015-16"): {"pbp": CapabilityLevel.UNAVAILABLE},
-    ("LNB_PROA", "2016-17"): {"pbp": CapabilityLevel.UNAVAILABLE},
-    ("LNB_PROA", "2017-18"): {"pbp": CapabilityLevel.UNAVAILABLE},
-    # ACB historical limitations
-    ("ACB", "2014-15"): {"pbp": CapabilityLevel.UNAVAILABLE},
-    ("ACB", "2015-16"): {"pbp": CapabilityLevel.UNAVAILABLE},
     # NBL shot coordinates only available from 2015-16+
     # (schedule data goes back to 1979, but detailed stats only from 2015-16)
     ("NBL", "2014-15"): {
@@ -121,6 +107,7 @@ SEASON_CAPABILITY_OVERRIDES: dict[tuple[str, str], dict[str, CapabilityLevel]] =
         "player_season": CapabilityLevel.UNAVAILABLE,
         "team_season": CapabilityLevel.UNAVAILABLE,
     },
+    # Historical data limitations for other leagues will be documented as discovered
 }
 
 

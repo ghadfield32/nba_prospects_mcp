@@ -53,9 +53,18 @@ import pandas as pd
 # CONFIG
 # ==============================================================================
 
+# Division to League mapping
+DIVISION_TO_LEAGUE = {
+    "1": "LNB_PROA",
+    "2": "LNB_ELITE2",
+    "3": "LNB_ESPOIRS_ELITE",
+    "4": "LNB_ESPOIRS_PROB",
+}
+
 # Paths
 DATA_DIR = Path("data/raw/lnb")
 NORMALIZED_DIR = Path("data/normalized/lnb")
+HISTORICAL_DIR = Path("data/lnb/historical")
 INDEX_FILE = DATA_DIR / "lnb_game_index.parquet"
 
 PBP_DIR = DATA_DIR / "pbp"
@@ -144,6 +153,55 @@ def calculate_shot_distance(x: float, y: float) -> float:
         return np.nan
 
 
+def load_game_league_mapping(season: str) -> dict[str, str]:
+    """Load fixtures and build game_id -> league mapping
+
+    Tries to load fixtures from historical directory to get division info.
+
+    Args:
+        season: Season string (e.g., "2025-2026")
+
+    Returns:
+        Dict mapping game_id (fixture_uuid) to league name
+    """
+    game_to_league: dict[str, str] = {}
+
+    # Try to find fixtures file in historical directory
+    season_dir = HISTORICAL_DIR / season
+    if not season_dir.exists():
+        print(f"  [WARN] No historical directory for {season}, using default LNB_PROA")
+        return game_to_league
+
+    # Look for fixtures file (could be fixtures.parquet or lnb_fixtures_*.parquet)
+    fixtures_files = list(season_dir.glob("*fixtures*.parquet"))
+
+    for fixtures_file in fixtures_files:
+        try:
+            fixtures_df = pd.read_parquet(fixtures_file)
+
+            # Check for division column
+            if "division" not in fixtures_df.columns:
+                continue
+
+            # Map each game to its league
+            id_col = "fixture_uuid" if "fixture_uuid" in fixtures_df.columns else "GAME_ID"
+
+            for _, row in fixtures_df.iterrows():
+                game_id = str(row[id_col])
+                division = str(row.get("division", "1"))
+                league = DIVISION_TO_LEAGUE.get(division, "LNB_PROA")
+                game_to_league[game_id] = league
+
+            print(
+                f"  [INFO] Loaded {len(game_to_league)} game->league mappings from {fixtures_file.name}"
+            )
+
+        except Exception as e:
+            print(f"  [WARN] Failed to load {fixtures_file}: {e}")
+
+    return game_to_league
+
+
 def classify_shot_zone(x: float, y: float, shot_type: str) -> str:
     """Classify shot zone based on coordinates
 
@@ -185,12 +243,13 @@ def classify_shot_zone(x: float, y: float, shot_type: str) -> str:
 # ==============================================================================
 
 
-def create_player_game_stats(game_id: str, season: str) -> pd.DataFrame:
+def create_player_game_stats(game_id: str, season: str, league: str = "LNB_PROA") -> pd.DataFrame:
     """Create player box score from PBP and shots data
 
     Args:
         game_id: Game UUID
         season: Season string (e.g., "2024-2025")
+        league: League name (e.g., "LNB_PROA", "LNB_ELITE2")
 
     Returns:
         DataFrame with player box score stats
@@ -327,20 +386,23 @@ def create_player_game_stats(game_id: str, season: str) -> pd.DataFrame:
                 "PF": stats["PF"],
                 "PLUS_MINUS": 0,  # TODO: Calculate from score progression
                 "SEASON": season,
-                "LEAGUE": "LNB_PROA",
+                "LEAGUE": league,
             }
         )
 
     return pd.DataFrame(rows)
 
 
-def create_team_game_stats(player_game_df: pd.DataFrame, game_id: str, season: str) -> pd.DataFrame:
+def create_team_game_stats(
+    player_game_df: pd.DataFrame, game_id: str, season: str, league: str = "LNB_PROA"
+) -> pd.DataFrame:
     """Create team box score from player stats
 
     Args:
         player_game_df: Player box score DataFrame
         game_id: Game UUID
         season: Season string
+        league: League name (e.g., "LNB_PROA", "LNB_ELITE2")
 
     Returns:
         DataFrame with team box score stats
@@ -392,7 +454,7 @@ def create_team_game_stats(player_game_df: pd.DataFrame, game_id: str, season: s
         )
 
         team_stat["SEASON"] = season
-        team_stat["LEAGUE"] = "LNB_PROA"
+        team_stat["LEAGUE"] = league
 
         team_stats.append(team_stat)
 
@@ -479,13 +541,16 @@ def create_shot_events(game_id: str, season: str) -> pd.DataFrame:
 # ==============================================================================
 
 
-def transform_game(game_id: str, season: str, force: bool = False) -> dict[str, bool]:
+def transform_game(
+    game_id: str, season: str, force: bool = False, league: str = "LNB_PROA"
+) -> dict[str, bool]:
     """Transform all normalized tables for a single game
 
     Args:
         game_id: Game UUID
         season: Season string
         force: If True, rebuild even if already exists
+        league: League name (e.g., "LNB_PROA", "LNB_ELITE2")
 
     Returns:
         Dict with success status for each table type
@@ -511,18 +576,18 @@ def transform_game(game_id: str, season: str, force: bool = False) -> dict[str, 
 
     try:
         # Create player game stats
-        player_game_df = create_player_game_stats(game_id, season)
+        player_game_df = create_player_game_stats(game_id, season, league)
         if not player_game_df.empty:
             player_game_df.to_parquet(player_file, index=False)
             results["player_game"] = True
-            print(f"    [PLAYER_GAME] ✅ {len(player_game_df)} players")
+            print(f"    [PLAYER_GAME] ✅ {len(player_game_df)} players ({league})")
 
         # Create team game stats
-        team_game_df = create_team_game_stats(player_game_df, game_id, season)
+        team_game_df = create_team_game_stats(player_game_df, game_id, season, league)
         if not team_game_df.empty:
             team_game_df.to_parquet(team_file, index=False)
             results["team_game"] = True
-            print(f"    [TEAM_GAME] ✅ {len(team_game_df)} teams")
+            print(f"    [TEAM_GAME] ✅ {len(team_game_df)} teams ({league})")
 
         # Create shot events
         shot_events_df = create_shot_events(game_id, season)
@@ -588,12 +653,17 @@ def transform_season(season: str, force: bool = False) -> dict[str, Any]:
 
     print(f"  Found {len(game_ids)} games to transform")
 
+    # Load game -> league mapping from fixtures
+    game_to_league = load_game_league_mapping(season)
+
     stats = {"total": len(game_ids), "player_game": 0, "team_game": 0, "shot_events": 0}
 
     for idx, game_id in enumerate(game_ids, 1):
+        # Get league for this game (default to LNB_PROA if not found)
+        league = game_to_league.get(game_id, "LNB_PROA")
         print(f"  [{idx}/{len(game_ids)}] {game_id[:16]}...")
 
-        results = transform_game(game_id, season, force)
+        results = transform_game(game_id, season, force, league)
 
         if results["player_game"]:
             stats["player_game"] += 1

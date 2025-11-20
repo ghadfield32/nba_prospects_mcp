@@ -1,15 +1,15 @@
 {
-  "timestamp": "2025-11-15T15:02:56.160717",
+  "timestamp": "2025-11-19T13:40:03.429600",
   "year": 2025,
   "division": 1,
   "coverage": {
-    "fixtures_expected": 8,
-    "fixtures_fetched": 8,
+    "fixtures_expected": 7,
+    "fixtures_fetched": 7,
     "fixtures_failed": 0,
     "coverage_pct": 100.0,
-    "pbp_events_total": 0,
-    "shots_total": 0,
-    "validation_passed": 8,
+    "pbp_events_total": 1100,
+    "shots_total": 348,
+    "validation_passed": 7,
     "validation_failed": 0
   },
   "errors": []

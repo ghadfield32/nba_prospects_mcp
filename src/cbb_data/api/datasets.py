@@ -53,6 +53,9 @@ from ..utils.entity_resolver import (
     resolve_ncaa_team,
 )
 
+# Import post-fetch filter system
+from .filters import DatasetFilter, apply_filters
+
 logger = logging.getLogger(__name__)
 
 # Derive all supported leagues from LEAGUE_LEVELS (single source of truth)
@@ -675,6 +678,29 @@ def _fetch_schedule(compiled: dict[str, Any]) -> pd.DataFrame:
     division = params.get("Division")
     groups = _map_division_to_groups(division) if division is not None else "50"
 
+    # Try LeagueSourceConfig first for modern unified approach
+    src_cfg = get_league_source_config(league)
+    if src_cfg and src_cfg.fetch_schedule:
+        # Extract season from params
+        season_str = params.get("Season", "2024-25")
+
+        try:
+            # Call the wired fetch function
+            logger.info(f"Fetching schedule via LeagueSourceConfig for {league}")
+            df = src_cfg.fetch_schedule(season=season_str)
+
+            if df is not None:
+                # Apply post-mask filtering and return - empty is valid (no data for filters)
+                df = apply_post_mask(df, post_mask)
+                if df.empty:
+                    logger.info(f"LeagueSourceConfig fetch returned empty for {league} (no data)")
+                return df
+        except Exception as e:
+            logger.warning(
+                f"LeagueSourceConfig fetch failed for {league}: {e}. "
+                "Falling back to hardcoded path."
+            )
+
     if league == "NCAA-MBB":
         # ESPN MBB
         if params.get("DateFrom") and params.get("DateTo"):
@@ -899,6 +925,31 @@ def _fetch_player_game(compiled: dict[str, Any]) -> pd.DataFrame:
     meta = compiled["meta"]
 
     league = meta.get("league")
+
+    # Try LeagueSourceConfig first for modern unified approach
+    src_cfg = get_league_source_config(league)
+    if src_cfg and src_cfg.fetch_player_game:
+        # Extract season from params
+        season_str = params.get("Season", "2024-25")
+        game_ids = post_mask.get("GAME_ID")
+
+        try:
+            # Call the wired fetch function
+            logger.info(f"Fetching player_game via LeagueSourceConfig for {league}")
+            df = src_cfg.fetch_player_game(season=season_str, game_ids=game_ids)
+
+            if df is not None:
+                # Apply post-mask filtering and return - empty is valid (no data for filters)
+                df = apply_post_mask(df, post_mask)
+                df = add_league_context(df, league)
+                if df.empty:
+                    logger.info(f"LeagueSourceConfig fetch returned empty for {league} (no data)")
+                return df
+        except Exception as e:
+            logger.warning(
+                f"LeagueSourceConfig fetch failed for {league}: {e}. "
+                "Falling back to hardcoded path."
+            )
 
     if league in ["NCAA-MBB", "NCAA-WBB"]:
         # For NCAA, we need to:
@@ -1285,9 +1336,40 @@ def _fetch_player_game(compiled: dict[str, Any]) -> pd.DataFrame:
 def _fetch_team_game(compiled: dict[str, Any]) -> pd.DataFrame:
     """Fetch team/game data (team box scores)
 
-    Currently returns schedule with scores as a proxy for team stats.
+    Strategy:
+    1. Try LeagueSourceConfig.fetch_team_game for league-specific data
+    2. Fallback to schedule with scores as a proxy for team stats
     """
-    # For now, use schedule as team/game data
+    params = compiled["params"]
+    post_mask = compiled["post_mask"]
+    meta = compiled["meta"]
+
+    league = meta.get("league")
+
+    # Try LeagueSourceConfig first for modern unified approach
+    src_cfg = get_league_source_config(league)
+    if src_cfg and src_cfg.fetch_team_game:
+        # Extract season from params
+        season_str = params.get("Season", "2024-25")
+        game_ids = post_mask.get("GAME_ID")
+
+        try:
+            # Call the wired fetch function
+            logger.info(f"Fetching team_game via LeagueSourceConfig for {league}")
+            df = src_cfg.fetch_team_game(season=season_str, game_ids=game_ids)
+
+            if df is not None:
+                # Apply post-mask filtering and return - empty is valid (no data for filters)
+                df = apply_post_mask(df, post_mask)
+                if df.empty:
+                    logger.info(f"LeagueSourceConfig fetch returned empty for {league} (no data)")
+                return df
+        except Exception as e:
+            logger.warning(
+                f"LeagueSourceConfig fetch failed for {league}: {e}. " "Falling back to schedule."
+            )
+
+    # Fallback: use schedule as team/game data
     # TODO: Add team-level aggregated stats
     return _fetch_schedule(compiled)
 
@@ -1310,6 +1392,26 @@ def _fetch_play_by_play(compiled: dict[str, Any]) -> pd.DataFrame:
 
     # Extract season for leagues that need it
     season_str = params.get("Season", "2024-25")
+
+    # Try LeagueSourceConfig first for modern unified approach
+    src_cfg = get_league_source_config(league)
+    if src_cfg and src_cfg.fetch_pbp:
+        try:
+            # Call the wired fetch function with all game_ids
+            logger.info(f"Fetching pbp via LeagueSourceConfig for {league}")
+            df = src_cfg.fetch_pbp(season=season_str, game_ids=post_mask["GAME_ID"])
+
+            if df is not None:
+                # Apply post-mask filtering and return - empty is valid (no data for filters)
+                df = apply_post_mask(df, post_mask)
+                if df.empty:
+                    logger.info(f"LeagueSourceConfig fetch returned empty for {league} (no data)")
+                return df
+        except Exception as e:
+            logger.warning(
+                f"LeagueSourceConfig fetch failed for {league}: {e}. "
+                "Falling back to hardcoded path."
+            )
 
     frames = []
 
@@ -2328,6 +2430,7 @@ def get_dataset(
     name_resolver: Callable[[str, str, str | None], int | None] | None = None,
     force_fresh: bool = False,
     pre_only: bool = True,
+    post_filters: DatasetFilter | None = None,
 ) -> Any:
     """Fetch a dataset with filters
 
@@ -2343,6 +2446,8 @@ def get_dataset(
         force_fresh: If True, bypass cache and fetch fresh data (default: False)
         pre_only: If True, exclude professional leagues (default: True).
                  Set to False to include pro leagues (EuroLeague, G-League, WNBA, etc.)
+        post_filters: Optional DatasetFilter for post-fetch filtering (names, dates, segments).
+                     Applied after data fetch for consistent filtering across all sources.
 
     Returns:
         DataFrame (pandas), list of dicts (json), or dict with path (parquet)
@@ -2460,6 +2565,12 @@ def get_dataset(
     # Fetch data
     fetch_fn = entry["fetch"]
     df = fetch_fn(compiled)
+
+    # Apply post-fetch filters (names, dates, segments)
+    if post_filters is not None and not df.empty:
+        logger.debug(f"Applying post-fetch filters: {post_filters}")
+        df = apply_filters(df, post_filters)
+        logger.debug(f"After post-filter: {len(df)} rows")
 
     # Select columns
     if columns:

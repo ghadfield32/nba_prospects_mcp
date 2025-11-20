@@ -225,8 +225,8 @@ def ingest_season(
             # Fetch raw payload
             payload = fetch_fixture_detail_and_pbp(fixture_uuid)
 
-            # Parse fixture metadata
-            metadata = parse_fixture_metadata(payload)
+            # Parse fixture metadata (include division for sub-league identification)
+            metadata = parse_fixture_metadata(payload, division=str(division))
             fixtures_data.append(asdict(metadata))
 
             # Parse PBP events
@@ -367,6 +367,21 @@ def ingest_season(
                 indent=2,
             )
         logger.info(f"   Coverage report: {report_file}")
+
+        # Also write to historical directory format for migration/normalization
+        season_str = f"{year - 1}-{year}"
+        historical_path = Path("data/lnb/historical") / season_str
+        historical_path.mkdir(parents=True, exist_ok=True)
+
+        # Save with division-specific names in historical format
+        hist_fixtures = historical_path / f"fixtures_div{division}.parquet"
+        hist_pbp = historical_path / f"pbp_events_div{division}.parquet"
+        hist_shots = historical_path / f"shots_div{division}.parquet"
+
+        df_fixtures.to_parquet(hist_fixtures, index=False)
+        df_pbp.to_parquet(hist_pbp, index=False)
+        df_shots.to_parquet(hist_shots, index=False)
+        logger.info(f"   Historical: {historical_path} (div{division})")
     else:
         logger.info("\n[5/5] Skipping write (validate-only mode)")
 

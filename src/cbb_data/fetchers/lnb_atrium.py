@@ -100,6 +100,7 @@ class FixtureMetadata:
     fixture_type: str  # REGULAR, PLAYOFF, etc.
     competition_name: str
     season_name: str
+    division: str = ""  # Division ID (1=ProA, 2=Elite2, 3=Espoirs Elite, 4=Espoirs ProB)
 
 
 @dataclass
@@ -306,7 +307,7 @@ def fetch_fixture_detail_and_pbp(fixture_uuid: str) -> dict[str, Any]:
     return data  # Return data (not payload) for easier parsing
 
 
-def parse_fixture_metadata(payload: dict[str, Any]) -> FixtureMetadata:
+def parse_fixture_metadata(payload: dict[str, Any], division: str = "") -> FixtureMetadata:
     """
     Extract fixture metadata from Atrium API payload.
 
@@ -319,13 +320,14 @@ def parse_fixture_metadata(payload: dict[str, Any]) -> FixtureMetadata:
 
     Args:
         payload: Raw JSON from fetch_fixture_detail_and_pbp()
+        division: Division ID (1=ProA, 2=Elite2, 3=Espoirs Elite, 4=Espoirs ProB)
 
     Returns:
         FixtureMetadata object with all parsed fields
 
     Example:
         >>> payload = fetch_fixture_detail_and_pbp("...")
-        >>> metadata = parse_fixture_metadata(payload)
+        >>> metadata = parse_fixture_metadata(payload, division="2")
         >>> print(f"{metadata.home_team_name} vs {metadata.away_team_name}")
     """
     fixture = payload["fixture"]
@@ -379,6 +381,7 @@ def parse_fixture_metadata(payload: dict[str, Any]) -> FixtureMetadata:
         fixture_type=fixture.get("fixtureType", ""),
         competition_name=competition.get("name", ""),
         season_name=season.get("name", ""),
+        division=division,
     )
 
 

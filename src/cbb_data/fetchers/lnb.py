@@ -1445,6 +1445,7 @@ def fetch_lnb_player_game(
 def fetch_lnb_pbp_historical(
     season: str | None = None,
     game_ids: list[str] | None = None,
+    league: str | None = None,
     **kwargs: Any,
 ) -> pd.DataFrame:
     """Fetch LNB play-by-play data from historical parquet files
@@ -1455,6 +1456,7 @@ def fetch_lnb_pbp_historical(
     Args:
         season: Season in format "2024-2025" or "2025-2026"
         game_ids: List of game/fixture UUIDs to filter
+        league: League identifier (LNB_PROA, LNB_ELITE2, etc.) to filter
         **kwargs: Additional filters (team, player, event_type, limit)
 
     Returns:
@@ -1463,15 +1465,16 @@ def fetch_lnb_pbp_historical(
     Example:
         >>> pbp = fetch_lnb_pbp_historical(season="2025-2026")
         >>> game_pbp = fetch_lnb_pbp_historical(season="2025-2026", game_ids=["abc-123"])
+        >>> elite2_pbp = fetch_lnb_pbp_historical(season="2024-2025", league="LNB_ELITE2")
     """
     from ..api.lnb_historical import get_lnb_historical_pbp
 
     if season is None:
-        logger.warning("fetch_lnb_pbp_historical: season is required, defaulting to 2025-2026")
+        logger.warning("fetch_lnb_pbp_historical: season is required, " "defaulting to 2025-2026")
         season = "2025-2026"
 
     try:
-        return get_lnb_historical_pbp(season=season, fixture_uuid=game_ids, **kwargs)
+        return get_lnb_historical_pbp(season=season, fixture_uuid=game_ids, league=league, **kwargs)
     except Exception as e:
         logger.error(f"fetch_lnb_pbp_historical failed: {e}")
         return pd.DataFrame()
@@ -1480,37 +1483,44 @@ def fetch_lnb_pbp_historical(
 def fetch_lnb_shots_historical(
     season: str | None = None,
     game_ids: list[str] | None = None,
+    league: str | None = None,
     **kwargs: Any,
 ) -> pd.DataFrame:
-    """Fetch LNB shot chart data from historical parquet files
+    """Fetch LNB shot chart data from raw parquet files
 
-    This fetcher accesses pre-ingested historical shot data stored in
-    data/lnb/historical/{season}/shots.parquet files.
+    This fetcher accesses pre-ingested shot data stored in
+    data/raw/lnb/shots/season={season}/ as per-game parquet files.
 
     Note: This is different from fetch_lnb_shots() which fetches a single game
-    via Atrium Sports API. This function fetches from pre-ingested historical
+    via Atrium Sports API. This function fetches from pre-ingested
     parquet files and supports season-level queries.
 
     Args:
         season: Season in format "2024-2025" or "2025-2026"
         game_ids: List of game/fixture UUIDs to filter
-        **kwargs: Additional filters (team, player, shot_made, limit)
+        league: League identifier (LNB_PROA, LNB_ELITE2, etc.) to filter
+        **kwargs: Additional filters (team, player, made, limit)
 
     Returns:
         DataFrame with shot events including x/y coordinates
 
     Example:
-        >>> shots = fetch_lnb_shots_historical(season="2025-2026")
-        >>> game_shots = fetch_lnb_shots_historical(season="2025-2026", game_ids=["abc-123"])
+        >>> shots = fetch_lnb_shots_historical(season="2024-2025")
+        >>> game_shots = fetch_lnb_shots_historical(
+        ...     season="2024-2025", game_ids=["abc-123"]
+        ... )
+        >>> elite2_shots = fetch_lnb_shots_historical(
+        ...     season="2024-2025", league="LNB_ELITE2"
+        ... )
     """
-    from ..api.lnb_historical import get_lnb_historical_shots
+    from ..api.lnb_historical import get_lnb_normalized_shots
 
     if season is None:
-        logger.warning("fetch_lnb_shots_historical: season is required, defaulting to 2025-2026")
-        season = "2025-2026"
+        logger.warning("fetch_lnb_shots_historical: season is required, " "defaulting to 2024-2025")
+        season = "2024-2025"
 
     try:
-        return get_lnb_historical_shots(season=season, fixture_uuid=game_ids, **kwargs)
+        return get_lnb_normalized_shots(season=season, game_ids=game_ids, league=league, **kwargs)
     except Exception as e:
         logger.error(f"fetch_lnb_shots_historical failed: {e}")
         return pd.DataFrame()
@@ -1652,3 +1662,341 @@ def fetch_espoirs_prob_player_game(season: str | None = None, **kwargs: Any) -> 
 def fetch_espoirs_prob_team_game(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
     """Fetch Espoirs PROB team-game data (league-specific wrapper)"""
     return fetch_lnb_team_game_normalized(season=season, league="LNB_ESPOIRS_PROB", **kwargs)
+
+
+# ==============================================================================
+# League-Specific Schedule & Season Aggregation (from normalized data)
+# ==============================================================================
+
+
+def fetch_lnb_schedule_from_games(
+    season: str | None = None,
+    league: str | None = None,
+    team: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    **kwargs: Any,
+) -> pd.DataFrame:
+    """Fetch schedule with human-readable team names and dates
+
+    Uses fixtures data to provide rich schedule info including team names,
+    game dates, scores, and venues. Supports filtering by team name and date range.
+
+    Args:
+        season: Season string (e.g., "2024-2025")
+        league: League identifier (e.g., "LNB_ELITE2")
+        team: Filter by team name (partial match supported)
+        start_date: Filter games on/after this date (YYYY-MM-DD)
+        end_date: Filter games on/before this date (YYYY-MM-DD)
+
+    Returns:
+        DataFrame with columns:
+        - GAME_ID: Game UUID
+        - GAME_DATE: Game date (YYYY-MM-DD)
+        - HOME_TEAM: Home team name
+        - AWAY_TEAM: Away team name
+        - HOME_TEAM_ID: Home team UUID
+        - AWAY_TEAM_ID: Away team UUID
+        - HOME_SCORE: Home team score
+        - AWAY_SCORE: Away team score
+        - VENUE: Venue name
+        - LEAGUE: League identifier
+        - SEASON: Season string
+
+    Examples:
+        >>> # Get all Elite 2 games
+        >>> schedule = fetch_lnb_schedule_from_games(league="LNB_ELITE2")
+
+        >>> # Get games for a specific team
+        >>> schedule = fetch_lnb_schedule_from_games(team="Lyon")
+
+        >>> # Get games in a date range
+        >>> schedule = fetch_lnb_schedule_from_games(
+        ...     start_date="2024-11-01", end_date="2024-11-30"
+        ... )
+    """
+    from ..api.lnb_lookup import get_lnb_schedule
+
+    if season is None:
+        season = "2024-2025"
+
+    return get_lnb_schedule(
+        season=season,
+        league=league,
+        team=team,
+        start_date=start_date,
+        end_date=end_date,
+    )
+
+
+def fetch_lnb_player_season_from_games(
+    season: str | None = None,
+    league: str | None = None,
+    per_mode: str = "Totals",
+    **kwargs: Any,
+) -> pd.DataFrame:
+    """Aggregate player season stats from normalized player_game data
+
+    Calculates season totals/averages from individual game box scores.
+    Works for any LNB league that has normalized player_game data.
+
+    Args:
+        season: Season string (e.g., "2024-2025")
+        league: League identifier (e.g., "LNB_ELITE2")
+        per_mode: "Totals" or "PerGame"
+
+    Returns:
+        DataFrame with aggregated player season stats
+    """
+    if season is None:
+        season = "2024-2025"
+
+    # Get player_game data
+    player_game = fetch_lnb_player_game_normalized(season=season, league=league, **kwargs)
+
+    if player_game.empty:
+        return pd.DataFrame()
+
+    # Identify stat columns to aggregate
+    stat_cols = [
+        "MIN",
+        "PTS",
+        "FGM",
+        "FGA",
+        "FG3M",
+        "FG3A",
+        "FTM",
+        "FTA",
+        "OREB",
+        "DREB",
+        "REB",
+        "AST",
+        "STL",
+        "BLK",
+        "TOV",
+        "PF",
+    ]
+    available_stats = [c for c in stat_cols if c in player_game.columns]
+
+    if not available_stats:
+        return pd.DataFrame()
+
+    # Group by player (and team if available)
+    group_cols = ["PLAYER_NAME"]
+    if "TEAM_ABBREV" in player_game.columns:
+        group_cols.append("TEAM_ABBREV")
+    elif "TEAM_NAME" in player_game.columns:
+        group_cols.append("TEAM_NAME")
+
+    # Aggregate
+    agg_dict = {col: "sum" for col in available_stats}
+    agg_dict["GAME_ID"] = "count"  # Games played
+
+    aggregated = player_game.groupby(group_cols, as_index=False).agg(agg_dict)
+    aggregated = aggregated.rename(columns={"GAME_ID": "GP"})
+
+    # Calculate percentages
+    if "FGM" in aggregated.columns and "FGA" in aggregated.columns:
+        aggregated["FG_PCT"] = (aggregated["FGM"] / aggregated["FGA"].replace(0, 1) * 100).round(1)
+    if "FG3M" in aggregated.columns and "FG3A" in aggregated.columns:
+        aggregated["FG3_PCT"] = (aggregated["FG3M"] / aggregated["FG3A"].replace(0, 1) * 100).round(
+            1
+        )
+    if "FTM" in aggregated.columns and "FTA" in aggregated.columns:
+        aggregated["FT_PCT"] = (aggregated["FTM"] / aggregated["FTA"].replace(0, 1) * 100).round(1)
+
+    # Calculate per-game if requested
+    if per_mode == "PerGame":
+        for col in available_stats:
+            if col in aggregated.columns:
+                aggregated[col] = (aggregated[col] / aggregated["GP"]).round(1)
+
+    # Add metadata
+    aggregated["SEASON"] = season
+    if league:
+        aggregated["LEAGUE"] = league
+
+    return aggregated
+
+
+def fetch_lnb_team_season_from_games(
+    season: str | None = None,
+    league: str | None = None,
+    **kwargs: Any,
+) -> pd.DataFrame:
+    """Aggregate team season stats from normalized team_game data
+
+    Calculates season totals and standings from team box scores.
+    Works for any LNB league that has normalized team_game data.
+
+    Args:
+        season: Season string (e.g., "2024-2025")
+        league: League identifier (e.g., "LNB_ELITE2")
+
+    Returns:
+        DataFrame with aggregated team season stats
+    """
+    if season is None:
+        season = "2024-2025"
+
+    # Get team_game data
+    team_game = fetch_lnb_team_game_normalized(season=season, league=league, **kwargs)
+
+    if team_game.empty:
+        return pd.DataFrame()
+
+    # Identify team column
+    if "TEAM_NAME" in team_game.columns:
+        team_col = "TEAM_NAME"
+    elif "TEAM_ABBREV" in team_game.columns:
+        team_col = "TEAM_ABBREV"
+    elif "TEAM_ID" in team_game.columns:
+        team_col = "TEAM_ID"
+    else:
+        return pd.DataFrame()
+
+    # Stat columns to aggregate
+    stat_cols = [
+        "PTS",
+        "FGM",
+        "FGA",
+        "FG3M",
+        "FG3A",
+        "FTM",
+        "FTA",
+        "OREB",
+        "DREB",
+        "REB",
+        "AST",
+        "STL",
+        "BLK",
+        "TOV",
+        "PF",
+    ]
+    available_stats = [c for c in stat_cols if c in team_game.columns]
+
+    if not available_stats:
+        return pd.DataFrame()
+
+    # Aggregate
+    agg_dict: dict[str, Any] = {col: "sum" for col in available_stats}
+    agg_dict["GAME_ID"] = "count"  # Games played
+
+    # Calculate wins if WL column exists
+    if "WL" in team_game.columns:
+        agg_dict["WL"] = lambda x: (x == "W").sum()
+
+    aggregated = team_game.groupby(team_col, as_index=False).agg(agg_dict)
+    aggregated = aggregated.rename(columns={"GAME_ID": "GP"})
+
+    if "WL" in aggregated.columns:
+        aggregated = aggregated.rename(columns={"WL": "W"})
+        aggregated["L"] = aggregated["GP"] - aggregated["W"]
+
+    # Add metadata
+    aggregated["SEASON"] = season
+    if league:
+        aggregated["LEAGUE"] = league
+
+    return aggregated
+
+
+# League-Specific Schedule/Season Wrappers
+# -----------------------------------------------------------------------------
+
+
+# Elite 2 Schedule & Season
+def fetch_elite2_schedule(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
+    """Fetch Elite 2 schedule (from team_game data)"""
+    return fetch_lnb_schedule_from_games(season=season, league="LNB_ELITE2", **kwargs)
+
+
+def fetch_elite2_player_season(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
+    """Fetch Elite 2 player season stats (aggregated from player_game)"""
+    return fetch_lnb_player_season_from_games(season=season, league="LNB_ELITE2", **kwargs)
+
+
+def fetch_elite2_team_season(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
+    """Fetch Elite 2 team season stats (aggregated from team_game)"""
+    return fetch_lnb_team_season_from_games(season=season, league="LNB_ELITE2", **kwargs)
+
+
+# Espoirs ELITE Schedule & Season
+def fetch_espoirs_elite_schedule(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
+    """Fetch Espoirs ELITE schedule (from team_game data)"""
+    return fetch_lnb_schedule_from_games(season=season, league="LNB_ESPOIRS_ELITE", **kwargs)
+
+
+def fetch_espoirs_elite_player_season(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
+    """Fetch Espoirs ELITE player season stats (aggregated from player_game)"""
+    return fetch_lnb_player_season_from_games(season=season, league="LNB_ESPOIRS_ELITE", **kwargs)
+
+
+def fetch_espoirs_elite_team_season(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
+    """Fetch Espoirs ELITE team season stats (aggregated from team_game)"""
+    return fetch_lnb_team_season_from_games(season=season, league="LNB_ESPOIRS_ELITE", **kwargs)
+
+
+# Espoirs PROB Schedule & Season
+def fetch_espoirs_prob_schedule(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
+    """Fetch Espoirs PROB schedule (from team_game data)"""
+    return fetch_lnb_schedule_from_games(season=season, league="LNB_ESPOIRS_PROB", **kwargs)
+
+
+def fetch_espoirs_prob_player_season(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
+    """Fetch Espoirs PROB player season stats (aggregated from player_game)"""
+    return fetch_lnb_player_season_from_games(season=season, league="LNB_ESPOIRS_PROB", **kwargs)
+
+
+def fetch_espoirs_prob_team_season(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
+    """Fetch Espoirs PROB team season stats (aggregated from team_game)"""
+    return fetch_lnb_team_season_from_games(season=season, league="LNB_ESPOIRS_PROB", **kwargs)
+
+
+# ==============================================================================
+# League-Specific PBP & Shots Wrappers
+# ==============================================================================
+
+
+# LNB Pro A (Betclic ELITE) PBP and Shots
+def fetch_proa_pbp(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
+    """Fetch LNB Pro A (Betclic ELITE) play-by-play data (league-specific wrapper)"""
+    return fetch_lnb_pbp_historical(season=season, league="LNB_PROA", **kwargs)
+
+
+def fetch_proa_shots(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
+    """Fetch LNB Pro A (Betclic ELITE) shot chart data (league-specific wrapper)"""
+    return fetch_lnb_shots_historical(season=season, league="LNB_PROA", **kwargs)
+
+
+# Elite 2 PBP and Shots
+def fetch_elite2_pbp(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
+    """Fetch Elite 2 play-by-play data (league-specific wrapper)"""
+    return fetch_lnb_pbp_historical(season=season, league="LNB_ELITE2", **kwargs)
+
+
+def fetch_elite2_shots(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
+    """Fetch Elite 2 shot chart data (league-specific wrapper)"""
+    return fetch_lnb_shots_historical(season=season, league="LNB_ELITE2", **kwargs)
+
+
+# Espoirs ELITE PBP and Shots
+def fetch_espoirs_elite_pbp(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
+    """Fetch Espoirs ELITE play-by-play data (league-specific wrapper)"""
+    return fetch_lnb_pbp_historical(season=season, league="LNB_ESPOIRS_ELITE", **kwargs)
+
+
+def fetch_espoirs_elite_shots(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
+    """Fetch Espoirs ELITE shot chart data (league-specific wrapper)"""
+    return fetch_lnb_shots_historical(season=season, league="LNB_ESPOIRS_ELITE", **kwargs)
+
+
+# Espoirs PROB PBP and Shots
+def fetch_espoirs_prob_pbp(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
+    """Fetch Espoirs PROB play-by-play data (league-specific wrapper)"""
+    return fetch_lnb_pbp_historical(season=season, league="LNB_ESPOIRS_PROB", **kwargs)
+
+
+def fetch_espoirs_prob_shots(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
+    """Fetch Espoirs PROB shot chart data (league-specific wrapper)"""
+    return fetch_lnb_shots_historical(season=season, league="LNB_ESPOIRS_PROB", **kwargs)
