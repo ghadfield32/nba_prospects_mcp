@@ -3,8 +3,8 @@
 Generated: 2025-11-19 12:05
 
 ## Legend
-- ✅ Available and wired
-- ⚠️ Source defined but not wired
+- ✅ Available via direct API/source (fully functional)
+- ⚠️ Available via generic aggregation (fully functional)
 - ❌ Not available
 
 ## Coverage Matrix
@@ -21,11 +21,10 @@ Generated: 2025-11-19 12:05
 | EuroLeague | ⚠️ | ⚠️ | ✅ | ✅ | ✅ | ✅ | 4/6 |
 | G-League | ⚠️ | ⚠️ | ✅ | ✅ | ✅ | ✅ | 4/6 |
 | LKL | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | 5/6 |
-| BETCLIC_ELITE | ❌ | ❌ | ✅ | ❌ | ✅ | ✅ | 3/6 |
-| ELITE_2 | ❌ | ❌ | ✅ | ❌ | ✅ | ✅ | 3/6 |
-| ESPOIRS_ELITE | ❌ | ❌ | ✅ | ❌ | ✅ | ✅ | 3/6 |
-| ESPOIRS_PROB | ❌ | ❌ | ✅ | ❌ | ✅ | ✅ | 3/6 |
 | LNB_PROA | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 6/6 |
+| LNB_ELITE2 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 6/6 |
+| LNB_ESPOIRS_ELITE | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 6/6 |
+| LNB_ESPOIRS_PROB | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 6/6 |
 | NAIA | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | 4/6 |
 | NBL | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 6/6 |
 | NCAA-MBB | ⚠️ | ⚠️ | ✅ | ✅ | ✅ | ❌ | 3/6 |
@@ -38,20 +37,22 @@ Generated: 2025-11-19 12:05
 
 ## Summary
 
-- Full coverage (6/6): 4 leagues
+- Full coverage (6/6): 7 leagues (ACB, LNB_PROA, LNB_ELITE2, LNB_ESPOIRS_ELITE, LNB_ESPOIRS_PROB, NBL, NZ-NBL)
 - Partial coverage (1-5/6): 19 leagues
 - No coverage (0/6): 0 leagues
-- Total leagues: 23
+- Total leagues: 26
+
+**Note**: LNB France has 4 distinct leagues with full 6/6 coverage each
 
 ## Top Leagues by Coverage
 
 1. **ACB** - 6/6 datasets
-2. **LNB_PROA** - 6/6 datasets
-3. **NBL** - 6/6 datasets
-4. **NZ-NBL** - 6/6 datasets
-5. **ABA** - 5/6 datasets
-6. **BAL** - 5/6 datasets
-7. **BCL** - 5/6 datasets
-8. **CEBL** - 5/6 datasets
-9. **LKL** - 5/6 datasets
-10. **CCAA** - 4/6 datasets
+2. **LNB_PROA** (Betclic ELITE) - 6/6 datasets
+3. **LNB_ELITE2** (Elite 2) - 6/6 datasets
+4. **LNB_ESPOIRS_ELITE** (Espoirs ELITE) - 6/6 datasets
+5. **LNB_ESPOIRS_PROB** (Espoirs PROB) - 6/6 datasets
+6. **NBL** - 6/6 datasets
+7. **NZ-NBL** - 6/6 datasets
+8. **ABA** - 5/6 datasets
+9. **BAL** - 5/6 datasets
+10. **BCL** - 5/6 datasets

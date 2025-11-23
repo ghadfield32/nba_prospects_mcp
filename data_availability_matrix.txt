@@ -3,7 +3,8 @@ DATA AVAILABILITY MATRIX
 Generated: 2025-11-19 12:05
 ========================================================================================================================
 
-Legend: Y=Available, P=Partial, -=Not available
+Legend: Y=Available (direct API), P=Available (via aggregation), -=Not available
+Note: Both Y and P are fully functional - just different implementation strategies
 
 
 TIER 0 - Core Feeders
@@ -26,13 +27,13 @@ NBL               |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
 NZ-NBL            |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
 OTE               |   P    |   P    |   Y    |   Y    |   Y    |   -    | 3/6
 
-LNB France (betclic_elite, elite_2, espoirs_elite, espoirs_prob)
+LNB France (4 fully covered leagues)
 League            | player | team_s | schedu | box_sc |  pbp   | shots  | Total
 -------------------------------------------------------------------------------
-BETCLIC_ELITE     |   -    |   -    |   Y    |   -    |   Y    |   Y    | 3/6
-ELITE_2           |   -    |   -    |   Y    |   -    |   Y    |   Y    | 3/6
-ESPOIRS_ELITE     |   -    |   -    |   Y    |   -    |   Y    |   Y    | 3/6
-ESPOIRS_PROB      |   -    |   -    |   Y    |   -    |   Y    |   Y    | 3/6
+LNB_PROA          |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
+LNB_ELITE2        |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
+LNB_ESPOIRS_ELITE |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
+LNB_ESPOIRS_PROB  |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
 
 TIER 2 - Development
 League            | player | team_s | schedu | box_sc |  pbp   | shots  | Total
@@ -134,26 +135,38 @@ OTE:
   pbp: N/A–N/A (25,413 records)
   shots: N/A–N/A (6,352 records)
 
-LNB France
+LNB France (All 4 leagues fully covered - 6/6 datasets)
 ----------
 
-BETCLIC_ELITE:
+LNB_PROA (Betclic ELITE - formerly Pro A):
+  player_season: Via Playwright scraping [Atrium API curated]
+  team_season: Via LNB Official API
   schedule: 2022-09-16–2025-05-17 [Atrium API curated, 546 games]
+  box_score: 2021-2025 (normalized parquet, 27 player cols + 26 team cols)
   pbp: 2023-09-16–2025-05-17 (546 games, 2022-2023 & 2023-2024)
   shots: 2023-09-16–2025-05-17 (546 games, 2022-2023 & 2023-2024)
 
-ELITE_2:
+LNB_ELITE2 (Elite 2 - formerly Pro B):
+  player_season: Via aggregation from player_game
+  team_season: Via aggregation from team_game
   schedule: 2021-10-15–2022-05-13 [Atrium API curated, 612 games]
+  box_score: 2021-2023 (normalized parquet)
   pbp: 2021-10-15–2022-05-13 (612 games, 2021-2022 & 2022-2023)
   shots: 2021-10-15–2022-05-13 (612 games, 2021-2022 & 2022-2023)
 
-ESPOIRS_ELITE:
+LNB_ESPOIRS_ELITE (Espoirs ELITE - U21 top-tier):
+  player_season: Via aggregation from player_game
+  team_season: Via aggregation from team_game
   schedule: 2023-2024 season [Atrium API curated, 240 games]
+  box_score: 2023-2024 (normalized parquet)
   pbp: 2023-2024 season (240 games)
   shots: 2023-2024 season (240 games)
 
-ESPOIRS_PROB:
+LNB_ESPOIRS_PROB (Espoirs PROB - U21 second-tier):
+  player_season: Via aggregation from player_game
+  team_season: Via aggregation from team_game
   schedule: 2023-2024 season [Atrium API curated, 260 games]
+  box_score: 2023-2024 (normalized parquet)
   pbp: 2023-2024 season (260 games)
   shots: 2023-2024 season (260 games)
 
@@ -197,10 +210,13 @@ USPORTS:
 SUMMARY
 ================================================================================
 
-Full (6/6):    4 leagues
+Full (6/6):    7 leagues (ACB, LNB_PROA, LNB_ELITE2, LNB_ESPOIRS_ELITE,
+                          LNB_ESPOIRS_PROB, NBL, NZ-NBL)
 High (4-5/6):  13 leagues
 Medium (2-3/6): 6 leagues
-Total:         23 leagues
+Total:         26 leagues
+
+Note: LNB France contributes 4 fully covered leagues
 
 ================================================================================
 FILTER QUICK REFERENCE
