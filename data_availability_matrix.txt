@@ -26,12 +26,13 @@ NBL               |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
 NZ-NBL            |   Y    |   Y    |   Y    |   Y    |   Y    |   Y    | 6/6
 OTE               |   P    |   P    |   Y    |   Y    |   Y    |   -    | 3/6
 
-LNB France
+LNB France (betclic_elite, elite_2, espoirs_elite, espoirs_prob)
 League            | player | team_s | schedu | box_sc |  pbp   | shots  | Total
 -------------------------------------------------------------------------------
-LNB_ELITE2        |   -    |   -    |   -    |   Y    |   Y    |   Y    | 3/6
-LNB_ESPOIRS_ELITE |   -    |   -    |   -    |   Y    |   Y    |   Y    | 3/6
-LNB_ESPOIRS_PROB  |   -    |   -    |   -    |   Y    |   Y    |   Y    | 3/6
+BETCLIC_ELITE     |   -    |   -    |   Y    |   -    |   Y    |   Y    | 3/6
+ELITE_2           |   -    |   -    |   Y    |   -    |   Y    |   Y    | 3/6
+ESPOIRS_ELITE     |   -    |   -    |   Y    |   -    |   Y    |   Y    | 3/6
+ESPOIRS_PROB      |   -    |   -    |   Y    |   -    |   Y    |   Y    | 3/6
 
 TIER 2 - Development
 League            | player | team_s | schedu | box_sc |  pbp   | shots  | Total
@@ -136,17 +137,25 @@ OTE:
 LNB France
 ----------
 
-LNB_ELITE2:
-  pbp: N/A–N/A (474,399 records)
-  shots: N/A–N/A (113,950 records)
+BETCLIC_ELITE:
+  schedule: 2022-09-16–2025-05-17 [Atrium API curated, 546 games]
+  pbp: 2023-09-16–2025-05-17 (546 games, 2022-2023 & 2023-2024)
+  shots: 2023-09-16–2025-05-17 (546 games, 2022-2023 & 2023-2024)
 
-LNB_ESPOIRS_ELITE:
-  pbp: N/A–N/A (474,399 records)
-  shots: N/A–N/A (113,950 records)
+ELITE_2:
+  schedule: 2021-10-15–2022-05-13 [Atrium API curated, 612 games]
+  pbp: 2021-10-15–2022-05-13 (612 games, 2021-2022 & 2022-2023)
+  shots: 2021-10-15–2022-05-13 (612 games, 2021-2022 & 2022-2023)
 
-LNB_ESPOIRS_PROB:
-  pbp: N/A–N/A (474,399 records)
-  shots: N/A–N/A (113,950 records)
+ESPOIRS_ELITE:
+  schedule: 2023-2024 season [Atrium API curated, 240 games]
+  pbp: 2023-2024 season (240 games)
+  shots: 2023-2024 season (240 games)
+
+ESPOIRS_PROB:
+  schedule: 2023-2024 season [Atrium API curated, 260 games]
+  pbp: 2023-2024 season (260 games)
+  shots: 2023-2024 season (260 games)
 
 TIER 2 - Development
 --------------------

@@ -10,21 +10,20 @@ Validators check:
 Each validator returns (is_valid, errors, warnings) for quarantine decisions.
 """
 
-from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass, field
-import pandas as pd
-import numpy as np
 
-from src.lnb.constants import (
-    VALID_PERIOD_IDS,
-    VALID_EVENT_TYPES,
-    VALID_SHOT_TYPES,
-    COURT_X_MIN,
+import pandas as pd
+
+from .constants import (
     COURT_X_MAX,
-    COURT_Y_MIN,
+    COURT_X_MIN,
     COURT_Y_MAX,
+    COURT_Y_MIN,
     REQUIRED_PBP_COLUMNS,
     REQUIRED_SHOTS_COLUMNS,
+    VALID_EVENT_TYPES,
+    VALID_PERIOD_IDS,
+    VALID_SHOT_TYPES,
 )
 
 
@@ -34,11 +33,11 @@ class ValidationResult:
 
     game_id: str
     is_valid: bool
-    errors: List[str] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
     row_drops: int = 0  # Number of rows dropped (if any)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """Convert to dictionary for JSON serialization"""
         return {
             "game_id": self.game_id,
@@ -85,8 +84,7 @@ def validate_pbp_game(df: pd.DataFrame, game_id: str) -> ValidationResult:
     if len(invalid_periods) > 0:
         unique_invalid = invalid_periods["PERIOD_ID"].unique()
         result.errors.append(
-            f"Invalid PERIOD_ID values: {unique_invalid.tolist()} "
-            f"({len(invalid_periods)} rows)"
+            f"Invalid PERIOD_ID values: {unique_invalid.tolist()} " f"({len(invalid_periods)} rows)"
         )
         result.is_valid = False
 
@@ -95,8 +93,7 @@ def validate_pbp_game(df: pd.DataFrame, game_id: str) -> ValidationResult:
     if len(unknown_events) > 0:
         unique_unknown = unknown_events["EVENT_TYPE"].unique()
         result.warnings.append(
-            f"Unknown EVENT_TYPE values: {unique_unknown.tolist()} "
-            f"({len(unknown_events)} rows)"
+            f"Unknown EVENT_TYPE values: {unique_unknown.tolist()} " f"({len(unknown_events)} rows)"
         )
 
     # Check 4: Scores monotonic within each period
@@ -114,7 +111,7 @@ def validate_pbp_game(df: pd.DataFrame, game_id: str) -> ValidationResult:
     return result
 
 
-def _validate_monotonic_scores(df: pd.DataFrame) -> List[str]:
+def _validate_monotonic_scores(df: pd.DataFrame) -> list[str]:
     """Check that HOME_SCORE and AWAY_SCORE are monotonic within each period
 
     Scores should never decrease within a period (resets between periods are ok).
@@ -188,8 +185,7 @@ def validate_shots_game(df: pd.DataFrame, game_id: str) -> ValidationResult:
     if len(invalid_shots) > 0:
         unique_invalid = invalid_shots["SHOT_TYPE"].unique()
         result.errors.append(
-            f"Invalid SHOT_TYPE values: {unique_invalid.tolist()} "
-            f"({len(invalid_shots)} rows)"
+            f"Invalid SHOT_TYPE values: {unique_invalid.tolist()} " f"({len(invalid_shots)} rows)"
         )
         result.is_valid = False
 
@@ -225,7 +221,7 @@ def validate_shots_game(df: pd.DataFrame, game_id: str) -> ValidationResult:
     return result
 
 
-def _validate_coordinates(df: pd.DataFrame) -> List[str]:
+def _validate_coordinates(df: pd.DataFrame) -> list[str]:
     """Check that X_COORD/Y_COORD are within court bounds
 
     Args:
@@ -275,8 +271,8 @@ def _validate_coordinates(df: pd.DataFrame) -> List[str]:
 
 
 def validate_pbp_batch(
-    games: Dict[str, pd.DataFrame]
-) -> Tuple[Dict[str, pd.DataFrame], List[ValidationResult]]:
+    games: dict[str, pd.DataFrame],
+) -> tuple[dict[str, pd.DataFrame], list[ValidationResult]]:
     """Validate multiple PBP games, separating valid from invalid
 
     Args:
@@ -299,8 +295,8 @@ def validate_pbp_batch(
 
 
 def validate_shots_batch(
-    games: Dict[str, pd.DataFrame]
-) -> Tuple[Dict[str, pd.DataFrame], List[ValidationResult]]:
+    games: dict[str, pd.DataFrame],
+) -> tuple[dict[str, pd.DataFrame], list[ValidationResult]]:
     """Validate multiple shots games, separating valid from invalid
 
     Args:

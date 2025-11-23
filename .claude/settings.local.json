@@ -29,7 +29,10 @@
       "Bash(PROJECT_LOG_NEW_ENTRY.md)",
       "Bash(PROJECT_LOG_TEMP.md)",
       "Bash(move:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(if not exist srccbb_datalnb mkdir srccbb_datalnb)"
     ],
     "deny": [],
     "ask": []

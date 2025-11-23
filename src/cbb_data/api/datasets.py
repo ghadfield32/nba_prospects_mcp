@@ -1402,7 +1402,11 @@ def _fetch_play_by_play(compiled: dict[str, Any]) -> pd.DataFrame:
             logger.info(f"Fetching pbp via LeagueSourceConfig for {league}")
             game_ids = post_mask.get("GAME_ID")
             # Pass game_ids as a filter parameter (not a positional arg) for unified fetchers
-            df = src_cfg.fetch_pbp(season=season_str, game_ids=game_ids) if game_ids else src_cfg.fetch_pbp(season=season_str)
+            df = (
+                src_cfg.fetch_pbp(season=season_str, game_ids=game_ids)
+                if game_ids
+                else src_cfg.fetch_pbp(season=season_str)
+            )
 
             if df is not None:
                 # Apply post-mask filtering (now column-agnostic, handles both uppercase and lowercase)
@@ -1411,7 +1415,9 @@ def _fetch_play_by_play(compiled: dict[str, Any]) -> pd.DataFrame:
                 post_mask_no_league = {k: v for k, v in post_mask.items() if k != "LEAGUE"}
                 df = apply_post_mask(df, post_mask_no_league)
                 if df.empty:
-                    logger.info(f"LeagueSourceConfig post-mask returned empty for {league} (no data after filtering)")
+                    logger.info(
+                        f"LeagueSourceConfig post-mask returned empty for {league} (no data after filtering)"
+                    )
                 return df
         except Exception as e:
             logger.warning(

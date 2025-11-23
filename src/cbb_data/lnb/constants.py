@@ -103,7 +103,7 @@ VALID_EVENT_TYPES = {
 VALID_SHOT_TYPES = {
     "2pt",  # Two-point shot
     "3pt",  # Three-point shot
-    "ft",   # Free throw
+    "ft",  # Free throw
 }
 
 # Court bounds (LNB API coordinate system, empirically observed)

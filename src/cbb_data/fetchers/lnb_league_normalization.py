@@ -28,7 +28,6 @@ SECOND_DIVISION_ALIASES = {
     "lnb prob",
     "lnb pro b",
     "probetclic",
-
     # Modern ÉLITE 2 variations
     "elite 2",
     "élite 2",
@@ -47,7 +46,6 @@ TOP_DIVISION_ALIASES = {
     "lnb pro a",
     "jeep elite",
     "jeep élite",
-
     # Modern Betclic ÉLITE variations
     "betclic elite",
     "betclic élite",
@@ -129,7 +127,6 @@ LEAGUE_CANONICAL_MAP = {
     "elite2": "elite_2",
     "élite2": "elite_2",
     "elite_2": "elite_2",
-
     # Top division (all map to betclic_elite)
     "proa": "betclic_elite",
     "pro_a": "betclic_elite",
@@ -137,7 +134,6 @@ LEAGUE_CANONICAL_MAP = {
     "lnb": "betclic_elite",
     "betclic": "betclic_elite",
     "betclic_elite": "betclic_elite",
-
     # U21 leagues (already canonical)
     "espoirs_elite": "espoirs_elite",
     "espoirs_prob": "espoirs_prob",
@@ -202,6 +198,7 @@ def canonical_mapping_key(season: str, league: str | None) -> str:
 # ==============================================================================
 # VALIDATION
 # ==============================================================================
+
 
 def validate_league_normalization(df):
     """Validate that no non-canonical league names appear in final data

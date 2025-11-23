@@ -24,11 +24,11 @@ import pandas as pd
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from src.lnb.constants import (
+from src.cbb_data.lnb.constants import (
     LNB_LEAGUES,
     METADATA_COLUMNS_TO_ATTACH,
 )
-from src.lnb.validation import ValidationResult, validate_shots_batch
+from src.cbb_data.lnb.validation import ValidationResult, validate_shots_batch
 
 # Paths
 INDEX_PATH = Path("data/raw/lnb/lnb_game_index.parquet")
