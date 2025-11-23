@@ -966,9 +966,36 @@ def _fetch_player_game(compiled: dict[str, Any]) -> pd.DataFrame:
             logger.debug(f"_fetch_player_game GAME_ID count: {len(post_mask['GAME_ID'])}")
         logger.debug(f"_fetch_player_game meta limit: {meta.get('limit')}")
 
-        # This requires team_id or game_ids
+        # FIX 2025-11-23: Auto-fetch schedule when no IDs provided
+        # Enables season-wide queries (consistent with player_season)
         if not (post_mask.get("TEAM_ID") or post_mask.get("GAME_ID")):
-            raise ValueError("player_game requires team or game_ids filter for NCAA")
+            logger.info(
+                f"No TEAM_ID or GAME_ID for {league} - auto-fetching "
+                "schedule to extract game IDs"
+            )
+
+            # Fetch season schedule (deep copy prevents state pollution)
+            schedule_compiled = {
+                "params": copy.deepcopy(params),
+                "post_mask": copy.deepcopy(post_mask),  # Keep filters
+                "meta": copy.deepcopy(meta),
+            }
+            # Remove TEAM_ID/GAME_ID (want all games for season)
+            schedule_compiled["post_mask"].pop("TEAM_ID", None)
+            schedule_compiled["post_mask"].pop("GAME_ID", None)
+
+            schedule = _fetch_schedule(schedule_compiled)
+
+            if schedule.empty:
+                logger.warning(
+                    f"No games in schedule for {league} " f"season {params.get('Season')}"
+                )
+                return pd.DataFrame()
+
+            # Extract game IDs and inject into post_mask
+            game_ids = [str(gid) for gid in schedule["GAME_ID"].unique().tolist()]
+            logger.info(f"Extracted {len(game_ids)} game IDs from schedule")
+            post_mask["GAME_ID"] = game_ids
 
         # Extract season early for CBBpy calls
         season = int(params.get("Season", datetime.now().year))

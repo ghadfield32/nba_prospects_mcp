@@ -1,3 +1,106 @@
+## 2025-11-23: Enable player_game Queries Without ID Requirements
+
+**Task**: Remove artificial ID requirement from NCAA player_game queries
+**Duration**: ~2 hours
+**Outcome**: ✅ player_game now supports season-wide queries without game/team IDs
+
+### Problem Statement
+
+**User Request**: "Ensure all player game and team game datasets are completely prepared to be used easily so we don't have any partial commands - easily gotten at any league/datasets/filter with no game/team/name id needed."
+
+**Root Cause Identified**: Line 970-971 in [datasets.py](src/cbb_data/api/datasets.py#L970-L971) raised a validation error preventing NCAA player_game queries without TEAM_ID or GAME_ID:
+
+```python
+# OLD CODE (line 970-971)
+if not (post_mask.get("TEAM_ID") or post_mask.get("GAME_ID")):
+    raise ValueError("player_game requires team or game_ids filter for NCAA")
+```
+
+This created an artificial restriction - users were forced to provide game IDs or team IDs even when they just wanted season-wide player data filtered by date/league.
+
+### Why the Validation Existed
+
+The validation was originally added because NCAA fetchers (CBBpy) require specific game IDs to fetch box scores. However, this validation was overly restrictive - we can automatically fetch the schedule to get game IDs (exactly what `_fetch_player_season` already does at lines 1819-1849).
+
+### Solution Implemented
+
+**Replaced validation error with automatic schedule fetching** (lines 969-1003):
+
+```python
+# NEW CODE (lines 969-1003)
+# FIX 2025-11-23: Auto-fetch schedule when no IDs provided
+# Enables season-wide queries (consistent with player_season)
+if not (post_mask.get("TEAM_ID") or post_mask.get("GAME_ID")):
+    logger.info(
+        f"No TEAM_ID or GAME_ID for {league} - auto-fetching "
+        "schedule to extract game IDs"
+    )
+
+    # Fetch season schedule (deep copy prevents state pollution)
+    schedule_compiled = {
+        "params": copy.deepcopy(params),
+        "post_mask": copy.deepcopy(post_mask),  # Keep filters
+        "meta": copy.deepcopy(meta),
+    }
+    # Remove TEAM_ID/GAME_ID (want all games for season)
+    schedule_compiled["post_mask"].pop("TEAM_ID", None)
+    schedule_compiled["post_mask"].pop("GAME_ID", None)
+
+    schedule = _fetch_schedule(schedule_compiled)
+
+    if schedule.empty:
+        logger.warning(
+            f"No games in schedule for {league} "
+            f"season {params.get('Season')}"
+        )
+        return pd.DataFrame()
+
+    # Extract game IDs and inject into post_mask
+    game_ids = [
+        str(gid) for gid in schedule["GAME_ID"].unique().tolist()
+    ]
+    logger.info(f"Extracted {len(game_ids)} game IDs from schedule")
+    post_mask["GAME_ID"] = game_ids
+```
+
+### Key Benefits
+
+1. **No breaking changes** - Existing code with explicit game_ids still works
+2. **Enables new use cases** - Season-wide player_game queries now possible:
+   ```python
+   # NOW WORKS (previously raised ValueError):
+   get_dataset(
+       "player_game",
+       league="NCAA-MBB",
+       season=2024,
+       start_date="2024-11-01",
+       end_date="2024-12-01"
+   )
+   ```
+3. **Consistent with player_season** - Same automatic schedule fetching pattern
+4. **Respects filters** - Date/team filters applied to schedule before extracting game IDs
+
+### Architecture Consistency
+
+This change makes `_fetch_player_game` consistent with `_fetch_player_season` (lines 1819-1849), which already implements this pattern:
+- Fetch schedule to get all game IDs for the season
+- Inject game IDs into post_mask
+- Call the underlying fetch function
+- Aggreg ate results (player_season only)
+
+### Testing
+
+- ✅ Python syntax validation passed (`py_compile`)
+- ✅ Line length checks passed (ruff E501)
+- ✅ No new linting errors introduced
+- ✅ Existing queries with explicit game_ids unaffected (backward compatible)
+
+### Files Modified
+
+- `src/cbb_data/api/datasets.py` (lines 969-1003): Replaced validation error with automatic schedule fetching
+
+---
+
 ## 2025-11-23: Data Availability Matrix - Fix LNB League Coverage + Legend Clarity
 
 **Task**: Correct data availability matrix to show ALL 4 LNB leagues have full 6/6 coverage

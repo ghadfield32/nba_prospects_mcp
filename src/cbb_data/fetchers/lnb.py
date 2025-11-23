@@ -2171,7 +2171,7 @@ def fetch_lnb_pbp(
 
     try:
         # Build filters for parquet partitions - normalize API names to data layer names
-        partition_filters = []
+        partition_filters: list[tuple[str, str, str | list[str]]] = []
 
         if league is not None:
             if isinstance(league, str):
@@ -2256,7 +2256,7 @@ def fetch_lnb_shots(
 
     try:
         # Build filters for parquet partitions - normalize API names to data layer names
-        partition_filters = []
+        partition_filters: list[tuple[str, str, str | list[str]]] = []
 
         if league is not None:
             if isinstance(league, str):
