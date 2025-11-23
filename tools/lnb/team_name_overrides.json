@@ -1,0 +1,7 @@
+{
+  "_comment": "Manual team name normalization overrides for edge cases",
+  "_example": {
+    "paris": "paris basketball",
+    "nanterre": "nanterre 92"
+  }
+}

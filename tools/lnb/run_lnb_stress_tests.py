@@ -46,7 +46,7 @@ if sys.platform == "win32":
 
 import pandas as pd
 
-from src.cbb_data.fetchers.lnb import fetch_lnb_play_by_play, fetch_lnb_shots
+from src.cbb_data.fetchers.lnb import fetch_lnb_game_shots, fetch_lnb_play_by_play
 
 # ==============================================================================
 # CONFIG
@@ -305,7 +305,7 @@ def stress_test_game(game: GameMetadata) -> GameStressResult:
     # ===========================================================================
     print(f"[GAME {game.game_id[:16]}...] Testing shot chart...", end=" ")
     try:
-        shots_df = fetch_lnb_shots(game.game_id)
+        shots_df = fetch_lnb_game_shots(game.game_id)
         res.shots_rows = len(shots_df)
 
         if res.shots_rows > 0:

@@ -211,14 +211,47 @@ def discover_fixtures_via_atrium(
         if not isinstance(fixtures, list):
             raise ValueError(f"Expected fixtures array, got {type(fixtures)}")
 
-        # Extract fixtureId from each fixture
+        # Extract fixtureId from each fixture, filtering out placeholders
         fixture_uuids = []
+        filtered_count = 0
+
         for fixture in fixtures:
             fixture_id = fixture.get("fixtureId")
-            if fixture_id:
-                fixture_uuids.append(fixture_id)
+            if not fixture_id:
+                continue
+
+            # Quality filter: Skip obvious placeholder/test fixtures
+            # Criteria based on debugging ÉLITE 2 historical seasons:
+            # 1. Both competitors are "Unknown"
+            # 2. Status is "IF_NEEDED" AND no fixture name/date
+            # 3. Fixture name contains "Test"
+            competitors = fixture.get("competitors", [])
+            status_value = fixture.get("status", {}).get("value")
+            fixture_name = fixture.get("name")
+
+            # Check if both competitors are unknown
+            if len(competitors) == 2:
+                comp1_name = competitors[0].get("name", "")
+                comp2_name = competitors[1].get("name", "")
+                if comp1_name == "Unknown" and comp2_name == "Unknown":
+                    filtered_count += 1
+                    continue
+
+            # Check for conditional playoff game without proper data
+            if status_value == "IF_NEEDED" and not fixture_name:
+                filtered_count += 1
+                continue
+
+            # Check for test fixtures
+            if fixture_name and "test" in fixture_name.lower():
+                filtered_count += 1
+                continue
+
+            fixture_uuids.append(fixture_id)
 
         print(f"  [SUCCESS] Discovered {len(fixture_uuids)} fixtures")
+        if filtered_count > 0:
+            print(f"  [FILTERED] Skipped {filtered_count} placeholder/test fixtures")
 
         if len(fixture_uuids) > 0:
             print(f"  [SAMPLE] First: {fixture_uuids[0]}")
@@ -338,32 +371,42 @@ def save_uuid_mappings(data: dict) -> None:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Bulk discover fixture UUIDs using Atrium Sports API",
+        description="Bulk discover fixture UUIDs using Atrium Sports API for all LNB leagues",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-    # Discover 2022-23 season (using known metadata)
+    # Discover 2022-23 season (all leagues with that season)
     python tools/lnb/bulk_discover_atrium_api.py --seasons 2022-2023
 
-    # Discover using seed fixture
+    # Discover specific league only
+    python tools/lnb/bulk_discover_atrium_api.py --leagues elite_2 --seasons 2024-2025
+
+    # Discover multiple leagues
+    python tools/lnb/bulk_discover_atrium_api.py \
+        --leagues betclic_elite elite_2 espoirs_elite \
+        --seasons 2024-2025 2023-2024
+
+    # Discover using seed fixture (for unknown league/season)
     python tools/lnb/bulk_discover_atrium_api.py \
         --seasons 2023-2024 \
         --seed-fixture 3fcea9a1-1f10-11ee-a687-db190750bdda
 
-    # Discover multiple seasons
-    python tools/lnb/bulk_discover_atrium_api.py \
-        --seasons 2022-2023 2023-2024
-
     # Dry run (preview only)
     python tools/lnb/bulk_discover_atrium_api.py \
         --seasons 2022-2023 --dry-run
+
+Available leagues:
+    betclic_elite    - Top-tier professional (formerly Pro A), 16 teams
+    elite_2          - Second-tier professional (formerly Pro B), 20 teams
+    espoirs_elite    - U21 top-tier youth development
+    espoirs_prob     - U21 second-tier youth development
 
 Output:
     - Saves to tools/lnb/fixture_uuids_by_season.json
     - Ready for build_game_index.py and pipeline
 
 Performance:
-    - ~1 second per season
+    - ~1 second per season per league
     - No authentication required
     - Returns actual fixture UUIDs
         """,
@@ -374,6 +417,14 @@ Performance:
         nargs="+",
         required=True,
         help="Seasons to discover (format: YYYY-YYYY)",
+    )
+
+    parser.add_argument(
+        "--leagues",
+        nargs="+",
+        default=None,
+        help="Leagues to discover (default: all leagues with data for specified seasons). "
+        "Options: betclic_elite, elite_2, espoirs_elite, espoirs_prob",
     )
 
     parser.add_argument(
@@ -395,6 +446,7 @@ Performance:
     print(f"{'='*80}\n")
 
     print(f"Seasons: {args.seasons}")
+    print(f"Leagues: {args.leagues or 'All'}")
     print(f"Dry run: {args.dry_run}")
     if args.seed_fixture:
         print(f"Seed fixture: {args.seed_fixture}")
@@ -403,24 +455,60 @@ Performance:
     # Load existing mappings
     all_mappings = load_existing_mappings()
 
-    # Discover each season
+    # ENHANCEMENT (2025-11-20): Multi-league discovery support
+    # If leagues specified, discover for each league/season combination
+    # If no leagues specified, discover using SEASON_METADATA (all leagues)
     newly_discovered = {}
-    for season in args.seasons:
-        try:
-            fixtures = discover_season_fixtures(
-                season_str=season,
-                seed_fixture_uuid=args.seed_fixture,
-            )
 
-            if fixtures:
-                newly_discovered[season] = fixtures
-                print(f"  [OK] {season}: {len(fixtures)} fixtures")
-            else:
-                print(f"  [WARN] {season}: No fixtures found")
+    if args.leagues and not args.seed_fixture:
+        # Multi-league mode: discover for each league explicitly
+        from src.cbb_data.fetchers.lnb_league_config import get_season_metadata
 
-        except Exception as e:
-            print(f"  [ERROR] {season}: {e}")
-            continue
+        for league in args.leagues:
+            for season in args.seasons:
+                # Get metadata for this specific league/season
+                meta = get_season_metadata(league, season)
+                if not meta:
+                    print(f"  [SKIP] {league} - {season}: No metadata available")
+                    continue
+
+                try:
+                    # Discover fixtures for this league/season
+                    fixtures = discover_fixtures_via_atrium(
+                        competition_id=meta["competition_id"],
+                        season_id=meta["season_id"],
+                        season_name=f"{league} {season}",
+                    )
+
+                    if fixtures:
+                        # Store with unique key: league_season
+                        key = f"{season}_{league}"
+                        newly_discovered[key] = fixtures
+                        print(f"  [OK] {league} - {season}: {len(fixtures)} fixtures")
+                    else:
+                        print(f"  [WARN] {league} - {season}: No fixtures found")
+
+                except Exception as e:
+                    print(f"  [ERROR] {league} - {season}: {e}")
+                    continue
+    else:
+        # Legacy mode: discover each season (any league in SEASON_METADATA)
+        for season in args.seasons:
+            try:
+                fixtures = discover_season_fixtures(
+                    season_str=season,
+                    seed_fixture_uuid=args.seed_fixture,
+                )
+
+                if fixtures:
+                    newly_discovered[season] = fixtures
+                    print(f"  [OK] {season}: {len(fixtures)} fixtures")
+                else:
+                    print(f"  [WARN] {season}: No fixtures found")
+
+            except Exception as e:
+                print(f"  [ERROR] {season}: {e}")
+                continue
 
     # Merge and save
     if newly_discovered and not args.dry_run:

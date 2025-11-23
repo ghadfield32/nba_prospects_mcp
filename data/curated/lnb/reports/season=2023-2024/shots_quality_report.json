@@ -1,0 +1,5210 @@
+{
+  "season": "2023-2024",
+  "build_timestamp": "2025-11-22T08:41:16.674426",
+  "expected_games": 740,
+  "loaded_games": 740,
+  "valid_games": 740,
+  "invalid_games": 0,
+  "quarantined_games": 0,
+  "games_with_warnings": 0,
+  "load_errors": 0,
+  "total_rows": 95868,
+  "league_stats": {
+    "espoirs_prob": {
+      "games": 260,
+      "rows": 35024
+    },
+    "betclic_elite": {
+      "games": 240,
+      "rows": 29804
+    },
+    "espoirs_elite": {
+      "games": 240,
+      "rows": 31040
+    }
+  },
+  "error_types": {},
+  "validation_details": [
+    {
+      "game_id": "92db4d18-a8bc-11ef-b483-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "914f2f42-a8bc-11ef-a33d-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "39cb4862-433a-11ef-83b2-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5e651f72-433d-11ef-9b96-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62b234b7-a8bc-11ef-9285-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6caa418d-433d-11ef-b30f-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6d97c288-433d-11ef-a2a6-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "71d05dc4-433d-11ef-a8d9-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6994597d-433d-11ef-974b-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "616ea697-a8bc-11ef-bf4d-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5e9adc96-433d-11ef-b80e-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "391f9a6d-433a-11ef-ba3d-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "250e3cc5-433a-11ef-8c1d-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "69bd64ce-433d-11ef-9880-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2ce693e0-433a-11ef-8391-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "631e9b52-433d-11ef-9ee0-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "71500ede-433d-11ef-bed2-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62fa9d47-433d-11ef-8bf1-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "61e51891-a8bc-11ef-8484-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "93680556-a8bc-11ef-b2ae-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6083dc1d-a8bc-11ef-b471-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5e3427d7-433d-11ef-b05d-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "931a4d5e-a8bc-11ef-9e0b-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "3294c6a5-433a-11ef-a6b4-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "463226ee-433a-11ef-913e-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "629719f6-433d-11ef-86c8-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2d8f2899-433a-11ef-a19c-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62882694-a8bc-11ef-8e3f-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "257f0877-433a-11ef-bbf5-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6c5bf931-433d-11ef-9b29-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "91ba8267-a8bc-11ef-ac50-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62586398-a8bc-11ef-8361-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "256247c9-433a-11ef-8fc7-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "68fd9a65-433d-11ef-81c8-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b2ed52a3-451d-11ef-ba30-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b312dbdf-451d-11ef-9bfc-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "399b2f55-433a-11ef-812e-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "9211b06f-a8bc-11ef-a7e1-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6cc6befe-433d-11ef-b02f-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "24e0c42b-433a-11ef-8eb7-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "717041c1-433d-11ef-908d-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5e106430-433d-11ef-8913-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "61ab26e1-433d-11ef-bde0-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62de88b1-433d-11ef-8125-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "623f1f5d-a8bc-11ef-a1fa-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "61d17737-433d-11ef-8d41-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "71790dfa-433d-11ef-9b26-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "71887b60-433d-11ef-b165-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "71afd904-433d-11ef-ac20-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5eb290a3-433d-11ef-9918-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b226939d-451d-11ef-9e95-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2c1f8dd1-433a-11ef-8a4b-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5e833036-433d-11ef-af59-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "92532fc7-a8bc-11ef-8d26-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "3333288e-433a-11ef-9dcc-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "941783f9-a8bc-11ef-8366-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "33118789-433a-11ef-9f6e-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "39e022f7-433a-11ef-99cc-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6173cb22-433d-11ef-971d-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "61e57799-433d-11ef-9e1e-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "924bc3d3-a8bc-11ef-a94e-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "68b61d3a-433d-11ef-87c6-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "32dc9aeb-433a-11ef-897e-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "91ec4917-a8bc-11ef-9214-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "46f68cb3-433a-11ef-8f4d-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "690dc1e9-433d-11ef-8d06-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62c4aeef-433d-11ef-a55d-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b320e162-451d-11ef-9ae7-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b2197aae-451d-11ef-9c93-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "339808ec-433a-11ef-a5c4-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2d3a233a-433a-11ef-b655-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5e29fc3c-433d-11ef-8f9f-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "25b3872a-433a-11ef-8dc0-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "25e5a8f9-433a-11ef-b08d-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2d7639a5-433a-11ef-8a7b-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62d2b54f-a8bc-11ef-849f-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "471eeb93-433a-11ef-bcb0-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "24d77328-433a-11ef-b5e6-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "69059fe2-433d-11ef-8f01-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "71ef7e6e-433d-11ef-9088-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "32c0db98-433a-11ef-8805-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6c72a8bb-433d-11ef-8d79-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62cd750f-433d-11ef-b4e5-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6c6a7e2e-433d-11ef-ab73-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2d1af977-433a-11ef-970a-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2c660cd6-433a-11ef-b254-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2cdf2d9f-433a-11ef-87e1-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b1805799-451d-11ef-8a60-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b3d44365-451d-11ef-9bd4-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "61aaa7e1-a8bc-11ef-8265-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2ceedae1-433a-11ef-b548-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "719915ff-433d-11ef-bae8-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5dbe0e80-433d-11ef-bc83-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2d49b039-433a-11ef-8d0a-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "921971de-a8bc-11ef-af28-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "473e08bb-433a-11ef-b36a-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "24c14cee-433a-11ef-8a28-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b129e5f0-451d-11ef-b306-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "474ededb-433a-11ef-abb7-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "61c40b18-a8bc-11ef-9b41-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6d4c68f3-433d-11ef-9c0a-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "39b64ee9-433a-11ef-856b-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "92eeb050-a8bc-11ef-9f29-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5dad3aaf-433d-11ef-9bb8-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "32b7a159-433a-11ef-8279-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "71d801c3-433d-11ef-90b5-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "686a0e0b-433d-11ef-99ad-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b1a7c0c5-451d-11ef-bd02-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "472950cf-433a-11ef-8732-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "932367de-a8bc-11ef-b958-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2cf6c532-433a-11ef-a0a3-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6d1a556f-433d-11ef-aedd-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "33b7ea31-433a-11ef-98a3-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "33a06048-433a-11ef-a6f5-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "60e2397c-a8bc-11ef-9122-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "333b31ab-433a-11ef-801a-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2c82cb7e-433a-11ef-9ac2-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "253c8c4e-433a-11ef-b3cf-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "46c6929c-433a-11ef-838f-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "92e55fd5-a8bc-11ef-9c09-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6ca2c218-433d-11ef-bbff-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b19da4ab-451d-11ef-9da8-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "39f4ec5f-433a-11ef-8605-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b2d6356b-451d-11ef-baab-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "712cc8ca-433d-11ef-9d7c-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "929c6878-a8bc-11ef-97ba-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b27d64ae-451d-11ef-9fff-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "91370d46-a8bc-11ef-b228-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "25c1ec56-433a-11ef-95cd-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "7191f8f2-433d-11ef-9680-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "60966364-a8bc-11ef-abfa-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "3952318b-433a-11ef-8a4e-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "71c7ddf8-433d-11ef-9b14-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "72454d9e-433d-11ef-844e-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6d05709c-433d-11ef-92e5-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6d299642-433d-11ef-85ed-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "68920c6d-433d-11ef-93bc-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b18a7456-451d-11ef-bb94-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "3905f981-433a-11ef-af59-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b1745ced-451d-11ef-9f50-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "71e02ec8-433d-11ef-8e86-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "4656a0af-433a-11ef-b3d6-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "1e7dde41-433a-11ef-abd2-197af2652521",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "696162ff-433d-11ef-a990-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "38d353b3-433a-11ef-a2a2-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62244723-a8bc-11ef-a3f1-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "25ecd3ce-433a-11ef-8820-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "47567644-433a-11ef-9104-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "624a73a7-433d-11ef-a46c-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2553f530-433a-11ef-bf2f-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "3a8f09b8-433a-11ef-ae59-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "38f5cd3a-433a-11ef-bbce-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "340ff35f-433a-11ef-8199-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "725440c7-433d-11ef-b9ae-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "33f2bb58-433a-11ef-ae79-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "60a8cb68-a8bc-11ef-bf9f-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "470bf893-433a-11ef-8c24-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b3657997-451d-11ef-9a31-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2c903cf7-433a-11ef-8a8b-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "33c8cfac-433a-11ef-9df5-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "334b72d4-433a-11ef-8b42-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "259cc0be-433a-11ef-951f-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5dcd1bfd-433d-11ef-8108-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2cac2695-433a-11ef-9139-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62604686-a8bc-11ef-ad84-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6cb0c794-433d-11ef-afc2-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62aa1f67-a8bc-11ef-b077-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "4688b5a4-433a-11ef-9f70-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "25263ea5-433a-11ef-99e4-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "693302ff-433d-11ef-962a-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "61cbc981-a8bc-11ef-85f1-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "33092d75-433a-11ef-9f46-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "9309ad0b-a8bc-11ef-8be4-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b2638202-451d-11ef-8a27-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "93e5bae3-a8bc-11ef-9990-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "617d80c6-433d-11ef-a43b-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6d3ead18-433d-11ef-a0d9-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b3b39a96-451d-11ef-b00c-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "71a89f11-433d-11ef-bec9-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6d137702-433d-11ef-9979-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "33b02e5e-433a-11ef-b621-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "92072604-a8bc-11ef-86cf-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6329f64e-a8bc-11ef-aad1-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "39405cf9-433a-11ef-89c5-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "624fde21-a8bc-11ef-b54f-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "33902a54-433a-11ef-8657-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "610d6230-a8bc-11ef-9134-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "1e764912-433a-11ef-9fa1-197af2652521",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "60fd555b-a8bc-11ef-b7a3-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5dc58043-433d-11ef-b6fb-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "630c8841-a8bc-11ef-9930-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "72083634-433d-11ef-9b28-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "1e678a35-433a-11ef-b584-197af2652521",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6cdfc00c-433d-11ef-86e5-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "627b23fe-a8bc-11ef-a822-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6d312b21-433d-11ef-b2af-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "91d8d37a-a8bc-11ef-9707-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "93889bf3-a8bc-11ef-87e9-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6d77757e-433d-11ef-be48-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "691f4d27-433d-11ef-a24e-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "38db1b4f-433a-11ef-9878-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6c8d702c-433d-11ef-acc0-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2c6d0083-433a-11ef-bf04-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "3965c124-433a-11ef-b361-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2c56fb5a-433a-11ef-9d76-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b22e662c-451d-11ef-aab6-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "71b8e39a-433d-11ef-8b63-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5e7437e4-433d-11ef-aa56-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "60d9514f-a8bc-11ef-9b35-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b15530cf-451d-11ef-be21-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6d0ce7dd-433d-11ef-9613-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "61eeb078-433d-11ef-b672-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b359acca-451d-11ef-a140-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "9370c0fd-a8bc-11ef-b599-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "63404804-a8bc-11ef-8a3d-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "697390c6-433d-11ef-b763-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "93447258-a8bc-11ef-b2c7-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "3927a9c6-433a-11ef-b1e4-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "60d07ff7-a8bc-11ef-a881-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b1bb307c-451d-11ef-9c80-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "71813722-433d-11ef-92e7-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "625db8f2-433d-11ef-813c-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6188ccd5-a8bc-11ef-989a-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "33eaaccf-433a-11ef-811a-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "622500d6-433d-11ef-b54f-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6d9eb907-433d-11ef-9217-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b319cf15-451d-11ef-8809-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "699c701a-433d-11ef-96ed-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5ec929e9-433d-11ef-bc79-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "61daa405-433d-11ef-94ee-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6c54cd6d-433d-11ef-bad0-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "61ffbf06-433d-11ef-9034-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "68f4b530-433d-11ef-913b-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6d53ce71-433d-11ef-af43-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "46bc3437-433a-11ef-b5a3-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "3319af92-433a-11ef-9c7b-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2c371961-433a-11ef-a5eb-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62368551-a8bc-11ef-9897-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2c0507aa-433a-11ef-a078-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b345ada4-451d-11ef-8b7e-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "397e9d54-433a-11ef-bd20-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "913009f5-a8bc-11ef-9695-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2c48ea06-433a-11ef-bfd2-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "71fff1fa-433d-11ef-a5da-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "25ba8c6b-433a-11ef-90ce-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "24b9fe1a-433a-11ef-bfaf-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b3e3aae1-451d-11ef-832e-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "91a2c287-a8bc-11ef-ac2a-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "32c97f9e-433a-11ef-a524-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2586432f-433a-11ef-8c2e-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "61997c4d-433d-11ef-a2c5-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "34229248-433a-11ef-b511-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "693cd3e7-433d-11ef-9326-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b23f7c09-451d-11ef-834a-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b2fb83bc-451d-11ef-9e1c-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "69ee83e4-433d-11ef-ab40-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62e6e724-433d-11ef-ae90-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b2e57f82-451d-11ef-8289-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b2b8301f-451d-11ef-9097-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6899d9cd-433d-11ef-af92-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "26460e13-433a-11ef-8807-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6327dff8-433d-11ef-ad97-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2636b46f-433a-11ef-ae88-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5e939800-433d-11ef-b780-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b3a33645-451d-11ef-b1be-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5f130cf0-433d-11ef-baa0-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "7168e449-433d-11ef-9ada-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b35192e8-451d-11ef-84f9-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "3a36331c-433a-11ef-89ce-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "604ce0d6-a8bc-11ef-94f2-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "33e261c5-433a-11ef-a5ea-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2dac5e49-433a-11ef-8a0b-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62e9ccef-a8bc-11ef-a0f2-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "9421a5c3-a8bc-11ef-8082-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6d87dfec-433d-11ef-a456-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6211889f-433d-11ef-ae69-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6d707659-433d-11ef-923b-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "71a0f965-433d-11ef-b895-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2d625f2a-433a-11ef-ada8-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6969676c-433d-11ef-93b7-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "92c1e269-a8bc-11ef-af24-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "61b26063-a8bc-11ef-9de3-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "32d32482-433a-11ef-bdd3-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "38c265f7-433a-11ef-aa49-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5eaaeea8-433d-11ef-9cc1-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6c86cd9d-433d-11ef-91fc-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "397673a0-433a-11ef-95d2-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b3027f67-451d-11ef-85be-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "69b44e66-433d-11ef-8dd3-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5e3bfd08-433d-11ef-8097-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "7227464b-433d-11ef-bd12-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62a1e594-a8bc-11ef-8687-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b3f29931-451d-11ef-99a5-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "621a888b-433d-11ef-8e9c-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b236cd0b-451d-11ef-b579-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5e4b7512-433d-11ef-ae48-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6268ebb9-433d-11ef-be0a-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62067448-a8bc-11ef-a645-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "26126614-433a-11ef-b7fc-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "60c760e3-a8bc-11ef-84e8-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "605fac0f-a8bc-11ef-9c49-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "61a22020-a8bc-11ef-b04f-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6191d619-a8bc-11ef-8a81-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "93d4fd94-a8bc-11ef-ab8f-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "1e858c72-433a-11ef-b15b-197af2652521",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6983d3e5-433d-11ef-a1c6-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "61f71914-433d-11ef-8274-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2cba6ea3-433a-11ef-9286-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "264e2b4c-433a-11ef-8e11-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "713e99af-433d-11ef-bfd7-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5de9bca2-433d-11ef-b624-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6d695d79-433d-11ef-811d-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "607b24c9-a8bc-11ef-bc48-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "32846ddd-433a-11ef-9dec-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "618fe8e7-433d-11ef-9d83-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "68abb22d-433d-11ef-baae-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62f9e5a3-a8bc-11ef-bbef-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2569bb1b-433a-11ef-a444-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "335c72d1-433a-11ef-9f3a-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "63161762-433d-11ef-bb46-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62f17da1-a8bc-11ef-a9e7-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "695949a8-433d-11ef-ac27-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "611dafac-a8bc-11ef-b1fd-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2c977c95-433a-11ef-bcd7-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b25a02c5-451d-11ef-becc-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6d22941c-433d-11ef-84f7-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "697ba652-433d-11ef-89ac-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6c389f28-433d-11ef-a698-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "69e6bd82-433d-11ef-b5f6-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5e4377e6-433d-11ef-8da5-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "93dd1fec-a8bc-11ef-9a19-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "9279937d-a8bc-11ef-827f-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "93a74914-a8bc-11ef-93fa-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "9244302a-a8bc-11ef-8bd1-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "942a76a0-a8bc-11ef-975d-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "46aa2718-433a-11ef-ae0f-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "463929ba-433a-11ef-b2d7-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "61b525c4-433d-11ef-8c22-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5ed0eb41-433d-11ef-946e-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "3948c04b-433a-11ef-9d4f-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "69f6a35b-433d-11ef-b8b9-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "93ca7848-a8bc-11ef-a006-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6246fbc4-a8bc-11ef-a1ba-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "46b374ff-433a-11ef-b77b-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "68dac6a4-433d-11ef-ae69-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "63055a31-433d-11ef-8fdd-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "688205e4-433d-11ef-a7ec-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6c796d37-433d-11ef-b305-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "691601e6-433d-11ef-a969-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "4677d516-433a-11ef-87f1-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "258da282-433a-11ef-8aae-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5df1fd9b-433d-11ef-94b0-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6302bdc9-a8bc-11ef-a83e-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "60408b3a-a8bc-11ef-b788-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "722000e4-433d-11ef-aedb-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "614bed21-a8bc-11ef-a6b8-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "685a70aa-433d-11ef-8850-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2577b6ef-433a-11ef-88a7-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "72365d8f-433d-11ef-bf94-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5efadd7e-433d-11ef-83b9-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5eba010a-433d-11ef-bfbf-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "33536185-433a-11ef-8e91-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6178506e-a8bc-11ef-ae36-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2570e433-433a-11ef-9c1d-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6237fbc7-433d-11ef-8278-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b32ef407-451d-11ef-9343-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6944c1b3-433d-11ef-9a56-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "26198523-433a-11ef-9aa2-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "92ae32e6-a8bc-11ef-b6b8-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "1e6f44db-433a-11ef-b4f3-197af2652521",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "91853809-a8bc-11ef-9bd5-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "69ddecf9-433d-11ef-a408-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "24d07105-433a-11ef-a157-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "47345510-433a-11ef-abc4-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "60ebdbad-a8bc-11ef-a758-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "69ac9ad5-433d-11ef-8d9a-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "932cb925-a8bc-11ef-99c8-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "263e30ee-433a-11ef-8e5e-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "92f7084a-a8bc-11ef-972e-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5e8a9c76-433d-11ef-8306-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "61301529-a8bc-11ef-858e-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b1156574-451d-11ef-8502-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "916b470c-a8bc-11ef-bc2b-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6cd7be53-433d-11ef-84e9-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2c40ab04-433a-11ef-ac00-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "334366b1-433a-11ef-9178-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62baa914-433d-11ef-9203-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b403424b-451d-11ef-ba40-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2d9923e0-433a-11ef-a850-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "3386bc80-433a-11ef-b7e7-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "68d1b275-433d-11ef-8e61-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62088cbe-433d-11ef-b8cb-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "68a2c8b8-433d-11ef-ae99-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "46d0d608-433a-11ef-a0f3-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2cc1f94f-433a-11ef-a9d3-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "7263af9c-433d-11ef-b662-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "61a1e8fc-433d-11ef-bb9d-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "68e383ac-433d-11ef-bd06-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "61bacca0-a8bc-11ef-a48e-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "33a84bea-433a-11ef-924b-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2534bdc4-433a-11ef-b408-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6139e154-a8bc-11ef-9069-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5f331d5b-433d-11ef-8968-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "39a382dc-433a-11ef-8fcc-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "32eead22-433a-11ef-b265-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "251ed068-433a-11ef-ab89-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2620fe51-433a-11ef-a4aa-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6c62d29c-433d-11ef-8002-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "688985dd-433d-11ef-8988-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5ddf9cb6-433d-11ef-b2e2-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5e17fb5c-433d-11ef-8f47-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b309d726-451d-11ef-99cf-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "46a301de-433a-11ef-86c2-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6d379f0f-433d-11ef-801e-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62c736de-a8bc-11ef-aa50-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62687cea-a8bc-11ef-a288-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5ec1682f-433d-11ef-8381-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "32f76fc0-433a-11ef-9891-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2d5802d7-433a-11ef-9b60-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5ee98aa5-433d-11ef-acad-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "3938077d-433a-11ef-9455-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6290740c-a8bc-11ef-99a4-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b196d76d-451d-11ef-97c2-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62a92ff2-433d-11ef-ba08-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2d69c70c-433a-11ef-b313-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2c73ae51-433a-11ef-bca4-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "91e326d7-a8bc-11ef-9223-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "93b7497e-a8bc-11ef-8b0e-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "71366863-433d-11ef-aa92-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "38caef13-433a-11ef-8f10-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6d81272f-433d-11ef-acab-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "60f4dbcf-a8bc-11ef-a947-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "46e316b4-433a-11ef-b08b-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "395bf645-433a-11ef-88a5-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "940f7b1a-a8bc-11ef-a405-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "33009344-433a-11ef-ba9c-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2544aec9-433a-11ef-b2ea-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5f03bc76-433d-11ef-8cbb-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "71c0320e-433d-11ef-ab0e-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "634b1680-a8bc-11ef-8997-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "93787c2c-a8bc-11ef-94a2-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "46d93586-433a-11ef-b3ef-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "3a487c64-433a-11ef-9197-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "4704ca86-433a-11ef-a4b0-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2d7ee214-433a-11ef-8a1e-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6272dde0-433d-11ef-904a-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62b1d8f1-433d-11ef-b932-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "3a1b368e-433a-11ef-be20-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "60b238b2-a8bc-11ef-8b24-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "911f0718-a8bc-11ef-b92c-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "93facb96-a8bc-11ef-a444-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6cf70b61-433d-11ef-88ef-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "7158ab54-433d-11ef-8131-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6d906f5e-433d-11ef-8434-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b168c0e5-451d-11ef-8b42-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2c9db857-433a-11ef-8beb-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5e7b759f-433d-11ef-8587-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "3a0eed9d-433a-11ef-bff8-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "3a23dc1c-433a-11ef-83fe-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5e07efae-433d-11ef-bd3b-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6862bd60-433d-11ef-8691-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "25fbffec-433a-11ef-92a4-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "464fbe5c-433a-11ef-b6da-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "3a515f1e-433a-11ef-b610-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "4648e698-433a-11ef-b73c-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b336254f-451d-11ef-a353-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6929968d-433d-11ef-b1dc-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5ed93ee6-433d-11ef-a4ca-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "46ed3338-433a-11ef-9bdc-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "39d3ff5f-433a-11ef-bad7-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6cfe68ac-433d-11ef-b93d-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "68c96f1e-433d-11ef-a7e0-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b37c7dae-451d-11ef-a46f-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "69d5ac09-433d-11ef-a962-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5e6c87fe-433d-11ef-991b-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b2842ad6-451d-11ef-8b70-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "33d9d51f-433a-11ef-9c5b-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b2de2d78-451d-11ef-87c6-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b33cfd08-451d-11ef-834f-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "91d135e2-a8bc-11ef-931e-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2d87c920-433a-11ef-9ef8-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b2c888de-451d-11ef-bea5-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6ccdecdf-433d-11ef-8cb9-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5df99fd9-433d-11ef-b5c3-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "938121f2-a8bc-11ef-b292-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "92936571-a8bc-11ef-992e-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2ca4e290-433a-11ef-b853-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5f239bfe-433d-11ef-ba51-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "25ab8d05-433a-11ef-b071-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "3a86349f-433a-11ef-83c0-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6143b4ba-a8bc-11ef-9bda-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "25d03756-433a-11ef-92eb-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b275952f-451d-11ef-97b2-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "71f72e0d-433d-11ef-a638-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "3a784cc9-433a-11ef-8b32-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "3988d0e8-433a-11ef-ad81-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2db68a9d-433a-11ef-a39d-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "39abaca3-433a-11ef-ab33-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "260af770-433a-11ef-9ccc-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "627c4640-433d-11ef-9461-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "723e3844-433d-11ef-baf3-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5f1ace72-433d-11ef-a472-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b395437c-451d-11ef-b475-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "47141334-433a-11ef-ad93-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "621a6198-a8bc-11ef-9ced-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b29abbb0-451d-11ef-8b26-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "26283328-433a-11ef-9cf0-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "69cd044f-433d-11ef-a67f-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b3c229e5-451d-11ef-b7b8-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "934ded77-a8bc-11ef-963e-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2cff986e-433a-11ef-b30b-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "61d4dfb0-a8bc-11ef-80c1-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "392fda2e-433a-11ef-9c90-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6334e675-a8bc-11ef-ae3d-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "93f25270-a8bc-11ef-98d1-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "933c8cf7-a8bc-11ef-b626-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b11c99e2-451d-11ef-b0af-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "918f7e6d-a8bc-11ef-bc2a-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "935efe80-a8bc-11ef-9409-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "61556bbe-a8bc-11ef-900d-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2c0de7d8-433a-11ef-9dcd-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5dd60032-433d-11ef-bb98-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2d26435c-433a-11ef-99c0-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6c9bcdbd-433d-11ef-8b5b-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b3aaf7a2-451d-11ef-80ec-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "332acf3e-433a-11ef-9004-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "722e8739-433d-11ef-a64b-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "928b895f-a8bc-11ef-8a35-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "628e6500-433d-11ef-b055-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b2f40c20-451d-11ef-933f-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b2942e9a-451d-11ef-8408-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "92715ebf-a8bc-11ef-adb7-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5ea253fe-433d-11ef-ba9c-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "9233d4ba-a8bc-11ef-b1fa-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "61c79ecb-433d-11ef-adb3-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "38fdc193-433a-11ef-bd91-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "262f6e76-433a-11ef-8e18-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "252db3d6-433a-11ef-a26a-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "25166c55-433a-11ef-aeec-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "91aa46a6-a8bc-11ef-9e16-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "91fcd288-a8bc-11ef-acbe-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6d455b01-433d-11ef-b228-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b383b1d5-451d-11ef-99aa-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "32af2541-433a-11ef-acbf-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b2cf65b3-451d-11ef-a713-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5e00bf20-433d-11ef-ae6a-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62ef40f1-433d-11ef-afe4-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "25c950bc-433a-11ef-951e-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b26e8e9e-451d-11ef-9a77-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2d081a77-433a-11ef-8fb6-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "33c0bd15-433a-11ef-8294-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "609e7ffa-a8bc-11ef-be7d-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "93c1a647-a8bc-11ef-8c9c-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "71615a19-433d-11ef-b2b2-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2c8962ff-433a-11ef-a95b-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "9262f25c-a8bc-11ef-bc76-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b15f6560-451d-11ef-8b44-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "63306ab1-433d-11ef-8c6c-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6c4b4a93-433d-11ef-8de9-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6cbe2b79-433d-11ef-b179-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "3a3f6d90-433a-11ef-bdcd-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "33fc5ee1-433a-11ef-98ce-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5e202790-433d-11ef-a648-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b13a6970-451d-11ef-b36a-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b1d01da2-451d-11ef-8e42-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "25f3e1af-433a-11ef-93d2-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2595675d-433a-11ef-895c-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5db63e84-433d-11ef-b9a1-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "628605e2-433d-11ef-8a35-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "615e48bf-a8bc-11ef-88f4-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62e02ba4-a8bc-11ef-af22-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6126a9e0-a8bc-11ef-b22a-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "917c90e6-a8bc-11ef-8a0f-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "396d9eb0-433a-11ef-b5fe-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "63763c76-a8bc-11ef-aca5-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "9147695d-a8bc-11ef-a1cc-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "61ed6e29-a8bc-11ef-98b7-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "92fff3cb-a8bc-11ef-84ea-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "25deac96-433a-11ef-813a-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "46601236-433a-11ef-89c8-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "635afb2e-a8bc-11ef-b1ba-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "327bd493-433a-11ef-95d6-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "698c8e60-433d-11ef-81c7-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "61dcaae9-a8bc-11ef-87b4-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6186dc9e-433d-11ef-b89f-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "63160902-a8bc-11ef-88ef-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "39fdd9d2-433a-11ef-8b35-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "60686bc5-a8bc-11ef-92d4-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6c40f9ba-433d-11ef-8157-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "60724e52-a8bc-11ef-b7c4-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "725c23e9-433d-11ef-adcf-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "390e11ec-433a-11ef-9e95-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "68c0a2c2-433d-11ef-acfe-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2c263f58-433a-11ef-94d4-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "4641fe01-433a-11ef-ae8a-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "61bee671-433d-11ef-ae79-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "636d4f07-a8bc-11ef-8942-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6da59cdd-433d-11ef-84c9-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6c800f93-433d-11ef-9234-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6166e3c7-a8bc-11ef-8c4a-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "7217c424-433d-11ef-a25a-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2cd8243a-433a-11ef-a102-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2da36221-433a-11ef-ac9d-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6240b49a-433d-11ef-ba55-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "93912b57-a8bc-11ef-bd29-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "255b2795-433a-11ef-a151-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5f2ae116-433d-11ef-a0a8-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "91f42d06-a8bc-11ef-807a-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62718935-a8bc-11ef-b18d-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "92d368d1-a8bc-11ef-8877-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b1db5589-451d-11ef-b058-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "3a65bc29-433a-11ef-b6e8-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b3f9d0cb-451d-11ef-96cb-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2c18e55c-433a-11ef-a4ce-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "939df7d4-a8bc-11ef-9f31-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b3cd2b6a-451d-11ef-8102-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b133701f-451d-11ef-ad1d-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "3a06a664-433a-11ef-8810-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "91731bd5-a8bc-11ef-bb53-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2c7b9aab-433a-11ef-8ceb-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62a020d4-433d-11ef-8fa0-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2d1351ca-433a-11ef-a87a-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6298c5c7-a8bc-11ef-8fb8-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62114eff-a8bc-11ef-beb5-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5e5c5b85-433d-11ef-8759-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "610550d8-a8bc-11ef-b8b3-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "46fda5c0-433a-11ef-85e4-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6871fa45-433d-11ef-b154-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "68ec6d1a-433d-11ef-be68-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b2bf9253-451d-11ef-b821-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "925aba31-a8bc-11ef-9c71-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "60553cf3-a8bc-11ef-8082-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "933520c7-a8bc-11ef-91e9-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "9127766b-a8bc-11ef-88f9-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "61fd7b6a-a8bc-11ef-ab29-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "336488c6-433a-11ef-afcd-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b2aeb286-451d-11ef-8e92-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "69c5112f-433d-11ef-98ae-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b1e40f43-451d-11ef-8b78-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2cc8ee1c-433a-11ef-9a4a-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5da5147e-433d-11ef-8385-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "469bc402-433a-11ef-a99b-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "92226a53-a8bc-11ef-9439-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "92812611-a8bc-11ef-aead-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "466faae0-433a-11ef-a9a5-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "38e2d995-433a-11ef-ba8a-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "71e81da0-433d-11ef-bb93-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "622f3fcc-433d-11ef-8b6c-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "91c2b398-a8bc-11ef-abe8-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "7210629e-433d-11ef-befc-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b1b0a1fc-451d-11ef-8cbc-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "337d99cd-433a-11ef-b29f-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "24c9150d-433a-11ef-a16c-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "25a3ec57-433a-11ef-a402-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "25d7530e-433a-11ef-9957-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6cf05ad5-433d-11ef-89ec-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6cb750a6-433d-11ef-bffe-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6c94c3ce-433d-11ef-a35a-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "328c99f7-433a-11ef-abfd-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "25073c96-433a-11ef-b707-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "630dc370-433d-11ef-8923-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "631ea7b6-a8bc-11ef-93eb-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62d5fb86-433d-11ef-b4bd-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "919ab53e-a8bc-11ef-aefb-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "724d3810-433d-11ef-aa06-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "9112ddd9-a8bc-11ef-b3b5-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "3a6e33fa-433a-11ef-97e7-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b208b809-451d-11ef-af46-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6d5a93fa-433d-11ef-a7d7-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "9355acdd-a8bc-11ef-9a99-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b1f81dbb-451d-11ef-a468-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "69a4329f-433d-11ef-b395-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "69509199-433d-11ef-83a9-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "46921c44-433a-11ef-b419-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "254cb3fc-433a-11ef-93aa-7b2ecc558b87",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "608d8798-a8bc-11ef-83c1-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b36ce2b4-451d-11ef-88e7-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "9402ad02-a8bc-11ef-8712-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "687abbf3-433d-11ef-8709-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "61f5a78c-a8bc-11ef-b345-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "341911b1-433a-11ef-bbd8-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2c5d8f95-433a-11ef-ba8b-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "3407a3b2-433a-11ef-a3d7-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "922b6615-a8bc-11ef-a94c-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "337560de-433a-11ef-9e43-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "92ca3fc7-a8bc-11ef-a888-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "622cfa8e-a8bc-11ef-a04a-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "618089d6-a8bc-11ef-a378-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b38c197c-451d-11ef-89d7-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b374d249-451d-11ef-87ff-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "69fe5d8f-433d-11ef-b140-49cb048bf036",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "71471911-433d-11ef-8df8-e9e444022f09",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "92b77f2b-a8bc-11ef-83f5-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b3dc493b-451d-11ef-8f2f-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "636479ce-a8bc-11ef-ac32-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b14a1ed0-451d-11ef-b1ce-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "616864fe-433d-11ef-9ae0-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "38ed554b-433a-11ef-9b35-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6d6215e4-433d-11ef-b008-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "4748280f-433a-11ef-83ef-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b247c0a1-451d-11ef-82a0-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b24ec70a-451d-11ef-8090-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2c4f3694-433a-11ef-9496-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "619a0803-a8bc-11ef-acdd-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "91572a0d-a8bc-11ef-9ca4-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "32a6ccb3-433a-11ef-be24-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "6ce97243-433d-11ef-af5d-7598be1314c0",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "92a653eb-a8bc-11ef-88d7-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "60bcd420-a8bc-11ef-abcd-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "391649b7-433a-11ef-9088-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2cb3c685-433a-11ef-b84d-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "33d20f19-433a-11ef-8d54-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b2a66bb7-451d-11ef-9154-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "91c9fcaa-a8bc-11ef-9945-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "39eae17d-433a-11ef-8b00-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b3bb1e70-451d-11ef-8f98-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "91b2fb8b-a8bc-11ef-babb-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "329da697-433a-11ef-b47f-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "2cd0e078-433a-11ef-a17b-db7c9454d397",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "b28cf311-451d-11ef-b027-fd30a5ffc186",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5ef38209-433d-11ef-845d-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "32e5d940-433a-11ef-8291-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "923b4f37-a8bc-11ef-a916-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "3a2d67a3-433a-11ef-b1ef-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "336d2aae-433a-11ef-a29a-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "4667b72b-433a-11ef-9eab-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5ee1ea0e-433d-11ef-a17a-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "915f7706-a8bc-11ef-ac8b-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "625496b2-433d-11ef-9b49-0fbf236e48bc",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5e541435-433d-11ef-a677-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "93af81d6-a8bc-11ef-821e-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "62bca124-a8bc-11ef-967c-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "611572d0-a8bc-11ef-97c1-a5f3cd7603e9",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "4680fbc6-433a-11ef-9322-f949528c2f59",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "913f587b-a8bc-11ef-bd22-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "93124738-a8bc-11ef-901a-f753fb0516df",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "3a5cf9ee-433a-11ef-b4be-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "39be4262-433a-11ef-864d-53ca0076bbb1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "5f0b9665-433d-11ef-a8f8-b9aa2b2f8ad1",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    },
+    {
+      "game_id": "332240ac-433a-11ef-8012-71ef94574d49",
+      "is_valid": true,
+      "errors": [],
+      "warnings": [],
+      "row_drops": 0
+    }
+  ],
+  "load_error_details": []
+}

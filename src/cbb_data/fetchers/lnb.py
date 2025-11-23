@@ -82,6 +82,7 @@ from typing import Any
 import pandas as pd
 import requests
 
+from ..api.datasets import get_current_season
 from ..utils.rate_limiter import get_source_limiter
 from .base import cached_dataframe, retry_on_error
 from .browser_scraper import BrowserScraper, is_playwright_available
@@ -98,7 +99,88 @@ LNB_STANDINGS_URL = f"{LNB_BASE_URL}/pro-a/statistiques"
 
 # Atrium Sports API (Third-party stats provider for LNB)
 ATRIUM_API_BASE = "https://eapi.web.prod.cloud.atriumsports.com"
+
+# ==============================================================================
+# League Name Mapping (API ↔ Data Layer)
+# ==============================================================================
+# Maps canonical API league names (from LEAGUE_LEVELS) to curated data partition names
+# Ensures consistent naming between registry and file system
+
+LNB_API_TO_DATA = {
+    "LNB_PROA": "betclic_elite",  # Betclic ELITE (formerly Pro A)
+    "LNB_ELITE2": "elite_2",  # Pro B (second-tier)
+    "LNB_ESPOIRS_ELITE": "espoirs_elite",  # Espoirs ELITE (U21 top-tier)
+    "LNB_ESPOIRS_PROB": "espoirs_prob",  # Espoirs Pro B (U21 second-tier)
+}
+
+# Reverse mapping for data layer → API names
+LNB_DATA_TO_API = {v: k for k, v in LNB_API_TO_DATA.items()}
+
+# All supported LNB leagues (API names)
+LNB_LEAGUES_API = list(LNB_API_TO_DATA.keys())
+
+# All supported LNB leagues (data layer names)
+LNB_LEAGUES_DATA = list(LNB_API_TO_DATA.values())
+
+
+def normalize_lnb_league_name(league: str) -> str:
+    """Convert API league name to data layer name
+
+    Accepts both canonical API names (LNB_PROA, LNB_ELITE2, etc.) and data
+    layer names (betclic_elite, elite_2, etc.), returning data layer format.
+
+    Args:
+        league: League identifier (API or data format)
+
+    Returns:
+        Data layer league name (e.g., "betclic_elite")
+
+    Example:
+        >>> normalize_lnb_league_name("LNB_PROA")
+        "betclic_elite"
+        >>> normalize_lnb_league_name("betclic_elite")
+        "betclic_elite"
+    """
+    # Already in data format - return as-is
+    if league in LNB_LEAGUES_DATA:
+        return league
+
+    # Convert from API format
+    if league in LNB_API_TO_DATA:
+        return LNB_API_TO_DATA[league]
+
+    # Legacy support: "LNB" or "LNB_PROA" without underscore
+    if league in ["LNB", "LNB-PROA"]:
+        return "betclic_elite"
+
+    # Unknown - log warning and return as-is (will fail downstream)
+    logger.warning(f"Unknown LNB league identifier: {league}")
+    return league
+
+
 ATRIUM_FIXTURE_DETAIL_URL = f"{ATRIUM_API_BASE}/v1/embed/12/fixture_detail"
+
+# LNB Competition to Canonical League ID Mapping
+COMPETITION_TO_LEAGUE_ID = {
+    "Betclic ELITE": "LNB_PROA",
+    "ELITE 2": "LNB_ELITE2",
+    "ELITE 2 (PROB)": "LNB_ELITE2",
+    "Espoirs ELITE": "LNB_ESPOIRS_ELITE",
+    "Espoirs PROB": "LNB_ESPOIRS_PROB",
+}
+
+
+def get_league_id_from_competition(competition: str) -> str:
+    """Map competition name to canonical league ID
+
+    Args:
+        competition: Competition name from game index
+
+    Returns:
+        Canonical league ID (e.g., "LNB_PROA", "LNB_ELITE2", etc.)
+        Defaults to "LNB_PROA" for unknown competitions
+    """
+    return COMPETITION_TO_LEAGUE_ID.get(competition, "LNB_PROA")
 
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
@@ -801,8 +883,8 @@ def _create_atrium_state(fixture_id: str, view: str) -> str:
 # NOTE: Removed @cached_dataframe - game-level data should not be globally cached
 #       since cache key doesn't include positional args (game_id). Caching should
 #       happen at season/bulk level instead.
-def fetch_lnb_play_by_play(game_id: str) -> pd.DataFrame:
-    """Fetch LNB Pro A play-by-play data from Atrium Sports API
+def fetch_lnb_play_by_play(game_id: str, league_id: str = "LNB_PROA") -> pd.DataFrame:
+    """Fetch LNB play-by-play data from Atrium Sports API
 
     Retrieves detailed play-by-play events from Atrium Sports (third-party stats
     provider for LNB). Each event includes player, team, action type, clock time,
@@ -815,6 +897,8 @@ def fetch_lnb_play_by_play(game_id: str) -> pd.DataFrame:
     Args:
         game_id: Game UUID (fixture ID) from LNB API
                  Format: "3522345e-3362-11f0-b97d-7be2bdc7a840"
+        league_id: Canonical league ID (default: "LNB_PROA")
+                   Options: "LNB_PROA", "LNB_ELITE2", "LNB_ESPOIRS_ELITE", "LNB_ESPOIRS_PROB"
 
     Returns:
         DataFrame with play-by-play events
@@ -837,7 +921,7 @@ def fetch_lnb_play_by_play(game_id: str) -> pd.DataFrame:
         - Y_COORD: Y coordinate for location events (0-100 scale)
         - HOME_SCORE: Home team score after this event
         - AWAY_SCORE: Away team score after this event
-        - LEAGUE: "LNB_PROA"
+        - LEAGUE: League canonical ID (e.g., "LNB_PROA", "LNB_ESPOIRS_ELITE")
 
     Example:
         >>> # Get play-by-play for a completed game
@@ -941,7 +1025,7 @@ def fetch_lnb_play_by_play(game_id: str) -> pd.DataFrame:
                         "Y_COORD": event.get("y"),
                         "HOME_SCORE": home_score,
                         "AWAY_SCORE": away_score,
-                        "LEAGUE": "LNB_PROA",
+                        "LEAGUE": league_id,
                     }
                 )
 
@@ -1005,12 +1089,15 @@ def fetch_lnb_play_by_play(game_id: str) -> pd.DataFrame:
 # NOTE: Removed @cached_dataframe - game-level data should not be globally cached
 #       since cache key doesn't include positional args (game_id). Caching should
 #       happen at season/bulk level instead.
-def fetch_lnb_shots(game_id: str) -> pd.DataFrame:
-    """Fetch LNB Pro A shot chart data from Atrium Sports API
+def fetch_lnb_game_shots(game_id: str, league_id: str = "LNB_PROA") -> pd.DataFrame:
+    """Fetch LNB shot chart data from Atrium Sports API (single game)
 
     Retrieves detailed shot chart data from Atrium Sports (third-party stats
-    provider for LNB). Each shot includes player, team, shot type, success/miss,
-    and precise court coordinates.
+    provider for LNB) for a single game. Each shot includes player, team, shot type,
+    success/miss, and precise court coordinates.
+
+    ⚠️ **NOTE**: This is a low-level game fetcher used by ingestion pipelines.
+    For bulk season data access, use fetch_lnb_shots(season, league) instead.
 
     ⚠️ **NOTE**: This uses a third-party API (Atrium Sports) that provides stats
     for LNB games. The fixture ID (game_id) must be the UUID from LNB's official
@@ -1019,6 +1106,8 @@ def fetch_lnb_shots(game_id: str) -> pd.DataFrame:
     Args:
         game_id: Game UUID (fixture ID) from LNB API
                  Format: "3522345e-3362-11f0-b97d-7be2bdc7a840"
+        league_id: Canonical league ID (default: "LNB_PROA")
+                   Options: "LNB_PROA", "LNB_ELITE2", "LNB_ESPOIRS_ELITE", "LNB_ESPOIRS_PROB"
 
     Returns:
         DataFrame with shot chart data
@@ -1039,11 +1128,11 @@ def fetch_lnb_shots(game_id: str) -> pd.DataFrame:
         - SUCCESS_STRING: French result ("réussi" or "raté")
         - X_COORD: X coordinate (0-100 scale, court position)
         - Y_COORD: Y coordinate (0-100 scale, court position)
-        - LEAGUE: "LNB_PROA"
+        - LEAGUE: League canonical ID (e.g., "LNB_PROA", "LNB_ESPOIRS_ELITE")
 
     Example:
         >>> # Get shot chart for a completed game
-        >>> df = fetch_lnb_shots("3522345e-3362-11f0-b97d-7be2bdc7a840")
+        >>> df = fetch_lnb_game_shots("3522345e-3362-11f0-b97d-7be2bdc7a840")
         >>>
         >>> # Filter to made 3-pointers
         >>> threes = df[(df['SHOT_TYPE'] == '3pt') & (df['SUCCESS'] == True)]
@@ -1133,7 +1222,7 @@ def fetch_lnb_shots(game_id: str) -> pd.DataFrame:
                     "SUCCESS_STRING": shot.get("successString"),
                     "X_COORD": shot.get("x"),
                     "Y_COORD": shot.get("y"),
-                    "LEAGUE": "LNB_PROA",
+                    "LEAGUE": league_id,
                 }
             )
 
@@ -1954,49 +2043,324 @@ def fetch_espoirs_prob_team_season(season: str | None = None, **kwargs: Any) -> 
 
 
 # ==============================================================================
+# Unified Curated Data Fetchers (Phase F - Priority #3)
+# ==============================================================================
+
+
+def fetch_lnb_games(
+    season: str,
+    league: str | list[str] | None = None,
+    **filters: Any,
+) -> pd.DataFrame:
+    """Fetch LNB game index from curated layer
+
+    Loads the truthful game index built from fixture discovery.
+    This index serves as the source of truth for all LNB games across leagues.
+
+    Args:
+        season: Season in format "2023-2024" or "2024-2025"
+        league: League filter - single league string or list of leagues
+                Valid values: "betclic_elite", "elite_2", "espoirs_elite", "espoirs_prob"
+        **filters: Additional filters (e.g., game_id, team)
+
+    Returns:
+        DataFrame with game index containing:
+        - game_id: Game UUID
+        - season: Season string
+        - league: League identifier
+        - home_team: Home team name
+        - away_team: Away team name
+        - game_date: Game date
+        - has_pbp: Boolean for PBP availability
+        - has_shots: Boolean for shots availability
+
+    Example:
+        >>> # Get all LNB games for 2023-2024
+        >>> games = fetch_lnb_games("2023-2024")
+
+        >>> # Get only Betclic ELITE games
+        >>> proa = fetch_lnb_games("2023-2024", league="betclic_elite")
+
+        >>> # Get multiple leagues
+        >>> senior = fetch_lnb_games("2023-2024", league=["betclic_elite", "elite_2"])
+    """
+    from pathlib import Path
+
+    index_path = Path("data/raw/lnb/lnb_game_index.parquet")
+
+    if not index_path.exists():
+        logger.warning(f"Game index not found at {index_path}")
+        return pd.DataFrame()
+
+    try:
+        # Load full index
+        df = pd.read_parquet(index_path)
+
+        # Filter by season
+        df = df[df["season"] == season]
+
+        # Filter by league(s) if provided - normalize API names to data layer names
+        if league is not None:
+            if isinstance(league, str):
+                normalized_league = normalize_lnb_league_name(league)
+                df = df[df["league"] == normalized_league]
+            elif isinstance(league, list):
+                normalized_leagues = [normalize_lnb_league_name(lg) for lg in league]
+                df = df[df["league"].isin(normalized_leagues)]
+
+        logger.info(f"Loaded {len(df)} games for season={season}, league={league}")
+        return df
+
+    except Exception as e:
+        logger.error(f"Failed to load LNB game index: {e}")
+        return pd.DataFrame()
+
+
+def fetch_lnb_pbp(
+    season: str,
+    league: str | list[str] | None = None,
+    **filters: Any,
+) -> pd.DataFrame:
+    """Fetch LNB play-by-play data from curated layer
+
+    Loads validated, unified PBP data from the curated layer. This data has been:
+    - Content-validated (100% pass rate)
+    - Enriched with league/season metadata
+    - Partitioned by season and league for fast access
+
+    Args:
+        season: Season in format "2023-2024" or "2024-2025"
+        league: League filter - single league string or list of leagues
+                Valid values: "betclic_elite", "elite_2", "espoirs_elite", "espoirs_prob"
+                If None, loads all leagues
+        **filters: Additional filters (e.g., game_id, team_id, event_type)
+
+    Returns:
+        DataFrame with PBP events containing:
+        - GAME_ID: Game UUID
+        - EVENT_ID: Event identifier
+        - PERIOD_ID: Quarter/period (1-4, 11+=OT)
+        - CLOCK: Time remaining in period
+        - EVENT_TYPE: Event type (2pt, 3pt, freeThrow, rebound, assist, etc.)
+        - PLAYER_NAME: Player name
+        - TEAM_ID: Team UUID
+        - HOME_SCORE: Score progression
+        - AWAY_SCORE: Score progression
+        - X_COORD: Shot location X (0-100 scale)
+        - Y_COORD: Shot location Y (0-100 scale)
+        - season: Season string
+        - league: League identifier
+
+    Example:
+        >>> # Get all PBP for 2023-2024
+        >>> pbp = fetch_lnb_pbp("2023-2024")
+
+        >>> # Get only Betclic ELITE PBP
+        >>> proa_pbp = fetch_lnb_pbp("2023-2024", league="betclic_elite")
+
+        >>> # Get senior leagues (Betclic + Elite 2)
+        >>> senior_pbp = fetch_lnb_pbp("2023-2024", league=["betclic_elite", "elite_2"])
+    """
+    from pathlib import Path
+
+    curated_base = Path(f"data/curated/lnb/pbp/season={season}/lnb_pbp.parquet")
+
+    if not curated_base.exists():
+        logger.warning(f"Curated PBP not found for season {season} at {curated_base}")
+        return pd.DataFrame()
+
+    try:
+        # Build filters for parquet partitions - normalize API names to data layer names
+        partition_filters = []
+
+        if league is not None:
+            if isinstance(league, str):
+                normalized_league = normalize_lnb_league_name(league)
+                partition_filters.append(("league", "=", normalized_league))
+            elif isinstance(league, list):
+                normalized_leagues = [normalize_lnb_league_name(lg) for lg in league]
+                partition_filters.append(("league", "in", normalized_leagues))
+
+        # Load with partition filtering for performance
+        df = pd.read_parquet(curated_base, filters=partition_filters if partition_filters else None)
+
+        # Apply additional filters if provided
+        if "game_ids" in filters and filters["game_ids"]:
+            game_ids_list = (
+                filters["game_ids"]
+                if isinstance(filters["game_ids"], list)
+                else [filters["game_ids"]]
+            )
+            df = df[df["GAME_ID"].isin(game_ids_list)]
+
+        logger.info(f"Loaded {len(df)} PBP events for season={season}, league={league}")
+        return df
+
+    except Exception as e:
+        logger.error(f"Failed to load curated PBP: {e}")
+        return pd.DataFrame()
+
+
+def fetch_lnb_shots(
+    season: str,
+    league: str | list[str] | None = None,
+    **filters: Any,
+) -> pd.DataFrame:
+    """Fetch LNB shot chart data from curated layer
+
+    Loads validated, unified shot data from the curated layer. This data has been:
+    - Content-validated (100% pass rate)
+    - Enriched with league/season metadata
+    - Partitioned by season and league for fast access
+
+    Args:
+        season: Season in format "2023-2024" or "2024-2025"
+        league: League filter - single league string or list of leagues
+                Valid values: "betclic_elite", "elite_2", "espoirs_elite", "espoirs_prob"
+                If None, loads all leagues
+        **filters: Additional filters (e.g., game_id, player_name, shot_type)
+
+    Returns:
+        DataFrame with shot events containing:
+        - GAME_ID: Game UUID
+        - EVENT_ID: Shot event identifier
+        - PERIOD_ID: Quarter/period (1-4, 11+=OT)
+        - CLOCK: Time remaining in period
+        - SHOT_TYPE: Shot type (2pt, 3pt, ft)
+        - SHOT_SUBTYPE: Shot subtype (jumpShot, layup, dunk, etc.)
+        - PLAYER_NAME: Player name
+        - TEAM_ID: Team UUID
+        - SUCCESS: Boolean (made/missed)
+        - X_COORD: Shot location X (0-100 scale)
+        - Y_COORD: Shot location Y (0-100 scale)
+        - season: Season string
+        - league: League identifier
+
+    Example:
+        >>> # Get all shots for 2023-2024
+        >>> shots = fetch_lnb_shots("2023-2024")
+
+        >>> # Get only Betclic ELITE shots
+        >>> proa_shots = fetch_lnb_shots("2023-2024", league="betclic_elite")
+
+        >>> # Get youth leagues (Espoirs ELITE + Espoirs PROB)
+        >>> youth_shots = fetch_lnb_shots("2023-2024", league=["espoirs_elite", "espoirs_prob"])
+    """
+    from pathlib import Path
+
+    curated_base = Path(f"data/curated/lnb/shots/season={season}/lnb_shots.parquet")
+
+    if not curated_base.exists():
+        logger.warning(f"Curated shots not found for season {season} at {curated_base}")
+        return pd.DataFrame()
+
+    try:
+        # Build filters for parquet partitions - normalize API names to data layer names
+        partition_filters = []
+
+        if league is not None:
+            if isinstance(league, str):
+                normalized_league = normalize_lnb_league_name(league)
+                partition_filters.append(("league", "=", normalized_league))
+            elif isinstance(league, list):
+                normalized_leagues = [normalize_lnb_league_name(lg) for lg in league]
+                partition_filters.append(("league", "in", normalized_leagues))
+
+        # Load with partition filtering for performance
+        df = pd.read_parquet(curated_base, filters=partition_filters if partition_filters else None)
+
+        logger.info(f"Loaded {len(df)} shot events for season={season}, league={league}")
+        return df
+
+    except Exception as e:
+        logger.error(f"Failed to load curated shots: {e}")
+        return pd.DataFrame()
+
+
+# ==============================================================================
 # League-Specific PBP & Shots Wrappers
 # ==============================================================================
 
 
 # LNB Pro A (Betclic ELITE) PBP and Shots
 def fetch_proa_pbp(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
-    """Fetch LNB Pro A (Betclic ELITE) play-by-play data (league-specific wrapper)"""
-    return fetch_lnb_pbp_historical(season=season, league="LNB_PROA", **kwargs)
+    """Fetch LNB Pro A (Betclic ELITE) play-by-play data (unified curated fetcher)"""
+    # Convert season format if needed (API format → curated format)
+    if season and "-" in season and len(season.split("-")[1]) == 2:
+        year1 = season.split("-")[0]
+        year2 = str(int(year1) + 1)
+        curated_season = f"{year1}-{year2}"
+    else:
+        curated_season = season or get_current_season("LNB_PROA")
+
+    return fetch_lnb_pbp(season=curated_season, league="LNB_PROA", **kwargs)
 
 
 def fetch_proa_shots(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
-    """Fetch LNB Pro A (Betclic ELITE) shot chart data (league-specific wrapper)"""
-    return fetch_lnb_shots_historical(season=season, league="LNB_PROA", **kwargs)
+    """Fetch LNB Pro A (Betclic ELITE) shot chart data (unified curated fetcher)"""
+    # Convert season format if needed (API format → curated format)
+    if season and "-" in season and len(season.split("-")[1]) == 2:
+        year1 = season.split("-")[0]
+        year2 = str(int(year1) + 1)
+        curated_season = f"{year1}-{year2}"
+    else:
+        curated_season = season or get_current_season("LNB_PROA")
+
+    return fetch_lnb_shots(season=curated_season, league="LNB_PROA", **kwargs)
 
 
 # Elite 2 PBP and Shots
 def fetch_elite2_pbp(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
-    """Fetch Elite 2 play-by-play data (league-specific wrapper)"""
-    return fetch_lnb_pbp_historical(season=season, league="LNB_ELITE2", **kwargs)
+    """Fetch Elite 2 PBP data (unified curated fetcher)"""
+    if season and "-" in season and len(season.split("-")[1]) == 2:
+        curated_season = f"{season.split('-')[0]}-{int(season.split('-')[0])+1}"
+    else:
+        curated_season = season or get_current_season("LNB_ELITE2")
+    return fetch_lnb_pbp(season=curated_season, league="LNB_ELITE2", **kwargs)
 
 
 def fetch_elite2_shots(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
-    """Fetch Elite 2 shot chart data (league-specific wrapper)"""
-    return fetch_lnb_shots_historical(season=season, league="LNB_ELITE2", **kwargs)
+    """Fetch Elite 2 shots data (unified curated fetcher)"""
+    if season and "-" in season and len(season.split("-")[1]) == 2:
+        curated_season = f"{season.split('-')[0]}-{int(season.split('-')[0])+1}"
+    else:
+        curated_season = season or get_current_season("LNB_ELITE2")
+    return fetch_lnb_shots(season=curated_season, league="LNB_ELITE2", **kwargs)
 
 
 # Espoirs ELITE PBP and Shots
 def fetch_espoirs_elite_pbp(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
-    """Fetch Espoirs ELITE play-by-play data (league-specific wrapper)"""
-    return fetch_lnb_pbp_historical(season=season, league="LNB_ESPOIRS_ELITE", **kwargs)
+    """Fetch Espoirs ELITE PBP data (unified curated fetcher)"""
+    if season and "-" in season and len(season.split("-")[1]) == 2:
+        curated_season = f"{season.split('-')[0]}-{int(season.split('-')[0])+1}"
+    else:
+        curated_season = season or get_current_season("LNB_ESPOIRS_ELITE")
+    return fetch_lnb_pbp(season=curated_season, league="LNB_ESPOIRS_ELITE", **kwargs)
 
 
 def fetch_espoirs_elite_shots(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
-    """Fetch Espoirs ELITE shot chart data (league-specific wrapper)"""
-    return fetch_lnb_shots_historical(season=season, league="LNB_ESPOIRS_ELITE", **kwargs)
+    """Fetch Espoirs ELITE shots (unified curated fetcher)"""
+    if season and "-" in season and len(season.split("-")[1]) == 2:
+        curated_season = f"{season.split('-')[0]}-{int(season.split('-')[0])+1}"
+    else:
+        curated_season = season or get_current_season("LNB_ESPOIRS_ELITE")
+    return fetch_lnb_shots(season=curated_season, league="LNB_ESPOIRS_ELITE", **kwargs)
 
 
 # Espoirs PROB PBP and Shots
 def fetch_espoirs_prob_pbp(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
-    """Fetch Espoirs PROB play-by-play data (league-specific wrapper)"""
-    return fetch_lnb_pbp_historical(season=season, league="LNB_ESPOIRS_PROB", **kwargs)
+    """Fetch Espoirs PROB PBP data (unified curated fetcher)"""
+    if season and "-" in season and len(season.split("-")[1]) == 2:
+        curated_season = f"{season.split('-')[0]}-{int(season.split('-')[0])+1}"
+    else:
+        curated_season = season or get_current_season("LNB_ESPOIRS_PROB")
+    return fetch_lnb_pbp(season=curated_season, league="LNB_ESPOIRS_PROB", **kwargs)
 
 
 def fetch_espoirs_prob_shots(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
-    """Fetch Espoirs PROB shot chart data (league-specific wrapper)"""
-    return fetch_lnb_shots_historical(season=season, league="LNB_ESPOIRS_PROB", **kwargs)
+    """Fetch Espoirs PROB shots (unified curated fetcher)"""
+    if season and "-" in season and len(season.split("-")[1]) == 2:
+        curated_season = f"{season.split('-')[0]}-{int(season.split('-')[0])+1}"
+    else:
+        curated_season = season or get_current_season("LNB_ESPOIRS_PROB")
+    return fetch_lnb_shots(season=curated_season, league="LNB_ESPOIRS_PROB", **kwargs)

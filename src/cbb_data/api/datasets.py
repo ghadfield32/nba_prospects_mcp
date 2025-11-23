@@ -691,7 +691,9 @@ def _fetch_schedule(compiled: dict[str, Any]) -> pd.DataFrame:
 
             if df is not None:
                 # Apply post-mask filtering and return - empty is valid (no data for filters)
-                df = apply_post_mask(df, post_mask)
+                # Skip league filter - LeagueSourceConfig already filtered by league
+                post_mask_no_league = {k: v for k, v in post_mask.items() if k != "LEAGUE"}
+                df = apply_post_mask(df, post_mask_no_league)
                 if df.empty:
                     logger.info(f"LeagueSourceConfig fetch returned empty for {league} (no data)")
                 return df
@@ -1387,25 +1389,29 @@ def _fetch_play_by_play(compiled: dict[str, Any]) -> pd.DataFrame:
 
     league = meta.get("league")
 
-    if not post_mask.get("GAME_ID"):
-        raise ValueError("play_by_play requires game_ids filter")
-
     # Extract season for leagues that need it
     season_str = params.get("Season", "2024-25")
 
     # Try LeagueSourceConfig first for modern unified approach
+    # Some leagues (like LNB) support season + league queries without game_ids
     src_cfg = get_league_source_config(league)
     if src_cfg and src_cfg.fetch_pbp:
         try:
-            # Call the wired fetch function with all game_ids
+            # Call the wired fetch function
+            # Pass game_ids if available, otherwise None (for season-level queries)
             logger.info(f"Fetching pbp via LeagueSourceConfig for {league}")
-            df = src_cfg.fetch_pbp(season=season_str, game_ids=post_mask["GAME_ID"])
+            game_ids = post_mask.get("GAME_ID")
+            # Pass game_ids as a filter parameter (not a positional arg) for unified fetchers
+            df = src_cfg.fetch_pbp(season=season_str, game_ids=game_ids) if game_ids else src_cfg.fetch_pbp(season=season_str)
 
             if df is not None:
-                # Apply post-mask filtering and return - empty is valid (no data for filters)
-                df = apply_post_mask(df, post_mask)
+                # Apply post-mask filtering (now column-agnostic, handles both uppercase and lowercase)
+                # Skip league filter - LeagueSourceConfig already filtered by league
+                logger.info(f"LeagueSourceConfig returned {len(df)} events for {league}")
+                post_mask_no_league = {k: v for k, v in post_mask.items() if k != "LEAGUE"}
+                df = apply_post_mask(df, post_mask_no_league)
                 if df.empty:
-                    logger.info(f"LeagueSourceConfig fetch returned empty for {league} (no data)")
+                    logger.info(f"LeagueSourceConfig post-mask returned empty for {league} (no data after filtering)")
                 return df
         except Exception as e:
             logger.warning(
@@ -1457,18 +1463,22 @@ def _fetch_play_by_play(compiled: dict[str, Any]) -> pd.DataFrame:
                 pbp = nbl_official.fetch_nbl_pbp(season=season_str, game_id=game_id)
                 frames.append(pbp)
 
-            elif league in ["LNB", "LNB_PROA"]:
-                # LNB Pro A (France) - Historical parquet files ✅ WIRED 2025-11-18
-                # Parse season
-                if "-" in season_str:
-                    season_year = int(season_str.split("-")[1]) + 2000
+            elif league in fetchers.lnb.LNB_LEAGUES_API:
+                # LNB (France) - All 4 leagues via curated layer ✅ WIRED 2025-11-22
+                # Convert season format: "2024-25" → "2024-2025" for curated layer
+                if "-" in season_str and len(season_str.split("-")[1]) == 2:
+                    year1 = season_str.split("-")[0]
+                    year2 = str(int(year1) + 1)
+                    curated_season = f"{year1}-{year2}"
                 else:
-                    season_year = int(season_str)
+                    # Already in full format or single year - use as-is
+                    curated_season = season_str
 
-                pbp = fetchers.lnb.fetch_lnb_pbp_historical(
-                    season=str(season_year), game_ids=[game_id]
-                )
-                frames.append(pbp)
+                # Use unified curated fetcher (much faster than per-game loops)
+                # This fetches all games for the league/season, then filters by game_id
+                pbp = fetchers.lnb.fetch_lnb_pbp(season=curated_season, league=league)
+                if not pbp.empty and game_id in pbp["GAME_ID"].values:
+                    frames.append(pbp[pbp["GAME_ID"] == game_id])
 
             elif league == "NZ-NBL":
                 # NZ NBL (New Zealand) - FIBA LiveStats HTML scraping ✅ WIRED 2025-11-18
@@ -1670,21 +1680,23 @@ def _fetch_shots(compiled: dict[str, Any]) -> pd.DataFrame:
             except Exception as e:
                 logger.warning(f"Failed to fetch NBL shots for game {game_id}: {e}")
 
-    elif league in ["LNB", "LNB_PROA"]:
-        # LNB Pro A (France) - Historical parquet files ✅ WIRED 2025-11-18
-        # Parse season
+    elif league in fetchers.lnb.LNB_LEAGUES_API:
+        # LNB (France) - All 4 leagues via curated layer ✅ WIRED 2025-11-22
+        # Convert season format: "2024-25" → "2024-2025" for curated layer
         season_str_generic = params.get("Season", "2024-25")
-        if "-" in season_str_generic:
-            season_year = int(season_str_generic.split("-")[1]) + 2000
+        if "-" in season_str_generic and len(season_str_generic.split("-")[1]) == 2:
+            year1 = season_str_generic.split("-")[0]
+            year2 = str(int(year1) + 1)
+            curated_season = f"{year1}-{year2}"
         else:
-            season_year = int(season_str_generic)
+            curated_season = season_str_generic
 
+        # Use unified curated fetcher for per-game shots
         for game_id in post_mask["GAME_ID"]:
             try:
-                shots = fetchers.lnb.fetch_lnb_shots_historical(
-                    season=str(season_year), game_ids=[game_id]
-                )
-                frames.append(shots)
+                shots = fetchers.lnb.fetch_lnb_shots(season=curated_season, league=league)
+                if not shots.empty and game_id in shots["GAME_ID"].values:
+                    frames.append(shots[shots["GAME_ID"] == game_id])
             except Exception as e:
                 logger.warning(f"Failed to fetch LNB shots for game {game_id}: {e}")
 
@@ -2517,8 +2529,13 @@ def get_dataset(
         logger.warning(f"Filter validation: {warning}")
 
     # Check required filters
+    # For datasets that typically require game_ids, also allow season + league
     if entry.get("requires_game_id") and not spec.game_ids:
-        raise ValueError(f"Dataset '{grouping}' requires game_ids filter")
+        # Allow season + league as an alternative to game_ids
+        if not (spec.season and spec.league):
+            raise ValueError(
+                f"Dataset '{grouping}' requires either 'game_ids' OR ('season' AND 'league') filters"
+            )
 
     # Check league specified (for multi-league datasets)
     if not spec.league and len(entry.get("leagues", [])) > 1:

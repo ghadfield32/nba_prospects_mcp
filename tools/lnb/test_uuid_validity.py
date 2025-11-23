@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import json
 
-from src.cbb_data.fetchers.lnb import fetch_lnb_play_by_play, fetch_lnb_shots
+from src.cbb_data.fetchers.lnb import fetch_lnb_game_shots, fetch_lnb_play_by_play
 
 # Load all UUIDs
 uuid_file = Path(__file__).parent / "fixture_uuids_by_season.json"
@@ -44,7 +44,7 @@ for season, uuids in sorted(mappings.items()):
 
         try:
             pbp = fetch_lnb_play_by_play(uuid)
-            shots = fetch_lnb_shots(uuid)
+            shots = fetch_lnb_game_shots(uuid)
 
             if not pbp.empty and not shots.empty:
                 print(f"✅ PBP:{len(pbp):3d} Shots:{len(shots):3d}")

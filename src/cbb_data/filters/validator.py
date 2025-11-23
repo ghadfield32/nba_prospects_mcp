@@ -210,27 +210,43 @@ def validate_filters(
         warnings.append(FilterValidationWarning(msg, "date"))
 
     # Check 5: Dataset-specific validations
-    if dataset_id == "pbp" and "game_ids" not in active_filters:
-        msg = "Dataset 'pbp' requires 'game_ids' filter. " "Add game_ids to your query."
-        if strict:
-            raise FilterValidationError(msg)
-        warnings.append(FilterValidationWarning(msg, "game_ids"))
-
-    if dataset_id == "shots":
-        # Shots dataset now supports season-level queries OR game-specific queries
-        # Require: (season AND league) OR game_ids
+    if dataset_id == "pbp":
+        # PBP dataset supports season-level queries OR game-specific queries
+        # Flexible filtering: season+league is the minimum requirement
+        # Additional filters (date, quarter, player/team names) refine results
         has_season = "season" in active_filters
         has_league = spec.league is not None
         has_game_ids = "game_ids" in active_filters
 
+        # Minimum requirement: either game_ids OR (season AND league)
+        # Additional filters like date, quarter, player/team names are optional refinements
         if not has_game_ids and not (has_season and has_league):
             msg = (
-                "Dataset 'shots' requires either 'game_ids' OR ('season' AND 'league'). "
-                "Add these filters to your query."
+                "Dataset 'pbp' requires either 'game_ids' OR ('season' AND 'league'). "
+                "Additional filters (date, quarter, player/team names) can refine results."
             )
             if strict:
                 raise FilterValidationError(msg)
-            warnings.append(FilterValidationWarning(msg, "game_ids"))
+            warnings.append(FilterValidationWarning(msg, "season"))
+
+    if dataset_id == "shots":
+        # Shots dataset supports season-level queries OR game-specific queries
+        # Flexible filtering: season+league is the minimum requirement
+        # Additional filters (date, quarter, player/team names) refine results
+        has_season = "season" in active_filters
+        has_league = spec.league is not None
+        has_game_ids = "game_ids" in active_filters
+
+        # Minimum requirement: either game_ids OR (season AND league)
+        # Additional filters like date, quarter, game_minute are optional refinements
+        if not has_game_ids and not (has_season and has_league):
+            msg = (
+                "Dataset 'shots' requires either 'game_ids' OR ('season' AND 'league'). "
+                "Additional filters (date, quarter, game_minute) can refine results."
+            )
+            if strict:
+                raise FilterValidationError(msg)
+            warnings.append(FilterValidationWarning(msg, "season"))
 
         # Shots now supported by multiple leagues (NCAA-MBB, EuroLeague, EuroCup,
         # G-League, WNBA, NBL, CEBL, OTE). No longer EuroLeague-only.

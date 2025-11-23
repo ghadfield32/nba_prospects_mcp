@@ -52,7 +52,11 @@ if sys.platform == "win32":
 
 import pandas as pd
 
-from src.cbb_data.fetchers.lnb import fetch_lnb_play_by_play, fetch_lnb_shots
+from src.cbb_data.fetchers.lnb import (
+    fetch_lnb_game_shots,
+    fetch_lnb_play_by_play,
+    get_league_id_from_competition,
+)
 
 # ==============================================================================
 # CONFIG
@@ -350,19 +354,23 @@ def log_error(game_id: str, season: str, data_type: str, error: str) -> None:
 # ==============================================================================
 
 
-def ingest_pbp_for_game(game_id: str, season: str) -> bool:
+def ingest_pbp_for_game(game_id: str, season: str, competition: str) -> bool:
     """Fetch and save PBP data for a single game
 
     Args:
         game_id: Game UUID
         season: Season string
+        competition: Competition name (e.g., "Betclic ELITE", "Espoirs ELITE")
 
     Returns:
         True if successful, False otherwise
     """
     try:
-        # Fetch PBP
-        pbp_df = fetch_lnb_play_by_play(game_id)
+        # Convert competition to canonical league ID
+        league_id = get_league_id_from_competition(competition)
+
+        # Fetch PBP with correct league ID
+        pbp_df = fetch_lnb_play_by_play(game_id, league_id=league_id)
 
         if pbp_df.empty:
             print(f"    [WARN] Empty PBP data for {game_id}")
@@ -371,7 +379,7 @@ def ingest_pbp_for_game(game_id: str, season: str) -> bool:
         # Save to partitioned Parquet
         save_partitioned_parquet(pbp_df, "pbp", season, game_id)
 
-        print(f"    [PBP] ✅ {len(pbp_df)} events saved")
+        print(f"    [PBP] ✅ {len(pbp_df)} events saved (LEAGUE={league_id})")
         return True
 
     except Exception as e:
@@ -380,19 +388,23 @@ def ingest_pbp_for_game(game_id: str, season: str) -> bool:
         return False
 
 
-def ingest_shots_for_game(game_id: str, season: str) -> bool:
+def ingest_shots_for_game(game_id: str, season: str, competition: str) -> bool:
     """Fetch and save shots data for a single game
 
     Args:
         game_id: Game UUID
         season: Season string
+        competition: Competition name (e.g., "Betclic ELITE", "Espoirs ELITE")
 
     Returns:
         True if successful, False otherwise
     """
     try:
-        # Fetch shots
-        shots_df = fetch_lnb_shots(game_id)
+        # Convert competition to canonical league ID
+        league_id = get_league_id_from_competition(competition)
+
+        # Fetch shots with correct league ID
+        shots_df = fetch_lnb_game_shots(game_id, league_id=league_id)
 
         if shots_df.empty:
             print(f"    [WARN] Empty shots data for {game_id}")
@@ -401,7 +413,7 @@ def ingest_shots_for_game(game_id: str, season: str) -> bool:
         # Save to partitioned Parquet
         save_partitioned_parquet(shots_df, "shots", season, game_id)
 
-        print(f"    [SHOTS] ✅ {len(shots_df)} shots saved")
+        print(f"    [SHOTS] ✅ {len(shots_df)} shots saved (LEAGUE={league_id})")
         return True
 
     except Exception as e:
@@ -416,12 +428,21 @@ def ingest_shots_for_game(game_id: str, season: str) -> bool:
 
 
 def bulk_ingest(
-    seasons: list[str], max_games_per_season: int | None = None, force_refetch: bool = False
+    seasons: list[str] | None = None,
+    leagues: list[str] | None = None,
+    max_games_per_season: int | None = None,
+    force_refetch: bool = False,
 ) -> dict[str, Any]:
-    """Bulk ingest PBP and shots data for multiple seasons
+    """Bulk ingest PBP and shots data for multiple seasons and leagues
+
+    ENHANCEMENT (2025-11-20): Added leagues parameter to support multi-league filtering.
+    Can now ingest data for specific leagues only.
 
     Args:
-        seasons: List of season strings
+        seasons: List of season strings (e.g., ["2024-2025"])
+                If None, processes all seasons in game index
+        leagues: List of league identifiers to include (e.g., ["betclic_elite", "elite_2"])
+                If None, processes all leagues
         max_games_per_season: Limit games per season (for testing)
         force_refetch: If True, re-fetch even if already fetched
 
@@ -432,15 +453,34 @@ def bulk_ingest(
     print("  LNB BULK INGESTION - PBP + SHOTS")
     print(f"{'='*80}\n")
 
-    print(f"Seasons: {seasons}")
+    print(f"Seasons: {seasons or 'All'}")
+    print(f"Leagues: {leagues or 'All'}")
     print(f"Max games per season: {max_games_per_season or 'All'}")
     print(f"Force re-fetch: {force_refetch}\n")
 
     index_df = load_game_index()
 
+    # Filter by season if specified
     if seasons:
         index_df = index_df[index_df["season"].isin(seasons)]
         print(f"[INFO] Filtered to {len(index_df)} games in selected seasons")
+
+    # Filter by league if specified (using league column)
+    if leagues:
+        # Direct filtering by league column (which has correct normalized values)
+        if "league" in index_df.columns:
+            print(f"[DEBUG] Before league filter: {len(index_df)} games")
+            print(f"[DEBUG] Unique leagues in index: {sorted(index_df['league'].unique())}")
+            print(f"[DEBUG] Requested leagues: {leagues}")
+
+            mask = index_df["league"].isin(leagues)
+            index_df = index_df[mask]
+
+            print(f"[INFO] Filtered to {len(index_df)} games in selected leagues")
+            if len(index_df) > 0:
+                print(f"[DEBUG] Leagues in filtered data: {sorted(index_df['league'].unique())}")
+        else:
+            print("[WARN] 'league' column not found in index, cannot filter by league")
 
     to_fetch, future_games = select_games_to_ingest(
         index_df,
@@ -491,6 +531,7 @@ def bulk_ingest(
 
     for idx, row in enumerate(to_fetch.itertuples(), 1):
         print(f"[{idx}/{len(to_fetch)}] {row.season} - {row.game_id[:16]}...")
+        print(f"  Competition: {row.competition}")
         print(f"  Home: {row.home_team_name}")
         print(f"  Away: {row.away_team_name}")
 
@@ -500,7 +541,7 @@ def bulk_ingest(
             or not row.has_pbp
             or not has_parquet_for_game(PBP_DIR, row.season, row.game_id)
         ):
-            pbp_success = ingest_pbp_for_game(row.game_id, row.season)
+            pbp_success = ingest_pbp_for_game(row.game_id, row.season, row.competition)
             if pbp_success:
                 stats["pbp_success"] += 1
                 index_df = update_index_flags(index_df, row.game_id, has_pbp=True)
@@ -515,7 +556,7 @@ def bulk_ingest(
             or not row.has_shots
             or not has_parquet_for_game(SHOTS_DIR, row.season, row.game_id)
         ):
-            shots_success = ingest_shots_for_game(row.game_id, row.season)
+            shots_success = ingest_shots_for_game(row.game_id, row.season, row.competition)
             if shots_success:
                 stats["shots_success"] += 1
                 index_df = update_index_flags(index_df, row.game_id, has_shots=True)
@@ -590,26 +631,49 @@ def print_summary(stats: dict[str, Any]) -> None:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Bulk ingest LNB play-by-play and shot chart data",
+        description="Bulk ingest LNB play-by-play and shot chart data for all leagues",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-    # Ingest current season
+    # Ingest current season (all leagues)
     python tools/lnb/bulk_ingest_pbp_shots.py
 
-    # Ingest specific seasons
+    # Ingest specific seasons (all leagues)
     python tools/lnb/bulk_ingest_pbp_shots.py --seasons 2024-2025 2023-2024
+
+    # Ingest specific league only
+    python tools/lnb/bulk_ingest_pbp_shots.py --leagues elite_2
+
+    # Ingest multiple leagues
+    python tools/lnb/bulk_ingest_pbp_shots.py --leagues betclic_elite espoirs_elite
+
+    # Ingest specific league + season
+    python tools/lnb/bulk_ingest_pbp_shots.py --leagues elite_2 --seasons 2024-2025
 
     # Force re-fetch all games
     python tools/lnb/bulk_ingest_pbp_shots.py --force-refetch
 
     # Limit to 10 games per season (for testing)
     python tools/lnb/bulk_ingest_pbp_shots.py --max-games 10
+
+Available leagues:
+    betclic_elite    - Top-tier professional (formerly Pro A), 16 teams
+    elite_2          - Second-tier professional (formerly Pro B), 20 teams
+    espoirs_elite    - U21 top-tier youth development
+    espoirs_prob     - U21 second-tier youth development
         """,
     )
 
     parser.add_argument(
         "--seasons", nargs="+", default=None, help="Seasons to process (default: all in index)"
+    )
+
+    parser.add_argument(
+        "--leagues",
+        nargs="+",
+        default=None,
+        help="Leagues to include (default: all leagues). "
+        "Options: betclic_elite, elite_2, espoirs_elite, espoirs_prob",
     )
 
     parser.add_argument(
@@ -622,17 +686,12 @@ Examples:
 
     args = parser.parse_args()
 
-    # Determine seasons
-    if args.seasons:
-        seasons = args.seasons
-    else:
-        # Use all seasons in index
-        index_df = load_game_index()
-        seasons = index_df["season"].unique().tolist()
-
     # Run bulk ingestion
     stats = bulk_ingest(
-        seasons=seasons, max_games_per_season=args.max_games, force_refetch=args.force_refetch
+        seasons=args.seasons,
+        leagues=args.leagues,
+        max_games_per_season=args.max_games,
+        force_refetch=args.force_refetch,
     )
 
     # Print summary

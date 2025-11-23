@@ -36,7 +36,7 @@ if sys.platform == "win32":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
-from src.cbb_data.fetchers.lnb import fetch_lnb_play_by_play, fetch_lnb_shots
+from src.cbb_data.fetchers.lnb import fetch_lnb_game_shots, fetch_lnb_play_by_play
 
 # ==============================================================================
 # CONFIG
@@ -83,7 +83,7 @@ def validate_uuid_against_api(uuid: str) -> tuple[bool, str]:
             return (False, "No PBP data returned")
 
         # Try to fetch shots data
-        shots_df = fetch_lnb_shots(uuid)
+        shots_df = fetch_lnb_game_shots(uuid)
 
         if shots_df.empty:
             return (True, f"PBP OK ({len(pbp_df)} events), no shots data")

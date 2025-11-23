@@ -31,7 +31,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.cbb_data.fetchers.lnb import fetch_lnb_play_by_play, fetch_lnb_schedule, fetch_lnb_shots
+from src.cbb_data.fetchers.lnb import fetch_lnb_game_shots, fetch_lnb_play_by_play, fetch_lnb_schedule
 
 # ==============================================================================
 # TEST FIXTURES
@@ -207,7 +207,7 @@ class TestSchemaStability:
 
     def test_shots_schema(self):
         """Verify shots schema matches expected columns"""
-        df = fetch_lnb_shots(TEST_GAME_ID)
+        df = fetch_lnb_game_shots(TEST_GAME_ID)
 
         assert not df.empty, "Shots data should not be empty"
 
@@ -301,7 +301,7 @@ class TestAPIHealth:
 
     def test_shots_api_reachable(self):
         """Verify shots API returns data"""
-        df = fetch_lnb_shots(TEST_GAME_ID)
+        df = fetch_lnb_game_shots(TEST_GAME_ID)
 
         assert not df.empty, "Shots API should return data"
         assert len(df) > 50, f"Expected >50 shots, got {len(df)}"
@@ -346,7 +346,7 @@ class TestDataQuality:
 
     def test_shots_coordinates_valid(self):
         """Verify shot coordinates are in valid range (0-100)"""
-        df = fetch_lnb_shots(TEST_GAME_ID)
+        df = fetch_lnb_game_shots(TEST_GAME_ID)
 
         # Remove nulls (valid for some shot types)
         df_coords = df[df["X_COORD"].notna() & df["Y_COORD"].notna()]
@@ -358,14 +358,14 @@ class TestDataQuality:
 
     def test_shots_success_boolean(self):
         """Verify shot SUCCESS is boolean"""
-        df = fetch_lnb_shots(TEST_GAME_ID)
+        df = fetch_lnb_game_shots(TEST_GAME_ID)
 
         assert df["SUCCESS"].dtype == bool, "SUCCESS should be boolean"
         assert df["SUCCESS"].isin([True, False]).all(), "SUCCESS should only contain True/False"
 
     def test_shots_type_values(self):
         """Verify shot types are valid"""
-        df = fetch_lnb_shots(TEST_GAME_ID)
+        df = fetch_lnb_game_shots(TEST_GAME_ID)
 
         valid_shot_types = ["2pt", "3pt"]
         assert (

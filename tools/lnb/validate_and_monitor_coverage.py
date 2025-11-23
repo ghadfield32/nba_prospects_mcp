@@ -750,7 +750,7 @@ def audit_sampled_games_against_api(
             - 'message': descriptive message
     """
     try:
-        from src.cbb_data.fetchers.lnb import fetch_lnb_play_by_play, fetch_lnb_shots
+        from src.cbb_data.fetchers.lnb import fetch_lnb_game_shots, fetch_lnb_play_by_play
     except ImportError:
         return [
             {
@@ -794,7 +794,7 @@ def audit_sampled_games_against_api(
         # Fetch from API
         try:
             api_pbp = fetch_lnb_play_by_play(game_id)
-            api_shots = fetch_lnb_shots(game_id)
+            api_shots = fetch_lnb_game_shots(game_id)
         except Exception as e:
             discrepancies.append(
                 {

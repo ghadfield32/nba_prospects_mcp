@@ -1,0 +1,46 @@
+# LNB Historical Data Coverage Manifest
+#
+# This file tracks which season+league combinations have incomplete UUID coverage
+# and need reconstruction via public schedule matching (B2 strategy).
+#
+# Status values:
+#   - missing_uuids: No UUID list exists, needs reconstruction
+#   - partial: UUID list exists but is incomplete (< expected_min games)
+#   - complete: Full coverage confirmed
+#   - in_progress: Reconstruction underway
+#
+# Expected game counts are approximate ranges:
+#   - Regular season: n_teams * (n_teams - 1) / 2 * 2 (double round robin)
+#   - Add ~20-40 for playoffs depending on format
+
+targets:
+  # ÉLITE 2 / Pro B (French 2nd division)
+  - season: "2022-2023"
+    league: "elite_2"
+    competition_name: "Pro B"  # Historical branding
+    status: "missing_uuids"
+    expected_min: 340
+    expected_max: 420
+    notes: "Only 1 test fixture currently, need ~340+ regular season + playoff games"
+
+  - season: "2023-2024"
+    league: "elite_2"
+    competition_name: "Pro B"  # Historical branding
+    status: "missing_uuids"
+    expected_min: 340
+    expected_max: 420
+    notes: "Only 1 test fixture currently, need ~340+ regular season + playoff games"
+
+  - season: "2024-2025"
+    league: "elite_2"
+    competition_name: "ÉLITE 2"  # Modern branding
+    status: "complete"
+    expected_min: 340
+    expected_max: 420
+    actual: 270
+    notes: "Full coverage via API discovery"
+
+# Future expansion: Add other LNB leagues with missing history
+# - Older Betclic ÉLITE seasons
+# - Historical Espoirs competitions
+# - Archived pre-2020 Pro B seasons

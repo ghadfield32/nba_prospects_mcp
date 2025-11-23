@@ -87,15 +87,21 @@ BETCLIC_ELITE_SEASONS: dict[str, SeasonMetadata] = {
 
 # ELITE 2 (formerly Pro B) - Second-tier professional
 ELITE_2_SEASONS: dict[str, SeasonMetadata] = {
-    "2022-2023": {
-        "competition_id": "213e021f-19b5-11ee-9190-29c4f278bc32",
-        "season_id": "7561dbee-19b5-11ee-affc-23e4d3a88307",
+    "2021-2022": {
+        "competition_id": "12cc5982-f549-11eb-8476-9ee7b443c3e3",
+        "season_id": "53baf994-f549-11eb-b854-ee44c37cacf0",
         "competition_name": "PROB",  # Old name pre-rebrand
-        "source": "Atrium API discovery 2025-11-18",
+        "source": "Real seed bulk discovery 2025-11-21",
+    },
+    "2022-2023": {
+        "competition_id": "50dc7dbd-0bf9-11ed-84a2-771b9cfe4d9c",
+        "season_id": "756d1ebc-0bf9-11ed-bcdb-176ad0fc17fa",
+        "competition_name": "PROB",  # Old name pre-rebrand
+        "source": "Real seed bulk discovery 2025-11-21",
     },
     "2023-2024": {
-        "competition_id": "0847055c-2fb3-11ef-9b30-3333ffdb8385",
-        "season_id": "91334b18-2fb3-11ef-be14-e92481b1d83d",
+        "competition_id": "213e021f-19b5-11ee-9190-29c4f278bc32",
+        "season_id": "7561dbee-19b5-11ee-affc-23e4d3a88307",
         "competition_name": "PROB",  # Old name pre-rebrand
         "source": "Atrium API discovery 2025-11-18",
     },
@@ -145,8 +151,10 @@ COMPETITION_NAMES = {
     "a2262b45-2fab-11ef-8eb7-99149ebb5652": "Betclic ELITE",  # 2023-2024
     "3f4064bb-51ad-11f0-aaaf-2923c944b404": "Betclic ELITE",  # 2024-2025
     # ELITE 2 (formerly PROB)
-    "213e021f-19b5-11ee-9190-29c4f278bc32": "ELITE 2 (PROB)",  # 2022-2023
-    "0847055c-2fb3-11ef-9b30-3333ffdb8385": "ELITE 2 (PROB)",  # 2023-2024
+    "12cc5982-f549-11eb-8476-9ee7b443c3e3": "ELITE 2 (PROB)",  # 2021-2022
+    "50dc7dbd-0bf9-11ed-84a2-771b9cfe4d9c": "ELITE 2 (PROB)",  # 2022-2023
+    "213e021f-19b5-11ee-9190-29c4f278bc32": "ELITE 2 (PROB)",  # 2023-2024
+    "0847055c-2fb3-11ef-9b30-3333ffdb8385": "ELITE 2 (PROB)",  # 2023-2024 (alt)
     "4c27df72-51ae-11f0-ab8c-73390bbc2fc6": "ELITE 2",  # 2024-2025
     # Espoirs ELITE
     "ac2bc8df-2fb4-11ef-9e38-9f35926cbbae": "Espoirs ELITE",  # 2023-2024

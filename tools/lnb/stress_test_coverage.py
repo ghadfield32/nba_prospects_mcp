@@ -47,7 +47,7 @@ if sys.platform == "win32":
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from src.cbb_data.fetchers.lnb import fetch_lnb_play_by_play, fetch_lnb_shots
+from src.cbb_data.fetchers.lnb import fetch_lnb_game_shots, fetch_lnb_play_by_play
 
 # ==============================================================================
 # CONFIG
@@ -129,7 +129,7 @@ def check_uuid_coverage(season: str, uuids: list[str]) -> dict[str, Any]:
 
         # Check shots
         try:
-            shots_df = fetch_lnb_shots(uuid)
+            shots_df = fetch_lnb_game_shots(uuid)
             if not shots_df.empty:
                 have_shots += 1
                 print(f"Shots:✅({len(shots_df)})")
@@ -548,7 +548,7 @@ def stress_test_endpoint(uuid: str, endpoint_type: str) -> dict[str, Any]:
         if endpoint_type == "pbp":
             df = fetch_lnb_play_by_play(uuid)
         elif endpoint_type == "shots":
-            df = fetch_lnb_shots(uuid)
+            df = fetch_lnb_game_shots(uuid)
         else:
             return {"success": False, "error": f"Unknown endpoint type: {endpoint_type}"}
 
@@ -714,7 +714,7 @@ def validate_memory_performance(
         # Fetch shots
         start_time = time.time()
         try:
-            shots_df = fetch_lnb_shots(uuid)
+            shots_df = fetch_lnb_game_shots(uuid)
             shots_duration = time.time() - start_time
             shots_rows = len(shots_df)
         except Exception:

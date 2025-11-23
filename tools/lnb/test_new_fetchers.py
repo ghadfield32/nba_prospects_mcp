@@ -14,7 +14,7 @@ if sys.platform == "win32":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
-from src.cbb_data.fetchers.lnb import fetch_lnb_play_by_play, fetch_lnb_shots
+from src.cbb_data.fetchers.lnb import fetch_lnb_game_shots, fetch_lnb_play_by_play
 
 # Test game ID (Nancy vs Saint-Quentin from our captures)
 GAME_ID = "3522345e-3362-11f0-b97d-7be2bdc7a840"
@@ -69,14 +69,14 @@ except Exception as e:
 # TEST 2: Shots Fetcher
 # ==============================================================================
 print("=" * 80)
-print("  TEST 2: fetch_lnb_shots()")
+print("  TEST 2: fetch_lnb_game_shots()")
 print("=" * 80)
 print()
 print(f"Game ID: {GAME_ID}")
 print()
 
 try:
-    df_shots = fetch_lnb_shots(GAME_ID)
+    df_shots = fetch_lnb_game_shots(GAME_ID)
 
     print(f"✅ SUCCESS! Retrieved {len(df_shots)} shots")
     print()

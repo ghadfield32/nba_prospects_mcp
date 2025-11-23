@@ -7,7 +7,7 @@ For comprehensive coverage testing, use tools/lnb/run_lnb_stress_tests.py
 import pandas as pd
 import pytest
 
-from src.cbb_data.fetchers.lnb import fetch_lnb_play_by_play, fetch_lnb_shots
+from src.cbb_data.fetchers.lnb import fetch_lnb_game_shots, fetch_lnb_play_by_play
 
 # Known working game UUID (Nancy vs Saint-Quentin, 2024-25 Play-In)
 SMOKE_GAME_ID = "3522345e-3362-11f0-b97d-7be2bdc7a840"
@@ -73,7 +73,7 @@ def test_lnb_play_by_play_smoke():
 @pytest.mark.lnb
 def test_lnb_shots_smoke():
     """Smoke test: fetch_lnb_shots returns valid data"""
-    df = fetch_lnb_shots(SMOKE_GAME_ID)
+    df = fetch_lnb_game_shots(SMOKE_GAME_ID)
 
     # Should return non-empty DataFrame
     assert isinstance(df, pd.DataFrame), "Should return pandas DataFrame"
@@ -116,7 +116,7 @@ def test_lnb_shots_smoke():
 def test_lnb_pbp_and_shots_consistency():
     """Verify PBP and shots data are consistent for the same game"""
     pbp_df = fetch_lnb_play_by_play(SMOKE_GAME_ID)
-    shots_df = fetch_lnb_shots(SMOKE_GAME_ID)
+    shots_df = fetch_lnb_game_shots(SMOKE_GAME_ID)
 
     # Should have same game ID
     assert pbp_df["GAME_ID"].iloc[0] == shots_df["GAME_ID"].iloc[0]
@@ -140,7 +140,7 @@ def test_lnb_multiple_games():
     # For now, just test the one we have multiple times to verify caching works
     for _ in range(3):
         pbp_df = fetch_lnb_play_by_play(SMOKE_GAME_ID)
-        shots_df = fetch_lnb_shots(SMOKE_GAME_ID)
+        shots_df = fetch_lnb_game_shots(SMOKE_GAME_ID)
 
         assert len(pbp_df) > 0
         assert len(shots_df) > 0

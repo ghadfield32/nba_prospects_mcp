@@ -63,10 +63,11 @@ repos:
       - id: check-toml
         name: check-toml-syntax
 
-      # Prevent adding large files
+      # Prevent adding large files (exclude data files which can be large)
       - id: check-added-large-files
         name: check-large-files
         args: [--maxkb=1000]
+        exclude: ^data/
 
       # Check for Python syntax errors
       - id: check-ast

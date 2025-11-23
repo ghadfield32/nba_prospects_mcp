@@ -14,7 +14,7 @@ if sys.platform == "win32":
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from src.cbb_data.fetchers.lnb import fetch_lnb_play_by_play, fetch_lnb_shots
+from src.cbb_data.fetchers.lnb import fetch_lnb_game_shots, fetch_lnb_play_by_play
 
 # Sample UUIDs to test (need to collect these from LNB website for different years)
 # These are placeholders - we'll need to manually collect real UUIDs
@@ -61,7 +61,7 @@ for season in sorted(TEST_UUIDS.keys(), reverse=True):  # Most recent first
 
         try:
             pbp = fetch_lnb_play_by_play(uuid)
-            shots = fetch_lnb_shots(uuid)
+            shots = fetch_lnb_game_shots(uuid)
 
             has_data = not pbp.empty and not shots.empty
 
