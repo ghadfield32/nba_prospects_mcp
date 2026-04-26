@@ -157,7 +157,9 @@ def fetch_schedule(season: str = "2023-24") -> pd.DataFrame:
 
 @retry_on_error(max_attempts=3, backoff_seconds=2.0)
 @cached_dataframe
-def fetch_player_game(season: str = "2023-24", force_refresh: bool = False) -> pd.DataFrame:
+def fetch_player_game(
+    season: str = "2023-24", force_refresh: bool = False, use_browser: bool = False
+) -> pd.DataFrame:
     """Fetch Basketball Champions League player game statistics
 
     Scrapes FIBA LiveStats HTML pages for each game in the season to collect
@@ -166,6 +168,7 @@ def fetch_player_game(season: str = "2023-24", force_refresh: bool = False) -> p
     Args:
         season: Season string (e.g., "2023-24")
         force_refresh: Force refresh cache (default: False)
+        use_browser: Use Playwright browser rendering to bypass 403 Forbidden (default: False)
 
     Returns:
         DataFrame with player game statistics
@@ -191,7 +194,11 @@ def fetch_player_game(season: str = "2023-24", force_refresh: bool = False) -> p
         - PF: Personal fouls
 
     Example:
+        >>> # Try simple HTTP first
         >>> player_stats = fetch_player_game("2023-24")
+        >>>
+        >>> # If blocked (403 Forbidden), use browser rendering
+        >>> player_stats = fetch_player_game("2023-24", use_browser=True)
         >>> top_scorers = player_stats.nlargest(10, "PTS")
         >>> print(top_scorers[["PLAYER_NAME", "TEAM", "PTS", "REB", "AST"]])
 
@@ -199,6 +206,7 @@ def fetch_player_game(season: str = "2023-24", force_refresh: bool = False) -> p
         - Returns empty DataFrame if schedule not available
         - Skips games that fail to scrape (logs warnings)
         - Uses Parquet caching for each game individually
+        - BCL often blocks HTTP requests (403 Forbidden) - use use_browser=True to bypass
     """
     # Get schedule first
     schedule = fetch_schedule(season)
@@ -214,12 +222,14 @@ def fetch_player_game(season: str = "2023-24", force_refresh: bool = False) -> p
 
         try:
             # Scrape box score using shared FIBA HTML scraper
+            # Pass use_browser to bypass 403 Forbidden errors
             box_score = scrape_fiba_box_score(
                 league_code=FIBA_LEAGUE_CODE,
                 game_id=str(game_id),
                 league=LEAGUE,
                 season=season,
                 force_refresh=force_refresh,
+                use_browser=use_browser,
             )
 
             if not box_score.empty:

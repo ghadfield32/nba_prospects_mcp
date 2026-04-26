@@ -82,13 +82,22 @@ from typing import Any
 import pandas as pd
 import requests
 
-from ..api.datasets import get_current_season
+# Lazy import to avoid circular dependency (datasets.py imports all fetchers)
+# from ..api.datasets import get_current_season
 from ..utils.rate_limiter import get_source_limiter
 from .base import cached_dataframe, retry_on_error
 from .browser_scraper import BrowserScraper, is_playwright_available
 from .html_tables import normalize_league_columns, read_first_table
 
 logger = logging.getLogger(__name__)
+
+
+def _get_current_season(league_code: str) -> str:
+    """Lazy import wrapper to avoid circular dependency with datasets.py."""
+    from ..api.datasets import get_current_season
+
+    return get_current_season(league_code)
+
 
 # Get rate limiter
 rate_limiter = get_source_limiter()
@@ -1878,7 +1887,7 @@ def fetch_lnb_player_season_from_games(
         group_cols.append("TEAM_NAME")
 
     # Aggregate
-    agg_dict = {col: "sum" for col in available_stats}
+    agg_dict = dict.fromkeys(available_stats, "sum")
     agg_dict["GAME_ID"] = "count"  # Games played
 
     aggregated = player_game.groupby(group_cols, as_index=False).agg(agg_dict)
@@ -1968,7 +1977,7 @@ def fetch_lnb_team_season_from_games(
         return pd.DataFrame()
 
     # Aggregate
-    agg_dict: dict[str, Any] = {col: "sum" for col in available_stats}
+    agg_dict: dict[str, Any] = dict.fromkeys(available_stats, "sum")
     agg_dict["GAME_ID"] = "count"  # Games played
 
     # Calculate wins if WL column exists
@@ -2291,7 +2300,7 @@ def fetch_proa_pbp(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
         year2 = str(int(year1) + 1)
         curated_season = f"{year1}-{year2}"
     else:
-        curated_season = season or get_current_season("LNB_PROA")
+        curated_season = season or _get_current_season("LNB_PROA")
 
     return fetch_lnb_pbp(season=curated_season, league="LNB_PROA", **kwargs)
 
@@ -2304,7 +2313,7 @@ def fetch_proa_shots(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
         year2 = str(int(year1) + 1)
         curated_season = f"{year1}-{year2}"
     else:
-        curated_season = season or get_current_season("LNB_PROA")
+        curated_season = season or _get_current_season("LNB_PROA")
 
     return fetch_lnb_shots(season=curated_season, league="LNB_PROA", **kwargs)
 
@@ -2315,7 +2324,7 @@ def fetch_elite2_pbp(season: str | None = None, **kwargs: Any) -> pd.DataFrame:
     if season and "-" in season and len(season.split("-")[1]) == 2:
         curated_season = f"{season.split('-')[0]}-{int(season.split('-')[0])+1}"
     else:
-        curated_season = season or get_current_season("LNB_ELITE2")
+        curated_season = season or _get_current_season("LNB_ELITE2")
     return fetch_lnb_pbp(season=curated_season, league="LNB_ELITE2", **kwargs)
 
 
@@ -2324,7 +2333,7 @@ def fetch_elite2_shots(season: str | None = None, **kwargs: Any) -> pd.DataFrame
     if season and "-" in season and len(season.split("-")[1]) == 2:
         curated_season = f"{season.split('-')[0]}-{int(season.split('-')[0])+1}"
     else:
-        curated_season = season or get_current_season("LNB_ELITE2")
+        curated_season = season or _get_current_season("LNB_ELITE2")
     return fetch_lnb_shots(season=curated_season, league="LNB_ELITE2", **kwargs)
 
 
@@ -2334,7 +2343,7 @@ def fetch_espoirs_elite_pbp(season: str | None = None, **kwargs: Any) -> pd.Data
     if season and "-" in season and len(season.split("-")[1]) == 2:
         curated_season = f"{season.split('-')[0]}-{int(season.split('-')[0])+1}"
     else:
-        curated_season = season or get_current_season("LNB_ESPOIRS_ELITE")
+        curated_season = season or _get_current_season("LNB_ESPOIRS_ELITE")
     return fetch_lnb_pbp(season=curated_season, league="LNB_ESPOIRS_ELITE", **kwargs)
 
 
@@ -2343,7 +2352,7 @@ def fetch_espoirs_elite_shots(season: str | None = None, **kwargs: Any) -> pd.Da
     if season and "-" in season and len(season.split("-")[1]) == 2:
         curated_season = f"{season.split('-')[0]}-{int(season.split('-')[0])+1}"
     else:
-        curated_season = season or get_current_season("LNB_ESPOIRS_ELITE")
+        curated_season = season or _get_current_season("LNB_ESPOIRS_ELITE")
     return fetch_lnb_shots(season=curated_season, league="LNB_ESPOIRS_ELITE", **kwargs)
 
 
@@ -2353,7 +2362,7 @@ def fetch_espoirs_prob_pbp(season: str | None = None, **kwargs: Any) -> pd.DataF
     if season and "-" in season and len(season.split("-")[1]) == 2:
         curated_season = f"{season.split('-')[0]}-{int(season.split('-')[0])+1}"
     else:
-        curated_season = season or get_current_season("LNB_ESPOIRS_PROB")
+        curated_season = season or _get_current_season("LNB_ESPOIRS_PROB")
     return fetch_lnb_pbp(season=curated_season, league="LNB_ESPOIRS_PROB", **kwargs)
 
 
@@ -2362,5 +2371,5 @@ def fetch_espoirs_prob_shots(season: str | None = None, **kwargs: Any) -> pd.Dat
     if season and "-" in season and len(season.split("-")[1]) == 2:
         curated_season = f"{season.split('-')[0]}-{int(season.split('-')[0])+1}"
     else:
-        curated_season = season or get_current_season("LNB_ESPOIRS_PROB")
+        curated_season = season or _get_current_season("LNB_ESPOIRS_PROB")
     return fetch_lnb_shots(season=curated_season, league="LNB_ESPOIRS_PROB", **kwargs)

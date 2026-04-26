@@ -1,173 +1,122 @@
 #!/usr/bin/env Rscript
-
-# Install NBL R Package Dependencies
+# ============================================================================
+# NBL R Package Installer
+# ============================================================================
+# Installs required R packages for NBL data export.
 #
-# This script installs the required R packages for NBL data integration:
-# - nblR: Official NBL Australia data package
-# - dplyr: Data manipulation
-# - arrow: Parquet file support
+# Required packages:
+#   - nblR: Official NBL stats wrapper (GPL-3, CRAN)
+#   - dplyr: Data manipulation
+#   - arrow: Parquet I/O
 #
 # Usage:
 #   Rscript tools/nbl/install_nbl_packages.R
 #
-# Why use this script instead of 'R -e install.packages(...)'?
-# - Avoids Windows PowerShell quoting issues
-# - Avoids '\U' Unicode escape errors with Windows paths like C:\Users\...
-# - More robust and easier to debug
-# - Can be run from any shell (PowerShell, cmd, bash)
+# Note: On some systems, you may need to run R as administrator/sudo
+#       for package installation to succeed.
+# ============================================================================
 
-# ==============================================================================
+cat("\n")
+cat("╔══════════════════════════════════════════════════════════════════╗\n")
+cat("║                NBL R Package Installer                           ║\n")
+cat("╚══════════════════════════════════════════════════════════════════╝\n")
+cat("\n")
+
 # Configuration
-# ==============================================================================
+CRAN_MIRROR <- "https://cloud.r-project.org"
+REQUIRED_PACKAGES <- c("nblR", "dplyr", "arrow")
 
-required_pkgs <- c("nblR", "dplyr", "arrow")
-cran_mirror <- "https://cloud.r-project.org"
-
-# ==============================================================================
-# Check Current Installation Status
-# ==============================================================================
-
-cat("\n")
-cat("╔════════════════════════════════════════════════════════════════════╗\n")
-cat("║           NBL R Package Installer                                  ║\n")
-cat("╚════════════════════════════════════════════════════════════════════╝\n")
+cat(sprintf("R version: %s\n", R.version.string))
+cat(sprintf("CRAN mirror: %s\n", CRAN_MIRROR))
+cat(sprintf("Packages to install: %s\n", paste(REQUIRED_PACKAGES, collapse=", ")))
 cat("\n")
 
-cat("🔍 Checking installed packages...\n")
-cat("\n")
+# Track results
+install_results <- list()
 
-installed <- rownames(installed.packages())
-missing   <- setdiff(required_pkgs, installed)
-already_installed <- intersect(required_pkgs, installed)
+# ----------------------------------------------------------------------------
+# Check and install each package
+# ----------------------------------------------------------------------------
+for (pkg in REQUIRED_PACKAGES) {
+  cat(sprintf("─── %s ───\n", pkg))
 
-# Show what's already installed
-if (length(already_installed) > 0) {
-  cat("✅ Already installed:\n")
-  for (pkg in already_installed) {
-    version <- as.character(packageVersion(pkg))
-    cat(sprintf("   • %s (version %s)\n", pkg, version))
-  }
-  cat("\n")
-}
+  if (requireNamespace(pkg, quietly = TRUE)) {
+    # Package already installed
+    pkg_version <- as.character(packageVersion(pkg))
+    cat(sprintf("  ✓ Already installed (version %s)\n", pkg_version))
+    install_results[[pkg]] <- "already_installed"
+  } else {
+    # Need to install
+    cat(sprintf("  Installing %s from CRAN...\n", pkg))
 
-# Check if we need to install anything
-if (length(missing) == 0) {
-  cat("🎉 All NBL R packages are already installed!\n")
-  cat("\n")
-  cat("Required packages:\n")
-  for (pkg in required_pkgs) {
-    version <- as.character(packageVersion(pkg))
-    cat(sprintf("  ✅ %s (version %s)\n", pkg, version))
-  }
-  cat("\n")
-  cat("Next steps:\n")
-  cat("  1. Validate setup: uv run python tools/nbl/validate_setup.py\n")
-  cat("  2. Export NBL data: uv run nbl-export\n")
-  cat("\n")
-  quit(status = 0)
-}
+    tryCatch({
+      install.packages(pkg, repos = CRAN_MIRROR, quiet = FALSE)
 
-# ==============================================================================
-# Install Missing Packages
-# ==============================================================================
-
-cat("📦 Missing packages:\n")
-for (pkg in missing) {
-  cat(sprintf("   • %s\n", pkg))
-}
-cat("\n")
-
-cat(sprintf("🚀 Installing from CRAN (%s)...\n", cran_mirror))
-cat("   This may take 2-5 minutes depending on your connection speed.\n")
-cat("\n")
-
-# Set repository
-options(repos = c(CRAN = cran_mirror))
-
-# Install each package with error handling
-installation_errors <- list()
-
-for (pkg in missing) {
-  cat("─────────────────────────────────────────────────────────────────────\n")
-  cat(sprintf("Installing %s...\n", pkg))
-  cat("─────────────────────────────────────────────────────────────────────\n")
-
-  tryCatch(
-    {
-      install.packages(pkg, repos = cran_mirror, quiet = FALSE)
-      cat(sprintf("✅ Successfully installed %s\n", pkg))
-    },
-    error = function(e) {
-      cat(sprintf("❌ Failed to install %s: %s\n", pkg, e$message))
-      installation_errors[[pkg]] <<- e$message
-    }
-  )
-  cat("\n")
-}
-
-# ==============================================================================
-# Verify Installation
-# ==============================================================================
-
-cat("═════════════════════════════════════════════════════════════════════\n")
-cat("Verification\n")
-cat("═════════════════════════════════════════════════════════════════════\n")
-cat("\n")
-
-installed_after <- rownames(installed.packages())
-still_missing   <- setdiff(required_pkgs, installed_after)
-
-if (length(still_missing) == 0 && length(installation_errors) == 0) {
-  cat("🎉 SUCCESS! All required packages are now installed:\n")
-  cat("\n")
-  for (pkg in required_pkgs) {
-    version <- as.character(packageVersion(pkg))
-    cat(sprintf("  ✅ %s (version %s)\n", pkg, version))
-  }
-  cat("\n")
-  cat("Next steps:\n")
-  cat("  1. Validate full setup: uv run python tools/nbl/validate_setup.py\n")
-  cat("  2. Export NBL data: uv run nbl-export\n")
-  cat("\n")
-  quit(status = 0)
-
-} else {
-  cat("⚠️  Installation completed with issues:\n")
-  cat("\n")
-
-  # Show what succeeded
-  newly_installed <- setdiff(intersect(required_pkgs, installed_after), already_installed)
-  if (length(newly_installed) > 0) {
-    cat("✅ Successfully installed:\n")
-    for (pkg in newly_installed) {
-      version <- as.character(packageVersion(pkg))
-      cat(sprintf("   • %s (version %s)\n", pkg, version))
-    }
-    cat("\n")
-  }
-
-  # Show what failed
-  if (length(still_missing) > 0) {
-    cat("❌ Still missing:\n")
-    for (pkg in still_missing) {
-      cat(sprintf("   • %s\n", pkg))
-      if (!is.null(installation_errors[[pkg]])) {
-        cat(sprintf("     Error: %s\n", installation_errors[[pkg]]))
+      # Verify installation
+      if (requireNamespace(pkg, quietly = TRUE)) {
+        pkg_version <- as.character(packageVersion(pkg))
+        cat(sprintf("  ✓ Successfully installed (version %s)\n", pkg_version))
+        install_results[[pkg]] <- "installed"
+      } else {
+        cat(sprintf("  ✗ Installation reported success but package not loadable\n"))
+        install_results[[pkg]] <- "failed"
       }
-    }
-    cat("\n")
+    }, error = function(e) {
+      cat(sprintf("  ✗ Installation failed: %s\n", e$message))
+      install_results[[pkg]] <- "failed"
+    }, warning = function(w) {
+      cat(sprintf("  ⚠ Warning during installation: %s\n", w$message))
+    })
   }
 
-  cat("Troubleshooting:\n")
-  cat("  1. Check your internet connection\n")
-  cat("  2. Try installing manually in R console:\n")
-  cat("     R\n")
-  cat(sprintf("     install.packages(c(%s), repos=\"%s\")\n",
-              paste(sprintf('"%s"', still_missing), collapse=", "),
-              cran_mirror))
-  cat("  3. Check firewall/proxy settings\n")
-  cat("  4. See tools/nbl/TROUBLESHOOTING_WINDOWS.md for more help\n")
   cat("\n")
+}
 
+# ----------------------------------------------------------------------------
+# Summary
+# ----------------------------------------------------------------------------
+cat("═══════════════════════════════════════════════════════════════════\n")
+cat("                     INSTALLATION SUMMARY                          \n")
+cat("═══════════════════════════════════════════════════════════════════\n")
+
+all_ok <- TRUE
+for (pkg in REQUIRED_PACKAGES) {
+  status <- install_results[[pkg]]
+  if (status == "already_installed") {
+    cat(sprintf("  ✓ %s: Already installed\n", pkg))
+  } else if (status == "installed") {
+    cat(sprintf("  ✓ %s: Newly installed\n", pkg))
+  } else {
+    cat(sprintf("  ✗ %s: FAILED\n", pkg))
+    all_ok <- FALSE
+  }
+}
+
+cat("\n")
+
+if (all_ok) {
+  cat("═══════════════════════════════════════════════════════════════════\n")
+  cat("  🎉 All packages installed successfully!\n")
+  cat("═══════════════════════════════════════════════════════════════════\n")
+  cat("\n")
+  cat("Next steps:\n")
+  cat("  1. Validate setup: python tools/nbl/validate_setup.py\n")
+  cat("  2. Export data: Rscript tools/nbl/export_nbl.R\n")
+  cat("\n")
+  quit(status = 0)
+} else {
+  cat("═══════════════════════════════════════════════════════════════════\n")
+  cat("  ⚠ Some packages failed to install.\n")
+  cat("═══════════════════════════════════════════════════════════════════\n")
+  cat("\n")
+  cat("Troubleshooting:\n")
+  cat("  1. Try running R as administrator (Windows) or with sudo (Linux)\n")
+  cat("  2. Check internet connection\n")
+  cat("  3. Try installing manually in R console:\n")
+  cat(sprintf('     install.packages(c("%s"), repos="%s")\n',
+              paste(REQUIRED_PACKAGES, collapse='", "'), CRAN_MIRROR))
+  cat("\n")
+  cat("For more help, see: tools/nbl/SETUP_GUIDE.md\n")
+  cat("\n")
   quit(status = 1)
 }

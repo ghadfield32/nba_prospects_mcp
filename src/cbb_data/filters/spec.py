@@ -17,6 +17,10 @@ SeasonType = Literal[
 ]
 PerMode = Literal["Totals", "PerGame", "Per40"]  # Per48 not currently implemented in aggregators
 League = Literal[
+    # NBA
+    "NBA",  # Session 274: Added to match unified_basketball_mcp version
+    # WNBA
+    "WNBA",  # Session 274: CRITICAL FIX - Added WNBA support
     # NCAA Basketball
     "NCAA-MBB",  # NCAA Men's Basketball (Division I)
     "NCAA-WBB",  # NCAA Women's Basketball (Division I)

@@ -57,6 +57,26 @@ data/nbl_raw/
 # Cache
 .cache/
 *.cache
+cache/
+
+# Pipeline data artifacts (not in git)
+data/_backups/
+data/_logs/
+data/_manifests/
+data/_reports/
+data/backups/
+data/canonical/
+data/gold/
+data/gold_backup_pre_dedupe/
+data/identity/
+data/mappings/
+data/reference/
+data/game_indexes/
+data/canonical_players.parquet
+data/player_xwalk.csv
+data/player_xwalk.parquet
+data/lkl_fiba_mapping.csv
+player_validation_results.txt
 
 # Logs
 *.log

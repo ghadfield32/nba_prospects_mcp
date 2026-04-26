@@ -1,0 +1,132 @@
+# Known Players Fixture - Curated Truth Set
+# Session 332: Cross-league player tracking validation
+# Updated with actual players found in dataset
+
+players:
+  # NCAA_MBB → NBA
+  - name: "Zion Williamson"
+    source_id:
+      league: "NCAA_MBB"
+      id: "4395628"
+    expected:
+      leagues: ["NCAA_MBB"]
+      seasons_min: 1
+      games_min: 30
+      ppg_min: 20.0
+    notes: "Duke 2018-19, 746 pts in 33 games (22.6 PPG, 8.9 RPG, 2.1 APG), #1 pick 2019"
+
+  # G_LEAGUE (multi-league: NCAA + G_LEAGUE)
+  - name: "Alex Caruso"
+    source_id:
+      league: "G_LEAGUE"
+      id: "1627936"
+    expected:
+      leagues: ["G_LEAGUE"]  # Also in NCAA
+      seasons_min: 1
+      games_min: 50
+    notes: "Multi-league: NCAA → G_LEAGUE (OKC Blue) → NBA (Lakers)"
+
+  - name: "Alex Caruso (NCAA)"
+    source_id:
+      league: "NCAA_MBB"
+      id: "61720"
+    expected:
+      leagues: ["NCAA_MBB"]
+      seasons_min: 1
+    notes: "Same player as G_LEAGUE Caruso - should be unified"
+
+  # EUROLEAGUE + ACB (multi-league European star)
+  - name: "Luka Dončić"
+    source_id:
+      league: "EUROLEAGUE"
+      id: "P005929"
+    expected:
+      leagues: ["EUROLEAGUE"]  # Also in ACB
+      seasons_min: 1
+      games_min: 30
+    notes: "Real Madrid (ACB + EuroLeague) → NBA, 39 EuroLeague games found"
+
+  - name: "Luka Dončić (ACB)"
+    source_id:
+      league: "ACB"
+      id: "acb:l_doncic"
+    expected:
+      leagues: ["ACB"]
+      seasons_min: 1
+    notes: "Same player as EUROLEAGUE - should be unified to single UID"
+
+  # ACB → NBA → ACB (Vezenkov's journey)
+  - name: "Sasha Vezenkov"
+    source_id:
+      league: "ACB"
+      id: "acb:a_vezenkov"
+    expected:
+      leagues: ["ACB"]
+      seasons_min: 1
+      games_min: 50
+    notes: "EuroLeague MVP, ACB star → NBA (Kings) → back to Olympiacos, 103 ACB games found"
+
+  # NBL → NBA
+  - name: "LaMelo Ball"
+    source_id:
+      league: "NBL"
+      id: "GEN_e86b9a0ded785489"
+    expected:
+      leagues: ["NBL"]
+      seasons_exact: 1
+      games_exact: 12
+    notes: "Illawarra Hawks 2019-20, exactly 12 games before #3 pick 2020"
+
+  # CEBL → NBA (multi-league: CEBL + G_LEAGUE)
+  - name: "Tazé Moore"
+    source_id:
+      league: "CEBL"
+      id: "GEN_176df4e0f1ce4672"
+    expected:
+      leagues: ["CEBL"]  # Also in G_LEAGUE
+      seasons_min: 1
+      games_min: 5
+    notes: "Multi-league: CEBL 2024 (21 games as Taze/Tazé Moore) + G_LEAGUE 2023-25"
+
+  - name: "Tazé Moore (G-League)"
+    source_id:
+      league: "G_LEAGUE"
+      id: "1631386"
+    expected:
+      leagues: ["G_LEAGUE"]
+      seasons_min: 1
+    notes: "Same player as CEBL - should be unified"
+
+  # OTE → NBA (Thompson twins 2022-23)
+  - name: "Amen Thompson"
+    source_id:
+      league: "OTE"
+      id: "e763b02b-3045-4a91-a078-7140899327d0"
+    expected:
+      leagues: ["OTE"]
+      seasons_exact: 1
+      games_min: 20
+      ppg_min: 15.0
+    notes: "OTE 2022-23, 26 games (16.3 PPG, 6.3 RPG, 6.2 APG), #4 pick 2023 Houston Rockets"
+
+  - name: "Ausar Thompson"
+    source_id:
+      league: "OTE"
+      id: "cbb0c3ec-f9f2-43e6-bb6e-6e4ef5702d92"
+    expected:
+      leagues: ["OTE"]
+      seasons_exact: 1
+      games_min: 20
+      ppg_min: 15.0
+    notes: "OTE 2022-23, 25 games (16.5 PPG, 6.4 RPG, 5.4 APG), #5 pick 2023 Detroit Pistons"
+
+# Additional test players found in dataset
+  - name: "Isaih Moore (CEBL multi-season)"
+    source_id:
+      league: "CEBL"
+      id: "GEN_278cf6a2c5001872"
+    expected:
+      leagues: ["CEBL"]
+      seasons_min: 1
+      games_min: 50
+    notes: "Multi-league CEBL + G_LEAGUE, 184 total games"

@@ -264,23 +264,23 @@ def fetch_ote_box_score(game_id: str) -> pd.DataFrame:
             if not any("Player" in h for h in header_texts):
                 continue
 
-            # Extract player names from headers (they're at the end, after stats columns)
+            # Extract player names from headers
             # Format: "13Diamant Blazi" (jersey number + name)
-            # Only look at headers after index 20 (to skip stat column headers)
+            # Session 332b fix: Scan ALL headers (no hardcoded index filtering)
+            # Previous logic skipped players in columns < 20, causing Thompson brothers to be missing
             player_names = []
             team_name = ""
 
             for h_idx, header_text in enumerate(header_texts):
-                if h_idx < 20:
-                    # Skip stat column headers
-                    continue
-
-                # Check for player names (jersey number + name format)
-                if len(header_text) > 3 and header_text[0].isdigit():
+                # Check for player names (jersey number 1-2 digits + name format)
+                # Pattern: starts with 1-2 digits, followed by uppercase letter (start of name)
+                if re.match(r"^\d{1,2}[A-Z]", header_text):
                     # Remove jersey number prefix (e.g., "13" from "13Diamant Blazi")
-                    player_name = re.sub(r"^\d+", "", header_text).strip()
-                    if player_name:  # Ensure name isn't empty
+                    # Collapse all whitespace to single spaces (fixes "Alan  Shi" → "Alan Shi")
+                    player_name = " ".join(re.sub(r"^\d+", "", header_text).split())
+                    if player_name and len(player_name) > 2:  # Ensure valid name
                         player_names.append(player_name)
+                        logger.debug(f"Found player: {player_name} (header idx {h_idx})")
                 elif " " in header_text and len(header_text) > 5:
                     # Likely team name (e.g., "City Reapers")
                     if not any(
@@ -604,3 +604,406 @@ def fetch_ote_shot_chart(game_id: str) -> pd.DataFrame:
     df["GAME_ID"] = game_id
 
     return df
+
+
+# ==============================================================================
+# Playwright-Enhanced Functions (for historical data and fixing "30-30" duplicates)
+# ==============================================================================
+
+
+def normalize_name(name: str) -> str:
+    """Create deterministic name key from player name.
+
+    Args:
+        name: Player name to normalize
+
+    Returns:
+        Normalized name key (lowercase, no special chars, underscores for spaces)
+    """
+    import re
+    import unicodedata
+
+    if not name or pd.isna(name):
+        return ""
+
+    # Normalize Unicode (decompose accented characters)
+    normalized = unicodedata.normalize("NFD", str(name))
+    # Remove combining characters (accents)
+    normalized = "".join(c for c in normalized if unicodedata.category(c) != "Mn")
+    # Convert to lowercase
+    normalized = normalized.lower()
+    # Remove non-alphanumeric characters except spaces
+    normalized = re.sub(r"[^a-z0-9\s]", "", normalized)
+    # Replace spaces with underscores
+    normalized = re.sub(r"\s+", "_", normalized.strip())
+
+    return normalized
+
+
+def parse_minutes(value: str) -> float | None:
+    """Parse minutes from MM:SS or numeric format.
+
+    Args:
+        value: Minutes string (e.g., "24:30" or "24.5")
+
+    Returns:
+        Minutes as float, or None if invalid
+    """
+    if not value or pd.isna(value):
+        return None
+
+    value = str(value).strip()
+
+    # Handle MM:SS format
+    if ":" in value:
+        try:
+            parts = value.split(":")
+            minutes = int(parts[0])
+            seconds = int(parts[1]) if len(parts) > 1 else 0
+            return minutes + seconds / 60.0
+        except (ValueError, IndexError):
+            return None
+
+    # Handle numeric format
+    try:
+        return float(value)
+    except ValueError:
+        return None
+
+
+# Validation players (Thompson twins + Alex Sarr)
+VALIDATION_PLAYERS = {
+    "alex_sarr": {"search": "sarr", "season": "2022-23"},
+    "amen_thompson": {"search": "amen", "season": "2022-23"},
+    "ausar_thompson": {"search": "ausar", "season": "2022-23"},
+}
+
+
+def validate_ote_data(df: pd.DataFrame, season: str) -> bool:
+    """Validate OTE data quality gates.
+
+    Args:
+        df: DataFrame with OTE data
+        season: Season string for logging
+
+    Returns:
+        True if validation passes, False otherwise
+    """
+    if df.empty:
+        logger.warning(f"No data for {season}")
+        return False
+
+    # Check PK uniqueness
+    pk_cols = ["LEAGUE", "SEASON", "GAME_ID", "PLAYER_ID"]
+    available_pks = [c for c in pk_cols if c in df.columns]
+
+    if available_pks:
+        pk_dupes = df.duplicated(subset=available_pks, keep=False).sum()
+        if pk_dupes > 0:
+            logger.warning(f"{pk_dupes} PK duplicates in {season}")
+
+    # Check stat sanity
+    if "FGM" in df.columns and "FGA" in df.columns:
+        invalid_fg = (df["FGM"].fillna(0) > df["FGA"].fillna(0)).sum()
+        if invalid_fg > 0:
+            logger.warning(f"{invalid_fg} rows with FGM > FGA")
+
+    if "FG3M" in df.columns and "FG3A" in df.columns:
+        invalid_fg3 = (df["FG3M"].fillna(0) > df["FG3A"].fillna(0)).sum()
+        if invalid_fg3 > 0:
+            logger.warning(f"{invalid_fg3} rows with FG3M > FG3A")
+
+    # Check NAME_KEY coverage (if using enhanced parsing)
+    if "PLAYER_NAME" in df.columns:
+        name_coverage = df["PLAYER_NAME"].notna().mean()
+        if name_coverage < 0.9:
+            logger.warning(f"PLAYER_NAME coverage only {name_coverage:.1%}")
+
+    logger.info(f"Validation passed: {len(df):,} rows")
+    return True
+
+
+def search_validation_players(df: pd.DataFrame) -> dict:
+    """Search for Thompson brothers and Alex Sarr in the data.
+
+    Args:
+        df: DataFrame with OTE data
+
+    Returns:
+        Dict with validation results for each player
+    """
+    results: dict[str, dict[str, Any]] = {}
+
+    if "PLAYER_NAME" not in df.columns:
+        logger.warning("No PLAYER_NAME column for validation")
+        return results
+
+    for player_key, info in VALIDATION_PLAYERS.items():
+        search_term = info["search"]
+        target_season = info["season"]
+
+        # Search in all data (case-insensitive partial match)
+        matches = df[df["PLAYER_NAME"].str.contains(search_term, case=False, na=False)]
+
+        # Also check specific season if SEASON column exists
+        season_matches = (
+            matches[matches["SEASON"] == target_season] if "SEASON" in matches.columns else matches
+        )
+
+        if len(matches) > 0:
+            results[player_key] = {
+                "found": True,
+                "total_games": len(matches),
+                "season_games": len(season_matches),
+                "names": matches["PLAYER_NAME"].unique().tolist()[:5],
+                "seasons": matches["SEASON"].unique().tolist()
+                if "SEASON" in matches.columns
+                else [],
+            }
+        else:
+            results[player_key] = {"found": False}
+
+    return results
+
+
+# ==============================================================================
+# Command-Line Interface for Historical Backfilling
+# ==============================================================================
+
+
+def _backfill_ote_season(season: str, output_dir: str, dry_run: bool = False) -> pd.DataFrame:
+    """Backfill OTE data for a historical season.
+
+    This function is a simplified wrapper around existing fetch functions.
+    For full Playwright-based backfilling with __NEXT_DATA__ parsing,
+    use the standalone script: nba_prospects_mcp/scripts/fill_ote_gap.py
+
+    Args:
+        season: Season string (e.g., "2022-23")
+        output_dir: Output directory for canonical parquet files
+        dry_run: If True, don't save files
+
+    Returns:
+        DataFrame with player-game data
+    """
+    import time
+    from pathlib import Path
+
+    logger.info("=" * 50)
+    logger.info(f"Backfilling OTE {season}")
+    logger.info("=" * 50)
+
+    # Fetch schedule using HTTP (may have "30-30" duplicates for historical data)
+    logger.info("  Fetching schedule...")
+    schedule = fetch_ote_schedule(season=season)
+
+    if schedule.empty:
+        logger.warning(f"  No schedule found for {season}")
+        logger.info("  NOTE: For historical seasons, use fill_ote_gap.py with Playwright")
+        return pd.DataFrame()
+
+    logger.info(f"    Found {len(schedule)} games")
+
+    # Fetch box scores for all games
+    logger.info("  Fetching box scores...")
+    all_player_games = []
+    errors = 0
+
+    for idx, row in schedule.iterrows():
+        game_id = str(row["GAME_ID"])
+
+        try:
+            box = fetch_ote_box_score(game_id=game_id)
+
+            if not box.empty:
+                box["SEASON"] = season
+                all_player_games.append(box)
+
+            time.sleep(0.5)  # Rate limit
+
+        except Exception as e:
+            errors += 1
+            if errors <= 5:
+                logger.warning(f"    Game {game_id[:8]}...: {type(e).__name__}: {e}")
+
+        if (idx + 1) % 10 == 0:  # type: ignore[operator]
+            logger.info(f"    Progress: {idx + 1}/{len(schedule)} games...")  # type: ignore[operator]
+
+    if errors > 5:
+        logger.info(f"    ... and {errors - 5} more errors")
+
+    if not all_player_games:
+        logger.warning("  No box score data collected")
+        return pd.DataFrame()
+
+    combined = pd.concat(all_player_games, ignore_index=True)
+    logger.info(f"    Collected {len(combined):,} player-game rows")
+
+    # Save to canonical directory
+
+    output_path = Path(output_dir) / f"season={season}" / "data.parquet"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if not dry_run:
+        combined.to_parquet(output_path, index=False)
+        logger.info(f"  Saved: {output_path}")
+    else:
+        logger.info(f"  [DRY RUN] Would save to {output_path}")
+
+    return combined
+
+
+def main() -> None:
+    """Command-line interface for OTE data fetching.
+
+    Examples:
+        # Fetch current season schedule
+        python -m cbb_data.fetchers.ote --schedule --season 2024-25
+
+        # Backfill historical season (basic HTTP - may have issues)
+        python -m cbb_data.fetchers.ote --backfill --seasons 2023-24
+
+        # For best results with historical data, use Playwright script:
+        python nba_prospects_mcp/scripts/fill_ote_gap.py --seasons 2022-23 2023-24
+    """
+    import argparse
+    import sys
+    from pathlib import Path
+
+    parser = argparse.ArgumentParser(
+        description="OTE (Overtime Elite) Data Fetcher",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Fetch current season schedule
+  python -m cbb_data.fetchers.ote --schedule --season 2024-25
+
+  # Backfill historical seasons (Thompson twins years) - basic HTTP
+  python -m cbb_data.fetchers.ote --backfill --seasons 2022-23 2023-24
+
+  # For full Playwright support (recommended for historical data):
+  python nba_prospects_mcp/scripts/fill_ote_gap.py --seasons 2022-23 2023-24 2024-25
+
+Note: HTTP-based fetching may produce "30-30" duplicate scores for historical
+      games. For accurate historical data, use fill_ote_gap.py with Playwright.
+        """,
+    )
+
+    parser.add_argument(
+        "--backfill",
+        action="store_true",
+        help="Backfill historical seasons to canonical directory (HTTP-based)",
+    )
+    parser.add_argument(
+        "--schedule", action="store_true", help="Fetch schedule only (don't fetch box scores)"
+    )
+    parser.add_argument(
+        "--seasons",
+        nargs="+",
+        default=["2024-25"],
+        help="Seasons to fetch (e.g., 2022-23 2023-24 2024-25)",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        default=None,
+        help="Output directory (default: data/canonical/box_player_game/league=OTE)",
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Preview what would be fetched without saving"
+    )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
+
+    args = parser.parse_args()
+
+    # Set up logging
+    log_level = logging.DEBUG if args.verbose else logging.INFO
+    logging.basicConfig(
+        level=log_level, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+
+    # Determine output directory
+    if args.output_dir:
+        output_dir = args.output_dir
+    else:
+        # Default to data/canonical/box_player_game/league=OTE
+        from pathlib import Path
+
+        base_dir = Path(__file__).parent.parent.parent.parent / "data"
+        output_dir = str(base_dir / "canonical" / "box_player_game" / "league=OTE")
+
+    logger.info("=" * 70)
+    logger.info("OTE DATA FETCHER")
+    logger.info("=" * 70)
+    logger.info(f"Seasons: {args.seasons}")
+    logger.info(f"Output dir: {output_dir}")
+    logger.info(f"Dry run: {args.dry_run}")
+    logger.info("")
+
+    if args.schedule:
+        # Fetch schedule only
+        for season in args.seasons:
+            logger.info(f"\nFetching OTE schedule for {season}...")
+            schedule = fetch_ote_schedule(season=season)
+            logger.info(f"  Found {len(schedule)} games")
+
+            if not schedule.empty and args.verbose:
+                logger.info(f"\n{schedule.head()}")
+
+        sys.exit(0)
+
+    if args.backfill:
+        # Backfill historical seasons
+        all_data = []
+
+        for season in args.seasons:
+            logger.info(f"\n{'=' * 50}")
+            logger.info(f"Processing {season}")
+            logger.info("=" * 50)
+
+            season_df = _backfill_ote_season(
+                season=season, output_dir=output_dir, dry_run=args.dry_run
+            )
+
+            if not season_df.empty:
+                all_data.append(season_df)
+
+                # Validate
+                logger.info("  Validating...")
+                validate_ote_data(season_df, season)
+
+        if all_data:
+            # Combine all seasons
+            combined = pd.concat(all_data, ignore_index=True)
+            logger.info(f"\nTotal new data: {len(combined):,} rows")
+
+            # Search for validation players
+            logger.info("\n" + "=" * 70)
+            logger.info("VALIDATION PLAYER SEARCH")
+            logger.info("=" * 70)
+            validation = search_validation_players(combined)
+
+            for player, info in validation.items():
+                if info["found"]:
+                    logger.info(
+                        f"[OK] {player}: {info['total_games']} games, names: {info['names']}"
+                    )
+                    if info.get("seasons"):
+                        logger.info(f"     Seasons: {info['seasons']}")
+                else:
+                    logger.info(f"[X] {player}: NOT FOUND")
+
+        logger.info("\n" + "=" * 70)
+        logger.info("NOTE: For best results with historical data, use Playwright:")
+        logger.info("  python nba_prospects_mcp/scripts/fill_ote_gap.py --seasons 2022-23 2023-24")
+        logger.info("=" * 70)
+
+        sys.exit(0)
+
+    # No action specified
+    parser.print_help()
+    sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

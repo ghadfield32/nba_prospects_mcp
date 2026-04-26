@@ -1573,3 +1573,218 @@ def fetch_acb_shot_chart_bawir(season: str) -> pd.DataFrame:
                 "SEASON",
             ]
         )
+
+
+# =============================================================================
+# Command-Line Interface for Historical Backfilling
+# =============================================================================
+
+
+def _backfill_acb_season(season: str, output_dir: Path, dry_run: bool = False) -> pd.DataFrame:
+    """Backfill ACB data for a historical season.
+
+    Args:
+        season: Season string (e.g., "2015-16")
+        output_dir: Output directory for canonical parquet files
+        dry_run: If True, don't save files
+
+    Returns:
+        DataFrame with canonical player-game data
+    """
+    import time
+
+    logger.info("=" * 50)
+    logger.info(f"Backfilling ACB {season}")
+    logger.info("=" * 50)
+
+    # Step 1: Fetch schedule
+    logger.info("  Fetching schedule...")
+    schedule = fetch_acb_schedule(season=season)
+
+    if schedule.empty:
+        logger.warning(f"  No schedule found for {season}")
+        return pd.DataFrame()
+
+    logger.info(f"    Found {len(schedule)} games")
+
+    # Step 2: Fetch box scores for all games
+    logger.info("  Fetching box scores...")
+    all_player_games = []
+    errors = 0
+
+    for idx, row in schedule.iterrows():
+        game_id = str(row["GAME_ID"])
+        game_date = row.get("GAME_DATE")
+        home_team = row.get("HOME_TEAM", "")
+        away_team = row.get("AWAY_TEAM", "")
+
+        try:
+            box = fetch_acb_box_score(game_id=game_id)
+
+            if not box.empty:
+                box["GAME_ID"] = game_id
+                box["GAME_DATE"] = game_date
+                box["SEASON"] = season
+
+                # Map team names from schedule
+                if "TEAM" in box.columns:
+                    teams_in_box = box["TEAM"].unique()
+                    if len(teams_in_box) >= 2:
+                        # Assume Team1 = home, Team2 = away
+                        team_map = {
+                            f"Team{i+1}": teams_in_box[i] for i in range(min(len(teams_in_box), 2))
+                        }
+                        # Override with actual team names
+                        team_map["Team1"] = home_team
+                        team_map["Team2"] = away_team
+
+                        box["TEAM"] = box["TEAM"].map(
+                            lambda t, team_map=team_map: team_map.get(t, t)  # type: ignore[misc]
+                        )
+                        box["IS_HOME"] = box["TEAM"] == home_team
+
+                all_player_games.append(box)
+
+            time.sleep(0.5)  # Rate limit
+
+        except Exception as e:
+            errors += 1
+            if errors <= 5:
+                logger.warning(f"    Game {game_id}: {type(e).__name__}: {e}")
+
+        if (idx + 1) % 50 == 0:  # type: ignore[operator]
+            logger.info(f"    Processed {idx + 1}/{len(schedule)} games...")  # type: ignore[operator]
+
+    if errors > 5:
+        logger.info(f"    ... and {errors - 5} more errors")
+
+    if not all_player_games:
+        logger.warning("  No box score data collected")
+        return pd.DataFrame()
+
+    combined = pd.concat(all_player_games, ignore_index=True)
+    logger.info(f"    Collected {len(combined):,} player-game rows")
+
+    # Step 3: Save to canonical directory
+    season_dir = output_dir / f"season={season}"
+    season_dir.mkdir(parents=True, exist_ok=True)
+    output_path = season_dir / "data.parquet"
+
+    if not dry_run:
+        combined.to_parquet(output_path, index=False)
+        logger.info(f"  Saved: {output_path}")
+    else:
+        logger.info(f"  [DRY RUN] Would save to {output_path}")
+
+    return combined
+
+
+def main() -> None:
+    """Command-line interface for ACB data fetching."""
+    import argparse
+    import sys
+
+    parser = argparse.ArgumentParser(
+        description="ACB (Liga Endesa) Data Fetcher",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Fetch current season schedule
+  python -m cbb_data.fetchers.acb --schedule --season 2024-25
+
+  # Backfill historical seasons (Luka's Real Madrid years)
+  python -m cbb_data.fetchers.acb --backfill --seasons 2015-16 2016-17 2017-18
+
+  # Dry run to preview what would be fetched
+  python -m cbb_data.fetchers.acb --backfill --seasons 2015-16 --dry-run
+        """,
+    )
+
+    parser.add_argument(
+        "--backfill", action="store_true", help="Backfill historical seasons to canonical directory"
+    )
+    parser.add_argument(
+        "--schedule", action="store_true", help="Fetch schedule only (don't fetch box scores)"
+    )
+    parser.add_argument(
+        "--seasons",
+        nargs="+",
+        default=["2024-25"],
+        help="Seasons to fetch (e.g., 2015-16 2016-17 2017-18)",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        default=None,
+        help="Output directory (default: data/canonical/box_player_game/league=ACB)",
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Preview what would be fetched without saving"
+    )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
+
+    args = parser.parse_args()
+
+    # Configure logging
+    if args.verbose:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
+
+    # Determine output directory
+    if args.output_dir:
+        output_dir = Path(args.output_dir)
+    else:
+        # Default: data/canonical/box_player_game/league=ACB
+        data_dir = Path(__file__).parent.parent.parent.parent.parent / "data"
+        output_dir = data_dir / "canonical" / "box_player_game" / "league=ACB"
+
+    logger.info("=" * 70)
+    logger.info("ACB DATA FETCHER - Liga Endesa (Spain)")
+    logger.info("=" * 70)
+    logger.info(f"Seasons: {args.seasons}")
+    logger.info(f"Output: {output_dir}")
+    logger.info("")
+
+    all_data = []
+
+    for season in args.seasons:
+        if args.schedule:
+            # Just fetch schedule
+            logger.info(f"\nFetching schedule for {season}...")
+            schedule = fetch_acb_schedule(season=season)
+            logger.info(f"  Found {len(schedule)} games")
+            logger.info(schedule.head())
+        elif args.backfill:
+            # Backfill with box scores
+            data = _backfill_acb_season(season, output_dir, args.dry_run)
+            if not data.empty:
+                all_data.append(data)
+        else:
+            logger.error("Must specify either --schedule or --backfill")
+            parser.print_help()
+            sys.exit(1)
+
+    # Summary
+    if args.backfill and all_data:
+        combined = pd.concat(all_data, ignore_index=True)
+        logger.info("")
+        logger.info("=" * 70)
+        logger.info("SUMMARY")
+        logger.info("=" * 70)
+        logger.info(f"Total rows: {len(combined):,}")
+        logger.info(f"Total games: {combined['GAME_ID'].nunique()}")
+        logger.info(f"Total players: {combined['PLAYER_NAME'].nunique()}")
+
+        # Check for validation players
+        for validation_player in ["Doncic", "Rubio", "Gasol"]:
+            player_data = combined[
+                combined["PLAYER_NAME"].str.contains(validation_player, case=False, na=False)
+            ]
+            if len(player_data) > 0:
+                logger.info(f"\n{validation_player}:")
+                logger.info(player_data.groupby("SEASON").size())
+
+
+if __name__ == "__main__":
+    main()

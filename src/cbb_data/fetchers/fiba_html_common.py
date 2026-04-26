@@ -358,6 +358,158 @@ def _fetch_fiba_html(league_code: str, game_id: str, page_type: str = "bs") -> s
 
 
 # ==============================================================================
+# JSON API Functions (Alternative to HTML scraping)
+# ==============================================================================
+
+
+def _extract_numeric_id(game_id: str) -> str | None:
+    """Extract numeric portion from FIBA game ID.
+
+    Examples:
+        '124044-VEF-BONN' -> '124044'
+        'BCL-2024-104486' -> '104486'
+    """
+    parts = str(game_id).split("-")
+    for part in parts:
+        if part.isdigit() and len(part) >= 5:
+            return part
+    # Fallback: return first numeric part
+    for part in parts:
+        if part.isdigit():
+            return part
+    return None
+
+
+def _fetch_fiba_json(game_id: str) -> dict | None:
+    """Fetch FIBA LiveStats JSON data for a game.
+
+    The JSON endpoint provides richer data than HTML scraping.
+    URL pattern: /data/{numeric_id}/data.json
+
+    Args:
+        game_id: FIBA game ID (e.g., '124044-VEF-BONN')
+
+    Returns:
+        Parsed JSON dict or None if unavailable
+    """
+    if not HTML_PARSING_AVAILABLE:
+        return None
+
+    numeric_id = _extract_numeric_id(game_id)
+    if not numeric_id:
+        logger.warning(f"Could not extract numeric ID from {game_id}")
+        return None
+
+    url = f"{FIBA_BASE_URL}/data/{numeric_id}/data.json"
+
+    try:
+        rate_limiter.acquire("fiba_livestats")
+        response = requests.get(url, timeout=30)
+        if response.status_code == 200:
+            return response.json()
+    except Exception as e:
+        logger.debug(f"JSON fetch failed for {game_id}: {e}")
+
+    return None
+
+
+def _parse_fiba_json_boxscore(data: dict) -> list[dict]:
+    """Parse FIBA LiveStats JSON into player box score records.
+
+    The JSON structure has:
+    - tm: {1: {team1_data}, 2: {team2_data}}
+    - Each team has: name, code, pl: {player_id: stats}
+
+    Args:
+        data: Parsed JSON from FIBA LiveStats
+
+    Returns:
+        List of player stat dictionaries
+    """
+    players = []
+
+    tm_data = data.get("tm", {})
+
+    for team_key in ["1", "2"]:
+        team = tm_data.get(team_key, {})
+        team_name = team.get("name", team.get("shortName", "Unknown"))
+        team_code = team.get("code", "")
+
+        pl_data = team.get("pl", {})
+
+        for player_id, pstats in pl_data.items():
+            # Skip inactive players
+            if not pstats.get("active", 1):
+                continue
+
+            first_name = pstats.get("firstName", "")
+            family_name = pstats.get("familyName", "")
+            player_name = f"{first_name} {family_name}".strip()
+
+            # Parse minutes (format: "27:23" -> 27.38)
+            min_str = pstats.get("sMinutes", "0:00")
+            try:
+                if ":" in str(min_str):
+                    mins, secs = str(min_str).split(":")
+                    minutes = int(mins) + int(secs) / 60
+                else:
+                    minutes = float(min_str)
+            except (ValueError, TypeError):
+                minutes = 0
+
+            player_record = {
+                "PLAYER_NAME": player_name,
+                "TEAM": team_name,
+                "TEAM_CODE": team_code,
+                "SOURCE_PLAYER_ID": f"FIBA_{player_id}",
+                "MIN": round(minutes, 1),
+                "PTS": pstats.get("sPoints", 0),
+                "FGM": pstats.get("sFieldGoalsMade", 0),
+                "FGA": pstats.get("sFieldGoalsAttempted", 0),
+                "FG3M": pstats.get("sThreePointersMade", 0),
+                "FG3A": pstats.get("sThreePointersAttempted", 0),
+                "FTM": pstats.get("sFreeThrowsMade", 0),
+                "FTA": pstats.get("sFreeThrowsAttempted", 0),
+                "OREB": pstats.get("sReboundsOffensive", 0),
+                "DREB": pstats.get("sReboundsDefensive", 0),
+                "TRB": pstats.get("sReboundsTotal", 0),
+                "AST": pstats.get("sAssists", 0),
+                "STL": pstats.get("sSteals", 0),
+                "BLK": pstats.get("sBlocks", 0),
+                "TOV": pstats.get("sTurnovers", 0),
+                "PF": pstats.get("sFoulsPersonal", 0),
+                "STARTER": 1 if pstats.get("starter", 0) else 0,
+                "SHIRT_NUMBER": pstats.get("shirtNumber", ""),
+            }
+
+            # Calculate percentages
+            if player_record["FGA"] > 0:
+                player_record["FG_PCT"] = round(
+                    player_record["FGM"] / player_record["FGA"] * 100, 1
+                )
+            else:
+                player_record["FG_PCT"] = 0.0
+
+            if player_record["FG3A"] > 0:
+                player_record["FG3_PCT"] = round(
+                    player_record["FG3M"] / player_record["FG3A"] * 100, 1
+                )
+            else:
+                player_record["FG3_PCT"] = 0.0
+
+            if player_record["FTA"] > 0:
+                player_record["FT_PCT"] = round(
+                    player_record["FTM"] / player_record["FTA"] * 100, 1
+                )
+            else:
+                player_record["FT_PCT"] = 0.0
+
+            players.append(player_record)
+
+    return players
+
+
+# ==============================================================================
 # HTML Parsing Helpers (from NZ-NBL pattern)
 # ==============================================================================
 
@@ -505,15 +657,17 @@ def scrape_fiba_box_score(
     league: str | None = None,
     season: str | None = None,
     force_refresh: bool = False,
+    use_browser: bool = False,
 ) -> pd.DataFrame:
     """Scrape box score from FIBA LiveStats HTML (with caching)
 
     Args:
-        league_code: FIBA league code (e.g., "LKL", "BAL", "NZN")
+        league_code: FIBA league code (e.g., "LKL", "BAL", "BCL", "NZN")
         game_id: FIBA game ID
         league: Optional standardized league name (for validation)
         season: Optional season string (for validation)
         force_refresh: If True, ignore cache and re-scrape
+        use_browser: If True, use Playwright browser rendering (slower but bypasses 403)
 
     Returns:
         DataFrame with player box scores
@@ -524,72 +678,124 @@ def scrape_fiba_box_score(
         Plus calculated percentages: FG_PCT, FG3_PCT, FT_PCT
 
     Example:
+        >>> # Try simple HTTP first
         >>> df = scrape_fiba_box_score("LKL", "123456", league="LKL", season="2023-24")
-        >>> print(f"Scraped {len(df)} player records")
+        >>>
+        >>> # If blocked (403), use browser rendering
+        >>> df = scrape_fiba_box_score("BCL", "104486", league="BCL", season="2023-24",
+        ...                             use_browser=True)
+
+    Note:
+        FIBA LiveStats may block HTTP requests (403 Forbidden) for some leagues (e.g., BCL).
+        Use use_browser=True to bypass restrictions with Playwright browser rendering.
+        Requires: uv pip install playwright && playwright install chromium
     """
     if not HTML_PARSING_AVAILABLE:
         logger.warning("HTML parsing not available. Install requests and beautifulsoup4.")
         return pd.DataFrame()
 
-    try:
-        html = _fetch_fiba_html(league_code, game_id, "bs")
-        soup = BeautifulSoup(html, "html.parser")
+    all_players = []
+    source_method = "unknown"
 
-        # Extract team names from page
-        team_headers = soup.find_all("h2", class_="teamName")
-        if len(team_headers) < 2:
-            logger.warning(f"Could not find team names for {league_code} game {game_id}")
-            return pd.DataFrame()
+    # Strategy 1: Try JSON API first (faster and more reliable)
+    json_data = _fetch_fiba_json(game_id)
+    if json_data:
+        all_players = _parse_fiba_json_boxscore(json_data)
+        source_method = "json"
+        logger.debug(f"Got {len(all_players)} players from JSON for {game_id}")
 
-        team1_name = team_headers[0].get_text(strip=True)
-        team2_name = team_headers[1].get_text(strip=True)
+    # Strategy 2: Fall back to HTML scraping (HTTP requests)
+    if not all_players and not use_browser:
+        try:
+            html = _fetch_fiba_html(league_code, game_id, "bs")
+            soup = BeautifulSoup(html, "html.parser")
 
-        # Parse both teams
-        all_players = []
-        all_players.extend(_parse_fiba_html_table(soup, team1_name))
-        all_players.extend(_parse_fiba_html_table(soup, team2_name))
+            # Extract team names from page
+            team_headers = soup.find_all("h2", class_="teamName")
+            if len(team_headers) >= 2:
+                team1_name = team_headers[0].get_text(strip=True)
+                team2_name = team_headers[1].get_text(strip=True)
 
-        if not all_players:
-            logger.warning(f"No player stats found for {league_code} game {game_id}")
-            return pd.DataFrame()
+                all_players.extend(_parse_fiba_html_table(soup, team1_name))
+                all_players.extend(_parse_fiba_html_table(soup, team2_name))
+                source_method = "html"
+        except Exception as e:
+            logger.debug(f"HTML scraping failed for {game_id}: {e}")
 
-        df = pd.DataFrame(all_players)
+    # Strategy 3: Use browser rendering (for JS-required pages or when HTTP blocked)
+    if not all_players and use_browser:
+        try:
+            from .browser_scraper import BrowserScraper
 
-        # Calculate percentages
-        if "FGM" in df.columns and "FGA" in df.columns:
-            df["FG_PCT"] = (df["FGM"] / df["FGA"].replace(0, 1) * 100).round(1)
-        if "FG3M" in df.columns and "FG3A" in df.columns:
-            df["FG3_PCT"] = (df["FG3M"] / df["FG3A"].replace(0, 1) * 100).round(1)
-        if "FTM" in df.columns and "FTA" in df.columns:
-            df["FT_PCT"] = (df["FTM"] / df["FTA"].replace(0, 1) * 100).round(1)
+            logger.info(f"Using browser rendering for {league_code} game {game_id} (bypassing 403)")
 
-        # Add game context
-        df["GAME_ID"] = game_id
+            with BrowserScraper(headless=True, timeout=30000) as scraper:
+                url = f"{FIBA_BASE_URL}/u/{league_code}/{game_id}/bs.html"
+                logger.debug(f"Fetching {url} via browser...")
+                html = scraper.get_rendered_html(url, wait_for="table.teamBoxscore", wait_time=5.0)
 
-        # Add league/season if provided
-        if league:
-            df["LEAGUE"] = league
-        if season:
-            df["SEASON"] = season
+                if html:
+                    soup = BeautifulSoup(html, "html.parser")
 
-        # Ensure standard columns
-        if league and season:
-            df = ensure_standard_columns(df, "player_game", league, season)
+                    # Extract team names from page
+                    team_headers = soup.find_all("h2", class_="teamName")
+                    if len(team_headers) >= 2:
+                        team1_name = team_headers[0].get_text(strip=True)
+                        team2_name = team_headers[1].get_text(strip=True)
 
-        # Validate
-        if league and season:
-            is_valid, issues = validate_player_game(df, league, season, strict=False)
-            if not is_valid:
-                logger.warning(
-                    "Scraped data validation issues:\n" + "\n".join(f"  - {i}" for i in issues)
-                )
+                        all_players.extend(_parse_fiba_html_table(soup, team1_name))
+                        all_players.extend(_parse_fiba_html_table(soup, team2_name))
+                        source_method = "browser"
+                        logger.info(
+                            f"Successfully scraped {len(all_players)} players via browser for {game_id}"
+                        )
 
-        logger.info(f"Scraped {len(df)} player records for {league_code} game {game_id}")
-        return df
+        except ImportError:
+            logger.warning(
+                "Browser scraping requested but Playwright not installed. "
+                "Install with: uv pip install playwright && playwright install chromium"
+            )
+        except Exception as e:
+            logger.error(f"Browser scraping failed for {game_id}: {e}")
 
-    except Exception as e:
-        logger.error(f"Failed to scrape box score for {league_code} game {game_id}: {e}")
+    if not all_players:
+        logger.warning(f"No player stats found for {league_code} game {game_id}")
         return pd.DataFrame()
+
+    df = pd.DataFrame(all_players)
+    df["SOURCE_METHOD"] = source_method
+
+    # Calculate percentages (if not already present from JSON)
+    if "FG_PCT" not in df.columns and "FGM" in df.columns and "FGA" in df.columns:
+        df["FG_PCT"] = (df["FGM"] / df["FGA"].replace(0, 1) * 100).round(1)
+    if "FG3_PCT" not in df.columns and "FG3M" in df.columns and "FG3A" in df.columns:
+        df["FG3_PCT"] = (df["FG3M"] / df["FG3A"].replace(0, 1) * 100).round(1)
+    if "FT_PCT" not in df.columns and "FTM" in df.columns and "FTA" in df.columns:
+        df["FT_PCT"] = (df["FTM"] / df["FTA"].replace(0, 1) * 100).round(1)
+
+    # Add game context
+    df["GAME_ID"] = game_id
+
+    # Add league/season if provided
+    if league:
+        df["LEAGUE"] = league
+    if season:
+        df["SEASON"] = season
+
+    # Ensure standard columns
+    if league and season:
+        df = ensure_standard_columns(df, "player_game", league, season)
+
+    # Validate
+    if league and season:
+        is_valid, issues = validate_player_game(df, league, season, strict=False)
+        if not is_valid:
+            logger.warning(
+                "Scraped data validation issues:\n" + "\n".join(f"  - {i}" for i in issues)
+            )
+
+    logger.info(f"Scraped {len(df)} players for {league_code} {game_id} via {source_method}")
+    return df
 
 
 def _classify_event_type(description: str) -> str:
